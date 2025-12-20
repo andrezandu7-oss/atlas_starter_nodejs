@@ -14,6 +14,9 @@
   },
   "homepage": "https://github.com/mongodb-university/atlas_starter_nodejs#readme",
   "dependencies": {
-    "mongodb": "^3.5.9"
+    "express": "^5.2.1",
+    "i18": "^0.0.6",
+    "i18next": "^25.7.2",
+    "mongodb": "^3.7.4"
   }
 }
