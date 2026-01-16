@@ -4,82 +4,107 @@ const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 
-// --- LOGIQUE DE SÉCURITÉ GENLOVE ---
-// Cette fonction sera utilisée pour filtrer les partenaires
-const canMatch = (userGeno, partnerGeno) => {
-    if (userGeno === 'SS' && partnerGeno === 'SS') return false; // BLOCAGE SS-SS
-    return true;
-};
-
-// --- PAGE D'ACCUEIL ---
+// --- ACCUEIL ---
 app.get('/', (req, res) => {
     res.send(`
     <!DOCTYPE html>
     <html lang="fr">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Genlove - L'amour qui soigne</title>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Genlove - Accueil</title>
         <style>
             body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #ff416c, #ff4b2b); height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; color: white; text-align: center; }
-            .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); padding: 40px; border-radius: 30px; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-            h1 { font-size: 2.5rem; margin: 0; }
-            .slogan { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
-            .quote { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; font-style: italic; line-height: 1.5; margin-bottom: 40px; }
-            .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border-radius: 50px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; text-decoration: none; transition: 0.3s; box-sizing: border-box; }
-            .btn-login { background: white; color: #ff416c; }
-            .btn-signup { background: transparent; border: 2px solid white; color: white; }
+            .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); padding: 40px; border-radius: 30px; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.3); }
+            .btn { display: block; width: 100%; padding: 15px; margin-top: 20px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; background: white; color: #ff416c; }
         </style>
     </head>
     <body>
         <div class="card">
             <h1>💞 Genlove 🧬</h1>
-            <div class="slogan">L’amour qui soigne 💙</div>
-            <div class="quote">"L’amour seul ne suffit plus. Unissez cœur et santé pour bâtir des couples solides 💖"</div>
-            <a href="#" class="btn btn-login">📌 Se connecter</a>
-            <a href="/signup" class="btn btn-signup">📝 S’inscrire</a>
+            <p>L’amour qui soigne 💙</p>
+            <a href="/signup-step2" class="btn">📝 Créer mon profil</a>
         </div>
     </body>
     </html>
     `);
 });
 
-// --- PAGE D'INSCRIPTION (ÉTAPE 2) ---
-app.get('/signup', (req, res) => {
+// --- FORMULAIRE DÉTAILLÉ (SCORE 60%+) ---
+app.get('/signup-step2', (req, res) => {
     res.send(`
     <!DOCTYPE html>
     <html lang="fr">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Inscription - Genlove</title>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Profil Complet - Genlove</title>
         <style>
-            body { font-family: 'Segoe UI', sans-serif; background: #fdf2f2; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
-            .form-card { background: white; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
-            h2 { color: #ff416c; text-align: center; }
-            .progress-container { background: #eee; border-radius: 10px; height: 10px; margin: 20px 0; }
-            .progress-bar { background: #4caf50; height: 100%; width: 40%; border-radius: 10px; }
-            .score-text { text-align: center; font-weight: bold; color: #4caf50; font-size: 0.9rem; margin-bottom: 20px; }
-            input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-            .btn-submit { background: #ff416c; color: white; border: none; width: 100%; padding: 15px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+            body { font-family: 'Segoe UI', sans-serif; background: #fdf2f2; margin: 0; padding: 20px; display: flex; justify-content: center; }
+            .container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; }
+            h2 { color: #ff416c; text-align: center; margin-bottom: 5px; }
+            .progress-bar { background: #eee; border-radius: 10px; height: 10px; margin: 15px 0; }
+            .fill { background: #4caf50; height: 100%; width: 60%; border-radius: 10px; }
+            .score-text { text-align: center; color: #4caf50; font-weight: bold; margin-bottom: 20px; }
+            
+            label { display: block; margin-top: 15px; font-weight: bold; color: #555; font-size: 0.9rem; }
+            input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+            
+            .upload-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+            .upload-btn { border: 2px dashed #ff416c; padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; color: #ff416c; font-size: 0.8rem; font-weight: bold; }
+            
+            .btn-final { background: #ff416c; color: white; border: none; width: 100%; padding: 15px; border-radius: 50px; font-weight: bold; margin-top: 30px; cursor: pointer; font-size: 1.1rem; }
+            .footer { text-align: center; font-size: 0.75rem; color: #888; margin-top: 20px; }
         </style>
     </head>
     <body>
-        <div class="form-card">
-            <h2>Créer ton profil</h2>
-            <div class="progress-container"><div class="progress-bar"></div></div>
-            <div class="score-text">Score de Confiance actuel : 40% 🛡️</div>
-            
-            <form action="/complete" method="POST">
-                <input type="text" placeholder="Ton Prénom" required>
-                <select name="genotype" required>
-                    <option value="">-- Choisis ton Génotype --</option>
-                    <option value="AA">AA (Sain)</option>
-                    <option value="AS">AS (Porteur)</option>
-                    <option value="SS">SS (Drépanocytaire)</option>
+        <div class="container">
+            <h2>Compléter mon profil</h2>
+            <div class="progress-bar"><div class="fill"></div></div>
+            <div class="score-text">Score de Confiance : 60% 🛡️</div>
+
+            <form action="/" method="GET">
+                <label>Nom & Prénom</label>
+                <input type="text" placeholder="Ex: André Zandu" required>
+
+                <label>Date de naissance</label>
+                <input type="date" required>
+
+                <label>Genre</label>
+                <select required>
+                    <option value="homme">Homme</option>
+                    <option value="femme">Femme</option>
                 </select>
-                <p style="font-size: 0.8rem; color: #666; text-align: center;">Note : Si vous êtes SS, vous ne verrez aucun profil SS pour votre sécurité.</p>
-                <button type="submit" class="btn-submit">Continuer</button>
+
+                <label>Statut actuel</label>
+                <select required>
+                    <option value="celibataire">Célibataire</option>
+                    <option value="divorce">Divorcé(e)</option>
+                    <option value="veuf">Veuf/Veuve</option>
+                </select>
+
+                <label>Groupe Sanguin</label>
+                <select required>
+                    <option value="A+">A+</option><option value="O+">O+</option>
+                    <option value="B+">B+</option><option value="AB+">AB+</option>
+                    <option value="A-">A-</option><option value="O-">O-</option>
+                </select>
+
+                <label>Allergies ou Antécédents</label>
+                <textarea placeholder="Ex: Asthme, Allergie pénicilline..." rows="2"></textarea>
+
+                <div class="upload-section">
+                    <div class="upload-btn">📸<br>Photo Profil</div>
+                    <div class="upload-btn">📄<br>Preuve Médicale</div>
+                </div>
+                
+                <div class="upload-btn" style="margin-top:10px; border-color: #2196F3; color: #2196F3;">
+                    🎥 Vidéo de vérification (20s)
+                </div>
+
+                <button type="submit" class="btn-final">🚀 Finaliser mon inscription</button>
+
+                <div class="footer">
+                    🔒 Données chiffrées et sécurisées par Genlove
+                </div>
             </form>
         </div>
     </body>
@@ -87,7 +112,4 @@ app.get('/signup', (req, res) => {
     `);
 });
 
-app.listen(port, () => {
-    console.log('Genlove actif sur le port ' + port);
-});
-             
+app.listen(port, () => { console.log('Genlove démarré sur ' + port); });
