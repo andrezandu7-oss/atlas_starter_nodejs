@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// --- INSCRIPTION : FORMULATION "DÉSIR D'AVOIR DES ENFANTS" ---
+// --- INSCRIPTION : AJOUT DATE DE NAISSANCE ---
 app.get('/signup-full', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -57,7 +57,7 @@ app.get('/signup-full', (req, res) => {
         </style>
     </head>
     <body>
-        <div id="overlay"><div class="loader"></div><h2 style="margin-top:20px;">Analyse de compatibilité...</h2></div>
+        <div id="overlay"><div class="loader"></div><h2 style="margin-top:20px;">Analyse sécurisée...</h2></div>
         <div class="container">
             <span class="logo">🧬 Genlove</span>
             <h2 style="margin-top:0;">Inscription</h2>
@@ -66,6 +66,9 @@ app.get('/signup-full', (req, res) => {
                     <div><label>Prénom *</label><input type="text" id="fn" placeholder="Ex: André"></div>
                     <div><label>Nom *</label><input type="text" id="ln" placeholder="Ex: Zandu"></div>
                 </div>
+
+                <label>Date de naissance *</label>
+                <input type="date" id="dob">
 
                 <p style="color:#ff416c; font-weight:bold; font-size:0.8rem; margin-top:15px;">Groupe Sanguin & Rhésus *</p>
                 <div class="grid">
@@ -130,25 +133,20 @@ app.get('/signup-full', (req, res) => {
                 document.getElementById('vLb').style.color='#4caf50';
             }
             function validate() {
-                const fields = {
-                    'Prénom': document.getElementById('fn').value,
-                    'Nom': document.getElementById('ln').value,
-                    'Groupe Sanguin': document.getElementById('gs').value,
-                    'Rhésus': document.getElementById('rh').value,
-                    'Génotype': document.getElementById('gt').value,
-                    'Désir d’enfants': document.getElementById('kids').value
-                };
+                const fn = document.getElementById('fn').value;
+                const ln = document.getElementById('ln').value;
+                const dob = document.getElementById('dob').value;
+                const gs = document.getElementById('gs').value;
+                const rh = document.getElementById('rh').value;
+                const gt = document.getElementById('gt').value;
+                const kids = document.getElementById('kids').value;
 
-                for (let key in fields) {
-                    if (!fields[key]) { alert("Le champ " + key + " est obligatoire."); return; }
+                if(!fn || !ln || !dob || !gs || !rh || !gt || !kids || !vCap) {
+                    alert("Tous les champs marqués d'une * sont obligatoires pour valider votre profil.");
+                    return;
                 }
-                if(!vCap) { alert("La vidéo de vérification est obligatoire."); return; }
 
-                localStorage.setItem('uData', JSON.stringify({
-                    fn: fields['Prénom'], ln: fields['Nom'], gs: fields['Groupe Sanguin'], 
-                    rh: fields['Rhésus'], gt: fields['Génotype'], kids: fields['Désir d’enfants'],
-                    ant: document.getElementById('ant').value, all: document.getElementById('all').value
-                }));
+                localStorage.setItem('uData', JSON.stringify({ fn, ln, dob, gs, rh, gt, kids, ant: document.getElementById('ant').value, all: document.getElementById('all').value }));
                 document.getElementById('overlay').style.display='flex';
                 setTimeout(() => { window.location.href='/dashboard'; }, 3000);
             }
@@ -165,7 +163,7 @@ app.get('/dashboard', (req, res) => {
     <html lang="fr">
     <head>
         <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mon Profil - Genlove</title>
+        <title>Profil - Genlove</title>
         <style>
             body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; display: flex; justify-content: center; }
             .iphone { background: #f9f9f9; width: 100%; max-width: 400px; padding: 30px; min-height: 100vh; box-sizing: border-box; }
@@ -183,7 +181,7 @@ app.get('/dashboard', (req, res) => {
             <img id="fPic" src="" class="pic">
             <div id="cont"></div>
             <div id="ssShield" class="warning" style="display:none;">
-                ⚠️ <b>Sécurité :</b> En tant que profil SS, les partenaires SS sont masqués pour protéger votre descendance.
+                ⚠️ <b>Sécurité :</b> Profil SS détecté. Les partenaires SS sont automatiquement masqués.
             </div>
             <a href="/signup-full" style="display:block; text-align:center; padding:15px; background:white; border:1px solid #ddd; border-radius:10px; margin-top:30px; text-decoration:none; color:black; font-weight:bold;">✏️ Modifier profil</a>
             <a href="/" style="display:block; text-align:center; margin-top:20px; color:#ff416c; text-decoration:none;">Déconnexion</a>
@@ -196,6 +194,7 @@ app.get('/dashboard', (req, res) => {
                 if(d.gt === 'SS') document.getElementById('ssShield').style.display = 'block';
                 document.getElementById('cont').innerHTML = \`
                     <div class="item"><span class="label">Identité</span> <span class="value">\${d.fn} \${d.ln}</span></div>
+                    <div class="item"><span class="label">Né(e) le</span> <span class="value">\${d.dob}</span></div>
                     <div class="item"><span class="label">Groupe & Rhésus</span> <span class="value" style="color:#ff416c;">\${d.gs}\${d.rh}</span></div>
                     <div class="item"><span class="label">Génotype</span> <span class="value">\${d.gt}</span></div>
                     <div class="item"><span class="label">Désir d'enfants</span> <span class="value">\${d.kids}</span></div>
@@ -209,3 +208,4 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.listen(port, () => { console.log('Genlove is READY'); });
+    
