@@ -18,7 +18,7 @@ const styles = `
     .btn-outline { background: transparent; border: 2px solid white; color: white; }
     .btn-logout { background: #f8f9fa; color: #666; border: 1px solid #eee; margin-top: 25px; font-size: 1rem; }
     
-    /* Zone Photo Cercle */
+    /* Zone Photo Cercle (Ton design préféré) */
     .photo-upload { 
         border: 2px dashed #ff416c; 
         height: 110px; width: 110px; 
@@ -49,7 +49,7 @@ app.get('/', (req, res) => {
     <body style="background: linear-gradient(135deg, #ff416c, #ff4b2b);">
         <div class="app-shell" style="background: transparent; justify-content: center;">
             <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); padding: 40px 30px; border-radius: 30px; width: 85%; margin: auto; color: white; text-align: center;">
-                <h1 style="font-size:2.5rem; margin:0;">💞 Genlove 🧬</h1>
+                <h1 style="font-size:2.5rem; margin:0;">💞 Genlove</h1>
                 <p style="margin: 20px 0; font-weight: bold;">Unissez cœur et santé pour bâtir des couples SOLIDES</p>
                 <a href="/signup" class="btn btn-white">📝 Créer mon profil</a>
                 <a href="/login" class="btn btn-outline">📌 Se connecter</a>
@@ -58,46 +58,65 @@ app.get('/', (req, res) => {
     </body></html>`);
 });
 
-// --- 2. INSCRIPTION (AVEC TOUTES LES CORRECTIONS) ---
+// --- 2. CONNEXION ---
+app.get('/login', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body>
+        <div class="app-shell"><div class="content">
+            <h2 style="color:#ff416c; margin-top:50px;">Bon retour !</h2>
+            <div class="card" style="margin-top:30px;">
+                <label>Prénom ou Identifiant</label>
+                <input type="text" id="loginUser" placeholder="Votre prénom...">
+            </div>
+            <button onclick="checkLogin()" class="btn btn-main" style="background:#ff416c; margin-top:20px;">Se connecter</button>
+            <a href="/" style="display:block; margin-top:20px; color:#999; text-decoration:none;">⬅️ Retour</a>
+        </div></div>
+        <script>
+            function checkLogin() {
+                if (localStorage.getItem('uData')) { window.location.href = '/dashboard'; }
+                else { alert("Aucun profil trouvé. Veuillez vous inscrire."); window.location.href = '/signup'; }
+            }
+        </script>
+    </body></html>`);
+});
+
+// --- 3. INSCRIPTION (DESIGN OPTIMISÉ) ---
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body>
         <div class="app-shell"><div class="content">
             <h2 style="color:#ff416c; margin-top:0;">Inscription</h2>
-            
             <form onsubmit="return validateAndSave(event)">
+                
                 <label for="pInp" id="pP" class="photo-upload">📸 Photo</label>
                 <input type="file" id="pInp" accept="image/*" style="display:none" onchange="preview(event)" required>
                 
                 <div class="row">
-                    <div style="flex:1;"><label>Prénom</label><input type="text" id="fn" placeholder="Ex: Éric" required></div>
-                    <div style="flex:1;"><label>Nom</label><input type="text" id="ln" placeholder="Ex: Tre" required></div>
+                    <div style="flex:1;"><label>Prénom</label><input type="text" id="fn" placeholder="Prénom" required></div>
+                    <div style="flex:1;"><label>Nom</label><input type="text" id="ln" placeholder="Nom" required></div>
                 </div>
 
                 <div style="margin-bottom:15px;"><label>Date de naissance</label><input type="date" id="dob" required></div>
                 
                 <div class="row">
                     <div style="flex:1;"><label>Groupe Sanguin</label>
-                        <select id="gs" required><option value="" disabled selected>Groupe...</option><option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option></select>
+                        <select id="gs" required><option value="" disabled selected>Choisir...</option><option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option></select>
                     </div>
                     <div style="flex:1;"><label>Rhésus</label>
-                        <select id="rh" required><option value="" disabled selected>Rhésus...</option><option value="+">+</option><option value="-">-</option></select>
+                        <select id="rh" required><option value="" disabled selected>Choisir...</option><option value="+">+</option><option value="-">-</option></select>
                     </div>
                 </div>
 
                 <div class="row">
                     <div style="flex:1;"><label>Génotype</label>
-                        <select id="gt" required><option value="" disabled selected>Génotype...</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
+                        <select id="gt" required><option value="" disabled selected>Votre Génotype...</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
                     </div>
                     <div style="flex:1;"><label>Désir d'enfant ?</label>
                         <select id="kids" required><option value="" disabled selected>Choisir...</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="Neutre">Neutre</option></select>
                     </div>
                 </div>
 
-                <div style="margin-bottom:15px; text-align:left;">
-                    <label>Antécédents / Allergies</label>
-                    <input type="text" id="med" placeholder="Ex: Asthme, Pénicilline">
-                </div>
+                <div style="margin-bottom:15px; text-align:left;"><label>Antécédents / Allergies</label><input type="text" id="med" placeholder="Ex: Asthme, Pénicilline"></div>
 
                 <div class="video-btn" id="vL" onclick="document.getElementById('vI').click()">🎥 Vidéo de vérification obligatoire *</div>
                 <input type="file" id="vI" accept="video/*" capture="user" style="display:none" onchange="videoDone()">
@@ -105,37 +124,27 @@ app.get('/signup', (req, res) => {
                 <button type="submit" class="btn btn-main">🚀 Finaliser mon profil</button>
             </form>
         </div></div>
-
         <script>
             let videoUploaded = false;
-
             function preview(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const r = new FileReader();
-                    r.onload = () => { 
-                        const el = document.getElementById('pP');
-                        el.style.backgroundImage = 'url('+r.result+')'; 
-                        el.innerText = '';
-                        localStorage.setItem('uPhoto', r.result); 
-                    };
-                    r.readAsDataURL(file);
-                }
+                const r = new FileReader();
+                r.onload = () => { 
+                    const el = document.getElementById('pP');
+                    el.style.backgroundImage = 'url('+r.result+')'; 
+                    el.innerText = ''; 
+                    localStorage.setItem('uPhoto', r.result); 
+                };
+                r.readAsDataURL(e.target.files[0]);
             }
-
-            function videoDone() {
-                videoUploaded = true;
-                const vBtn = document.getElementById('vL');
-                vBtn.innerText = '✅ Vidéo enregistrée';
-                vBtn.classList.add('video-success');
+            function videoDone() { 
+                videoUploaded = true; 
+                const v = document.getElementById('vL'); 
+                v.innerText = '✅ Vidéo enregistrée'; 
+                v.classList.add('video-success'); 
             }
-
             function validateAndSave(e) {
                 e.preventDefault();
-                if(!videoUploaded) {
-                    alert("Veuillez enregistrer votre vidéo de vérification pour continuer.");
-                    return false;
-                }
+                if(!videoUploaded) { alert("Veuillez enregistrer la vidéo de vérification."); return false; }
                 const d = { 
                     fn:document.getElementById('fn').value, ln:document.getElementById('ln').value, 
                     dob:document.getElementById('dob').value, gs:document.getElementById('gs').value, 
@@ -149,7 +158,7 @@ app.get('/signup', (req, res) => {
     </body></html>`);
 });
 
-// --- 3. DASHBOARD ---
+// --- 4. TABLEAU DE BORD (PROFIL) ---
 app.get('/dashboard', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body>
@@ -157,27 +166,23 @@ app.get('/dashboard', (req, res) => {
             <img id="uP" src="" style="width:120px; height:120px; border-radius:50%; border:4px solid #ff416c; object-fit:cover; margin-top:20px;">
             <h2 id="uN">Utilisateur</h2>
             <div class="card">
-                <p>🎂 <b>Né(e) le :</b> <span id="uD"></span></p>
                 <p>🧬 <b>Génotype :</b> <span id="uG"></span></p>
                 <p>🩸 <b>Groupe :</b> <span id="uGs"></span></p>
                 <p>👶 <b>Désir d'enfant :</b> <span id="uK"></span></p>
             </div>
-            <a href="/search" class="btn btn-main" style="background:#ff416c;">🔍 Trouver un partenaire</a>
             <a href="/" class="btn btn-logout">Déconnexion</a>
         </div></div>
         <script>
             const d = JSON.parse(localStorage.getItem('uData'));
             if(d) {
                 document.getElementById('uN').innerText = d.fn + ' ' + d.ln;
-                document.getElementById('uD').innerText = d.dob;
                 document.getElementById('uG').innerText = d.gt;
                 document.getElementById('uGs').innerText = 'Groupe ' + d.gs + d.rh;
                 document.getElementById('uK').innerText = d.kids;
-            }
-            document.getElementById('uP').src = localStorage.getItem('uPhoto') || 'https://via.placeholder.com/120';
+                document.getElementById('uP').src = localStorage.getItem('uPhoto');
+            } else { window.location.href = '/'; }
         </script>
     </body></html>`);
 });
 
-app.listen(port, () => { console.log('Genlove V10 Final Ready'); });
-        
+app.listen(port, () => { console.log('Genlove V12 Final Ready'); });
