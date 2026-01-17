@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// --- INSCRIPTION AVEC BLOCAGE SI PAS DE VIDÉO ---
+// --- INSCRIPTION AVEC PROJET DE VIE ---
 app.get('/signup-full', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -84,7 +84,7 @@ app.get('/signup-full', (req, res) => {
                         <input type="file" id="pInp" style="display:none" accept="image/*" onchange="preview(event)">
                     </div>
                 </div>
-                <p style="font-weight:bold; font-size:0.8rem; margin:15px 0 5px 0; color:#ff416c;">Informations médicales :</p>
+                <p style="font-weight:bold; font-size:0.8rem; margin:15px 0 5px 0; color:#ff416c;">Santé & Projet de vie :</p>
                 <div class="grid">
                     <select id="gs">
                         <option value="">Groupe sanguin</option>
@@ -93,10 +93,20 @@ app.get('/signup-full', (req, res) => {
                     </select>
                     <select id="gt"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
                 </div>
+                
+                <label>Voulez-vous des enfants ?</label>
+                <select id="kids">
+                    <option value="Oui">Oui, absolument</option>
+                    <option value="Non">Non, je ne souhaite pas</option>
+                    <option value="À discuter">C'est à discuter</option>
+                    <option value="Déjà parents">Je suis déjà parent</option>
+                </select>
+
                 <div class="grid">
                     <div><label>Antécédents :</label><input type="text" id="ant" placeholder="Ex: Asthme"></div>
                     <div><label>Allergies :</label><input type="text" id="all" placeholder="Ex: Paracétamol"></div>
                 </div>
+                
                 <label for="vInp" id="vLb" class="upload-btn" style="border-color:#2196F3; color:#2196F3;">🎥 Vidéo de vérification</label>
                 <input type="file" id="vInp" style="display:none" accept="video/*" capture="user" onchange="videoDone()">
                 
@@ -108,7 +118,6 @@ app.get('/signup-full', (req, res) => {
         </div>
         <script>
             let videoCaptured = false;
-
             function preview(e) {
                 const r = new FileReader();
                 r.onload = () => { 
@@ -119,26 +128,20 @@ app.get('/signup-full', (req, res) => {
                 };
                 r.readAsDataURL(e.target.files[0]);
             }
-
             function videoDone() {
                 videoCaptured = true;
                 document.getElementById('vLb').innerText='✅ Vidéo enregistrée';
                 document.getElementById('vLb').style.borderColor = '#4caf50';
                 document.getElementById('vLb').style.color = '#4caf50';
             }
-
             function saveAndStart() {
-                // VERIFICATION VIDEO
-                if(!videoCaptured) {
-                    alert("Veuillez enregistrer la vidéo de vérification pour continuer.");
-                    return;
-                }
-
+                if(!videoCaptured) { alert("Veuillez enregistrer la vidéo."); return; }
                 localStorage.setItem('userData', JSON.stringify({
                     fn: document.getElementById('fn').value,
                     ln: document.getElementById('ln').value,
                     gs: document.getElementById('gs').value,
                     gt: document.getElementById('gt').value,
+                    kids: document.getElementById('kids').value,
                     ant: document.getElementById('ant').value,
                     all: document.getElementById('all').value
                 }));
@@ -151,7 +154,7 @@ app.get('/signup-full', (req, res) => {
     `);
 });
 
-// --- MON PROFIL ---
+// --- PROFIL AVEC PROJET DE VIE ---
 app.get('/dashboard', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -163,7 +166,7 @@ app.get('/dashboard', (req, res) => {
             body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; display: flex; justify-content: center; }
             .iphone { background: #f9f9f9; width: 100%; max-width: 400px; padding: 30px; min-height: 100vh; box-sizing: border-box; }
             .brand { color: #0056b3; font-weight: bold; margin-bottom: 20px; display: block; }
-            .pic { width: 150px; height: 150px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+            .pic { width: 140px; height: 140px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
             .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
             .label { font-weight: 600; color: #333; }
             .value { color: #666; }
@@ -187,8 +190,9 @@ app.get('/dashboard', (req, res) => {
                 document.getElementById('infoCont').innerHTML = \`
                     <div class="item"><span class="label">Prénom</span> <span class="value">\${data.fn}</span></div>
                     <div class="item"><span class="label">Nom</span> <span class="value">\${data.ln}</span></div>
-                    <div class="item"><span class="label">Groupe Sanguin</span> <span class="value">\${data.gs}</span></div>
+                    <div class="item"><span class="label">Enfants ?</span> <span class="value">\${data.kids}</span></div>
                     <div class="item"><span class="label">Génotype</span> <span class="value">\${data.gt}</span></div>
+                    <div class="item"><span class="label">Groupe Sanguin</span> <span class="value">\${data.gs}</span></div>
                     <div class="item"><span class="label">Antécédents</span> <span class="value">\${data.ant || 'Aucun'}</span></div>
                     <div class="item"><span class="label">Allergies</span> <span class="value">\${data.all || 'Aucune'}</span></div>
                 \`;
