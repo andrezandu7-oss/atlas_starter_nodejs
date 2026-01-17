@@ -23,8 +23,8 @@ app.get('/', (req, res) => {
     <body>
         <div class="card">
             <h1>💞 Genlove 🧬</h1>
-            <p>"Unissez cœur et santé pour bâtir des couples solides 💖"</p>
-            <a href="/dashboard" class="btn btn-login">📌 Se connecter</a>
+            <p>"L'amour qui prend soin de votre avenir"</p>
+            <a href="/dashboard" class="btn btn-login">📌 Mon Profil</a>
             <a href="/signup-full" class="btn btn-signup">📝 S’inscrire</a>
         </div>
     </body>
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// --- INSCRIPTION : TOUT INCLUS & OBLIGATOIRE ---
+// --- INSCRIPTION : LIBELLÉS CORRIGÉS ---
 app.get('/signup-full', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -43,11 +43,10 @@ app.get('/signup-full', (req, res) => {
         <style>
             body { font-family: 'Segoe UI', sans-serif; background: #fdf2f2; padding: 10px; display: flex; justify-content: center; }
             .container { background: white; padding: 20px; border-radius: 20px; width: 100%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-            .logo { color: #ff416c; font-weight: bold; }
+            .logo { color: #ff416c; font-weight: bold; float: right; }
             .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
             label { font-size: 0.75rem; font-weight: bold; color: #333; display: block; margin-top: 8px; }
             input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-top: 4px; font-size: 0.9rem; box-sizing: border-box; }
-            .photo-box { border: 2px dashed #ff416c; width: 100%; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; background-size: cover; color: #ff416c; font-size: 0.75rem; margin-top: 5px; font-weight: bold; }
             .upload-btn { border: 2px dashed #2196F3; padding: 15px; border-radius: 10px; text-align: center; color: #2196F3; font-size: 0.9rem; font-weight: bold; margin-top: 15px; cursor: pointer; display: block; }
             .btn-final { background: #4caf50; color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; margin-top: 20px; }
             .btn-back { display: block; background: #f5f5f5; color: #666; border: 1px solid #ddd; padding: 16px; border-radius: 10px; font-weight: bold; text-decoration: none; text-align: center; font-size: 1rem; margin-top: 10px; }
@@ -57,12 +56,10 @@ app.get('/signup-full', (req, res) => {
         </style>
     </head>
     <body>
-        <div id="overlay"><div class="loader"></div><h2 style="margin-top:20px;">Vérification de compatibilité...</h2></div>
+        <div id="overlay"><div class="loader"></div><h2 style="margin-top:20px;">Vérification biométrique...</h2></div>
         <div class="container">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:bold;">Inscription</span>
-                <span class="logo">🧬 Genlove</span>
-            </div>
+            <span class="logo">🧬 Genlove</span>
+            <h2 style="margin-top:0;">Inscription</h2>
             <form>
                 <div class="grid">
                     <div><label>Prénom *</label><input type="text" id="fn" placeholder="Ex: André"></div>
@@ -72,25 +69,23 @@ app.get('/signup-full', (req, res) => {
                 <p style="color:#ff416c; font-weight:bold; font-size:0.8rem; margin-top:15px;">Groupe Sanguin & Rhésus *</p>
                 <div class="grid">
                     <select id="gs">
-                        <option value="">Lettre (ABO)</option>
+                        <option value="">Groupe Sanguin</option>
                         <option>A</option><option>B</option><option>AB</option><option>O</option>
                     </select>
                     <select id="rh">
-                        <option value="">Signe (+/-)</option>
+                        <option value="">Rhésus</option>
                         <option>+</option><option>-</option>
                     </select>
                 </div>
 
                 <div class="grid">
-                    <div>
-                        <label>Génotype *</label>
+                    <div><label>Génotype *</label>
                         <select id="gt">
                             <option value="">Choisir</option>
                             <option>AA</option><option>AS</option><option>SS</option>
                         </select>
                     </div>
-                    <div>
-                        <label>Projet de vie *</label>
+                    <div><label>Projet de vie *</label>
                         <select id="kids">
                             <option value="">Enfants ?</option>
                             <option>Oui</option><option>Non</option><option>À discuter</option>
@@ -103,12 +98,6 @@ app.get('/signup-full', (req, res) => {
                     <div><label>Allergies</label><input type="text" id="all" placeholder="Ex: Paracétamol"></div>
                 </div>
 
-                <div>
-                    <label>Photo de profil</label>
-                    <label for="pInp" id="pView" class="photo-box">📁 Ajouter une photo</label>
-                    <input type="file" id="pInp" style="display:none" accept="image/*" onchange="preview(event)">
-                </div>
-
                 <label for="vInp" id="vLb" class="upload-btn">🎥 Vidéo de vérification obligatoire *</label>
                 <input type="file" id="vInp" style="display:none" accept="video/*" capture="user" onchange="videoDone()">
 
@@ -119,20 +108,10 @@ app.get('/signup-full', (req, res) => {
 
         <script>
             let vCap = false;
-            function preview(e) {
-                const r = new FileReader();
-                r.onload = () => { 
-                    document.getElementById('pView').style.backgroundImage = 'url('+r.result+')';
-                    document.getElementById('pView').innerText='';
-                    localStorage.setItem('uPhoto', r.result);
-                };
-                r.readAsDataURL(e.target.files[0]);
-            }
             function videoDone() { 
                 vCap = true; 
                 document.getElementById('vLb').innerText='✅ Vidéo enregistrée';
                 document.getElementById('vLb').style.color='#4caf50';
-                document.getElementById('vLb').style.borderColor='#4caf50';
             }
             function validate() {
                 const fn = document.getElementById('fn').value;
@@ -143,15 +122,11 @@ app.get('/signup-full', (req, res) => {
                 const kids = document.getElementById('kids').value;
 
                 if(!fn || !ln || !gs || !rh || !gt || !kids || !vCap) {
-                    alert("Attention : Le Prénom, Nom, Groupe, Rhésus, Génotype, Projet de vie et la Vidéo sont obligatoires.");
+                    alert("Attention : Tous les champs marqués d'une * sont obligatoires pour votre sécurité.");
                     return;
                 }
 
-                localStorage.setItem('uData', JSON.stringify({
-                    fn, ln, gs, rh, gt, kids,
-                    ant: document.getElementById('ant').value, 
-                    all: document.getElementById('all').value
-                }));
+                localStorage.setItem('uData', JSON.stringify({ fn, ln, gs, rh, gt, kids, ant: document.getElementById('ant').value, all: document.getElementById('all').value }));
                 document.getElementById('overlay').style.display='flex';
                 setTimeout(() => { window.location.href='/dashboard'; }, 3000);
             }
@@ -161,7 +136,7 @@ app.get('/signup-full', (req, res) => {
     `);
 });
 
-// --- MON PROFIL ---
+// --- MON PROFIL AVEC SÉCURITÉ SS ---
 app.get('/dashboard', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -172,33 +147,34 @@ app.get('/dashboard', (req, res) => {
         <style>
             body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; display: flex; justify-content: center; }
             .iphone { background: #f9f9f9; width: 100%; max-width: 400px; padding: 30px; min-height: 100vh; box-sizing: border-box; }
-            .pic { width: 120px; height: 120px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+            .pic { width: 120px; height: 120px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
             .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
             .label { font-weight: 600; color: #333; }
             .value { color: #666; font-weight: bold; }
+            .warning { background: #fff5f5; color: #d32f2f; padding: 10px; border-radius: 10px; font-size: 0.8rem; margin-top: 15px; border: 1px solid #feb2b2; }
         </style>
     </head>
     <body>
         <div class="iphone">
             <h2 style="margin:0;">🤍 Mon Profil</h2>
             <p style="color:#0056b3; font-weight:bold;">Genlove</p>
-            <img id="fPic" src="" class="pic">
             <div id="cont"></div>
+            <div id="ssShield" class="warning" style="display:none;">
+                ⚠️ <b>Sécurité Genlove :</b> Votre génotype étant SS, les partenaires également SS sont automatiquement masqués pour protéger votre future descendance.
+            </div>
             <a href="/signup-full" style="display:block; text-align:center; padding:15px; background:white; border:1px solid #ddd; border-radius:10px; margin-top:30px; text-decoration:none; color:black; font-weight:bold;">✏️ Modifier profil</a>
             <a href="/" style="display:block; text-align:center; margin-top:20px; color:#ff416c; text-decoration:none;">Déconnexion</a>
         </div>
         <script>
             const d = JSON.parse(localStorage.getItem('uData'));
-            const p = localStorage.getItem('uPhoto');
-            if(p) document.getElementById('fPic').src = p;
             if(d) {
+                if(d.gt === 'SS') document.getElementById('ssShield').style.display = 'block';
                 document.getElementById('cont').innerHTML = \`
                     <div class="item"><span class="label">Identité</span> <span class="value">\${d.fn} \${d.ln}</span></div>
-                    <div class="item"><span class="label">Groupe Sanguin</span> <span class="value" style="color:#ff416c;">\${d.gs}\${d.rh}</span></div>
+                    <div class="item"><span class="label">Groupe & Rhésus</span> <span class="value" style="color:#ff416c;">\${d.gs}\${d.rh}</span></div>
                     <div class="item"><span class="label">Génotype</span> <span class="value">\${d.gt}</span></div>
                     <div class="item"><span class="label">Projet Enfants</span> <span class="value">\${d.kids}</span></div>
                     <div class="item"><span class="label">Antécédents</span> <span class="value">\${d.ant || 'Aucun'}</span></div>
-                    <div class="item"><span class="label">Allergies</span> <span class="value">\${d.all || 'Aucune'}</span></div>
                 \`;
             }
         </script>
@@ -207,4 +183,4 @@ app.get('/dashboard', (req, res) => {
     `);
 });
 
-app.listen(port, () => { console.log('Genlove is LIVE'); });
+app.listen(port, () => { console.log('Genlove is READY'); });
