@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// --- INSCRIPTION AVEC PROJET DE VIE ---
+// --- INSCRIPTION AVEC RHÉSUS ---
 app.get('/signup-full', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -62,7 +62,7 @@ app.get('/signup-full', (req, res) => {
         </style>
     </head>
     <body>
-        <div id="overlay"><div class="loader"></div><h2>Analyse biométrique...</h2></div>
+        <div id="overlay"><div class="loader"></div><h2>Analyse sécurisée...</h2></div>
         <div class="container">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:bold;">Créer votre profil</span>
@@ -79,28 +79,31 @@ app.get('/signup-full', (req, res) => {
                         <div style="font-size:0.85rem; margin-top:10px;"><input type="radio" name="g" value="Homme" checked> H <input type="radio" name="g" value="Femme"> F</div>
                     </div>
                     <div>
-                        <label>Photo de profil :</label>
+                        <label>Photo :</label>
                         <label for="pInp" id="pView" class="photo-box">📁 Ajouter</label>
                         <input type="file" id="pInp" style="display:none" accept="image/*" onchange="preview(event)">
                     </div>
                 </div>
-                <p style="font-weight:bold; font-size:0.8rem; margin:15px 0 5px 0; color:#ff416c;">Santé & Projet de vie :</p>
+
+                <p style="font-weight:bold; font-size:0.8rem; margin:15px 0 5px 0; color:#ff416c;">Santé & Génétique :</p>
                 <div class="grid">
                     <select id="gs">
                         <option value="">Groupe sanguin</option>
-                        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-                        <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                        <option>A</option><option>B</option><option>AB</option><option>O</option>
                     </select>
-                    <select id="gt"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
+                    <select id="rh">
+                        <option value="">Facteur Rhésus</option>
+                        <option>Positif (+)</option>
+                        <option>Négatif (-)</option>
+                    </select>
                 </div>
-                
-                <label>Voulez-vous des enfants ?</label>
-                <select id="kids">
-                    <option value="Oui">Oui, absolument</option>
-                    <option value="Non">Non, je ne souhaite pas</option>
-                    <option value="À discuter">C'est à discuter</option>
-                    <option value="Déjà parents">Je suis déjà parent</option>
-                </select>
+                <div class="grid">
+                    <select id="gt"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
+                    <select id="kids">
+                        <option value="">Projet enfants ?</option>
+                        <option>Oui</option><option>Non</option><option>À discuter</option>
+                    </select>
+                </div>
 
                 <div class="grid">
                     <div><label>Antécédents :</label><input type="text" id="ant" placeholder="Ex: Asthme"></div>
@@ -135,11 +138,12 @@ app.get('/signup-full', (req, res) => {
                 document.getElementById('vLb').style.color = '#4caf50';
             }
             function saveAndStart() {
-                if(!videoCaptured) { alert("Veuillez enregistrer la vidéo."); return; }
+                if(!videoCaptured) { alert("Vidéo obligatoire pour la sécurité."); return; }
                 localStorage.setItem('userData', JSON.stringify({
                     fn: document.getElementById('fn').value,
                     ln: document.getElementById('ln').value,
                     gs: document.getElementById('gs').value,
+                    rh: document.getElementById('rh').value,
                     gt: document.getElementById('gt').value,
                     kids: document.getElementById('kids').value,
                     ant: document.getElementById('ant').value,
@@ -154,7 +158,7 @@ app.get('/signup-full', (req, res) => {
     `);
 });
 
-// --- PROFIL AVEC PROJET DE VIE ---
+// --- PROFIL AVEC RHÉSUS ---
 app.get('/dashboard', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -165,11 +169,11 @@ app.get('/dashboard', (req, res) => {
         <style>
             body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; display: flex; justify-content: center; }
             .iphone { background: #f9f9f9; width: 100%; max-width: 400px; padding: 30px; min-height: 100vh; box-sizing: border-box; }
-            .brand { color: #0056b3; font-weight: bold; margin-bottom: 20px; display: block; }
-            .pic { width: 140px; height: 140px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+            .brand { color: #0056b3; font-weight: bold; margin-bottom: 15px; display: block; }
+            .pic { width: 130px; height: 130px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
             .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
             .label { font-weight: 600; color: #333; }
-            .value { color: #666; }
+            .value { color: #666; text-align: right; }
             .btn-edit { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; background: white; margin-top: 30px; font-weight: bold; cursor:pointer; text-decoration:none; display:block; text-align:center; color:black; }
         </style>
     </head>
@@ -188,11 +192,10 @@ app.get('/dashboard', (req, res) => {
             if(photo) document.getElementById('finalPic').src = photo;
             if(data) {
                 document.getElementById('infoCont').innerHTML = \`
-                    <div class="item"><span class="label">Prénom</span> <span class="value">\${data.fn}</span></div>
-                    <div class="item"><span class="label">Nom</span> <span class="value">\${data.ln}</span></div>
-                    <div class="item"><span class="label">Enfants ?</span> <span class="value">\${data.kids}</span></div>
+                    <div class="item"><span class="label">Prénom & Nom</span> <span class="value">\${data.fn} \${data.ln}</span></div>
+                    <div class="item"><span class="label">Groupe Sanguin</span> <span class="value">\${data.gs} (\${data.rh})</span></div>
                     <div class="item"><span class="label">Génotype</span> <span class="value">\${data.gt}</span></div>
-                    <div class="item"><span class="label">Groupe Sanguin</span> <span class="value">\${data.gs}</span></div>
+                    <div class="item"><span class="label">Projet Enfants</span> <span class="value">\${data.kids}</span></div>
                     <div class="item"><span class="label">Antécédents</span> <span class="value">\${data.ant || 'Aucun'}</span></div>
                     <div class="item"><span class="label">Allergies</span> <span class="value">\${data.all || 'Aucune'}</span></div>
                 \`;
@@ -204,3 +207,4 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.listen(port, () => { console.log('Genlove is ready'); });
+             
