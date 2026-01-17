@@ -4,7 +4,7 @@ const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 
-// --- PAGE D'ACCUEIL ---
+// --- ACCUEIL ---
 app.get('/', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -14,9 +14,8 @@ app.get('/', (req, res) => {
         <title>Genlove - L'amour qui soigne</title>
         <style>
             body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #ff416c, #ff4b2b); height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; color: white; text-align: center; }
-            .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); padding: 40px; border-radius: 30px; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-            h1 { font-size: 2.5rem; margin: 0; }
-            .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border-radius: 50px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; text-decoration: none; box-sizing: border-box; color: white; }
+            .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); padding: 40px; border-radius: 30px; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.3); }
+            .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; color: white; }
             .btn-login { background: white; color: #ff416c; }
             .btn-signup { background: transparent; border: 2px solid white; }
         </style>
@@ -25,9 +24,6 @@ app.get('/', (req, res) => {
         <div class="card">
             <h1>💞 Genlove 🧬</h1>
             <p>L’amour qui soigne 💙</p>
-            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin: 20px 0; font-size: 0.85rem; font-style: italic;">
-                "Unissez cœur et santé pour bâtir des couples solides 💖"
-            </div>
             <a href="/dashboard" class="btn btn-login">📌 Se connecter</a>
             <a href="/signup-full" class="btn btn-signup">📝 S’inscrire</a>
         </div>
@@ -36,7 +32,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// --- FORMULAIRE D'INSCRIPTION OPTIMISÉ ---
+// --- INSCRIPTION AVEC PLACEHOLDERS (EXEMPLES) ---
 app.get('/signup-full', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -46,139 +42,76 @@ app.get('/signup-full', (req, res) => {
         <title>Créer votre profil - Genlove</title>
         <style>
             body { font-family: 'Segoe UI', sans-serif; background: #fdf2f2; margin: 0; padding: 10px; display: flex; justify-content: center; }
-            .container { background: white; padding: 20px; border-radius: 20px; width: 100%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; }
+            .container { background: white; padding: 20px; border-radius: 20px; width: 100%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
             .logo { color: #ff416c; font-weight: bold; font-size: 1.1rem; }
             .progress-bar { background: #eee; height: 8px; border-radius: 10px; margin: 10px 0 5px 0; }
             .fill { background: #4caf50; width: 60%; height: 100%; border-radius: 10px; transition: width 4s; }
             .score { text-align: center; color: #4caf50; font-weight: bold; font-size: 0.85rem; margin-bottom: 15px; }
             .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
             label { font-size: 0.75rem; font-weight: bold; color: #333; display: block; margin-top: 8px; }
-            input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; margin-top: 4px; font-size: 0.85rem; box-sizing: border-box; }
-            .hidden-input { display: none; }
-            
-            /* Aperçu Photo */
+            input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 4px; font-size: 0.85rem; box-sizing: border-box; }
             .photo-box { border: 2px dashed #ff416c; width: 100%; height: 55px; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background-size: cover; background-position: center; color: #ff416c; font-size: 0.75rem; margin-top: 5px; font-weight: bold; }
-            
-            /* Boutons d'upload dynamiques */
-            .upload-btn { border: 2px dashed #ff416c; padding: 12px; border-radius: 10px; text-align: center; color: #ff416c; font-size: 0.75rem; font-weight: bold; margin-top: 10px; cursor: pointer; display: block; transition: 0.3s; }
+            .upload-btn { border: 2px dashed #ff416c; padding: 12px; border-radius: 10px; text-align: center; color: #ff416c; font-size: 0.75rem; font-weight: bold; margin-top: 10px; cursor: pointer; display: block; }
             .video-btn { border: 2px dashed #2196F3; color: #2196F3; }
-            .btn-success { border: 2px solid #4caf50 !important; color: #4caf50 !important; background: #e8f5e9; }
-            
-            .info-yellow { background: #fffbe6; border: 1px solid #ffe58f; padding: 10px; border-radius: 12px; font-size: 0.75rem; margin: 15px 0; color: #856404; }
-            .footer-btns { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-top: 20px; }
-            .btn-final { background: #4caf50; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-            .btn-back { background: #b0bec5; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration:none; text-align:center; display:flex; align-items:center; justify-content:center; }
-            
-            /* Écran d'analyse IA */
+            .footer-btns { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-top: 25px; }
+            .btn-final { background: #4caf50; color: white; border: none; padding: 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+            .btn-back { background: #b0bec5; color: white; border: none; padding: 15px; border-radius: 5px; font-weight: bold; cursor: pointer; text-decoration:none; text-align:center; display:flex; align-items:center; justify-content:center; }
             #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:1000; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
             .loader { border: 6px solid #f3f3f3; border-top: 6px solid #ff416c; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         </style>
     </head>
     <body>
-        <div id="overlay">
-            <div class="loader"></div>
-            <h2 id="status">Analyse biométrique en cours...</h2>
-            <p id="substatus" style="color:#666; font-size:0.9rem; padding:0 20px;">L'IA compare votre visage à votre photo de profil</p>
-        </div>
-
+        <div id="overlay"><div class="loader"></div><h2 id="status">Analyse biométrique...</h2></div>
         <div class="container">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:bold;">Créer votre profil</span>
                 <span class="logo">🧬 Genlove</span>
             </div>
-            <div class="progress-bar"><div id="progressBar" class="fill"></div></div>
-            <div id="scoreLabel" class="score">Score de Confiance : 60% 🛡️</div>
-
+            <div class="progress-bar"><div id="bar" class="fill"></div></div>
+            <div class="score">Score de Confiance : 60% 🛡️</div>
             <form>
                 <div class="grid">
-                    <div><label>Prénom :</label><input type="text" placeholder="Ton prénom" required></div>
-                    <div><label>Nom :</label><input type="text" placeholder="Ton nom" required></div>
+                    <div><label>Prénom :</label><input type="text" placeholder="Ex: André"></div>
+                    <div><label>Nom :</label><input type="text" placeholder="Ex: Zandu"></div>
                 </div>
-
                 <div class="grid" style="align-items: end;">
                     <div><label>Genre :</label>
-                        <div style="font-size:0.85rem; margin-top:10px;"><input type="radio" name="g" checked> H <input type="radio" name="g" style="margin-left:10px;"> F</div>
+                        <div style="font-size:0.85rem; margin-top:10px;"><input type="radio" name="g" checked> H <input type="radio" name="g"> F</div>
                     </div>
                     <div>
                         <label>Photo de profil :</label>
-                        <label for="photoInp" id="photoView" class="photo-box">📁 Ajouter</label>
-                        <input type="file" id="photoInp" class="hidden-input" accept="image/*" onchange="handlePhoto(event)">
+                        <label for="pInp" id="pView" class="photo-box">📁 Ajouter</label>
+                        <input type="file" id="pInp" class="hidden-input" style="display:none" onchange="preview(event)">
                     </div>
                 </div>
-
-                <p style="font-weight:bold; font-size:0.8rem; margin:15px 0 5px 0; color:#ff416c;">Données de santé :</p>
+                <p style="font-weight:bold; font-size:0.8rem; margin:15px 0 5px 0; color:#ff416c;">Informations médicales :</p>
                 <div class="grid">
-                    <select required><option value="">Groupe sanguin</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>
-                    <select required><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
+                    <select><option>Groupe sanguin</option><option>A+</option><option>O+</option><option>B+</option></select>
+                    <select><option>Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
                 </div>
-
-                <label>Statut actuel :</label>
-                <div style="font-size:0.75rem; display:flex; gap:10px; margin-top:5px;">
-                    <label style="font-weight:normal;"><input type="checkbox" checked> Célibataire</label>
-                    <label style="font-weight:normal;"><input type="checkbox"> Divorcé</label>
-                    <label style="font-weight:normal;"><input type="checkbox"> Veuf</label>
+                <div class="grid">
+                    <div><label>Antécédents :</label><input type="text" placeholder="Ex: Asthme, Diabète"></div>
+                    <div><label>Allergies :</label><input type="text" placeholder="Ex: Paracétamol, Arachide"></div>
                 </div>
-
-                <div class="info-yellow">😊 Genlove est pour ceux qui cherchent l'amour — sélectionnez votre situation !</div>
-
-                <label for="certInp" id="certLabel" class="upload-btn">📄 Ajouter certificat médical</label>
-                <input type="file" id="certInp" class="hidden-input" onchange="handleCert()">
-
-                <label for="vidInp" id="vidLabel" class="upload-btn video-btn">🎥 Vidéo de vérification (20s max)</label>
-                <input type="file" id="vidInp" class="hidden-input" accept="video/*" capture="user" onchange="handleVideo()">
-
+                <div style="background: #fffbe6; padding: 10px; border-radius: 10px; font-size: 0.75rem; margin-top: 15px;">😊 Genlove est pour ceux qui cherchent l'amour !</div>
+                <label for="vInp" id="vLb" class="upload-btn video-btn">🎥 Vidéo de vérification (20s max)</label>
+                <input type="file" id="vInp" style="display:none" accept="video/*" capture="user" onchange="document.getElementById('vLb').innerText='✅ Vidéo enregistrée'">
                 <div class="footer-btns">
-                    <button type="button" class="btn-final" onclick="runFinalIA()">🚀 Finaliser mon inscription</button>
+                    <button type="button" class="btn-final" onclick="startIA()">🚀 Finaliser mon inscription</button>
                     <a href="/" class="btn-back">Retour</a>
                 </div>
             </form>
         </div>
-
         <script>
-            // 1. Aperçu Photo
-            function handlePhoto(e) {
-                const reader = new FileReader();
-                reader.onload = function(){
-                    const view = document.getElementById('photoView');
-                    view.style.backgroundImage = 'url(' + reader.result + ')';
-                    view.innerText = "";
-                    view.style.border = "2px solid #4caf50";
-                }
-                reader.readAsDataURL(e.target.files[0]);
+            function preview(e) {
+                const r = new FileReader();
+                r.onload = () => { const v = document.getElementById('pView'); v.style.backgroundImage = 'url('+r.result+')'; v.innerText=''; };
+                r.readAsDataURL(e.target.files[0]);
             }
-
-            // 2. Confirmation Certificat
-            function handleCert() {
-                const lb = document.getElementById('certLabel');
-                lb.innerText = "✅ Certificat ajouté";
-                lb.classList.add('btn-success');
-            }
-
-            // 3. Confirmation Vidéo
-            function handleVideo() {
-                const lb = document.getElementById('vidLabel');
-                lb.innerText = "✅ Vidéo bien enregistrée";
-                lb.classList.add('btn-success');
-            }
-
-            // 4. Analyse IA Instantanée (Exit les 24h !)
-            function runFinalIA() {
-                document.getElementById('overlay').style.display = 'flex';
-                
-                setTimeout(() => {
-                    document.getElementById('status').innerText = "Vérification de l'authenticité...";
-                    document.getElementById('substatus').innerText = "Analyse du certificat médical en cours...";
-                }, 2000);
-
-                setTimeout(() => {
-                    document.getElementById('overlay').style.display = 'none';
-                    document.getElementById('progressBar').style.width = '100%';
-                    document.getElementById('scoreLabel').innerText = "Score de Confiance : 100% ✅";
-                    
-                    alert("✨ Félicitations ! Votre profil a été validé par notre IA.\\nBienvenue sur Genlove.");
-                    window.location.href = "/dashboard";
-                }, 5000);
+            function startIA() {
+                document.getElementById('overlay').style.display='flex';
+                setTimeout(() => { window.location.href='/dashboard'; }, 4000);
             }
         </script>
     </body>
@@ -186,6 +119,41 @@ app.get('/signup-full', (req, res) => {
     `);
 });
 
-app.get('/dashboard', (req, res) => { res.send('<body style="text-align:center; padding-top:100px; font-family:sans-serif;"><h1>🎉 Profil Validé !</h1><p>Vous avez maintenant accès aux profils compatibles.</p><a href="/">Retour</a></body>'); });
+// --- MON PROFIL ---
+app.get('/dashboard', (req, res) => {
+    res.send(`
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mon Profil - Genlove</title>
+        <style>
+            body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; display: flex; justify-content: center; }
+            .iphone { background: #f9f9f9; width: 100%; max-width: 400px; padding: 30px; min-height: 100vh; box-sizing: border-box; }
+            .brand { color: #0056b3; font-weight: bold; margin-bottom: 20px; display: block; }
+            .pic { width: 120px; height: 120px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; object-fit: cover; }
+            .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+            .label { font-weight: 500; }
+            .value { color: #666; }
+            .btn-edit { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; background: white; margin-top: 30px; font-weight: bold; cursor: pointer; }
+        </style>
+    </head>
+    <body>
+        <div class="iphone">
+            <h1 style="margin:0;">🤍 Mon Profil</h1>
+            <span class="brand">Genlove</span>
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" class="pic">
+            <div class="item"><span class="label">Prénom</span> <span class="value">André</span></div>
+            <div class="item"><span class="label">Nom</span> <span class="value">Zandu</span></div>
+            <div class="item"><span class="label">Génotype</span> <span class="value">AA</span></div>
+            <div class="item"><span class="label">Antécédents</span> <span class="value">Asthme</span></div>
+            <div class="item"><span class="label">Allergies</span> <span class="value">Paracétamol</span></div>
+            <button class="btn-edit">✏️ Modifier profil</button>
+            <a href="/" style="display:block; text-align:center; margin-top:20px; color:#0056b3; text-decoration:none;">Déconnexion</a>
+        </div>
+    </body>
+    </html>
+    `);
+});
 
-app.listen(port, () => { console.log('Genlove is LIVE'); });
+app.listen(port, () => { console.log('Genlove ready'); });
