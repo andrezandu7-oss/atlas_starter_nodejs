@@ -4,103 +4,111 @@ const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 
-// --- STYLES DIRECTEMENT INSPIRÉS DE TES IMAGES ---
+// --- DESIGN GLOBAL UNIFIÉ (V25 ORIGINAL) ---
 const styles = `
 <style>
-    body { font-family: 'Segoe UI', Helvetica, Arial, sans-serif; margin: 0; background: #fff; color: #000; display: flex; justify-content: center; }
-    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; position: relative; background: white; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; color: #333; }
+    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+    
+    /* ACCUEIL */
+    .welcome-screen { background: #f4e9da; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; text-align: center; box-sizing: border-box; }
+    .btn-dark { background: #1a2a44; color: white; border-radius: 12px; text-decoration: none; width: 100%; padding: 18px; font-weight: bold; margin-bottom: 15px; display: block; }
+    .btn-outline { background: white; color: #1a2a44; border: 1.5px solid #1a2a44; border-radius: 12px; text-decoration: none; width: 100%; padding: 18px; font-weight: bold; display: block; }
 
-    /* STYLE INSCRIPTION (IMAGE 2) */
-    .signup-container { padding: 40px 20px; text-align: center; }
-    .signup-title { color: #ff416c; font-size: 1.8rem; margin-bottom: 30px; }
-    .photo-dash { border: 2px dashed #ff416c; width: 150px; height: 150px; border-radius: 50%; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; color: #ff416c; cursor: pointer; background-size: cover; }
-    .input-classic { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; font-size: 1rem; box-sizing: border-box; }
-    .video-dash { border: 2px dashed #007bff; border-radius: 12px; padding: 15px; color: #007bff; margin-bottom: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .btn-finaliser { background: #ff416c; color: white; border: none; width: 100%; padding: 18px; border-radius: 40px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+    /* INSCRIPTION (FIDÈLE À TES IMAGES) */
+    .content { padding: 20px; text-align: center; }
+    .photo-circle { border: 2px dashed #ff416c; height: 150px; width: 150px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff416c; cursor: pointer; margin: 0 auto 20px auto; background-size: cover; background-position: center; position: relative; }
+    .input-field { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; margin-top: 5px; box-sizing: border-box; font-size: 1rem; }
+    .row { display: flex; gap: 10px; }
+    label { display: block; font-size: 0.8rem; font-weight: bold; color: #555; margin-top: 12px; text-align: left; }
+    
+    /* BOUTON VIDÉO (IMAGE 2) */
+    .video-btn { border: 2px dashed #007bff; padding: 12px; border-radius: 12px; color: #007bff; font-weight: bold; margin: 20px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    
+    /* BOUTON FINALISER (IMAGE 2) */
+    .btn-pink-final { background: #ff416c; color: white; border: none; width: 100%; padding: 18px; border-radius: 50px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 10px; }
 
-    /* STYLE COMPATIBILITÉ (IMAGE 1) */
-    .comp-screen { padding: 40px 30px; text-align: left; }
-    .comp-header { font-size: 1.4rem; font-weight: bold; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 10px; }
-    .brand-box { color: #007bff; font-size: 1.6rem; font-weight: bold; margin-bottom: 30px; display: flex; align-items: center; gap: 8px; }
-    .domain-block { margin-bottom: 25px; }
-    .domain-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 4px; }
-    .domain-text { font-size: 0.9rem; color: #333; line-height: 1.4; }
-    .btn-contact-gray { background: #f2f2f2; color: #000; border: none; width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .btn-retour { background: none; border: none; width: 100%; padding: 15px; color: #000; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+    /* DASHBOARD */
+    .med-badge { display: flex; justify-content: space-around; background: #1a2a44; color: white; padding: 15px; border-radius: 15px; margin: 20px 0; }
+    .med-val { font-size: 1.2rem; font-weight: bold; color: #ff416c; display: block; }
+    .med-lab { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; }
 </style>
 `;
 
-// --- ROUTE 1 : INSCRIPTION (REPRODUIT L'IMAGE 2) ---
+// --- 1. ACCUEIL ---
+app.get('/', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body><div class="app-shell"><div class="welcome-screen">
+        <h1 style="font-size:3.2rem; color:#1a2a44; margin:0;">Gen<span style="color:#ff416c;">love</span></h1>
+        <p style="font-weight:bold; color:#1a2a44; margin:5px 0 25px 0;">L'amour qui soigne 💙</p>
+        <p style="color: #2d4059; margin-bottom: 40px;">⭐ <b>Bienvenue sur Genlove !</b><br><br>Unissez cœur et santé pour bâtir des couples solides ❤️</p>
+        <a href="/signup" class="btn-dark">👤 S'inscrire</a>
+        <a href="/" class="btn-outline">➔ Se connecter</a>
+    </div></div></body></html>`);
+});
+
+// --- 2. INSCRIPTION ---
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body><div class="app-shell"><div class="signup-container">
-        <h1 class="signup-title">Mon Profil Médical</h1>
+    <body><div class="app-shell"><div class="content">
+        <h2 style="color:#ff416c; margin-bottom:25px;">Mon Profil Médical</h2>
         <form onsubmit="save(event)">
-            <div class="photo-dash" id="circ" onclick="document.getElementById('pI').click()">📸 Photo *</div>
+            <div class="photo-circle" id="circ" onclick="document.getElementById('pI').click()">
+                <span id="txt">📸 Photo *</span>
+            </div>
             <input type="file" id="pI" accept="image/*" style="display:none" onchange="up(event)">
             
-            <input type="text" id="fn" class="input-classic" placeholder="Prénom" required>
-            <select id="gt" class="input-classic">
+            <input type="text" id="fn" class="input-field" placeholder="Prénom" required>
+            
+            <select id="gt" class="input-field" style="margin-top:15px;">
                 <option value="AA">AA</option>
                 <option value="AS">AS</option>
                 <option value="SS">SS</option>
             </select>
 
-            <div class="video-dash" id="vB" onclick="this.innerText='✅ Vidéo enregistrée'; this.style.color='#4caf50'; this.style.borderColor='#4caf50'; this.ok=true;">
-                🎥 Vidéo de vérification *
-            </div>
+            <div class="video-btn" id="vB" onclick="vOk()">🎥 Vidéo de vérification *</div>
 
-            <button type="submit" class="btn-finaliser">🚀 Finaliser</button>
+            <button type="submit" class="btn-pink-final">🚀 Finaliser</button>
         </form>
     </div></div>
     <script>
-        function up(e){ const r=new FileReader(); r.onload=()=>{ localStorage.setItem('uImg',r.result); document.getElementById('circ').style.backgroundImage='url('+r.result+')'; document.getElementById('circ').innerText=''; }; r.readAsDataURL(e.target.files[0]); }
+        let vReady = false;
+        function up(e){ const r=new FileReader(); r.onload=()=>{ localStorage.setItem('uImg',r.result); document.getElementById('circ').style.backgroundImage='url('+r.result+')'; document.getElementById('txt').innerText=''; }; r.readAsDataURL(e.target.files[0]); }
+        function vOk(){ vReady=true; document.getElementById('vB').innerText='✅ Vidéo OK'; document.getElementById('vB').style.color='#4caf50'; document.getElementById('vB').style.borderColor='#4caf50'; }
         function save(e){
             e.preventDefault();
+            if(!localStorage.getItem('uImg') || !vReady){ alert("Photo et Vidéo requises"); return; }
             const d = { fn:document.getElementById('fn').value, gt:document.getElementById('gt').value };
             localStorage.setItem('uData', JSON.stringify(d));
-            window.location.href='/matching';
+            window.location.href='/dashboard';
         }
     </script></body></html>`);
 });
 
-// --- ROUTE 2 : COMPATIBILITÉ (REPRODUIT L'IMAGE 1) ---
-app.get('/compatibility/:id', (req, res) => {
+// --- 3. DASHBOARD (PROFIL ENREGISTRÉ) ---
+app.get('/dashboard', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body><div class="app-shell"><div class="comp-screen">
-        <div class="comp-header">
-            <span style="color:#ff416c;">❤️</span>
-            <span>Détails de compatibilité<br>par domaine</span>
-        </div>
+    <body><div class="app-shell"><div class="content">
+        <div style="background:#f0fff4; padding:15px; border-radius:15px; color:#2f855a; margin-bottom:20px; font-weight:bold;">🎉 Profil enregistré avec succès !</div>
+        <div id="resPic" style="width:130px; height:130px; border-radius:50%; border:4px solid #ff416c; margin:0 auto 15px auto; background-size:cover; background-position:center;"></div>
+        <h2 id="resName" style="color:#1a2a44; margin:0;"></h2>
         
-        <div class="brand-box">💉 Genlove</div>
-
-        <div class="domain-block">
-            <div class="domain-title">Santé : 80 %</div>
-            <div class="domain-text">Vous partagez une forte compatibilité physique et médicale.</div>
+        <div class="med-badge">
+            <div class="med-item"><span class="med-lab">Génotype</span><span id="resGt" class="med-val"></span></div>
         </div>
 
-        <div class="domain-block">
-            <div class="domain-title">Génétique : 70 %</div>
-            <div class="domain-text">Votre combinaison génétique présente un bon niveau d'harmonie.</div>
-        </div>
-
-        <div class="domain-block">
-            <div class="domain-title">Émotion : 90 %</div>
-            <div class="domain-text">Vos profils émotionnels s'accordent très fortement.</div>
-        </div>
-
-        <div class="domain-block">
-            <div class="domain-title">Projet de vie : 65 %</div>
-            <div class="domain-text">Vos objectifs sont similaires, mais certains points restent à découvrir.</div>
-        </div>
-
-        <button class="btn-contact-gray" onclick="alert('Demande de contact envoyée !')">✉️ Contacter</button>
-        <a href="/matching" class="btn-retour">🔒 Retour</a>
-    </div></div></body></html>`);
+        <button class="btn-dark" style="background:#ff416c; border:none; width:100%;">🔍 Trouver un partenaire</button>
+    </div></div>
+    <script>
+        const d = JSON.parse(localStorage.getItem('uData'));
+        const p = localStorage.getItem('uImg');
+        if(d && p){
+            document.getElementById('resPic').style.backgroundImage = 'url('+p+')';
+            document.getElementById('resName').innerText = d.fn;
+            document.getElementById('resGt').innerText = d.gt;
+        } else { window.location.href='/signup'; }
+    </script></body></html>`);
 });
 
-// Redirection par défaut vers l'inscription pour tester
-app.get('/', (req, res) => res.redirect('/signup'));
-
-app.listen(port, () => { console.log('Genlove V32 - Fidélité visuelle totale'); });
+app.listen(port, () => { console.log('Genlove V25 - Retour à la base stable'); });
+           
