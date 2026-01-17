@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// --- INSCRIPTION AVEC RHÉSUS ET VALIDATION ---
+// --- INSCRIPTION : TOUT INCLUS & OBLIGATOIRE ---
 app.get('/signup-full', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -57,49 +57,62 @@ app.get('/signup-full', (req, res) => {
         </style>
     </head>
     <body>
-        <div id="overlay"><div class="loader"></div><h2 style="margin-top:20px;">Analyse biométrique...</h2></div>
+        <div id="overlay"><div class="loader"></div><h2 style="margin-top:20px;">Vérification de compatibilité...</h2></div>
         <div class="container">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:bold;">Inscription</span>
                 <span class="logo">🧬 Genlove</span>
             </div>
-            <form id="regForm">
+            <form>
                 <div class="grid">
                     <div><label>Prénom *</label><input type="text" id="fn" placeholder="Ex: André"></div>
                     <div><label>Nom *</label><input type="text" id="ln" placeholder="Ex: Zandu"></div>
                 </div>
-                <div class="grid" style="align-items: end;">
-                    <div><label>Genre *</label>
-                        <div style="font-size:0.9rem; margin-top:10px;"><input type="radio" name="g" value="H" checked> H <input type="radio" name="g" value="F"> F</div>
+
+                <p style="color:#ff416c; font-weight:bold; font-size:0.8rem; margin-top:15px;">Groupe Sanguin & Rhésus *</p>
+                <div class="grid">
+                    <select id="gs">
+                        <option value="">Lettre (ABO)</option>
+                        <option>A</option><option>B</option><option>AB</option><option>O</option>
+                    </select>
+                    <select id="rh">
+                        <option value="">Signe (+/-)</option>
+                        <option>+</option><option>-</option>
+                    </select>
+                </div>
+
+                <div class="grid">
+                    <div>
+                        <label>Génotype *</label>
+                        <select id="gt">
+                            <option value="">Choisir</option>
+                            <option>AA</option><option>AS</option><option>SS</option>
+                        </select>
                     </div>
                     <div>
-                        <label>Photo de profil</label>
-                        <label for="pInp" id="pView" class="photo-box">📁 Ajouter</label>
-                        <input type="file" id="pInp" style="display:none" accept="image/*" onchange="preview(event)">
+                        <label>Projet de vie *</label>
+                        <select id="kids">
+                            <option value="">Enfants ?</option>
+                            <option>Oui</option><option>Non</option><option>À discuter</option>
+                        </select>
                     </div>
                 </div>
 
-                <p style="color:#ff416c; font-weight:bold; font-size:0.8rem; margin-top:15px;">Médical (Obligatoire) :</p>
-                <div class="grid">
-                    <select id="gs">
-                        <option value="">Groupe sanguin *</option>
-                        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-                        <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
-                    </select>
-                    <select id="gt">
-                        <option value="">Génotype *</option>
-                        <option>AA</option><option>AS</option><option>SS</option>
-                    </select>
-                </div>
                 <div class="grid">
                     <div><label>Antécédents</label><input type="text" id="ant" placeholder="Ex: Asthme"></div>
                     <div><label>Allergies</label><input type="text" id="all" placeholder="Ex: Paracétamol"></div>
                 </div>
 
-                <label for="vInp" id="vLb" class="upload-btn">🎥 Vidéo de vérification *</label>
+                <div>
+                    <label>Photo de profil</label>
+                    <label for="pInp" id="pView" class="photo-box">📁 Ajouter une photo</label>
+                    <input type="file" id="pInp" style="display:none" accept="image/*" onchange="preview(event)">
+                </div>
+
+                <label for="vInp" id="vLb" class="upload-btn">🎥 Vidéo de vérification obligatoire *</label>
                 <input type="file" id="vInp" style="display:none" accept="video/*" capture="user" onchange="videoDone()">
 
-                <button type="button" class="btn-final" onclick="checkAll()">🚀 Finaliser l'inscription</button>
+                <button type="button" class="btn-final" onclick="validate()">🚀 Finaliser mon profil</button>
                 <a href="/" class="btn-back">Retour</a>
             </form>
         </div>
@@ -121,22 +134,23 @@ app.get('/signup-full', (req, res) => {
                 document.getElementById('vLb').style.color='#4caf50';
                 document.getElementById('vLb').style.borderColor='#4caf50';
             }
-            function checkAll() {
-                const fields = {
-                    'Prénom': document.getElementById('fn').value,
-                    'Nom': document.getElementById('ln').value,
-                    'Groupe sanguin': document.getElementById('gs').value,
-                    'Génotype': document.getElementById('gt').value
-                };
+            function validate() {
+                const fn = document.getElementById('fn').value;
+                const ln = document.getElementById('ln').value;
+                const gs = document.getElementById('gs').value;
+                const rh = document.getElementById('rh').value;
+                const gt = document.getElementById('gt').value;
+                const kids = document.getElementById('kids').value;
 
-                for (let name in fields) {
-                    if (!fields[name]) { alert("Le champ " + name + " est obligatoire."); return; }
+                if(!fn || !ln || !gs || !rh || !gt || !kids || !vCap) {
+                    alert("Attention : Le Prénom, Nom, Groupe, Rhésus, Génotype, Projet de vie et la Vidéo sont obligatoires.");
+                    return;
                 }
-                if (!vCap) { alert("La vidéo de vérification est obligatoire."); return; }
 
                 localStorage.setItem('uData', JSON.stringify({
-                    fn: fields['Prénom'], ln: fields['Nom'], gs: fields['Groupe sanguin'], gt: fields['Génotype'],
-                    ant: document.getElementById('ant').value, all: document.getElementById('all').value
+                    fn, ln, gs, rh, gt, kids,
+                    ant: document.getElementById('ant').value, 
+                    all: document.getElementById('all').value
                 }));
                 document.getElementById('overlay').style.display='flex';
                 setTimeout(() => { window.location.href='/dashboard'; }, 3000);
@@ -147,7 +161,7 @@ app.get('/signup-full', (req, res) => {
     `);
 });
 
-// --- PROFIL ---
+// --- MON PROFIL ---
 app.get('/dashboard', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -161,7 +175,7 @@ app.get('/dashboard', (req, res) => {
             .pic { width: 120px; height: 120px; border-radius: 50%; background: #ddd; margin: 0 auto 20px; display: block; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
             .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
             .label { font-weight: 600; color: #333; }
-            .value { color: #666; }
+            .value { color: #666; font-weight: bold; }
         </style>
     </head>
     <body>
@@ -180,8 +194,9 @@ app.get('/dashboard', (req, res) => {
             if(d) {
                 document.getElementById('cont').innerHTML = \`
                     <div class="item"><span class="label">Identité</span> <span class="value">\${d.fn} \${d.ln}</span></div>
-                    <div class="item"><span class="label">Groupe Sanguin</span> <span class="value">\${d.gs}</span></div>
+                    <div class="item"><span class="label">Groupe Sanguin</span> <span class="value" style="color:#ff416c;">\${d.gs}\${d.rh}</span></div>
                     <div class="item"><span class="label">Génotype</span> <span class="value">\${d.gt}</span></div>
+                    <div class="item"><span class="label">Projet Enfants</span> <span class="value">\${d.kids}</span></div>
                     <div class="item"><span class="label">Antécédents</span> <span class="value">\${d.ant || 'Aucun'}</span></div>
                     <div class="item"><span class="label">Allergies</span> <span class="value">\${d.all || 'Aucune'}</span></div>
                 \`;
