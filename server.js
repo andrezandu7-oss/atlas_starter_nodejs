@@ -24,6 +24,9 @@ app.get('/', (req, res) => {
         <div class="card">
             <h1>💞 Genlove 🧬</h1>
             <p>L’amour qui soigne 💙</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin: 20px 0; font-size: 0.85rem;">
+                "L’amour seul ne suffit plus. Unissez cœur et santé pour bâtir des couples solides 💖"
+            </div>
             <a href="/dashboard" class="btn btn-login">📌 Se connecter</a>
             <a href="/signup-full" class="btn btn-signup">📝 S’inscrire</a>
         </div>
@@ -32,7 +35,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// --- INSCRIPTION AVEC GROUPES COMPLETS ET MÉMOIRE PHOTO ---
+// --- INSCRIPTION AVEC BLOCAGE SI PAS DE VIDÉO ---
 app.get('/signup-full', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -59,7 +62,7 @@ app.get('/signup-full', (req, res) => {
         </style>
     </head>
     <body>
-        <div id="overlay"><div class="loader"></div><h2>Analyse IA...</h2></div>
+        <div id="overlay"><div class="loader"></div><h2>Analyse biométrique...</h2></div>
         <div class="container">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:bold;">Créer votre profil</span>
@@ -95,7 +98,7 @@ app.get('/signup-full', (req, res) => {
                     <div><label>Allergies :</label><input type="text" id="all" placeholder="Ex: Paracétamol"></div>
                 </div>
                 <label for="vInp" id="vLb" class="upload-btn" style="border-color:#2196F3; color:#2196F3;">🎥 Vidéo de vérification</label>
-                <input type="file" id="vInp" style="display:none" accept="video/*" capture="user" onchange="document.getElementById('vLb').innerText='✅ Vidéo enregistrée'">
+                <input type="file" id="vInp" style="display:none" accept="video/*" capture="user" onchange="videoDone()">
                 
                 <div class="footer-btns">
                     <button type="button" class="btn-final" onclick="saveAndStart()">🚀 Finaliser</button>
@@ -104,18 +107,33 @@ app.get('/signup-full', (req, res) => {
             </form>
         </div>
         <script>
+            let videoCaptured = false;
+
             function preview(e) {
                 const r = new FileReader();
                 r.onload = () => { 
                     const v = document.getElementById('pView');
                     v.style.backgroundImage = 'url('+r.result+')';
                     v.innerText='';
-                    localStorage.setItem('userPhoto', r.result); // Sauvegarde la photo
+                    localStorage.setItem('userPhoto', r.result);
                 };
                 r.readAsDataURL(e.target.files[0]);
             }
+
+            function videoDone() {
+                videoCaptured = true;
+                document.getElementById('vLb').innerText='✅ Vidéo enregistrée';
+                document.getElementById('vLb').style.borderColor = '#4caf50';
+                document.getElementById('vLb').style.color = '#4caf50';
+            }
+
             function saveAndStart() {
-                // Sauvegarde les infos
+                // VERIFICATION VIDEO
+                if(!videoCaptured) {
+                    alert("Veuillez enregistrer la vidéo de vérification pour continuer.");
+                    return;
+                }
+
                 localStorage.setItem('userData', JSON.stringify({
                     fn: document.getElementById('fn').value,
                     ln: document.getElementById('ln').value,
@@ -133,7 +151,7 @@ app.get('/signup-full', (req, res) => {
     `);
 });
 
-// --- MON PROFIL DYNAMIQUE ---
+// --- MON PROFIL ---
 app.get('/dashboard', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -149,29 +167,22 @@ app.get('/dashboard', (req, res) => {
             .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
             .label { font-weight: 600; color: #333; }
             .value { color: #666; }
-            .btn-edit { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; background: white; margin-top: 30px; font-weight: bold; }
+            .btn-edit { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; background: white; margin-top: 30px; font-weight: bold; cursor:pointer; text-decoration:none; display:block; text-align:center; color:black; }
         </style>
     </head>
     <body>
         <div class="iphone">
             <h1 style="margin:0;">🤍 Mon Profil</h1>
             <span class="brand">Genlove</span>
-            
             <img id="finalPic" src="" class="pic">
-            
-            <div id="infoCont">
-                </div>
-
-            <button class="btn-edit">✏️ Modifier profil</button>
+            <div id="infoCont"></div>
+            <a href="/signup-full" class="btn-edit">✏️ Modifier profil</a>
             <a href="/" style="display:block; text-align:center; margin-top:20px; color:#ff416c; text-decoration:none; font-weight:bold;">Déconnexion</a>
         </div>
-
         <script>
             const data = JSON.parse(localStorage.getItem('userData'));
             const photo = localStorage.getItem('userPhoto');
-
             if(photo) document.getElementById('finalPic').src = photo;
-            
             if(data) {
                 document.getElementById('infoCont').innerHTML = \`
                     <div class="item"><span class="label">Prénom</span> <span class="value">\${data.fn}</span></div>
@@ -188,4 +199,4 @@ app.get('/dashboard', (req, res) => {
     `);
 });
 
-app.listen(port, () => { console.log('Genlove LIVE'); });
+app.listen(port, () => { console.log('Genlove is ready'); });
