@@ -110,4 +110,3 @@ app.get('/search', (req, res) => {
 
 // ... (le reste du code server.js demeure identique)
 app.listen(port, () => { console.log('Genlove Search V2 READY'); });
-    
