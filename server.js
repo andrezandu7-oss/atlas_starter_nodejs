@@ -14,26 +14,20 @@ const styles = `
     /* Boutons */
     .btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 16px; margin: 10px 0; border-radius: 50px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; text-decoration: none; box-sizing: border-box; transition: 0.3s; }
     .btn-main { background: #4caf50; color: white; }
+    .btn-white { background: white; color: #ff416c; }
+    .btn-outline { background: transparent; border: 2px solid white; color: white; }
     .btn-logout { background: #f8f9fa; color: #666; border: 1px solid #eee; margin-top: 25px; font-size: 1rem; }
     
-    /* Zone Photo Ajustée */
+    /* Zone Photo Cercle */
     .photo-upload { 
         border: 2px dashed #ff416c; 
-        height: 120px; 
-        width: 120px; 
+        height: 110px; width: 110px; 
         border-radius: 50%; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        color: #ff416c; 
-        cursor: pointer; 
-        margin: 10px auto 20px auto; 
-        background-size: cover; 
-        background-position: center;
-        overflow: hidden;
-        font-size: 0.8rem;
-        text-align: center;
-        padding: 5px;
+        display: flex; align-items: center; justify-content: center; 
+        color: #ff416c; cursor: pointer; 
+        margin: 0 auto 15px auto; 
+        background-size: cover; background-position: center;
+        font-size: 0.75rem; font-weight: bold;
     }
 
     /* Formulaires */
@@ -43,71 +37,60 @@ const styles = `
     select:invalid { color: #999; }
     .row { display: flex; gap: 10px; margin-bottom: 10px; }
     
-    /* Bouton Vidéo */
-    .video-btn { border: 2px dashed #007bff; padding: 15px; border-radius: 15px; color: #007bff; font-weight: bold; margin: 15px 0; cursor: pointer; font-size: 0.9rem; }
+    /* Bouton Vidéo Obligatoire */
+    .video-btn { border: 2px dashed #007bff; padding: 15px; border-radius: 15px; color: #007bff; font-weight: bold; margin: 15px 0; cursor: pointer; font-size: 0.9rem; transition: 0.3s; }
+    .video-success { border-color: #4caf50; color: #4caf50; background: #f0fff4; }
 </style>
 `;
 
-// --- PAGE D'INSCRIPTION ---
+// --- 1. ÉCRAN D'ACCUEIL ---
+app.get('/', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body style="background: linear-gradient(135deg, #ff416c, #ff4b2b);">
+        <div class="app-shell" style="background: transparent; justify-content: center;">
+            <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); padding: 40px 30px; border-radius: 30px; width: 85%; margin: auto; color: white; text-align: center;">
+                <h1 style="font-size:2.5rem; margin:0;">💞 Genlove 🧬</h1>
+                <p style="margin: 20px 0; font-weight: bold;">Unissez cœur et santé pour bâtir des couples SOLIDES</p>
+                <a href="/signup" class="btn btn-white">📝 Créer mon profil</a>
+                <a href="/login" class="btn btn-outline">📌 Se connecter</a>
+            </div>
+        </div>
+    </body></html>`);
+});
+
+// --- 2. INSCRIPTION (AVEC TOUTES LES CORRECTIONS) ---
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body>
         <div class="app-shell"><div class="content">
-            <h2 style="color:#ff416c; margin-top:0;">Créer mon profil</h2>
+            <h2 style="color:#ff416c; margin-top:0;">Inscription</h2>
             
-            <form onsubmit="saveProfile(event)">
-                <label for="pInp" id="pP" class="photo-upload">📸 Photo de profil</label>
-                <input type="file" id="pInp" accept="image/*" style="display:none" onchange="preview(event)">
+            <form onsubmit="return validateAndSave(event)">
+                <label for="pInp" id="pP" class="photo-upload">📸 Photo</label>
+                <input type="file" id="pInp" accept="image/*" style="display:none" onchange="preview(event)" required>
                 
                 <div class="row">
                     <div style="flex:1;"><label>Prénom</label><input type="text" id="fn" placeholder="Ex: Éric" required></div>
                     <div style="flex:1;"><label>Nom</label><input type="text" id="ln" placeholder="Ex: Tre" required></div>
                 </div>
 
-                <div style="margin-bottom:15px;">
-                    <label>Date de naissance</label>
-                    <input type="date" id="dob" required>
-                </div>
+                <div style="margin-bottom:15px;"><label>Date de naissance</label><input type="date" id="dob" required></div>
                 
                 <div class="row">
-                    <div style="flex:1;">
-                        <label>Groupe Sanguin</label>
-                        <select id="gs" required>
-                            <option value="" disabled selected>Choisir...</option>
-                            <option value="A">Groupe A</option>
-                            <option value="B">Groupe B</option>
-                            <option value="AB">Groupe AB</option>
-                            <option value="O">Groupe O</option>
-                        </select>
+                    <div style="flex:1;"><label>Groupe Sanguin</label>
+                        <select id="gs" required><option value="" disabled selected>Groupe...</option><option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option></select>
                     </div>
-                    <div style="flex:1;">
-                        <label>Rhésus</label>
-                        <select id="rh" required>
-                            <option value="" disabled selected>Choisir...</option>
-                            <option value="+">+</option>
-                            <option value="-">-</option>
-                        </select>
+                    <div style="flex:1;"><label>Rhésus</label>
+                        <select id="rh" required><option value="" disabled selected>Rhésus...</option><option value="+">+</option><option value="-">-</option></select>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div style="flex:1;">
-                        <label>Génotype</label>
-                        <select id="gt" required>
-                            <option value="" disabled selected>Votre Génotype...</option>
-                            <option value="AA">AA</option>
-                            <option value="AS">AS</option>
-                            <option value="SS">SS</option>
-                        </select>
+                    <div style="flex:1;"><label>Génotype</label>
+                        <select id="gt" required><option value="" disabled selected>Génotype...</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
                     </div>
-                    <div style="flex:1;">
-                        <label>Désir d'enfant ?</label>
-                        <select id="kids" required>
-                            <option value="" disabled selected>Choisir...</option>
-                            <option value="Oui">Oui</option>
-                            <option value="Non">Non</option>
-                            <option value="Neutre">Neutre</option>
-                        </select>
+                    <div style="flex:1;"><label>Désir d'enfant ?</label>
+                        <select id="kids" required><option value="" disabled selected>Choisir...</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="Neutre">Neutre</option></select>
                     </div>
                 </div>
 
@@ -117,12 +100,15 @@ app.get('/signup', (req, res) => {
                 </div>
 
                 <div class="video-btn" id="vL" onclick="document.getElementById('vI').click()">🎥 Vidéo de vérification obligatoire *</div>
-                <input type="file" id="vI" accept="video/*" capture="user" style="display:none" onchange="document.getElementById('vL').innerText='✅ Vidéo enregistrée'">
+                <input type="file" id="vI" accept="video/*" capture="user" style="display:none" onchange="videoDone()">
                 
                 <button type="submit" class="btn btn-main">🚀 Finaliser mon profil</button>
             </form>
         </div></div>
+
         <script>
+            let videoUploaded = false;
+
             function preview(e) {
                 const file = e.target.files[0];
                 if (file) {
@@ -130,22 +116,30 @@ app.get('/signup', (req, res) => {
                     r.onload = () => { 
                         const el = document.getElementById('pP');
                         el.style.backgroundImage = 'url('+r.result+')'; 
-                        el.innerText = ''; // Enlever le texte
-                        el.style.borderStyle = 'solid'; // Changer le pointillé en ligne pleine
+                        el.innerText = '';
                         localStorage.setItem('uPhoto', r.result); 
                     };
                     r.readAsDataURL(file);
                 }
             }
-            function saveProfile(e) {
+
+            function videoDone() {
+                videoUploaded = true;
+                const vBtn = document.getElementById('vL');
+                vBtn.innerText = '✅ Vidéo enregistrée';
+                vBtn.classList.add('video-success');
+            }
+
+            function validateAndSave(e) {
                 e.preventDefault();
+                if(!videoUploaded) {
+                    alert("Veuillez enregistrer votre vidéo de vérification pour continuer.");
+                    return false;
+                }
                 const d = { 
-                    fn:document.getElementById('fn').value, 
-                    ln:document.getElementById('ln').value, 
-                    dob:document.getElementById('dob').value, 
-                    gs:document.getElementById('gs').value, 
-                    rh:document.getElementById('rh').value, 
-                    gt:document.getElementById('gt').value, 
+                    fn:document.getElementById('fn').value, ln:document.getElementById('ln').value, 
+                    dob:document.getElementById('dob').value, gs:document.getElementById('gs').value, 
+                    rh:document.getElementById('rh').value, gt:document.getElementById('gt').value, 
                     kids:document.getElementById('kids').value 
                 };
                 localStorage.setItem('uData', JSON.stringify(d));
@@ -155,7 +149,7 @@ app.get('/signup', (req, res) => {
     </body></html>`);
 });
 
-// --- DASHBOARD ---
+// --- 3. DASHBOARD ---
 app.get('/dashboard', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body>
@@ -169,7 +163,7 @@ app.get('/dashboard', (req, res) => {
                 <p>👶 <b>Désir d'enfant :</b> <span id="uK"></span></p>
             </div>
             <a href="/search" class="btn btn-main" style="background:#ff416c;">🔍 Trouver un partenaire</a>
-            <a href="/signup" class="btn btn-logout">Déconnexion</a>
+            <a href="/" class="btn btn-logout">Déconnexion</a>
         </div></div>
         <script>
             const d = JSON.parse(localStorage.getItem('uData'));
@@ -185,5 +179,5 @@ app.get('/dashboard', (req, res) => {
     </body></html>`);
 });
 
-app.get('/', (req, res) => { res.redirect('/signup'); });
-app.listen(port, () => { console.log('Genlove V9 Ready'); });
+app.listen(port, () => { console.log('Genlove V10 Final Ready'); });
+        
