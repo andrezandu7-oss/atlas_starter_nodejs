@@ -6,31 +6,18 @@ app.use(express.urlencoded({ extended: true }));
 
 const styles = `
 <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; color: #333; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; color: #333; }
     .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
     
-    /* --- L'ACCUEIL EXACT DE TON IMAGE --- */
-    .welcome-screen { 
-        background: #f4e9da; /* Le beige exact de l'image */
-        min-height: 100vh; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center;
-        padding: 40px 30px; 
-        text-align: center; 
-        box-sizing: border-box; 
-    }
-    .logo-placeholder { margin-bottom: 20px; }
-    .brand-name { font-size: 3.2rem; font-weight: bold; color: #1a2a44; margin: 0; letter-spacing: -1px; }
+    /* --- 1. DESIGN ACCUEIL PREMIUM (Fidèle à ton image) --- */
+    .welcome-screen { background: #f4e9da; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; text-align: center; box-sizing: border-box; }
+    .brand-name { font-size: 3.2rem; font-weight: bold; color: #1a2a44; margin: 0; }
     .brand-name span { color: #ff416c; }
     .slogan { font-size: 1.2rem; color: #1a2a44; font-weight: bold; margin: 5px 0 25px 0; }
-    .welcome-msg { font-size: 1rem; color: #2d4059; line-height: 1.5; margin-bottom: 40px; }
-    
-    .btn-dark { background: #1a2a44; color: white; border-radius: 12px; text-decoration: none; width: 100%; padding: 18px; font-weight: bold; margin-bottom: 15px; display: block; font-size: 1.1rem; }
-    .btn-outline { background: white; color: #1a2a44; border: 1.5px solid #1a2a44; border-radius: 12px; text-decoration: none; width: 100%; padding: 18px; font-weight: bold; display: block; font-size: 1.1rem; }
+    .btn-dark-welcome { background: #1a2a44; color: white; border-radius: 12px; text-decoration: none; width: 100%; padding: 18px; font-weight: bold; margin-bottom: 15px; display: block; font-size: 1.1rem; }
+    .btn-outline-welcome { background: white; color: #1a2a44; border: 1.5px solid #1a2a44; border-radius: 12px; text-decoration: none; width: 100%; padding: 18px; font-weight: bold; display: block; font-size: 1.1rem; }
 
-    /* --- L'INSCRIPTION QUE TU AS VALIDÉE --- */
+    /* --- 2. DESIGN INSCRIPTION (Ton design préféré) --- */
     .content { padding: 25px; text-align: center; }
     .photo-container { position: relative; width: 130px; margin: 0 auto 25px auto; }
     .photo-circle { 
@@ -41,46 +28,51 @@ const styles = `
         color: #ff416c; cursor: pointer; 
         background-size: cover; background-position: center;
         background-color: #fff;
+        font-size: 0.85rem; font-weight: bold;
     }
-    .del-x { position: absolute; top: 0; right: 0; background: #ff416c; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; display: none; }
+    .photo-circle.filled { border-style: solid; border-width: 3px; }
+    .del-badge { position: absolute; top: 0; right: 0; background: #ff416c; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; display: none; }
 
-    .row { display: flex; gap: 12px; margin-bottom: 15px; }
-    .input-field { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; }
-    label { display: block; font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 5px; text-align: left; }
+    .input-field { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; margin-top: 5px; }
+    label { display: block; font-size: 0.85rem; font-weight: bold; color: #555; margin-top: 15px; text-align: left; }
+    .row { display: flex; gap: 12px; }
     
-    .video-box { border: 2px dashed #007bff; padding: 15px; border-radius: 15px; color: #007bff; font-weight: bold; margin: 20px 0; cursor: pointer; }
-    .video-ok { border-color: #4caf50; color: #4caf50; background: #f0fff4; }
-    .btn-final { background: #4caf50; color: white; border: none; width: 100%; padding: 18px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+    .video-btn { border: 2px dashed #007bff; padding: 15px; border-radius: 15px; color: #007bff; font-weight: bold; margin: 25px 0; cursor: pointer; }
+    .video-done { border-color: #4caf50; color: #4caf50; background: #f0fff4; }
+    .btn-green-final { background: #4caf50; color: white; border: none; width: 100%; padding: 18px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; cursor: pointer; margin-top: 10px; }
 </style>
 `;
 
+// ROUTE ACCUEIL
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell"><div class="welcome-screen">
-        <div class="logo-placeholder">
+        <div style="margin-bottom:20px;">
             <svg width="100" height="100" viewBox="0 0 100 100">
                 <path d="M50 85c-1.5 0-3-.5-4.2-1.5C32 72.5 15 56.4 15 39.5 15 27.1 25.1 17 37.5 17c5.4 0 10.5 2 12.5 5.2 2-3.2 7.1-5.2 12.5-5.2C74.9 17 85 27.1 85 39.5c0 16.9-17 33-30.8 44-1.2 1-2.7 1.5-4.2 1.5z" fill="#ff416c"/>
-                <path d="M40 35 L60 35 M40 45 L60 45" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                <path d="M35 40 L65 40 M35 50 L65 50" stroke="white" stroke-width="4" stroke-linecap="round"/>
             </svg>
         </div>
         <h1 class="brand-name">Gen<span>love</span></h1>
         <p class="slogan">L'amour qui soigne 💙</p>
-        <p class="welcome-msg">⭐ <b>Bienvenue sur Genlove !</b><br><br>L'amour seul ne suffit plus. Unissez cœur et santé pour bâtir des couples solides ❤️</p>
-        <a href="/login" class="btn-dark">➔ Se connecter</a>
-        <a href="/signup" class="btn-outline">👤 S'inscrire</a>
+        <p style="color: #2d4059; margin-bottom: 40px;">⭐ <b>Bienvenue sur Genlove !</b><br><br>Unissez cœur et santé pour bâtir des couples solides ❤️</p>
+        <a href="/login" class="btn-dark-welcome">➔ Se connecter</a>
+        <a href="/signup" class="btn-outline-welcome">👤 S'inscrire</a>
     </div></div></body></html>`);
 });
 
+// ROUTE INSCRIPTION
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body onload="restore()"><div class="app-shell"><div class="content">
-        <h2 style="color:#ff416c; margin-bottom:25px;">Créer mon profil</h2>
-        <form onsubmit="return validate(event)">
+    <body onload="checkImg()"><div class="app-shell"><div class="content">
+        <h2 style="color:#ff416c; margin-bottom:20px;">Créer mon profil</h2>
+        <form onsubmit="return validateProfile(event)">
+            
             <div class="photo-container">
-                <label for="imgInp" id="circle" class="photo-circle">📸 Photo *</label>
-                <button type="button" id="delBtn" class="del-x" onclick="clearPhoto()">✕</button>
+                <label for="pI" id="circ" class="photo-circle">📸 Photo *</label>
+                <button type="button" id="dBtn" class="del-badge" onclick="clearImg()">✕</button>
             </div>
-            <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="preview(event)">
+            <input type="file" id="pI" accept="image/*" style="display:none" onchange="upImg(event)">
             
             <div class="row">
                 <div style="flex:1;"><label>Prénom</label><input type="text" id="fn" class="input-field" required></div>
@@ -88,45 +80,49 @@ app.get('/signup', (req, res) => {
             </div>
 
             <div class="row">
-                <div style="flex:1;"><label>Génotype</label><select id="gt" class="input-field" required><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select></div>
-                <div style="flex:1;"><label>Rhésus</label><select id="rh" class="input-field" required><option value="+">+</option><option value="-">-</option></select></div>
+                <div style="flex:1;"><label>Génotype</label>
+                    <select id="gt" class="input-field" required><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
+                </div>
+                <div style="flex:1;"><label>Désir d'enfant ?</label>
+                    <select id="kd" class="input-field" required><option value="Oui">Oui</option><option value="Non">Non</option></select>
+                </div>
             </div>
 
-            <div class="video-box" id="vidB" onclick="document.getElementById('vidI').click()">🎥 Vidéo de vérification *</div>
-            <input type="file" id="vidI" accept="video/*" capture="user" style="display:none" onchange="vidDone()">
+            <div class="video-btn" id="vB" onclick="document.getElementById('vI').click()">🎥 Vidéo de vérification obligatoire *</div>
+            <input type="file" id="vI" accept="video/*" capture="user" style="display:none" onchange="vOk()">
 
-            <button type="submit" class="btn-final">🚀 Finaliser mon profil</button>
+            <button type="submit" class="btn-green-final">🚀 Finaliser mon profil</button>
         </form>
     </div></div>
     <script>
         let vReady = false;
-        function restore() { if(localStorage.getItem('savedImg')) { setImg(localStorage.getItem('savedImg')); } }
-        function preview(e) {
+        function checkImg(){ if(localStorage.getItem('uImg')){ setVis(localStorage.getItem('uImg')); } }
+        function upImg(e){
             const r = new FileReader();
-            r.onload = () => { localStorage.setItem('savedImg', r.result); setImg(r.result); };
+            r.onload = () => { localStorage.setItem('uImg', r.result); setVis(r.result); };
             r.readAsDataURL(e.target.files[0]);
         }
-        function setImg(src) {
-            const c = document.getElementById('circle');
-            c.style.backgroundImage = 'url('+src+')';
-            c.innerText = '';
-            document.getElementById('delBtn').style.display = 'block';
+        function setVis(s){
+            const c = document.getElementById('circ');
+            c.style.backgroundImage = 'url('+s+')';
+            c.innerText = ''; c.classList.add('filled');
+            document.getElementById('dBtn').style.display = 'block';
         }
-        function clearPhoto() {
-            localStorage.removeItem('savedImg');
-            const c = document.getElementById('circle');
+        function clearImg(){
+            localStorage.removeItem('uImg');
+            const c = document.getElementById('circ');
             c.style.backgroundImage = 'none';
-            c.innerText = '📸 Photo *';
-            document.getElementById('delBtn').style.display = 'none';
+            c.innerText = '📸 Photo *'; c.classList.remove('filled');
+            document.getElementById('dBtn').style.display = 'none';
         }
-        function vidDone() { vReady = true; const b = document.getElementById('vidB'); b.innerText = '✅ Vidéo OK'; b.classList.add('video-ok'); }
-        function validate(e) {
+        function vOk(){ vReady = true; const b = document.getElementById('vB'); b.innerText = '✅ Vidéo enregistrée'; b.classList.add('video-done'); }
+        function validateProfile(e){
             e.preventDefault();
-            if(!localStorage.getItem('savedImg')) { alert("Photo obligatoire !"); return false; }
-            if(!vReady) { alert("Vidéo obligatoire !"); return false; }
+            if(!localStorage.getItem('uImg')){ alert("La photo de profil est obligatoire !"); return false; }
+            if(!vReady){ alert("La vidéo est obligatoire !"); return false; }
             window.location.href = '/dashboard';
         }
     </script></body></html>`);
 });
 
-app.listen(port, () => { console.log('Genlove V20 - Fidelité Totale Ready'); });
+app.listen(port, () => { console.log('Genlove V21 - Perfection Accueil + Inscription'); });
