@@ -30,21 +30,14 @@ const styles = `
 `;
 
 /* ---------------------------
-   ROUTE / (redirection vers /signup)
+   ACCUEIL (route /)
 ---------------------------- */
 app.get('/', (req, res) => {
-    res.redirect('/signup');
-});
-
-/* ---------------------------
-   ACCUEIL (optionnel)
----------------------------- */
-app.get('/home', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell">
         <div class="page-white">
             <h2 style="color:#ff416c;">Bienvenue sur Genlove</h2>
-            <p>Une application de rencontre basée sur la compatibilité santé.</p>
+            <p>Application prototype de rencontre basée sur la compatibilité santé.</p>
             <button class="btn-pink" onclick="window.location.href='/signup'">Commencer</button>
         </div>
     </div></body></html>`);
@@ -138,7 +131,7 @@ app.get('/profile', (req, res) => {
 });
 
 /* ---------------------------
-   MATCHING (écran placeholder)
+   MATCHING
 ---------------------------- */
 app.get('/matching', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
@@ -167,7 +160,7 @@ app.get('/settings', (req, res) => {
 
             <div class="setting-item">
                 <span>Déconnexion</span>
-                <button class="btn-pink" style="padding:10px 15px; border-radius:20px;" onclick="window.location.href='/signup'">Déconnecter</button>
+                <button class="btn-pink" style="padding:10px 15px; border-radius:20px;" onclick="window.location.href='/'">Déconnecter</button>
             </div>
         </div>
     </div></body></html>`);
