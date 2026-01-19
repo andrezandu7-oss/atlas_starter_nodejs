@@ -21,6 +21,8 @@ const styles = `
     .remove-x { position: absolute; top: 5px; right: 5px; background: #ff416c; color: white; border-radius: 50%; width: 24px; height: 24px; display: none; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; font-weight: bold; z-index: 10; }
     
     .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; color: #333; }
+    input[type="date"]::before { content: "Date de naissance "; width: 100%; color: #757575; }
+    input[type="date"]:focus::before, input[type="date"]:valid::before { content: ""; display: none; }
 
     .oath-box { margin-top: 20px; display: flex; align-items: center; gap: 10px; text-align: left; padding: 12px; background: #fff5f7; border-radius: 10px; border: 1px solid #ffd1d9; }
     .oath-text { font-size: 0.85rem; color: #1a2a44; font-weight: 500; line-height: 1.3; }
@@ -31,10 +33,16 @@ const styles = `
     
     .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
     .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: bold; display: block; margin: 20px; width: auto; box-sizing: border-box; }
+
+    /* MATCHING */
+    .match-card { background:white; padding:25px; border-radius:20px; text-align:center; }
+    .match-photo { width:140px; height:140px; border-radius:50%; border:3px solid #ff416c; margin:0 auto 15px auto; background-color:#eee; }
+    .match-actions { display:flex; flex-direction:column; gap:12px; padding:0 20px 20px 20px; }
+    .btn-white { background:white; color:#1a2a44; border:1px solid #ddd; padding:18px; border-radius:50px; font-weight:bold; cursor:pointer; }
 </style>
 `;
 
-// --- 1. ACCUEIL ---
+/* ================== ACCUEIL ================== */
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell"><div class="home-screen">
@@ -42,25 +50,14 @@ app.get('/', (req, res) => {
         <div class="slogan">Unissez cœur et santé pour bâtir des couples sains</div>
         <div style="width:100%; margin-top:20px;">
             <p style="font-size:0.9rem; color:#1a2a44; margin-bottom:10px;">Avez-vous déjà un compte ?</p>
-            <a href="/login" class="btn-dark">➔ Se connecter</a>
+            <a href="/profile" class="btn-dark">➔ Se connecter</a>
             <a href="/signup" style="color:#1a2a44; text-decoration:none; font-weight:bold; display:block; margin-top:15px;">👤 Créer un compte</a>
         </div>
         <div class="secure-note">🔒 Vos données de santé sont cryptées et confidentielles.</div>
     </div></div></body></html>`);
 });
 
-// --- 1.1 LOGIN (propre pour prototype) ---
-app.get('/login', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body><div class="app-shell"><div class="page-white">
-        <h2 style="color:#ff416c; margin-top:0;">Connexion</h2>
-        <p>Appuyez sur se connecter pour accéder à votre profil (prototype)</p>
-        <button class="btn-pink" onclick="location.href='/profile'">🔓 Se connecter</button>
-        <a href="/" style="color:#1a2a44; text-decoration:none; font-weight:bold; display:block; margin-top:15px;">⬅️ Retour</a>
-    </div></div></body></html>`);
-});
-
-// --- 2. CONFIGURATION SANTÉ ---
+/* ================== SIGNUP ================== */
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell"><div class="page-white">
@@ -75,10 +72,25 @@ app.get('/signup', (req, res) => {
             <input type="text" id="ln" class="input-box" placeholder="Nom" required>
             <input type="date" id="dob" class="input-box" required>
             <input type="text" id="res" class="input-box" placeholder="Résidence/Région actuelle" required>
-            <select id="gt" class="input-box" required><option value="">Génotype (Obligatoire)</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
+            <select id="gt" class="input-box" required>
+                <option value="">Génotype (Obligatoire)</option>
+                <option value="AA">AA</option>
+                <option value="AS">AS</option>
+                <option value="SS">SS</option>
+            </select>
             <div style="display:flex; gap:10px;">
-                <select id="gs" class="input-box" style="flex:2;" required><option value="">Groupe Sanguin</option><option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option></select>
-                <select id="rh" class="input-box" style="flex:1;" required><option value="">Rh</option><option value="+">+</option><option value="-">-</option></select>
+                <select id="gs" class="input-box" style="flex:2;" required>
+                    <option value="">Groupe Sanguin</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="AB">AB</option>
+                    <option value="O">O</option>
+                </select>
+                <select id="rh" class="input-box" style="flex:1;" required>
+                    <option value="">Rh</option>
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                </select>
             </div>
             <div class="oath-box">
                 <input type="checkbox" id="oath" required>
@@ -89,9 +101,23 @@ app.get('/signup', (req, res) => {
     </div></div>
     <script>
         let b64="";
-        function preview(e){ const r=new FileReader(); r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; document.getElementById('x').style.display='flex'; }; r.readAsDataURL(e.target.files[0]); }
-        function resetPhoto(e){ e.stopPropagation(); document.getElementById('c').style.backgroundImage='none'; document.getElementById('t').style.display='block'; document.getElementById('x').style.display='none'; b64=""; }
-        
+        function preview(e){
+            const r=new FileReader();
+            r.onload=()=>{
+                b64=r.result;
+                document.getElementById('c').style.backgroundImage='url('+b64+')';
+                document.getElementById('t').style.display='none';
+                document.getElementById('x').style.display='flex';
+            };
+            r.readAsDataURL(e.target.files[0]);
+        }
+        function resetPhoto(e){
+            e.stopPropagation();
+            document.getElementById('c').style.backgroundImage='none';
+            document.getElementById('t').style.display='block';
+            document.getElementById('x').style.display='none';
+            b64="";
+        }
         function saveAndGo(e){
             e.preventDefault();
             localStorage.setItem('u_p', b64);
@@ -105,7 +131,7 @@ app.get('/signup', (req, res) => {
     </script></body></html>`);
 });
 
-// --- 3. PROFIL ---
+/* ================== PROFILE ================== */
 app.get('/profile', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f8f9fa;"><div class="app-shell">
@@ -127,7 +153,6 @@ app.get('/profile', (req, res) => {
         <a href="/matching" class="btn-dark" style="margin:20px; text-decoration:none;">🔍 Trouver un partenaire</a>
     </div>
     <script>
-        if(!localStorage.getItem('u_fn')) location.href='/signup';
         const p = localStorage.getItem('u_p');
         if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
         document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || "") + " " + (localStorage.getItem('u_ln') || "");
@@ -137,30 +162,118 @@ app.get('/profile', (req, res) => {
     </script></body></html>`);
 });
 
-// --- 4. MATCHING (Prototype) ---
-app.get('/matching', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body style="background:#f8f9fa;"><div class="app-shell">
-        <div class="page-white">
-            <h2 style="color:#ff416c; margin-top:0;">🔍 Matching</h2>
-            <p>Écran prototype - ici apparaîtront les partenaires compatibles</p>
-            <a href="/profile" class="btn-dark" style="text-decoration:none;">⬅️ Retour au profil</a>
-        </div>
-    </div></body></html>`);
-});
-
-// --- 5. PARAMÈTRES ---
+/* ================== SETTINGS ================== */
 app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
-        <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
+        <div style="padding:25px; background:white; text-align:center;">
+            <div style="font-size:2.5rem; font-weight:bold;">
+                <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
+            </div>
+        </div>
         <div class="st-group">
-            <a href="/signup" class="st-item" style="text-decoration:none; color:black;"><span>Modifier mon profil</span><b>➔</b></a>
+            <a href="/signup" class="st-item" style="text-decoration:none; color:black;">
+                <span>Modifier mon profil</span><b>➔</b>
+            </a>
             <div class="st-item"><span>Export PDF Santé</span><b style="color:#ff416c;">Bientôt</b></div>
         </div>
         <a href="/profile" class="btn-pink" style="text-decoration:none;">Retour au profil</a>
         <div style="text-align:center; font-size:0.75rem; color:#bbb; margin-top: auto; padding-bottom: 20px;">Version 60.2 - Genlove © 2026</div>
     </div></body></html>`);
+});
+
+/* ================== MATCHING ================== */
+app.get('/matching', (req, res) => {
+  res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+  <body style="background:#f8f9fa;">
+    <div class="app-shell">
+      <div style="background:white; padding:20px 20px 15px 20px; text-align:center; border-radius:0 0 30px 30px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <a href="/profile" style="text-decoration:none; color:#666;">⬅️ Retour</a>
+          <div style="font-weight:bold; color:#1a2a44;">Matching</div>
+          <a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a>
+        </div>
+      </div>
+
+      <div id="matchArea" style="padding:20px;"></div>
+
+      <div style="text-align:center; margin-top:auto; padding-bottom:20px;">
+        <button id="likeBtn" class="home-btn btn-pink" style="width:85%;">💖 J’aime</button>
+        <button id="skipBtn" class="home-btn btn-white" style="width:85%;">➡️ Passer</button>
+      </div>
+    </div>
+
+    <script>
+      const currentUser = {
+        gt: localStorage.getItem('u_gt'),
+        gs: localStorage.getItem('u_gs'),
+      };
+
+      const profiles = [
+        { id: 1, name: "Amina", age: 24, res: "Kinshasa", gt: "AS", gs: "O+", photo: "" },
+        { id: 2, name: "Marie", age: 26, res: "Lubumbashi", gt: "SS", gs: "A-" , photo: "" },
+        { id: 3, name: "Sarah", age: 28, res: "Goma", gt: "AA", gs: "B+" , photo: "" },
+        { id: 4, name: "Julie", age: 22, res: "Kisangani", gt: "SS", gs: "O+" , photo: "" },
+        { id: 5, name: "Nadia", age: 27, res: "Matadi", gt: "AS", gs: "AB-" , photo: "" }
+      ];
+
+      let index = 0;
+
+      function showProfile() {
+        if(index >= profiles.length) {
+          document.getElementById('matchArea').innerHTML = `
+            <div style="background:white; padding:25px; border-radius:20px; text-align:center;">
+              <div style="font-weight:bold; color:#1a2a44;">Fin des profils</div>
+              <p style="color:#666; margin-top:10px;">Reviens plus tard pour voir d'autres personnes.</p>
+            </div>
+          `;
+          document.getElementById('likeBtn').style.display = 'none';
+          document.getElementById('skipBtn').style.display = 'none';
+          return;
+        }
+
+        const p = profiles[index];
+
+        // BLOQUAGE SS vs SS
+        if(currentUser.gt === "SS" && p.gt === "SS") {
+          index++;
+          showProfile();
+          return;
+        }
+
+        document.getElementById('matchArea').innerHTML = `
+          <div class="match-card">
+            <div class="match-photo"></div>
+            <div style="font-weight:bold; font-size:1.2rem;">${p.name}, ${p.age}</div>
+            <div style="color:#666; margin-top:5px;">📍 ${p.res}</div>
+            <div style="margin-top:15px; display:flex; justify-content:space-between; padding:0 20px;">
+              <div style="text-align:left;">
+                <div style="font-weight:bold; color:#1a2a44;">Génotype</div>
+                <div>${p.gt}</div>
+              </div>
+              <div style="text-align:left;">
+                <div style="font-weight:bold; color:#1a2a44;">Groupe Sanguin</div>
+                <div>${p.gs}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      showProfile();
+
+      document.getElementById('skipBtn').onclick = () => {
+        index++;
+        showProfile();
+      };
+
+      document.getElementById('likeBtn').onclick = () => {
+        alert("💖 Demande envoyée !");
+        index++;
+        showProfile();
+      };
+    </script>
+  </body></html>`);
 });
 
 app.listen(port);
