@@ -21,8 +21,6 @@ const styles = `
     .remove-x { position: absolute; top: 5px; right: 5px; background: #ff416c; color: white; border-radius: 50%; width: 24px; height: 24px; display: none; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; font-weight: bold; z-index: 10; }
     
     .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; color: #333; }
-    input[type="date"]::before { content: "Date de naissance "; width: 100%; color: #757575; }
-    input[type="date"]:focus::before, input[type="date"]:valid::before { content: ""; display: none; }
 
     .oath-box { margin-top: 20px; display: flex; align-items: center; gap: 10px; text-align: left; padding: 12px; background: #fff5f7; border-radius: 10px; border: 1px solid #ffd1d9; }
     .oath-text { font-size: 0.85rem; color: #1a2a44; font-weight: 500; line-height: 1.3; }
@@ -44,10 +42,21 @@ app.get('/', (req, res) => {
         <div class="slogan">Unissez cœur et santé pour bâtir des couples sains</div>
         <div style="width:100%; margin-top:20px;">
             <p style="font-size:0.9rem; color:#1a2a44; margin-bottom:10px;">Avez-vous déjà un compte ?</p>
-            <a href="/profile" class="btn-dark">➔ Se connecter</a>
+            <a href="/login" class="btn-dark">➔ Se connecter</a>
             <a href="/signup" style="color:#1a2a44; text-decoration:none; font-weight:bold; display:block; margin-top:15px;">👤 Créer un compte</a>
         </div>
         <div class="secure-note">🔒 Vos données de santé sont cryptées et confidentielles.</div>
+    </div></div></body></html>`);
+});
+
+// --- 1.1 LOGIN (propre pour prototype) ---
+app.get('/login', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body><div class="app-shell"><div class="page-white">
+        <h2 style="color:#ff416c; margin-top:0;">Connexion</h2>
+        <p>Appuyez sur se connecter pour accéder à votre profil (prototype)</p>
+        <button class="btn-pink" onclick="location.href='/profile'">🔓 Se connecter</button>
+        <a href="/" style="color:#1a2a44; text-decoration:none; font-weight:bold; display:block; margin-top:15px;">⬅️ Retour</a>
     </div></div></body></html>`);
 });
 
@@ -57,7 +66,10 @@ app.get('/signup', (req, res) => {
     <body><div class="app-shell"><div class="page-white">
         <h2 style="color:#ff416c; margin-top:0;">Configuration Santé</h2>
         <form id="hForm" onsubmit="saveAndGo(event)">
-            <div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo *</span><div class="remove-x" id="x" onclick="resetPhoto(event)">✕</div></div>
+            <div class="photo-circle" id="c" onclick="document.getElementById('i').click()">
+                <span id="t">📸 Photo *</span>
+                <div class="remove-x" id="x" onclick="resetPhoto(event)">✕</div>
+            </div>
             <input type="file" id="i" style="display:none" onchange="preview(event)" required>
             <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
             <input type="text" id="ln" class="input-box" placeholder="Nom" required>
@@ -98,7 +110,10 @@ app.get('/profile', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f8f9fa;"><div class="app-shell">
         <div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;">
-            <div style="display:flex; justify-content:space-between;"><a href="/" style="text-decoration:none; color:#666;">Accueil</a><a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a></div>
+            <div style="display:flex; justify-content:space-between;">
+                <a href="/" style="text-decoration:none; color:#666;">Accueil</a>
+                <a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a>
+            </div>
             <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-color:#eee;"></div>
             <h2 id="vN" style="margin:5px 0 0 0;">Utilisateur</h2>
             <p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Résidence/Région</p>
@@ -109,9 +124,10 @@ app.get('/profile', (req, res) => {
             <div class="st-item"><span>Génotype</span><b id="rG">...</b></div>
             <div class="st-item"><span>Groupe Sanguin</span><b id="rS">...</b></div>
         </div>
-        <a href="/signup" class="btn-dark" style="margin:20px; text-decoration:none;">🔍 Trouver un partenaire</a>
+        <a href="/matching" class="btn-dark" style="margin:20px; text-decoration:none;">🔍 Trouver un partenaire</a>
     </div>
     <script>
+        if(!localStorage.getItem('u_fn')) location.href='/signup';
         const p = localStorage.getItem('u_p');
         if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
         document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || "") + " " + (localStorage.getItem('u_ln') || "");
@@ -121,7 +137,19 @@ app.get('/profile', (req, res) => {
     </script></body></html>`);
 });
 
-// --- 4. PARAMÈTRES (SIGNATURE V60.2) ---
+// --- 4. MATCHING (Prototype) ---
+app.get('/matching', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body style="background:#f8f9fa;"><div class="app-shell">
+        <div class="page-white">
+            <h2 style="color:#ff416c; margin-top:0;">🔍 Matching</h2>
+            <p>Écran prototype - ici apparaîtront les partenaires compatibles</p>
+            <a href="/profile" class="btn-dark" style="text-decoration:none;">⬅️ Retour au profil</a>
+        </div>
+    </div></body></html>`);
+});
+
+// --- 5. PARAMÈTRES ---
 app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
