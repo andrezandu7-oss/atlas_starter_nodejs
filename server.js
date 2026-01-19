@@ -35,6 +35,11 @@ body {
     padding:16px;width:90%;border-radius:40px;
     margin:25px auto;display:block;font-weight:bold;
 }
+.btn-secondary {
+    background:#fff;color:#ff416c;border:2px solid #ff416c;
+    padding:16px;width:90%;border-radius:40px;
+    margin:10px auto;display:block;font-weight:bold;
+}
 .item {
     display:flex;justify-content:space-between;
     padding:14px 0;border-bottom:1px solid #eee;
@@ -71,9 +76,26 @@ a { text-decoration:none;color:#007bff; }
 </style>
 `;
 
-/* ================= ACCUEIL ================= */
+/* ================= REDIRECTION / ================= */
 app.get('/', (req, res) => {
-  res.redirect('/signup');
+  res.redirect('/home');
+});
+
+/* ================= ACCUEIL (MAQUETTE) ================= */
+app.get('/home', (req, res) => {
+  res.send(`<!DOCTYPE html><html><head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+  <body><div class="app-shell"><div class="page">
+
+  <h2 style="text-align:center;color:#ff416c">Genlove</h2>
+  <p style="text-align:center;color:#333">Trouve un partenaire compatible</p>
+
+  <div class="photo" style="background:#ff416c"></div>
+
+  <button class="btn" onclick="location.href='/signup'">🚀 Créer un compte</button>
+  <button class="btn-secondary" onclick="location.href='/signup'">🔑 Se connecter</button>
+
+  </div></div></body></html>`);
 });
 
 /* ================= INSCRIPTION ================= */
@@ -118,8 +140,6 @@ res.send(`<!DOCTYPE html><html><head>
 <script>
 function save(e){
  e.preventDefault();
-
- // stocker en local
  localStorage.setItem('fn',fn.value);
  localStorage.setItem('ln',ln.value);
  localStorage.setItem('dob',dob.value);
@@ -130,7 +150,6 @@ function save(e){
  localStorage.setItem('visibility','Public');
  localStorage.setItem('share','on');
 
- // afficher loader 5 secondes
  document.getElementById('loader').style.display = 'flex';
  setTimeout(() => {
    location.href='/profile';
@@ -228,4 +247,4 @@ function clearAll(){
 </div></div></body></html>`);
 });
 
-app.listen(port,()=>console.log("Genlove prototype avec Paramètres prêt 🚀"));
+app.listen(port,()=>console.log("Genlove prototype avec Accueil fidèle prêt 🚀"));
