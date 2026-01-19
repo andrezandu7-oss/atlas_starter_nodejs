@@ -9,13 +9,11 @@ const styles = `
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
     .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
     
-    /* ÉCRAN ACCUEIL (VERROUILLÉ) */
     .home-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center; }
     .logo-text { font-size: 3.5rem; font-weight: bold; margin-bottom: 5px; }
     .slogan { font-weight: bold; color: #1a2a44; margin-bottom: 40px; font-size: 1rem; line-height: 1.5; }
     .secure-note { font-size: 0.75rem; color: #666; margin-top: 25px; }
 
-    /* ÉCRAN CONFIGURATION SANTÉ (VERROUILLÉ + AJUSTEMENTS) */
     .page-white { background: white; min-height: 100vh; padding: 25px 20px; box-sizing: border-box; text-align: center; }
     .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; background-size: cover; background-position: center; }
     .remove-x { position: absolute; top: 5px; right: 5px; background: #ff416c; color: white; border-radius: 50%; width: 24px; height: 24px; display: none; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; font-weight: bold; z-index: 10; }
@@ -24,21 +22,17 @@ const styles = `
     input[type="date"]::before { content: "Date de naissance "; width: 100%; color: #757575; }
     input[type="date"]:focus::before, input[type="date"]:valid::before { content: ""; display: none; }
 
-    /* CASE SERMENT */
     .oath-box { margin-top: 20px; display: flex; align-items: center; gap: 10px; text-align: left; padding: 12px; background: #fff5f7; border-radius: 10px; border: 1px solid #ffd1d9; }
     .oath-text { font-size: 0.85rem; color: #1a2a44; font-weight: 500; line-height: 1.3; }
 
-    /* ÉLÉMENTS DE PROFIL */
     .st-group { background: white; border-radius: 15px; margin: 0 15px 15px 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
-    .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; text-decoration: none; color: #333; font-size: 0.95rem; }
+    .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; font-size: 0.95rem; }
     
-    /* BOUTONS */
-    .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; text-decoration: none; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
+    .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
     .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: bold; display: block; margin: 20px; width: auto; box-sizing: border-box; }
 </style>
 `;
 
-// --- 1. ACCUEIL ---
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell"><div class="home-screen">
@@ -53,7 +47,6 @@ app.get('/', (req, res) => {
     </div></div></body></html>`);
 });
 
-// --- 2. CONFIGURATION SANTÉ ---
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell"><div class="page-white">
@@ -67,9 +60,7 @@ app.get('/signup', (req, res) => {
             <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
             <input type="text" id="ln" class="input-box" placeholder="Nom" required>
             <input type="date" id="dob" class="input-box" required>
-            
             <input type="text" id="res" class="input-box" placeholder="Résidence/Région actuelle" required>
-
             <select id="gt" class="input-box" required>
                 <option value="">Génotype (Obligatoire)</option>
                 <option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option>
@@ -85,12 +76,10 @@ app.get('/signup', (req, res) => {
                 <option value="">Projet de vie (Désir d'enfant ?)</option>
                 <option value="Oui">Oui</option><option value="Non">Non</option>
             </select>
-
             <div class="oath-box">
                 <input type="checkbox" id="oath" required>
                 <label for="oath" class="oath-text">Je jure que les données fournies sont exactes et sincères.</label>
             </div>
-
             <button type="submit" class="btn-pink">🚀 Valider mon profil</button>
         </form>
     </div></div>
@@ -122,7 +111,6 @@ app.get('/signup', (req, res) => {
     </script></body></html>`);
 });
 
-// --- 3. PROFIL (AFFICHAGE DES DONNÉES SAISIES) ---
 app.get('/profile', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f8f9fa;"><div class="app-shell">
@@ -150,43 +138,5 @@ app.get('/profile', (req, res) => {
     </script></body></html>`);
 });
 
-// --- 4. MATCHING (AVEC FILTRE SÉCURITÉ SS) ---
-app.get('/matching', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body style="background:#f4f7f6;"><div class="app-shell">
-        <div style="padding:20px; background:white; text-align:center;"><h3>Partenaires Compatibles</h3></div>
-        <div id="list"></div>
-        <a href="/profile" class="btn-pink">Retour</a>
-    </div>
-    <script>
-        const partners = [
-            {n:"Sarah", gt:"AA", r:"Kinshasa", p:"https://i.pravatar.cc/150?u=1"},
-            {n:"Julie", gt:"SS", r:"Bruxelles", p:"https://i.pravatar.cc/150?u=2"},
-            {n:"Marc", gt:"AS", r:"Dakar", p:"https://i.pravatar.cc/150?u=3"}
-        ];
-        const myGt = localStorage.getItem('u_gt');
-        const list = document.getElementById('list');
-        // RÈGLE : Si l'utilisateur est SS, on ne montre pas les partenaires SS
-        partners.filter(p => !(myGt === 'SS' && p.gt === 'SS')).forEach(p => {
-            list.innerHTML += \`<div style="background:white; margin:10px; padding:15px; border-radius:15px; display:flex; align-items:center;">
-                <div style="width:50px; height:50px; border-radius:50%; background-image:url('\${p.p}'); background-size:cover;"></div>
-                <div style="margin-left:15px;"><b>\${p.n}</b><br><small>\${p.r} • Génotype: \${p.gt}</small></div>
-            </div>\`;
-        });
-    </script></body></html>`);
-});
-
-// --- 5. PARAMÈTRES ---
-app.get('/settings', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body style="background:#f4f7f6;"><div class="app-shell">
-        <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
-        <div class="st-group">
-            <a href="/signup" class="st-item"><span>Modifier mon profil</span><span style="color:#007bff; font-weight:bold;">Modifier ➔</span></a>
-        </div>
-        <a href="/profile" class="btn-pink">Retour</a>
-        <div style="text-align:center; font-size:0.75rem; color:#bbb;">Version 59.9 - Genlove © 2026</div>
-    </div></body></html>`);
-});
-
 app.listen(port);
+             
