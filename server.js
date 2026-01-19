@@ -8,7 +8,7 @@ const styles = `
 <style>
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
     .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
-    
+
     /* ÉCRAN DE CHARGEMENT / VÉRIFICATION */
     #loader { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
     .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -22,15 +22,37 @@ const styles = `
     .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
     .st-group { background: white; border-radius: 15px; margin: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
     .st-item { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; font-size: 0.95rem; }
+
+    /* PARAMÈTRES */
+    .settings { padding: 20px; }
+    .setting-item { display:flex; justify-content:space-between; align-items:center; margin:15px 0; background:white; padding:15px; border-radius:15px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
 </style>
 `;
 
-// --- ROUTE / (redirection vers /signup) ---
+/* ---------------------------
+   ROUTE / (redirection vers /signup)
+---------------------------- */
 app.get('/', (req, res) => {
     res.redirect('/signup');
 });
 
-// --- CONFIGURATION SANTÉ (INSCRIPTION) ---
+/* ---------------------------
+   ACCUEIL (optionnel)
+---------------------------- */
+app.get('/home', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body><div class="app-shell">
+        <div class="page-white">
+            <h2 style="color:#ff416c;">Bienvenue sur Genlove</h2>
+            <p>Une application de rencontre basée sur la compatibilité santé.</p>
+            <button class="btn-pink" onclick="window.location.href='/signup'">Commencer</button>
+        </div>
+    </div></body></html>`);
+});
+
+/* ---------------------------
+   SIGNUP
+---------------------------- */
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell">
@@ -68,11 +90,9 @@ app.get('/signup', (req, res) => {
         
         function verifyAndSave(e){
             e.preventDefault();
-            // Afficher le loader
             document.getElementById('loader').style.display = 'flex';
             document.getElementById('main-content').style.opacity = '0.1';
 
-            // Sauvegarder les données
             localStorage.setItem('u_p', b64);
             localStorage.setItem('u_fn', document.getElementById('fn').value);
             localStorage.setItem('u_ln', document.getElementById('ln').value);
@@ -80,7 +100,6 @@ app.get('/signup', (req, res) => {
             localStorage.setItem('u_gt', document.getElementById('gt').value);
             localStorage.setItem('u_gs', document.getElementById('gs').value + document.getElementById('rh').value);
 
-            // Attendre 5 secondes avant de rediriger
             setTimeout(() => {
                 window.location.href = '/profile';
             }, 5000);
@@ -88,7 +107,9 @@ app.get('/signup', (req, res) => {
     </script></body></html>`);
 });
 
-// --- PAGE PROFIL ---
+/* ---------------------------
+   PROFILE
+---------------------------- */
 app.get('/profile', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f8f9fa;"><div class="app-shell">
@@ -114,6 +135,42 @@ app.get('/profile', (req, res) => {
             document.getElementById('rS').innerText = localStorage.getItem('u_gs');
         }
     </script></body></html>`);
+});
+
+/* ---------------------------
+   MATCHING (écran placeholder)
+---------------------------- */
+app.get('/matching', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body><div class="app-shell">
+        <div class="page-white">
+            <h2 style="color:#ff416c;">Matching</h2>
+            <p>Écran de recherche de partenaires (prototype).</p>
+            <button class="btn-pink" onclick="window.location.href='/settings'">⚙️ Paramètres</button>
+        </div>
+    </div></body></html>`);
+});
+
+/* ---------------------------
+   SETTINGS
+---------------------------- */
+app.get('/settings', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body><div class="app-shell">
+        <div class="page-white settings">
+            <h2 style="color:#ff416c; margin-top:0;">Paramètres</h2>
+
+            <div class="setting-item">
+                <span>Modifier profil</span>
+                <button class="btn-pink" style="padding:10px 15px; border-radius:20px;" onclick="window.location.href='/signup'">Modifier</button>
+            </div>
+
+            <div class="setting-item">
+                <span>Déconnexion</span>
+                <button class="btn-pink" style="padding:10px 15px; border-radius:20px;" onclick="window.location.href='/signup'">Déconnecter</button>
+            </div>
+        </div>
+    </div></body></html>`);
 });
 
 app.listen(port, () => console.log("Genlove V60.3 lancée !"));
