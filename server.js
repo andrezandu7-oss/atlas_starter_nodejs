@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -6,109 +6,124 @@ app.use(express.urlencoded({ extended: true }));
 
 const styles = `
 <style>
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
-    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
-    
-    /* ÉCRAN DE CHARGEMENT / VÉRIFICATION */
-    #loader { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
-    .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    /* SIGNUP & PROFIL (BASE V59.9) */
-    .page-white { background: white; min-height: 100vh; padding: 25px 20px; box-sizing: border-box; text-align: center; }
-    .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative; background-size: cover; background-position: center; }
-    .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; }
-    .oath-box { margin-top: 20px; display: flex; align-items: center; gap: 10px; text-align: left; padding: 12px; background: #fff5f7; border-radius: 10px; border: 1px solid #ffd1d9; }
-    .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
-    .st-group { background: white; border-radius: 15px; margin: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
-    .st-item { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; font-size: 0.95rem; }
+  body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
+  .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
+  .page { padding: 25px 20px; box-sizing: border-box; }
+  .photo { width: 110px; height: 110px; border-radius: 50%; margin: 20px auto; background: #eee center/cover; border: 2px dashed #ff416c; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .input { width: 100%; padding: 14px; margin-top: 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8f9fa; box-sizing: border-box; }
+  .btn { background: #ff416c; color: white; border: none; padding: 16px; width: 90%; border-radius: 50px; margin: 25px auto; display: block; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
+  .card { background: white; border-radius: 15px; margin: 15px 0; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+  .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f1f1; font-size: 0.95rem; }
+  .item:last-child { border-bottom: none; }
+  .loader { position: absolute; inset: 0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 100; }
+  .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .badge-ss { background: #ff416c; color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; }
 </style>
 `;
 
-// --- CONFIGURATION SANTÉ (INSCRIPTION) ---
-app.get('/signup', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body><div class="app-shell">
-        <div id="loader">
-            <div class="spinner"></div>
-            <h3 style="color:#1a2a44;">Vérification en cours...</h3>
-            <p style="color:#666; font-size:0.9rem;">Genlove analyse vos données de santé pour garantir la sécurité de la communauté.</p>
-        </div>
-
-        <div class="page-white" id="main-content">
-            <h2 style="color:#ff416c; margin-top:0;">Configuration Santé</h2>
-            <form id="healthForm" onsubmit="verifyAndSave(event)">
-                <div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo *</span></div>
-                <input type="file" id="i" style="display:none" onchange="preview(event)" required>
-                <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
-                <input type="text" id="ln" class="input-box" placeholder="Nom" required>
-                <input type="date" id="dob" class="input-box" required>
-                <input type="text" id="res" class="input-box" placeholder="Résidence/Région actuelle" required>
-                <select id="gt" class="input-box" required><option value="">Génotype *</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
-                <div style="display:flex; gap:10px;">
-                    <select id="gs" class="input-box" style="flex:2;" required><option value="">Groupe Sanguin</option><option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option></select>
-                    <select id="rh" class="input-box" style="flex:1;" required><option value="+">+</option><option value="-">-</option></select>
-                </div>
-                <div class="oath-box">
-                    <input type="checkbox" id="oath" required>
-                    <label for="oath" style="font-size:0.8rem;">Je jure que les données fournies sont exactes et sincères.</label>
-                </div>
-                <button type="submit" class="btn-pink">🚀 Valider mon profil</button>
-            </form>
-        </div>
-    </div>
-    <script>
-        let b64="";
-        function preview(e){ const r=new FileReader(); r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; }; r.readAsDataURL(e.target.files[0]); }
-        
-        function verifyAndSave(e){
-            e.preventDefault();
-            // Afficher le loader
-            document.getElementById('loader').style.display = 'flex';
-            document.getElementById('main-content').style.opacity = '0.1';
-
-            // Sauvegarder les données
-            localStorage.setItem('u_p', b64);
-            localStorage.setItem('u_fn', document.getElementById('fn').value);
-            localStorage.setItem('u_ln', document.getElementById('ln').value);
-            localStorage.setItem('u_res', document.getElementById('res').value);
-            localStorage.setItem('u_gt', document.getElementById('gt').value);
-            localStorage.setItem('u_gs', document.getElementById('gs').value + document.getElementById('rh').value);
-
-            // Attendre 5 secondes avant de rediriger
-            setTimeout(() => {
-                window.location.href = '/profile';
-            }, 5000);
-        }
-    </script></body></html>`);
+/* ================= 1. INSCRIPTION ================= */
+app.get("/signup", (req, res) => {
+  res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+  <body><div class="app-shell"><div class="page">
+    <h2 style="color:#ff416c; text-align:center; margin-top:0;">Configuration Santé</h2>
+    <form onsubmit="save(event)">
+      <div class="photo" id="photo" onclick="file.click()"><span id="photoText">📸 Photo</span></div>
+      <input id="file" type="file" accept="image/*" style="display:none" onchange="preview(event)">
+      <input class="input" id="fn" placeholder="Prénom" required>
+      <input class="input" id="ln" placeholder="Nom" required>
+      <input class="input" id="dob" type="date" required title="Date de naissance">
+      <input class="input" id="res" placeholder="Résidence / Région" required>
+      <select class="input" id="gs" required><option value="">Groupe sanguin</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>O+</option><option>O-</option></select>
+      <select class="input" id="gt" required><option value="">Génotype</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
+      <select class="input" id="child" required><option value="">Désir d'enfant</option><option>Oui</option><option>Non</option></select>
+      <div style="margin-top:15px; display:flex; gap:10px; align-items:center; text-align:left;">
+        <input type="checkbox" id="oath" required>
+        <label for="oath" style="font-size:0.8rem;">Je jure que les données de santé fournies sont exactes.</label>
+      </div>
+      <button class="btn">🚀 Valider mon profil</button>
+    </form>
+  </div></div>
+  <script>
+    let img = "";
+    function preview(e) {
+      const reader = new FileReader();
+      reader.onload = () => { img = reader.result; photo.style.backgroundImage = 'url(' + img + ')'; photoText.style.display = 'none'; };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+    function save(e) {
+      e.preventDefault();
+      localStorage.setItem("img", img);
+      localStorage.setItem("fn", fn.value); localStorage.setItem("ln", ln.value);
+      localStorage.setItem("dob", dob.value); localStorage.setItem("res", res.value);
+      localStorage.setItem("gs", gs.value); localStorage.setItem("gt", gt.value);
+      localStorage.setItem("child", child.value);
+      window.location.href = "/validate";
+    }
+  </script></body></html>`);
 });
 
-// --- PAGE PROFIL ---
-app.get('/profile', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body style="background:#f8f9fa;"><div class="app-shell">
-        <div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;">
-            <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-color:#eee;"></div>
-            <h2 id="vN" style="margin:5px 0 0 0;">Utilisateur</h2>
-            <p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Lieu</p>
-            <p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p>
-        </div>
-        <div class="st-group">
-            <div class="st-item"><span>Génotype</span><b id="rG">--</b></div>
-            <div class="st-item"><span>Groupe Sanguin</span><b id="rS">--</b></div>
-        </div>
-        <button class="btn-pink" onclick="window.location.href='/matching'">🔍 Trouver un partenaire</button>
-        <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:auto; padding-bottom:15px;">Version 60.3 - Genlove © 2026</div>
-    </div>
-    <script>
-        window.onload = () => {
-            document.getElementById('vP').style.backgroundImage = 'url('+localStorage.getItem('u_p')+')';
-            document.getElementById('vN').innerText = localStorage.getItem('u_fn') + " " + localStorage.getItem('u_ln');
-            document.getElementById('vR').innerText = "📍 " + localStorage.getItem('u_res');
-            document.getElementById('rG').innerText = localStorage.getItem('u_gt');
-            document.getElementById('rS').innerText = localStorage.getItem('u_gs');
-        }
-    </script></body></html>`);
+/* ================= 2. VALIDATION (LOADER 5s) ================= */
+app.get("/validate", (req, res) => {
+  res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+  <body><div class="app-shell"><div class="loader">
+    <div class="spinner"></div>
+    <h3 style="color:#1a2a44;">Vérification sécurisée...</h3>
+    <p style="color:#666; font-size:0.9rem; padding:0 20px;">
+      Genlove sécurise vos données médicales.<br>Analyse de compatibilité en cours...
+    </p>
+  </div></div>
+  <script>setTimeout(() => { window.location.href = "/profile"; }, 5000);</script>
+  </body></html>`);
 });
 
-app.listen(port, () => console.log("Genlove V60.3 lancée !"));
+/* ================= 3. PROFIL ================= */
+app.get("/profile", (req, res) => {
+  res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+  <body><div class="app-shell"><div class="page">
+    <h2 style="color:#ff416c; text-align:center; margin-top:0;">Mon Profil</h2>
+    <div class="photo" id="pPhoto"></div>
+    <div class="card">
+      <div class="item"><span>Identité</span><b id="pName"></b></div>
+      <div class="item"><span>Localisation</span><b id="pRes"></b></div>
+      <div class="item"><span>Âge</span><b id="pAge"></b></div>
+    </div>
+    <div class="card">
+      <div class="item"><span>Génotype</span><b id="pGt"></b></div>
+      <div class="item"><span>Groupe Sanguin</span><b id="pGs"></b></div>
+      <div class="item"><span>Désir d'enfant</span><b id="pChild"></b></div>
+    </div>
+    <button class="btn" onclick="location.href='/matching'">🔍 Trouver un partenaire</button>
+    <div style="text-align:center;"><a href="/settings" style="color:#666; text-decoration:none; font-size:0.9rem;">⚙️ Paramètres du compte</a></div>
+  </div></div>
+  <script>
+    if (!localStorage.getItem("fn")) window.location.href = "/signup";
+    const geno = localStorage.getItem("gt");
+    pPhoto.style.backgroundImage = 'url(' + localStorage.getItem("img") + ')';
+    pName.innerText = localStorage.getItem("fn") + " " + localStorage.getItem("ln");
+    pRes.innerText = "📍 " + localStorage.getItem("res");
+    pGs.innerText = localStorage.getItem("gs");
+    pGt.innerHTML = geno === "SS" ? '<span class="badge-ss">SS</span>' : geno;
+    pChild.innerText = localStorage.getItem("child");
+    const dob = new Date(localStorage.getItem("dob"));
+    pAge.innerText = new Date().getFullYear() - dob.getFullYear() + " ans";
+  </script></body></html>`);
+});
+
+/* ================= 4. PARAMÈTRES (SIGNATURE V60.6) ================= */
+app.get("/settings", (req, res) => {
+  res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+  <body><div class="app-shell"><div class="page">
+    <h2 style="color:#ff416c; text-align:center; margin-top:0;">⚙️ Paramètres</h2>
+    <div class="card">
+      <div class="item"><span>Visibilité</span><b>Public</b></div>
+      <div class="item"><span>Protection SS</span><b>Activée ✅</b></div>
+      <div class="item"><span>Export Données</span><a href="#" style="color:#ff416c">PDF</a></div>
+      <div class="item" onclick="if(confirm('Supprimer ?')){localStorage.clear();location.href='/signup';}" style="cursor:pointer;"><span style="color:red">Supprimer mon compte</span></div>
+    </div>
+    <a href="/profile" class="btn" style="background:#1a2a44;">⬅️ Retour au profil</a>
+    <div style="text-align:center; font-size:0.7rem; color:#bbb; margin-top:50px;">Version 60.6 - Genlove © 2026</div>
+  </div></div></body></html>`);
+});
+
+app.listen(port, () => console.log("Genlove V60.6 opérationnelle !"));
