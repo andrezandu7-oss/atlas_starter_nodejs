@@ -30,7 +30,6 @@ const styles = `
     .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; text-decoration: none; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
     .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: bold; display: block; margin: 15px; width: auto; box-sizing: border-box; }
 
-    /* MATCHING */
     .info-bubble { background: #e7f3ff; color: #1a2a44; padding: 15px; border-radius: 12px; margin: 15px; font-size: 0.85rem; line-height: 1.4; border-left: 5px solid #007bff; text-align: left; }
     .match-card { background: white; margin: 10px 15px; padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .match-photo-blur { width: 50px; height: 50px; border-radius: 50%; background: #eee; filter: blur(5px); }
@@ -52,7 +51,7 @@ app.get('/', (req, res) => {
     </div></div></body></html>`);
 });
 
-// 2. SIGNUP
+// 2. SIGNUP (MISE À JOUR AVEC LE GENRE)
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell">
@@ -64,14 +63,25 @@ app.get('/signup', (req, res) => {
                 <input type="file" id="i" style="display:none" onchange="preview(event)" required>
                 <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
                 <input type="text" id="ln" class="input-box" placeholder="Nom" required>
+                
+                <select id="gender" class="input-box" required>
+                    <option value="">Genre</option>
+                    <option value="Homme">Homme</option>
+                    <option value="Femme">Femme</option>
+                </select>
+
                 <input type="date" id="dob" class="input-box" required>
                 <input type="text" id="res" class="input-box" placeholder="Résidence/Région actuelle" required>
+                
                 <select id="gt" class="input-box" required><option value="">Génotype</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select>
+                
                 <div style="display:flex; gap:10px;">
                     <select id="gs" class="input-box" style="flex:2;" required><option value="">Groupe Sanguin</option><option>A</option><option>B</option><option>AB</option><option>O</option></select>
                     <select id="rh" class="input-box" style="flex:1;" required><option value="+">+</option><option value="-">-</option></select>
                 </div>
+                
                 <select id="pj" class="input-box" required><option value="">Projet de vie (Désir d'enfant ?)</option><option value="Oui">Oui</option><option value="Non">Non</option></select>
+                
                 <button type="submit" class="btn-pink">🚀 Valider mon profil</button>
             </form>
         </div>
@@ -83,13 +93,16 @@ app.get('/signup', (req, res) => {
             e.preventDefault();
             document.getElementById('loader').style.display='flex';
             document.getElementById('main-content').style.opacity='0.1';
+            
             localStorage.setItem('u_p', b64);
             localStorage.setItem('u_fn', document.getElementById('fn').value);
             localStorage.setItem('u_ln', document.getElementById('ln').value);
+            localStorage.setItem('u_gender', document.getElementById('gender').value);
             localStorage.setItem('u_res', document.getElementById('res').value);
             localStorage.setItem('u_gt', document.getElementById('gt').value);
             localStorage.setItem('u_gs', document.getElementById('gs').value + document.getElementById('rh').value);
             localStorage.setItem('u_pj', document.getElementById('pj').value);
+            
             setTimeout(() => { window.location.href='/profile'; }, 5000);
         }
     </script></body></html>`);
@@ -104,6 +117,7 @@ app.get('/profile', (req, res) => {
             <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover;"></div>
             <h2 id="vN" style="margin:5px 0 0 0;">Utilisateur</h2>
             <p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Localisation</p>
+            <p id="vG" style="font-size:0.85rem; color:#ff416c; margin-bottom:10px; font-weight:bold;"></p>
             <p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p>
         </div>
         <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div>
@@ -119,13 +133,14 @@ app.get('/profile', (req, res) => {
         if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
         document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || 'Utilisateur') + " " + (localStorage.getItem('u_ln') || '');
         document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || 'Non définie');
+        document.getElementById('vG').innerText = localStorage.getItem('u_gender') || '';
         document.getElementById('rG').innerText = localStorage.getItem('u_gt') || '--';
         document.getElementById('rS').innerText = localStorage.getItem('u_gs') || '--';
         document.getElementById('rP').innerText = "Enfant : " + (localStorage.getItem('u_pj') || '--');
     </script></body></html>`);
 });
 
-// 4. MATCHING (Logique Stricte)
+// 4. MATCHING
 app.get('/matching', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
