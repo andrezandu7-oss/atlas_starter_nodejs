@@ -26,7 +26,7 @@ const styles = `
     input[type="date"]::before { content: "Date de naissance "; width: 100%; color: #757575; }
     input[type="date"]:focus::before, input[type="date"]:valid::before { content: ""; display: none; }
 
-    /* SERMENT */
+    /* SERMENT & FORMULAIRE */
     .serment-container { margin-top: 20px; padding: 15px; background: #fff5f7; border-radius: 12px; border: 1px solid #ffdae0; text-align: left; display: flex; gap: 10px; align-items: flex-start; }
     .serment-text { font-size: 0.82rem; color: #d63384; line-height: 1.4; }
 
@@ -34,9 +34,19 @@ const styles = `
     .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; text-decoration: none; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
     .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: bold; display: block; margin: 15px; width: auto; box-sizing: border-box; }
 
-    /* MATCHING & PROFIL */
+    /* STRUCTURES DE LISTE */
     .st-group { background: white; border-radius: 15px; margin: 0 15px 15px 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
     .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; font-size: 0.95rem; }
+
+    /* TOGGLE SWITCH (Bouton Glissière) */
+    .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #007bff; }
+    input:checked + .slider:before { transform: translateX(21px); }
+
+    /* MATCHING */
     .info-bubble { background: #e7f3ff; color: #1a2a44; padding: 15px; border-radius: 12px; margin: 15px; font-size: 0.85rem; border-left: 5px solid #007bff; text-align: left; }
     .match-card { background: white; margin: 10px 15px; padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .match-photo-blur { width: 50px; height: 50px; border-radius: 50%; background: #eee; filter: blur(5px); }
@@ -159,25 +169,42 @@ app.get('/matching', (req, res) => {
             }
         }
         filtered.forEach(p => {
-            container.innerHTML += '<div class="match-card"><div class="match-photo-blur"></div><div style="flex:1"><b>Profil #'+p.id+'</b><br><small>Génotype '+p.gt+'</small></div><button class="btn-contact" style="border:none; background:#ff416c; color:white; border-radius:8px; padding:5px 10px;">Détails</button></div>';
+            container.innerHTML += '<div class="match-card"><div class="match-photo-blur"></div><div style="flex:1"><b>Profil #'+p.id+'</b><br><small>Génotype '+p.gt+'</small></div><button style="border:none; background:#ff416c; color:white; border-radius:8px; padding:5px 10px;">Détails</button></div>';
         });
     </script></body></html>`);
 });
 
-// --- ROUTE 5 : PARAMÈTRES ---
+// --- ROUTE 5 : PARAMÈTRES (Avec Toggle Switch Bleu) ---
 app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
         <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
-        <div class="st-group"><div class="st-item" style="font-weight:bold;">Confidentialité</div><div class="st-item"><span>Visibilité profil</span><b>Public</b></div></div>
-        <div class="st-group"><div class="st-item" style="font-weight:bold;">Mise à jour</div><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
         <div class="st-group">
-            <div class="st-item" style="font-weight:bold; color:red;">Supprimer compte</div>
-            <div style="display:flex; justify-content:space-around; padding:10px;">
-                <button class="btn-dark" style="width:30%; padding:10px;" onclick="localStorage.clear(); location.href='/';">Oui</button>
-                <button class="btn-dark" style="width:30%; padding:10px;">Non</button>
+            <div class="st-item">
+                <span>Visibilité profil</span>
+                <label class="switch">
+                    <input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="st-item" style="font-size:0.8rem; color:#666;">Statut actuel : <b id="status" style="color:#007bff;">Public</b></div>
+        </div>
+
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
+        <div class="st-group">
+            <a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a>
+        </div>
+        
+        <div class="st-group">
+            <div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div>
+            <div style="display:flex; justify-content:space-around; padding:15px;">
+                <button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button>
+                <button onclick="alert('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button>
             </div>
         </div>
+
         <a href="/profile" class="btn-pink">Retour</a>
     </div></body></html>`);
 });
