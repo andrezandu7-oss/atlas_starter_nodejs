@@ -1,11 +1,8 @@
 const express = require("express");
-const http = require("http");
 const app = express();
-const server = http.createServer(app);
+const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
-
-const port = process.env.PORT || 3000;
 
 /* ================= STYLES GLOBAUX ================= */
 const styles = `
@@ -51,10 +48,15 @@ res.send(`
 <form class="card" method="post" action="/register">
 <h3>Inscription</h3>
 <input name="email" required placeholder="Email" style="width:100%;padding:10px">
-<input name="gt" placeholder="Génotype" style="width:100%;padding:10px;margin-top:8px">
-<select name="child" style="width:100%;padding:10px;margin-top:8px">
-<option>Désir d'enfant : Oui</option>
-<option>Désir d'enfant : Non</option>
+<select name="gt" style="width:100%;padding:10px;margin-top:8px" required>
+<option value="">Génotype</option>
+<option value="AA">AA</option>
+<option value="AS">AS</option>
+<option value="SS">SS</option>
+</select>
+<select name="child" style="width:100%;padding:10px;margin-top:8px" required>
+<option value="Oui">Désir d'enfant : Oui</option>
+<option value="Non">Désir d'enfant : Non</option>
 </select>
 <button class="btn-pink">Valider</button>
 </form>
@@ -64,6 +66,8 @@ res.send(`
 });
 
 app.post("/register",(req,res)=>{
+// Ici on sauvegarde en localStorage côté client dans la vraie version.
+// Pour l'instant, on redirige vers le profil.
 res.redirect("/profile");
 });
 
@@ -99,16 +103,49 @@ res.send(`
 L'identité complète n'est révélée qu'après consensus mutuel.</p>
 </div>
 
-${[1,2,3].map(i=>`
-<div class="card">
-<div class="blur" style="height:120px;background:#ddd;border-radius:12px"></div>
-<p><b>Profil ${i}</b></p>
-<p style="color:#ff416c;font-weight:bold">${70+i*5}% compatible</p>
-<a href="/requests" class="btn-pink">📩 Contacter</a>
-</div>
-`).join("")}
+<div id="list"></div>
 
 <a href="/profile" class="btn-dark">Retour</a>
+
+<script>
+  const myGt = "AS"; // À remplacer par localStorage.getItem("u_gt")
+
+  const partners = [
+    { id:1, gt:"AA", score:82 },
+    { id:2, gt:"SS", score:91 },
+    { id:3, gt:"AS", score:75 },
+    { id:4, gt:"AS", score:88 },
+    { id:5, gt:"AA", score:79 }
+  ];
+
+  // 🔐 FILTRAGE SS×SS
+  const filtered = partners.filter(p => {
+    if (myGt === "SS" && p.gt === "SS") return false;
+    return true;
+  });
+
+  // ⚠️ MESSAGE pédagogique AS×AS
+  const warning = (p) => {
+    if (myGt === "AS" && p.gt === "AS") {
+      return "<p style='color:#ff416c; font-weight:bold'>⚠️ Attention : AS × AS peut augmenter les risques de transmission. Consultez un médecin.</p>";
+    }
+    return "";
+  };
+
+  const list = document.getElementById("list");
+  filtered.forEach((p, index) => {
+    list.innerHTML += `
+      <div class="card">
+        <div class="blur" style="height:120px;background:#ddd;border-radius:12px"></div>
+        <p><b>Profil ${index+1}</b></p>
+        ${warning(p)}
+        <p style="color:#ff416c;font-weight:bold">${p.score}% compatible</p>
+        <a href="/requests" class="btn-pink">📩 Contacter</a>
+      </div>
+    `;
+  });
+</script>
+
 </div>
 </body></html>
 `);
@@ -192,5 +229,4 @@ res.send(`
 `);
 });
 
-/* ================= SERVER ================= */
-server.listen(port,()=>console.log("Genlove lancé sur le port "+port));
+app.listen(port,()=>console.log("Genlove lancé sur le port "+port));
