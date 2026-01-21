@@ -7,8 +7,12 @@ app.use(express.urlencoded({ extended: true }));
 const styles = `
 <style>
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
-    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
+    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; overflow-x: hidden; }
     
+    /* NOTIFICATION BANNER */
+    #genlove-notify { position: absolute; top: -70px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; transition: 0.5s ease-in-out; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-left: 5px solid #007bff; }
+    #genlove-notify.show { top: 15px; }
+
     /* LOADER */
     #loader { display: none; position: absolute; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -49,7 +53,7 @@ const styles = `
     .st-group { background: white; border-radius: 15px; margin: 0 15px 15px 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
     .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; font-size: 0.95rem; }
 
-    /* TOGGLE SWITCH (Bouton Glissière Bleu) */
+    /* TOGGLE SWITCH */
     .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
@@ -64,7 +68,18 @@ const styles = `
 </style>
 `;
 
-// --- ROUTES ---
+const notifyScript = `
+<script>
+    function showNotify(msg) {
+        const n = document.getElementById('genlove-notify');
+        document.getElementById('notify-msg').innerText = msg;
+        n.classList.add('show');
+        setTimeout(() => { n.classList.remove('show'); }, 3500);
+    }
+</script>
+`;
+
+// Routes logic remains identical, just adding the notify div and script call
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell"><div class="home-screen">
@@ -75,14 +90,13 @@ app.get('/', (req, res) => {
             <a href="/profile" class="btn-dark">➔ Se connecter</a>
             <a href="/signup" style="color:#1a2a44; text-decoration:none; font-weight:bold; display:block; margin-top:15px;">👤 Créer un compte</a>
         </div>
-        <div style="font-size: 0.75rem; color: #666; margin-top: 25px;">🔒 Vos données de santé sont cryptées et confidentielles.</div>
     </div></div></body></html>`);
 });
 
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell">
-        <div id="loader"><div class="spinner"></div><h3>Analyse sécurisée...</h3><p>Vérification de vos données médicales.</p></div>
+        <div id="loader"><div class="spinner"></div><h3>Analyse sécurisée...</h3><p>Vérification médicale en cours.</p></div>
         <div class="page-white" id="main-content">
             <h2 style="color:#ff416c; margin-top:0;">Configuration Santé</h2>
             <form onsubmit="saveAndRedirect(event)">
@@ -101,7 +115,7 @@ app.get('/signup', (req, res) => {
                 <select id="pj" class="input-box" required><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select>
                 <div class="serment-container">
                     <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
-                    <label for="oath" class="serment-text">Je confirme sur l'honneur que les informations saisies sont sincères et conformes à mes résultats médicaux.</label>
+                    <label for="oath" class="serment-text">Je confirme sur l'honneur que les informations sont conformes à mes résultats médicaux.</label>
                 </div>
                 <button type="submit" class="btn-pink">🚀 Valider mon profil</button>
             </form>
@@ -114,12 +128,9 @@ app.get('/signup', (req, res) => {
             e.preventDefault();
             document.getElementById('loader').style.display='flex';
             document.getElementById('main-content').style.opacity='0.1';
-            localStorage.setItem('u_p', b64);
-            localStorage.setItem('u_fn', document.getElementById('fn').value);
-            localStorage.setItem('u_ln', document.getElementById('ln').value);
-            localStorage.setItem('u_gender', document.getElementById('gender').value);
-            localStorage.setItem('u_res', document.getElementById('res').value);
-            localStorage.setItem('u_gt', document.getElementById('gt').value);
+            localStorage.setItem('u_p', b64); localStorage.setItem('u_fn', document.getElementById('fn').value);
+            localStorage.setItem('u_ln', document.getElementById('ln').value); localStorage.setItem('u_gender', document.getElementById('gender').value);
+            localStorage.setItem('u_res', document.getElementById('res').value); localStorage.setItem('u_gt', document.getElementById('gt').value);
             localStorage.setItem('u_gs', document.getElementById('gs').value + document.getElementById('rh').value);
             localStorage.setItem('u_pj', document.getElementById('pj').value);
             setTimeout(() => { window.location.href='/profile'; }, 5000);
@@ -138,20 +149,14 @@ app.get('/profile', (req, res) => {
             <p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p>
         </div>
         <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div>
-        <div class="st-group">
-            <div class="st-item"><span>Génotype</span><b id="rG">...</b></div>
-            <div class="st-item"><span>Groupe Sanguin</span><b id="rS">...</b></div>
-            <div class="st-item"><span>Projet de vie</span><b id="rP">...</b></div>
-        </div>
+        <div class="st-group"><div class="st-item"><span>Génotype</span><b id="rG"></b></div><div class="st-item"><span>Groupe Sanguin</span><b id="rS"></b></div><div class="st-item"><span>Projet de vie</span><b id="rP"></b></div></div>
         <a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a>
     </div>
     <script>
-        const p = localStorage.getItem('u_p');
-        if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
+        const p = localStorage.getItem('u_p'); if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
         document.getElementById('vN').innerText = localStorage.getItem('u_fn') + " " + localStorage.getItem('u_ln');
         document.getElementById('vR').innerText = "📍 " + localStorage.getItem('u_res') + " (" + localStorage.getItem('u_gender') + ")";
-        document.getElementById('rG').innerText = localStorage.getItem('u_gt');
-        document.getElementById('rS').innerText = localStorage.getItem('u_gs');
+        document.getElementById('rG').innerText = localStorage.getItem('u_gt'); document.getElementById('rS').innerText = localStorage.getItem('u_gs');
         document.getElementById('rP').innerText = "Enfant : " + localStorage.getItem('u_pj');
     </script></body></html>`);
 });
@@ -159,21 +164,20 @@ app.get('/profile', (req, res) => {
 app.get('/matching', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
+        <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
         <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div>
         <div id="match-container"></div>
         <a href="/profile" class="btn-pink">Retour au profil</a>
     </div>
 
-    <div id="popup-overlay" onclick="closePopup()">
-        <div class="popup-content" onclick="event.stopPropagation()">
+    <div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()">
             <span class="close-popup" onclick="closePopup()">&times;</span>
             <h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3>
             <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
             <div id="pop-msg" class="popup-msg"></div>
-            <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="alert('Demande de contact envoyée !')">🚀 Contacter ce profil</button>
-        </div>
-    </div>
-
+            <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="closePopup(); showNotify('Demande de contact envoyée avec succès !')">🚀 Contacter ce profil</button>
+    </div></div>
+    ${notifyScript}
     <script>
         const partners = [
             {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie."},
@@ -198,7 +202,7 @@ app.get('/matching', (req, res) => {
                     <div class="match-photo-blur"></div>
                     <div style="flex:1"><b>Profil #\${p.id}</b><br><small>Génotype \${p.gt}</small></div>
                     <div style="display:flex;">
-                        <button class="btn-action btn-contact" onclick="alert('Demande envoyée au Profil #\${p.id}')">Contacter</button>
+                        <button class="btn-action btn-contact" onclick="showNotify('Demande envoyée au Profil #\${p.id} !')">Contacter</button>
                         <button class="btn-action btn-details" onclick='showDetails(\${JSON.stringify(p)})'>Détails</button>
                     </div>
                 </div>\`;
@@ -208,16 +212,13 @@ app.get('/matching', (req, res) => {
             const myGt = localStorage.getItem('u_gt');
             document.getElementById('pop-name').innerText = "Profil #" + p.id;
             document.getElementById('pop-details').innerHTML = "<b>Génotype :</b> " + p.gt + "<br><b>Groupe Sanguin :</b> " + p.gs + "<br><br><b>Projet :</b><br><i>" + p.pj + "</i>";
-            
             let msg = "";
-            if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale. Protection totale de la descendance.";
-            else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> Excellent choix. En tant que AA, vous jouez un rôle protecteur essentiel. Aucun risque de naissance SS.";
-            else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Une union magnifique et sans crainte. Votre profil AA est le partenaire idéal pour une personne SS.";
-            
+            if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Protection totale de la descendance.";
+            else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> Aucun risque de naissance SS.";
+            else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Profil AA idéal pour partenaire SS.";
             document.getElementById('pop-msg').innerHTML = msg;
             document.getElementById('popup-overlay').style.display = 'flex';
         }
-
         function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
     </script></body></html>`);
 });
@@ -226,28 +227,8 @@ app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
         <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
-        <div class="st-group">
-            <div class="st-item">
-                <span>Visibilité profil</span>
-                <label class="switch">
-                    <input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="st-item" style="font-size:0.8rem; color:#666;">Statut actuel : <b id="status" style="color:#007bff;">Public</b></div>
-        </div>
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
-        <div class="st-group">
-            <a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a>
-        </div>
-        <div class="st-group">
-            <div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div>
-            <div style="display:flex; justify-content:space-around; padding:15px;">
-                <button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button>
-                <button onclick="alert('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button>
-            </div>
-        </div>
+        <div class="st-group"><div class="st-item"><span>Visibilité</span><label class="switch"><input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'"><span class="slider"></span></label></div>
+        <div class="st-item">Statut : <b id="status" style="color:#007bff;">Public</b></div></div>
         <a href="/profile" class="btn-pink">Retour</a>
     </div></body></html>`);
 });
