@@ -149,7 +149,7 @@ app.get('/profile', (req, res) => {
     </script></body></html>`);
 });
 
-// --- ROUTE 4 : MATCHING ---
+// --- ROUTE 4 : MATCHING (AVEC BOUTON CONTACTER) ---
 app.get('/matching', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
