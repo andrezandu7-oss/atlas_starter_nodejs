@@ -9,7 +9,7 @@ const styles = `
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
     .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; overflow-x: hidden; }
     
-    /* NOTIFICATION BANNER */
+    /* NOTIFICATION BANNER (V62.7) */
     #genlove-notify { position: absolute; top: -70px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; transition: 0.5s ease-in-out; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-left: 5px solid #007bff; }
     #genlove-notify.show { top: 15px; }
 
@@ -79,7 +79,7 @@ const notifyScript = `
 </script>
 `;
 
-// Routes logic remains identical, just adding the notify div and script call
+// --- ROUTE 1 : ACCUEIL ---
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell"><div class="home-screen">
@@ -90,9 +90,11 @@ app.get('/', (req, res) => {
             <a href="/profile" class="btn-dark">➔ Se connecter</a>
             <a href="/signup" style="color:#1a2a44; text-decoration:none; font-weight:bold; display:block; margin-top:15px;">👤 Créer un compte</a>
         </div>
+        <div style="font-size: 0.75rem; color: #666; margin-top: 25px;">🔒 Vos données de santé sont cryptées et confidentielles.</div>
     </div></div></body></html>`);
 });
 
+// --- ROUTE 2 : INSCRIPTION ---
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body><div class="app-shell">
@@ -138,6 +140,7 @@ app.get('/signup', (req, res) => {
     </script></body></html>`);
 });
 
+// --- ROUTE 3 : PROFIL ---
 app.get('/profile', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f8f9fa;"><div class="app-shell">
@@ -161,6 +164,7 @@ app.get('/profile', (req, res) => {
     </script></body></html>`);
 });
 
+// --- ROUTE 4 : MATCHING ---
 app.get('/matching', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
@@ -223,14 +227,42 @@ app.get('/matching', (req, res) => {
     </script></body></html>`);
 });
 
+// --- ROUTE 5 : PARAMÈTRES (V62.6 Intégrale + Notify) ---
 app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
+        <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
         <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
-        <div class="st-group"><div class="st-item"><span>Visibilité</span><label class="switch"><input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'"><span class="slider"></span></label></div>
-        <div class="st-item">Statut : <b id="status" style="color:#007bff;">Public</b></div></div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
+        <div class="st-group">
+            <div class="st-item">
+                <span>Visibilité profil</span>
+                <label class="switch">
+                    <input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'; showNotify('Paramètre mis à jour !')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="st-item" style="font-size:0.8rem; color:#666;">Statut actuel : <b id="status" style="color:#007bff;">Public</b></div>
+        </div>
+
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
+        <div class="st-group">
+            <a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a>
+        </div>
+        
+        <div class="st-group">
+            <div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div>
+            <div style="display:flex; justify-content:space-around; padding:15px;">
+                <button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button>
+                <button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button>
+            </div>
+        </div>
+
         <a href="/profile" class="btn-pink">Retour</a>
-    </div></body></html>`);
+    </div>
+    ${notifyScript}
+    </body></html>`);
 });
 
 app.listen(port);
