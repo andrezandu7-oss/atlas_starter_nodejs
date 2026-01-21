@@ -7,21 +7,30 @@ app.use(express.urlencoded({ extended: true }));
 const styles = `
 <style>
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
-    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
+    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
     
     /* LOADER */
     #loader { display: none; position: absolute; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+    /* STYLE DE LA NOTIFICATION (Ton nouveau design) */
+    .notif-box { 
+        display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+        width: 320px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        z-index: 3000; border: 1px solid #eee; overflow: hidden; animation: bounceIn 0.5s ease;
+    }
+    .notif-header { background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; font-weight: bold; color: #1a2a44; font-size: 0.85rem; }
+    .notif-body { padding: 18px; text-align: center; color: #333; font-size: 0.9rem; line-height: 1.4; }
+    .notif-btn { background: #7ba6e9; color: white; border: none; width: 100%; padding: 12px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+    @keyframes bounceIn { 0% { top: -100px; } 70% { top: 35px; } 100% { top: 20px; } }
+
     /* ACCUEIL & PAGES */
     .home-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center; }
     .logo-text { font-size: 3.5rem; font-weight: bold; margin-bottom: 5px; }
     .slogan { font-weight: bold; color: #1a2a44; margin-bottom: 40px; font-size: 1rem; line-height: 1.5; }
-    
     .page-white { background: white; min-height: 100vh; padding: 25px 20px; box-sizing: border-box; text-align: center; }
     .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; background-size: cover; background-position: center; }
-    
     .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; color: #333; }
     input[type="date"]::before { content: "Date de naissance "; width: 100%; color: #757575; }
     input[type="date"]:focus::before, input[type="date"]:valid::before { content: ""; display: none; }
@@ -33,7 +42,6 @@ const styles = `
     /* BOUTONS */
     .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; text-decoration: none; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; }
     .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: bold; display: block; margin: 15px; width: auto; box-sizing: border-box; }
-    
     .btn-action { border: none; border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-details { background: #ff416c; color: white; }
     .btn-contact { background: #1a2a44; color: white; margin-right: 5px; }
@@ -158,7 +166,7 @@ app.get('/profile', (req, res) => {
     </script></body></html>`);
 });
 
-// --- ROUTE 4 : MATCHING + POPUP DÉTAILS ---
+// --- ROUTE 4 : MATCHING + POPUP + NOTIF ---
 app.get('/matching', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
@@ -167,13 +175,22 @@ app.get('/matching', (req, res) => {
         <a href="/profile" class="btn-pink">Retour au profil</a>
     </div>
 
+    <div id="notif" class="notif-box">
+        <div class="notif-header">📩 Genlove Notification</div>
+        <div class="notif-body">
+            Quelqu'un de compatible avec vous souhaite échanger 💞<br><br>
+            <small>Ouvrez Genlove pour découvrir qui c'est 💝</small>
+        </div>
+        <button class="notif-btn" onclick="document.getElementById('notif').style.display='none'">📖 Ouvrir Genlove</button>
+    </div>
+
     <div id="popup-overlay" onclick="closePopup()">
         <div class="popup-content" onclick="event.stopPropagation()">
             <span class="close-popup" onclick="closePopup()">&times;</span>
             <h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3>
             <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
             <div id="pop-msg" class="popup-msg"></div>
-            <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="alert('Demande de contact envoyée !')">🚀 Contacter ce profil</button>
+            <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="handleContact()">🚀 Contacter ce profil</button>
         </div>
     </div>
 
@@ -186,7 +203,6 @@ app.get('/matching', (req, res) => {
         const myGt = localStorage.getItem('u_gt');
         const container = document.getElementById('match-container');
         
-        // REGLE DE SECURITE : SS et AS ne voient QUE les AA.
         let filtered = partners;
         if (myGt === "SS" || myGt === "AS") {
             filtered = partners.filter(p => p.gt === "AA");
@@ -201,7 +217,7 @@ app.get('/matching', (req, res) => {
                     <div class="match-photo-blur"></div>
                     <div style="flex:1"><b>Profil #\${p.id}</b><br><small>Génotype \${p.gt}</small></div>
                     <div style="display:flex;">
-                        <button class="btn-action btn-contact" onclick="alert('Demande envoyée au Profil #\${p.id}')">Contacter</button>
+                        <button class="btn-action btn-contact" onclick="handleContact()">Contacter</button>
                         <button class="btn-action btn-details" onclick='showDetails(\${JSON.stringify(p)})'>Détails</button>
                     </div>
                 </div>\`;
@@ -210,28 +226,33 @@ app.get('/matching', (req, res) => {
         function showDetails(p) {
             const myGt = localStorage.getItem('u_gt');
             document.getElementById('pop-name').innerText = "Profil #" + p.id;
-            document.getElementById('pop-details').innerHTML = "<b>Génotype :</b> " + p.gt + "<br><b>Groupe Sanguin :</b> " + p.gs + "<br><br><b>Projet de vie :</b><br><i>" + p.pj + "</i>";
+            document.getElementById('pop-details').innerHTML = "<b>Génotype :</b> " + p.gt + "<br><b>Groupe :</b> " + p.gs + "<br><br><b>Projet :</b><br><i>" + p.pj + "</i>";
             
             let msg = "";
-            if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale. En choisissant un partenaire AA, vous offrez à votre future descendance une protection totale.";
-            else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> Excellent choix. En tant que AA, vous jouez un rôle protecteur essentiel. Votre union ne présente aucun risque de naissance d'un enfant SS.";
-            else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Une union magnifique et sans crainte. Votre profil AA est le partenaire idéal pour une personne SS. Aucun de vos enfants ne souffrira de la forme majeure.";
+            if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale.";
+            else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> Excellent choix. Vous jouez un rôle protecteur essentiel.";
+            else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Une union magnifique. Aucun de vos enfants ne souffrira.";
             
             document.getElementById('pop-msg').innerHTML = msg;
             document.getElementById('popup-overlay').style.display = 'flex';
+        }
+
+        function handleContact() {
+            closePopup();
+            alert("Demande de contact envoyée ! 🚀");
+            // Simulation : La notif apparaît chez l'autre après 3 sec
+            setTimeout(() => { document.getElementById('notif').style.display = 'block'; }, 3000);
         }
 
         function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
     </script></body></html>`);
 });
 
-// --- ROUTE 5 : PARAMÈTRES (Avec Toggle Bleu) ---
+// --- ROUTE 5 : PARAMÈTRES (Pacte Respecté) ---
 app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
     <body style="background:#f4f7f6;"><div class="app-shell">
         <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
-        
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
         <div class="st-group">
             <div class="st-item">
                 <span>Visibilité profil</span>
@@ -240,22 +261,8 @@ app.get('/settings', (req, res) => {
                     <span class="slider"></span>
                 </label>
             </div>
-            <div class="st-item" style="font-size:0.8rem; color:#666;">Statut actuel : <b id="status" style="color:#007bff;">Public</b></div>
+            <div class="st-item" style="font-size:0.8rem; color:#666;">Statut : <b id="status" style="color:#007bff;">Public</b></div>
         </div>
-
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
-        <div class="st-group">
-            <a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a>
-        </div>
-        
-        <div class="st-group">
-            <div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div>
-            <div style="display:flex; justify-content:space-around; padding:15px;">
-                <button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button>
-                <button onclick="alert('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button>
-            </div>
-        </div>
-
         <a href="/profile" class="btn-pink">Retour</a>
     </div></body></html>`);
 });
