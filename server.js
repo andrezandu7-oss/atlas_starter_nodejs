@@ -10,7 +10,7 @@ const genloveApp = `
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Genlove Simulation</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; }
         .active { display: flex; }
 
@@ -27,22 +27,21 @@ const genloveApp = `
         .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; font-weight: bold; cursor: pointer; }
         .btn-red { background: #dc3545; color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; font-weight: bold; cursor: pointer; }
 
-        /* ÉCRAN 3 : CHAT (Ajusté pour la visibilité du curseur) */
-        .chat-header { background: #9dbce3; color: white; padding: 15px; text-align: center; flex-shrink: 0; }
+        /* ÉCRAN 3 : CHAT (MODIFICATION ICI) */
+        .chat-header { background: #9dbce3; color: white; padding: 15px; text-align: center; }
         .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .bubble { padding: 12px; border-radius: 15px; max-width: 80%; font-size: 0.95rem; line-height: 1.4; }
         .received { background: #e2ecf7; align-self: flex-start; }
         .sent { background: #ff416c; color: white; align-self: flex-end; }
         
-        /* AJUSTEMENT ICI : Ajout de padding-bottom pour remonter le champ */
         .input-area { 
-            padding: 10px 15px 40px 15px; 
+            padding: 10px 15px 40px 15px; /* REHAUSSÉ : 40px au lieu de 15px */
             border-top: 1px solid #eee; 
             display: flex; 
             gap: 10px; 
             align-items: center; 
             background: white;
-            flex-shrink: 0; 
+            flex-shrink: 0; /* EMPÊCHE L'ÉCRASEMENT */
         }
         .input-box { 
             flex: 1; 
@@ -51,7 +50,7 @@ const genloveApp = `
             padding: 12px; 
             border-radius: 25px; 
             outline: none; 
-            font-size: 16px; /* Empêche le zoom automatique sur mobile */
+            font-size: 16px; /* ÉVITE LE ZOOM AUTO SUR IPHONE */
         }
         .btn-send { background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
@@ -104,7 +103,6 @@ const genloveApp = `
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen' + id).classList.add('active');
-            if(id === 3) window.scrollTo(0, 0);
         }
         function send() {
             const input = document.getElementById('msg');
