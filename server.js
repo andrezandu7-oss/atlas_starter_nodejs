@@ -75,7 +75,7 @@ const genloveApp = `
             position: fixed; bottom: 0; width: 100%; max-width: 450px; 
             padding: 10px 15px 45px 15px; border-top: 1px solid #eee; 
             display: flex; gap: 10px; background: white; box-sizing: border-box;
-            align-items: flex-end; /* Garde le bouton en bas quand le textarea grandit */
+            align-items: flex-end; /* Pour garder le bouton aligné en bas */
         }
 
         /* POPUP SÉCURITÉ */
@@ -133,7 +133,7 @@ const genloveApp = `
         </div>
 
         <div class="input-area" id="chatInput">
-            <textarea id="msg" style="flex:1; background:#f1f3f4; border:1px solid #ddd; padding:12px; border-radius:20px; outline:none; font-family:inherit; resize:none; max-height:150px; overflow-y:auto;" placeholder="Écrivez votre message..." rows="1" oninput="autoGrow(this)"></textarea>
+            <textarea id="msg" style="flex:1; background:#f1f3f4; border:1px solid #ddd; padding:12px; border-radius:25px; outline:none; font-family:inherit; resize:none; max-height:150px; overflow-y:auto;" placeholder="Écrivez votre message..." rows="1" oninput="autoGrow(this)"></textarea>
             <button style="background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; flex-shrink:0;" onclick="send()">➤</button>
         </div>
     </div>
