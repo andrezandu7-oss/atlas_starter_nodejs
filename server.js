@@ -61,7 +61,6 @@ const genloveApp = `
         .received { background: #e2ecf7; align-self: flex-start; }
         .sent { background: #ff416c; color: white; align-self: flex-end; }
         .input-area { position: fixed; bottom: 0; width: 100%; max-width: 450px; padding: 10px 15px 45px 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; box-sizing: border-box; }
-        .input-box { flex: 1; background: #f1f3f4; border: 1px solid #ddd; padding: 12px; border-radius: 25px; outline: none; }
 
         /* POPUP SÉCURITÉ */
         #security-popup { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
@@ -118,7 +117,7 @@ const genloveApp = `
         </div>
 
         <div class="input-area" id="chatInput">
-            <input type="text" id="msg" class="input-box" placeholder="Écrivez votre message...">
+            <input type="text" id="msg" style="flex:1; background:#f1f3f4; border:1px solid #ddd; padding:12px; border-radius:25px; outline:none;" placeholder="Écrivez votre message...">
             <button style="background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%;" onclick="send()">➤</button>
         </div>
     </div>
@@ -163,13 +162,17 @@ const genloveApp = `
                     <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
                     <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
                     <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
-                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>\`;
+                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>
+                    <p style="margin-top: 20px;">
+                        <a href="#" onclick="location.reload()" style="color: #4a76b8; text-decoration: none; font-weight: bold; font-size: 0.9rem;">🏠 Retourner sur mon profil</a>
+                    </p>\`;
             } else {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
                     <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
                     <p>Votre session a été fermée en toute sécurité. À bientôt.</p>
-                    <button class="btn-restart" style="background:#1a2a44;" onclick="location.href='about:blank';">Quitter Genlove</button>\`;
+                    <button class="btn-restart" style="background:#1a2a44; margin-bottom: 15px;" onclick="location.href='about:blank';">Quitter Genlove</button>
+                    <button onclick="location.reload()" style="background: none; border: 1px solid #ccc; color: #666; padding: 12px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer;">Retour à l'accueil</button>\`;
             }
             show('final');
         }
