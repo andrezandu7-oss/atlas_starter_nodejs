@@ -14,63 +14,50 @@ const genloveApp = `
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
         .active { display: flex; }
 
-        /* ANIMATIONS */
-        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-        .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; font-size: 1.2rem; }
+        /* HEADER CHAT AMÉLIORÉ */
+        .chat-header { 
+            background: #9dbce3; color: white; padding: 10px 15px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header-btn { background: none; border: none; color: white; cursor: pointer; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; }
+        .logout-text { font-size: 0.8rem; border: 1px solid white; padding: 4px 8px; border-radius: 12px; margin-left: 5px; }
 
-        /* STYLE HORLOGE NUMÉRIQUE */
+        /* HORLOGE ET COEUR */
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; }
         .digital-clock {
-            background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 12px;
-            font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 1.2rem;
-            border: 1px solid #333; box-shadow: 0 0 10px rgba(255, 65, 108, 0.2);
+            background: #1a1a1a; color: #ff416c; padding: 5px 12px; border-radius: 10px;
+            font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem;
             display: inline-flex; align-items: center;
         }
 
-        /* POPUP PÉDAGOGIQUE */
-        #security-popup {
-            display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
-        }
-        .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4); width: 88%; }
-        .pedagogic-box { background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; }
-        .pedagogic-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: #2c3e50; line-height: 1.4; }
-
-        /* DESIGN ÉCRANS 1 & 2 */
-        .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
-        .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
-        .n-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .c-header { background: #0000ff; color: white; padding: 18px; font-weight: bold; }
-        
-        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-
-        /* CHAT */
-        .chat-header { background: #9dbce3; color: white; padding: 12px; text-align: center; flex-shrink: 0; }
-        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
-        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 1rem; line-height: 1.4; }
-        .received { background: #e2ecf7; align-self: flex-start; }
-        .sent { background: #ff416c; color: white; align-self: flex-end; }
-        
-        .input-area { 
-            position: fixed; bottom: 0; width: 100%; max-width: 450px;
-            padding: 10px 15px 45px 15px; border-top: 1px solid #eee; 
-            display: flex; gap: 10px; align-items: center; background: white;
-            box-sizing: border-box; z-index: 500;
-        }
-        .input-box { flex: 1; background: #f1f3f4; border: 1px solid #ddd; padding: 12px; border-radius: 25px; outline: none; font-size: 16px; }
-        .btn-send { background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
-        /* NOUVEL ÉCRAN FINAL */
+        /* ÉCRAN FINAL DYNAMIQUE */
         .final-bg { background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); color: white; justify-content: center; align-items: center; text-align: center; }
         .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 25px; width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
         .btn-restart { background: #ff416c; color: white; border: none; padding: 16px; border-radius: 30px; width: 100%; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 25px; }
+
+        /* AUTRES STYLES (NOTIF, POPUP, CHAT) */
+        .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
+        .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
+        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
+        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
+        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
+        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; line-height: 1.4; }
+        .received { background: #e2ecf7; align-self: flex-start; }
+        .sent { background: #ff416c; color: white; align-self: flex-end; }
+        .input-area { position: fixed; bottom: 0; width: 100%; max-width: 450px; padding: 10px 15px 45px 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; box-sizing: border-box; }
+        .input-box { flex: 1; background: #f1f3f4; border: 1px solid #ddd; padding: 12px; border-radius: 25px; outline: none; }
+        #security-popup { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; width: 88%; }
+        .pedagogic-box { background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; }
     </style>
 </head>
 <body>
 
     <div id="screen1" class="screen active notif-bg">
         <div class="notif-card">
-            <div class="n-header">📩 Genlove Notification</div>
+            <div style="padding:15px; border-bottom:1px solid #eee; font-weight:bold;">📩 Genlove Notification</div>
             <div style="padding: 30px 20px; text-align: center; color: #333;">
                 <p style="font-size: 1.15rem; font-weight: 500; margin-bottom: 10px;">Quelqu'un de compatible avec vous souhaite échanger 💞</p>
                 <p style="font-size: 0.95rem; color: #666; margin-bottom: 25px;">Ouvrez Genlove pour découvrir qui c'est 💖</p>
@@ -81,7 +68,7 @@ const genloveApp = `
 
     <div id="screen2" class="screen notif-bg">
         <div class="notif-card">
-            <div class="c-header">Genlove - confirmation</div>
+            <div style="background: #0000ff; color: white; padding: 18px; font-weight: bold;">Genlove - confirmation</div>
             <div style="padding: 30px 25px; background: white;">
                 <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
                 <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
@@ -94,26 +81,22 @@ const genloveApp = `
             <div class="popup-card">
                 <h3 style="margin-top:0;">🔒 Espace de discussion privé</h3>
                 <p><b>Par mesure de confidentialité, Genlove a sécurisé cet échange pour vous permettre de faire connaissance en toute sérénité.</b></p>
-                
                 <div class="pedagogic-box">
-                    <div class="pedagogic-item">🛡️ <b>Éphémère :</b> Cette conversation s'effacera automatiquement dans 30 minutes.</div>
-                    <div class="pedagogic-item">🕵️ <b>Privé :</b> Aucune donnée ni historique n'est conservé après la fermeture.</div>
-                    <div class="pedagogic-item">✨ <b>Liberté :</b> Profitez de cet instant pour échanger en toute franchise.</div>
+                    <div style="display:flex; gap:10px; margin-bottom:10px; font-size:0.9rem;">🛡️ <b>Éphémère :</b> Tout s'efface dans 30 min.</div>
+                    <div style="display:flex; gap:10px; margin-bottom:10px; font-size:0.9rem;">🕵️ <b>Privé :</b> Aucun historique n'est conservé.</div>
                 </div>
-
-                <p style="font-weight: bold; color: #ff416c;">Le décompte commence maintenant.</p>
-                <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%; font-size:1.1rem;" onclick="closePopup()">Démarrer l'échange</button>
+                <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="closePopup()">Démarrer l'échange</button>
             </div>
         </div>
 
         <div class="chat-header">
-            <b>📍 Chat sécurisé</b><br>
-            <div style="margin-top:10px;">
-                <span class="digital-clock">
-                    <span class="heart-icon">❤️</span>
-                    <span id="timer-display">30:00</span>
-                </span>
+            <button class="header-btn" onclick="showFinal('chat')" title="Quitter la conversation">✕</button>
+            <div class="digital-clock">
+                <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
             </div>
+            <button class="header-btn" onclick="showFinal('app')" title="Se déconnecter">
+                <span class="logout-text">Logout 🔒</span>
+            </button>
         </div>
 
         <div class="chat-messages" id="box">
@@ -127,16 +110,8 @@ const genloveApp = `
     </div>
 
     <div id="screen-final" class="screen final-bg">
-        <div class="final-card">
-            <div style="font-size: 3.5rem; margin-bottom: 15px;">✨</div>
-            <h2 style="margin: 0 0 15px 0; color: #1a2a44;">Genlove vous remercie</h2>
-            <p style="margin-bottom: 20px;">Merci pour ce moment de partage et de franchise.</p>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 15px; font-size: 0.9rem; color: #555;">
-                🛡️ Par mesure de sécurité, votre conversation a été <b>intégralement effacée</b>.
+        <div id="final-card-content" class="final-card">
             </div>
-            <p style="margin-top: 25px; font-weight: 500;">Envie de découvrir d'autres profils ?</p>
-            <button class="btn-restart" onclick="location.reload()">🔎 Continuer la recherche</button>
-        </div>
     </div>
 
     <script>
@@ -145,22 +120,11 @@ const genloveApp = `
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            if(id === 'final') {
-                document.getElementById('screen-final').classList.add('active');
-            } else {
-                document.getElementById('screen' + id).classList.add('active');
-            }
+            document.getElementById(id === 'final' ? 'screen-final' : 'screen' + id).classList.add('active');
         }
 
-        function showSecurityPopup() {
-            show(3);
-            document.getElementById('security-popup').style.display = 'flex';
-        }
-
-        function closePopup() {
-            document.getElementById('security-popup').style.display = 'none';
-            startTimer();
-        }
+        function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
+        function closePopup() { document.getElementById('security-popup').style.display = 'none'; startTimer(); }
 
         function startTimer() {
             if (timerInterval) return;
@@ -169,29 +133,35 @@ const genloveApp = `
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
-                if (timeLeft <= 0) { 
-                    clearInterval(timerInterval); 
-                    show('final'); // REMPLACEMENT DU RELOAD PAR L'ÉCRAN FINAL
-                }
+                if (timeLeft <= 0) { clearInterval(timerInterval); showFinal('chat'); }
             }, 1000);
         }
 
-        function updateInputPosition() {
-            if (window.visualViewport && document.getElementById('screen3').classList.contains('active')) {
-                const keyboardHeight = window.innerHeight - window.visualViewport.height;
-                document.getElementById('chatInput').style.bottom = keyboardHeight + "px";
-                document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
+        // LOGIQUE DYNAMIQUE DE L'IDÉE DE GÉNIE
+        function showFinal(type) {
+            clearInterval(timerInterval);
+            const card = document.getElementById('final-card-content');
+            if(type === 'chat') {
+                card.innerHTML = \`
+                    <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
+                    <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
+                    <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
+                    <p style="font-size:0.9rem; color:#666; margin-top:10px;">🛡️ Conversation effacée avec succès.</p>
+                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>
+                \`;
+            } else {
+                card.innerHTML = \`
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
+                    <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
+                    <p>Votre session a été fermée en toute sécurité. Toutes vos traces ont été supprimées.</p>
+                    <button class="btn-restart" style="background:#1a2a44;" onclick="location.reload()">Se reconnecter</button>
+                \`;
             }
+            show('final');
         }
-        window.visualViewport && window.visualViewport.addEventListener("resize", updateInputPosition);
 
         function send() {
             const input = document.getElementById('msg');
-            if(input.value.trim().toUpperCase() === "FIN") { // Petit raccourci pour tester l'écran final
-                clearInterval(timerInterval);
-                show('final');
-                return;
-            }
             if(input.value.trim()) {
                 const div = document.createElement('div');
                 div.className = 'bubble sent';
@@ -201,6 +171,12 @@ const genloveApp = `
                 document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
             }
         }
+
+        window.visualViewport && window.visualViewport.addEventListener("resize", () => {
+            if (document.getElementById('screen3').classList.contains('active')) {
+                document.getElementById('chatInput').style.bottom = (window.innerHeight - window.visualViewport.height) + "px";
+            }
+        });
     </script>
 </body>
 </html>
