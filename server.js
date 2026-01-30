@@ -35,11 +35,6 @@ const genloveApp = `
         .pedagogic-box { background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; }
         .pedagogic-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: #2c3e50; line-height: 1.4; }
 
-        /* ÉCRAN FINAL (NOUVEAU) */
-        .final-bg { background: linear-gradient(135deg, #1a2a44 0%, #4a76b8 100%); color: white; justify-content: center; align-items: center; text-align: center; padding: 20px; }
-        .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 88%; }
-        .btn-restart { background: #ff416c; color: white; border: none; padding: 18px; border-radius: 30px; width: 100%; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 25px; }
-
         /* DESIGN ÉCRANS 1 & 2 */
         .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
@@ -64,6 +59,11 @@ const genloveApp = `
         }
         .input-box { flex: 1; background: #f1f3f4; border: 1px solid #ddd; padding: 12px; border-radius: 25px; outline: none; font-size: 16px; }
         .btn-send { background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* NOUVEL ÉCRAN FINAL */
+        .final-bg { background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); color: white; justify-content: center; align-items: center; text-align: center; }
+        .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 25px; width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+        .btn-restart { background: #ff416c; color: white; border: none; padding: 16px; border-radius: 30px; width: 100%; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 25px; }
     </style>
 </head>
 <body>
@@ -72,12 +72,8 @@ const genloveApp = `
         <div class="notif-card">
             <div class="n-header">📩 Genlove Notification</div>
             <div style="padding: 30px 20px; text-align: center; color: #333;">
-                <p style="font-size: 1.15rem; font-weight: 500; margin-bottom: 10px;">
-                    Quelqu'un de compatible avec vous souhaite échanger 💞
-                </p>
-                <p style="font-size: 0.95rem; color: #666; margin-bottom: 25px;">
-                    Ouvrez Genlove pour découvrir qui c'est 💖
-                </p>
+                <p style="font-size: 1.15rem; font-weight: 500; margin-bottom: 10px;">Quelqu'un de compatible avec vous souhaite échanger 💞</p>
+                <p style="font-size: 0.95rem; color: #666; margin-bottom: 25px;">Ouvrez Genlove pour découvrir qui c'est 💖</p>
             </div>
             <button class="btn-blue" onclick="show(2)">📖 Ouvrir l'application Genlove</button>
         </div>
@@ -132,14 +128,13 @@ const genloveApp = `
 
     <div id="screen-final" class="screen final-bg">
         <div class="final-card">
-            <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
-            <h2 style="margin-top:0;">Merci d'utiliser Genlove</h2>
-            <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
-            <p>Pour votre sécurité, <b>votre conversation a été intégralement effacée.</b></p>
-            <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-                <p style="font-weight: bold; color: #1a2a44;">L'aventure continue !</p>
-                <p style="font-size: 0.9rem;">D'autres profils compatibles vous attendent.</p>
+            <div style="font-size: 3.5rem; margin-bottom: 15px;">✨</div>
+            <h2 style="margin: 0 0 15px 0; color: #1a2a44;">Genlove vous remercie</h2>
+            <p style="margin-bottom: 20px;">Merci pour ce moment de partage et de franchise.</p>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 15px; font-size: 0.9rem; color: #555;">
+                🛡️ Par mesure de sécurité, votre conversation a été <b>intégralement effacée</b>.
             </div>
+            <p style="margin-top: 25px; font-weight: 500;">Envie de découvrir d'autres profils ?</p>
             <button class="btn-restart" onclick="location.reload()">🔎 Continuer la recherche</button>
         </div>
     </div>
@@ -192,6 +187,11 @@ const genloveApp = `
 
         function send() {
             const input = document.getElementById('msg');
+            if(input.value.trim().toUpperCase() === "FIN") { // Petit raccourci pour tester l'écran final
+                clearInterval(timerInterval);
+                show('final');
+                return;
+            }
             if(input.value.trim()) {
                 const div = document.createElement('div');
                 div.className = 'bubble sent';
