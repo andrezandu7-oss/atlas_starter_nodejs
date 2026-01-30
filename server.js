@@ -8,24 +8,29 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation - Finale</title>
+    <title>Genlove Simulation</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
         .active { display: flex; }
 
-        /* HORLOGE ET COEUR */
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
+        /* --- ÉCRAN 1 : LA NOTIFICATION (CORRIGÉE) --- */
+        .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
+        .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
+        .n-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1rem; }
+        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; font-size: 1rem; }
+
+        /* --- ÉCRAN 2 : CONFIRMATION --- */
+        .c-header { background: #0000ff; color: white; padding: 18px; font-weight: bold; }
+        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; font-weight: bold; cursor: pointer; }
+
+        /* --- ÉCRAN 3 : CHAT & DESIGN HORLOGE --- */
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; font-size: 1.2rem; }
         .digital-clock {
             background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 12px;
             font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 1.2rem;
-            border: 1px solid #333; box-shadow: 0 0 10px rgba(255, 65, 108, 0.2);
-            display: inline-flex; align-items: center;
+            border: 1px solid #333; display: inline-flex; align-items: center;
         }
 
         /* POPUP PÉDAGOGIQUE */
@@ -33,25 +38,14 @@ const genloveApp = `
             display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
         }
-        .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4); width: 88%; }
-        .pedagogic-box { 
-            background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; 
-            margin: 20px 0; border: 1px solid #d0e3ff;
-        }
-        .pedagogic-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: #2c3e50; line-height: 1.3; }
+        .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; width: 88%; }
+        .pedagogic-box { background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; }
+        .pedagogic-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: #2c3e50; }
 
-        /* ÉCRANS NOTIF & CONFIRMATION */
-        .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
-        .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
-        .n-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; }
-        .c-header { background: #0000ff; color: white; padding: 18px; font-weight: bold; }
-        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 20px 5%; font-weight: bold; cursor: pointer; }
-        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
-
-        /* CHAT */
+        /* MESSAGERIE */
         .chat-header { background: #9dbce3; color: white; padding: 12px; text-align: center; flex-shrink: 0; }
         .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
-        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 1rem; }
+        .bubble { padding: 12px; border-radius: 15px; max-width: 80%; font-size: 0.95rem; }
         .received { background: #e2ecf7; align-self: flex-start; }
         .sent { background: #ff416c; color: white; align-self: flex-end; }
         
@@ -70,17 +64,22 @@ const genloveApp = `
     <div id="screen1" class="screen active notif-bg">
         <div class="notif-card">
             <div class="n-header">📩 Genlove Notification</div>
-            <div style="padding: 30px 20px; text-align: center;"><p style="font-size: 1.1rem;">Un partenaire compatible ! 💞</p></div>
+            <div style="padding: 30px 20px; text-align: center; color: #333;">
+                <p style="font-size: 1.1rem; margin: 0;">Un partenaire compatible ! 💞</p>
+            </div>
             <button class="btn-blue" onclick="show(2)">Ouvrir</button>
         </div>
     </div>
 
     <div id="screen2" class="screen notif-bg">
-        <div class="notif-card">
+        <div class="notif-card" style="width: 85%;">
             <div class="c-header">Genlove - confirmation</div>
-            <div style="padding: 30px 25px;">
-                <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
-                <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
+            <div style="padding: 25px; background: white;">
+                <p style="font-size: 1.1rem; margin-bottom: 20px;">Accepter Sarah ? ❤️</p>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
+                    <button style="background:#dc3545; color:white; border:none; padding:15px; border-radius:10px; flex:1;" onclick="show(1)">Refuser</button>
+                </div>
             </div>
         </div>
     </div>
@@ -152,6 +151,7 @@ const genloveApp = `
             }, 1000);
         }
 
+        // TON SCRIPT POUR LE CLAVIER
         function updateInputPosition() {
             if (window.visualViewport && document.getElementById('screen3').classList.contains('active')) {
                 const keyboardHeight = window.innerHeight - window.visualViewport.height;
