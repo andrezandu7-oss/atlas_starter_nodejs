@@ -71,12 +71,8 @@ const genloveApp = `
         .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
         .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
 
-        .input-area { 
-            position: fixed; bottom: 0; width: 100%; max-width: 450px; 
-            padding: 10px 15px 45px 15px; border-top: 1px solid #eee; 
-            display: flex; gap: 10px; background: white; box-sizing: border-box;
-            align-items: flex-end; /* Pour garder le bouton aligné en bas */
-        }
+        /* INSERTION 1 : align-items: flex-end ajouté ici pour que le bouton suive le textarea */
+        .input-area { position: fixed; bottom: 0; width: 100%; max-width: 450px; padding: 10px 15px 45px 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; box-sizing: border-box; align-items: flex-end; }
 
         /* POPUP SÉCURITÉ */
         #security-popup { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
@@ -133,8 +129,8 @@ const genloveApp = `
         </div>
 
         <div class="input-area" id="chatInput">
-            <textarea id="msg" style="flex:1; background:#f1f3f4; border:1px solid #ddd; padding:12px; border-radius:25px; outline:none; font-family:inherit; resize:none; max-height:150px; overflow-y:auto;" placeholder="Écrivez votre message..." rows="1" oninput="autoGrow(this)"></textarea>
-            <button style="background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; flex-shrink:0;" onclick="send()">➤</button>
+            <textarea id="msg" style="flex:1; background:#f1f3f4; border:1px solid #ddd; padding:12px; border-radius:25px; outline:none; font-family:inherit; resize:none; max-height:120px; overflow-y:auto;" placeholder="Écrivez votre message..." rows="1" oninput="autoGrow(this)"></textarea>
+            <button style="background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%;" onclick="send()">➤</button>
         </div>
     </div>
 
@@ -165,6 +161,7 @@ const genloveApp = `
             }, 1000);
         }
 
+        // INSERTION 3 : La fonction de calcul de hauteur
         function autoGrow(element) {
             element.style.height = "auto";
             element.style.height = (element.scrollHeight) + "px";
@@ -206,7 +203,7 @@ const genloveApp = `
                 div.innerText = input.value;
                 document.getElementById('box').appendChild(div);
                 input.value = '';
-                input.style.height = "auto";
+                input.style.height = "auto"; // Réinitialise la hauteur après envoi
                 document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
             }
         }
