@@ -14,30 +14,62 @@ const genloveApp = `
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
         .active { display: flex; }
 
-        /* HEADER CHAT AMÉLIORÉ */
+        /* HEADER CHAT RECTIFIÉ */
         .chat-header { 
-            background: #9dbce3; color: white; padding: 10px 15px; 
+            background: #9dbce3; color: white; padding: 12px 15px; 
             display: flex; justify-content: space-between; align-items: center; 
-            flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
-        .header-btn { background: none; border: none; color: white; cursor: pointer; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; }
-        .logout-text { font-size: 0.8rem; border: 1px solid white; padding: 4px 8px; border-radius: 12px; margin-left: 5px; }
+
+        /* BOUTON QUITTER : SOLIDE ET CLAIR */
+        .btn-quit {
+            background: #ffffff;
+            color: #9dbce3;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* BOUTON LOGOUT : STYLE "BADGE SÉCURITÉ" */
+        .btn-logout-badge {
+            background: #1a2a44;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
 
         /* HORLOGE ET COEUR */
-        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; }
         .digital-clock {
-            background: #1a1a1a; color: #ff416c; padding: 5px 12px; border-radius: 10px;
+            background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 10px;
             font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem;
             display: inline-flex; align-items: center;
+            border: 1px solid #333;
         }
 
-        /* ÉCRAN FINAL DYNAMIQUE */
+        /* ÉCRAN FINAL */
         .final-bg { background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); color: white; justify-content: center; align-items: center; text-align: center; }
         .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 25px; width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
         .btn-restart { background: #ff416c; color: white; border: none; padding: 16px; border-radius: 30px; width: 100%; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 25px; }
 
-        /* AUTRES STYLES (NOTIF, POPUP, CHAT) */
+        /* AUTRES STYLES ESSENTIELS */
         .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
         .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
@@ -90,12 +122,14 @@ const genloveApp = `
         </div>
 
         <div class="chat-header">
-            <button class="header-btn" onclick="showFinal('chat')" title="Quitter la conversation">✕</button>
+            <button class="btn-quit" onclick="showFinal('chat')">✕</button>
+            
             <div class="digital-clock">
                 <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
             </div>
-            <button class="header-btn" onclick="showFinal('app')" title="Se déconnecter">
-                <span class="logout-text">Logout 🔒</span>
+
+            <button class="btn-logout-badge" onclick="showFinal('app')">
+                Logout 🔒
             </button>
         </div>
 
@@ -105,13 +139,12 @@ const genloveApp = `
 
         <div class="input-area" id="chatInput">
             <input type="text" id="msg" class="input-box" placeholder="Écrivez votre message...">
-            <button class="btn-send" onclick="send()">➤</button>
+            <button style="background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%;" onclick="send()">➤</button>
         </div>
     </div>
 
     <div id="screen-final" class="screen final-bg">
-        <div id="final-card-content" class="final-card">
-            </div>
+        <div id="final-card-content" class="final-card"></div>
     </div>
 
     <script>
@@ -137,7 +170,6 @@ const genloveApp = `
             }, 1000);
         }
 
-        // LOGIQUE DYNAMIQUE DE L'IDÉE DE GÉNIE
         function showFinal(type) {
             clearInterval(timerInterval);
             const card = document.getElementById('final-card-content');
@@ -146,14 +178,13 @@ const genloveApp = `
                     <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
                     <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
                     <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
-                    <p style="font-size:0.9rem; color:#666; margin-top:10px;">🛡️ Conversation effacée avec succès.</p>
                     <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>
                 \`;
             } else {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
                     <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
-                    <p>Votre session a été fermée en toute sécurité. Toutes vos traces ont été supprimées.</p>
+                    <p>Votre session a été fermée en toute sécurité. À bientôt.</p>
                     <button class="btn-restart" style="background:#1a2a44;" onclick="location.reload()">Se reconnecter</button>
                 \`;
             }
@@ -171,12 +202,6 @@ const genloveApp = `
                 document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
             }
         }
-
-        window.visualViewport && window.visualViewport.addEventListener("resize", () => {
-            if (document.getElementById('screen3').classList.contains('active')) {
-                document.getElementById('chatInput').style.bottom = (window.innerHeight - window.visualViewport.height) + "px";
-            }
-        });
     </script>
 </body>
 </html>
