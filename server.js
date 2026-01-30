@@ -30,18 +30,29 @@ const genloveApp = `
             display: inline-flex; align-items: center;
         }
 
-        /* POPUP DE SÉCURITÉ PÉDAGOGIQUE */
+        /* POPUP PÉDAGOGIQUE AMÉLIORÉ */
         #security-popup {
             display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
         }
         .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4); width: 88%; }
-        .popup-card h3 { color: #1a1a1a; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .popup-card p { color: #444; line-height: 1.5; font-size: 0.95rem; }
-        .info-box { background: #f8f9fa; border-left: 4px solid #4a76b8; padding: 12px; text-align: left; margin: 20px 0; font-size: 0.9rem; }
-        .btn-got-it { background: #4a76b8; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+        .popup-card h3 { color: #1a1a1a; margin-top: 0; font-size: 1.4rem; font-weight: bold; }
+        .popup-card p { color: #444; line-height: 1.5; font-size: 1rem; margin: 15px 0; }
+        
+        .pedagogic-box { 
+            background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; 
+            margin: 20px 0; border: 1px solid #d0e3ff;
+        }
+        .pedagogic-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: #2c3e50; }
+        .pedagogic-item b { color: #4a76b8; }
 
-        /* ÉCRANS NOTIF & CONFIRMATION */
+        .btn-start { 
+            background: #4a76b8; color: white; border: none; padding: 16px; 
+            border-radius: 30px; font-weight: bold; cursor: pointer; width: 100%; 
+            font-size: 1.1rem; box-shadow: 0 4px 15px rgba(74, 118, 184, 0.3);
+        }
+
+        /* NOTIF & CONFIRMATION */
         .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
         .n-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; }
@@ -51,8 +62,8 @@ const genloveApp = `
 
         /* CHAT */
         .chat-header { background: #9dbce3; color: white; padding: 12px; text-align: center; flex-shrink: 0; }
-        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
-        .bubble { padding: 12px; border-radius: 15px; max-width: 80%; font-size: 0.95rem; }
+        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
+        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 1rem; }
         .received { background: #e2ecf7; align-self: flex-start; }
         .sent { background: #ff416c; color: white; align-self: flex-end; }
         
@@ -71,9 +82,7 @@ const genloveApp = `
     <div id="screen1" class="screen active notif-bg">
         <div class="notif-card">
             <div class="n-header">📩 Genlove Notification</div>
-            <div style="padding: 30px 20px; text-align: center;">
-                <p style="font-size: 1.1rem; margin: 0;">Un partenaire compatible ! 💞</p>
-            </div>
+            <div style="padding: 30px 20px; text-align: center;"><p style="font-size: 1.1rem;">Un partenaire compatible ! 💞</p></div>
             <button class="btn-blue" onclick="show(2)">Ouvrir</button>
         </div>
     </div>
@@ -81,7 +90,7 @@ const genloveApp = `
     <div id="screen2" class="screen notif-bg">
         <div class="notif-card">
             <div class="c-header">Genlove - confirmation</div>
-            <div style="padding: 30px 25px; background: white;">
+            <div style="padding: 30px 25px;">
                 <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
                 <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
             </div>
@@ -91,24 +100,23 @@ const genloveApp = `
     <div id="screen3" class="screen">
         <div id="security-popup">
             <div class="popup-card">
-                <h3>🔒 Espace de confiance</h3>
-                <p>Pour garantir votre sérénité, Genlove a créé cet espace de discussion <b>strictement confidentiel</b>.</p>
+                <h3>🔒 Espace de discussion privé</h3>
+                <p>Par mesure de confidentialité, Genlove a sécurisé cet échange pour vous permettre de faire connaissance en toute sérénité.</p>
                 
-                <div class="info-box">
-                    • <b>Éphémère :</b> Tout s'efface dans 30 min.<br>
-                    • <b>Sécurisé :</b> Aucune trace n'est conservée.<br>
-                    • <b>Liberté :</b> Échangez sans crainte et en toute franchise.
+                <div class="pedagogic-box">
+                    <div class="pedagogic-item">🛡️ <b>Éphémère :</b> Cette conversation s'effacera automatiquement dans 30 minutes.</div>
+                    <div class="pedagogic-item">🕵️ <b>Privé :</b> Aucune donnée ni historique n'est conservé après la fermeture.</div>
+                    <div class="pedagogic-item">✨ <b>Liberté :</b> Profitez de cet instant pour échanger en toute franchise.</div>
                 </div>
 
-                <p style="font-weight: bold; color: #ff416c;">La conversation s'autodétruira à la fin du compte à rebours.</p>
-                
-                <button class="btn-got-it" onclick="closePopup()">Démarrer l'échange</button>
+                <p style="font-weight: bold; color: #ff416c;">Le décompte commence dès maintenant.</p>
+                <button class="btn-start" onclick="closePopup()">Démarrer l'échange sécurisé</button>
             </div>
         </div>
 
         <div class="chat-header">
             <b>📍 Chat sécurisé</b><br>
-            <div style="margin-top:8px;">
+            <div style="margin-top:10px;">
                 <span class="digital-clock">
                     <span class="heart-icon">❤️</span>
                     <span id="timer-display">30:00</span>
@@ -129,9 +137,9 @@ const genloveApp = `
     <script>
         let timeLeft = 30 * 60; 
         let timerInterval;
+        const chatInput = document.getElementById("chatInput");
 
         function show(id) {
-            document.querySelectorAll('.screen').forEach(s => s.forEach ? s.classList.remove('active') : null);
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen' + id).classList.add('active');
         }
@@ -153,10 +161,9 @@ const genloveApp = `
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
-                
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    alert("Sécurité Genlove : La conversation a été définitivement effacée pour votre confidentialité.");
+                    alert("Session expirée pour votre sécurité.");
                     location.reload();
                 }
             }, 1000);
@@ -165,7 +172,7 @@ const genloveApp = `
         function updateInputPosition() {
             if (window.visualViewport && document.getElementById('screen3').classList.contains('active')) {
                 const keyboardHeight = window.innerHeight - window.visualViewport.height;
-                document.getElementById('chatInput').style.bottom = keyboardHeight + "px";
+                chatInput.style.bottom = keyboardHeight + "px";
             }
         }
         window.visualViewport && window.visualViewport.addEventListener("resize", updateInputPosition);
