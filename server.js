@@ -10,70 +10,55 @@ const genloveApp = `
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Genlove Simulation</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
-        .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
+        html, body { height: 100%; margin: 0; font-family: sans-serif; background: #f0f2f5; overflow: hidden; }
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: relative; background: white; }
         .active { display: flex; }
 
-        /* POPUP DE SÉCURITÉ OPTION 1 */
+        /* POPUP SÉCURITÉ */
         #security-popup {
-            display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 20px;
         }
-        .popup-card { background: white; border-radius: 25px; padding: 30px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 85%; }
+        .popup-card { background: white; border-radius: 25px; padding: 30px 20px; text-align: center; width: 85%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .btn-got-it { background: #4a76b8; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; margin-top: 20px; cursor: pointer; }
 
-        /* ÉCRANS NOTIF & CONFIRMATION */
-        .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
-        .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
-        .n-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; font-weight: bold; }
-        .c-header { background: #0000ff; color: white; padding: 18px; font-weight: bold; }
-        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
-        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; font-weight: bold; cursor: pointer; }
+        /* ÉCRANS PRÉCÉDENTS */
+        .centered-content { justify-content: center; align-items: center; background: #f0f2f5; }
+        .card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .card-header { padding: 15px; background: #0000ff; color: white; font-weight: bold; }
+        .btn-action { width: 90%; padding: 15px; border-radius: 12px; margin: 10px 5%; border: none; font-weight: bold; cursor: pointer; }
 
-        /* CHAT SÉCURISÉ */
-        .chat-header { background: #9dbce3; color: white; padding: 15px; text-align: center; flex-shrink: 0; }
-        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .bubble { padding: 12px; border-radius: 15px; max-width: 80%; font-size: 0.95rem; line-height: 1.4; }
-        .received { background: #e2ecf7; align-self: flex-start; }
-        .sent { background: #ff416c; color: white; align-self: flex-end; }
-        
-        .input-area { 
-            padding: 10px 15px 45px 15px; /* Rehaussé pour le curseur */
-            border-top: 1px solid #eee; 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
-            background: white;
-            flex-shrink: 0;
+        /* CHAT (Synthèse de tes 3 codes) */
+        .chat-header { background: #9bbce3; text-align: center; padding: 15px; flex-shrink: 0; color: white; z-index: 1001; }
+        .chat-messages { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            background: #f8fafb;
+            padding-bottom: 80px; /* Espace pour l'input */
         }
-        .input-box { flex: 1; background: #f1f3f4; border: 1px solid #ddd; padding: 12px; border-radius: 25px; outline: none; font-size: 16px; }
-        .btn-send { background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .message { max-width: 80%; padding: 10px 14px; margin-bottom: 10px; border-radius: 18px; line-height: 1.4; font-size: 0.95rem; }
+        .received { background: #e9eef5; align-self: flex-start; }
+        .sent { background: #ff4f7b; color: white; margin-left: auto; }
+
+        .chat-input { 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            display: flex; gap: 8px; 
+            padding: 10px 15px 30px 15px; 
+            background: #fff; 
+            border-top: 1px solid #ddd;
+            z-index: 1000;
+            transition: bottom 0.05s linear; /* Pour suivre le clavier fluidement */
+        }
+        .chat-input input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ccc; outline: none; font-size: 16px; }
+        .chat-input button { padding: 0 16px; border-radius: 50%; border: none; background: #3b82f6; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="screen1" class="screen active notif-bg">
-        <div class="notif-card">
-            <div class="n-header">📩 Genlove Notification</div>
-            <div style="padding: 30px 20px; text-align: center; color: #333;">
-                <p style="font-size: 1.1rem;">Quelqu'un de compatible avec vous souhaite échanger 💞</p>
-            </div>
-            <button class="btn-blue" onclick="show(2)">📖 Ouvrir l'application Genlove</button>
-        </div>
-    </div>
-
-    <div id="screen2" class="screen notif-bg">
-        <div class="notif-card" style="width: 85%;">
-            <div class="c-header">Genlove - confirmation</div>
-            <div style="padding: 25px; background: white;">
-                <p><b>Sarah</b> souhaite échanger avec vous ❤️</p>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
-                    <button style="background:#dc3545; color:white; border:none; padding:15px; border-radius:10px; flex:1;" onclick="show(1)">Refuser</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="screen1" class="screen active centered-content"><div class="card"><div style="padding:15px; font-weight:bold;">📩 Genlove Notification</div><div style="padding:30px; text-align:center;">Un partenaire compatible ! 💞</div><button class="btn-action" style="background:#7ca9e6; color:white;" onclick="show(2)">Ouvrir</button></div></div>
+    <div id="screen2" class="screen centered-content"><div class="card"><div class="card-header">Genlove - confirmation</div><div style="padding:25px;"><p>Accepter Sarah ? ❤️</p><button class="btn-action" style="background:#28a745; color:white;" onclick="showSecurityPopup()">Accepter</button></div></div></div>
 
     <div id="screen3" class="screen">
         <div id="security-popup">
@@ -81,27 +66,26 @@ const genloveApp = `
                 <h3>🔒 Espace de discussion privé</h3>
                 <p>Par mesure de confidentialité, vos échanges dans ce chat sont <b>éphémères</b>.</p>
                 <p>Cette conversation s'effacera automatiquement dans <b>30 minutes</b>.</p>
-                <p><small>Profitez de cet instant pour faire connaissance en toute sécurité.</small></p>
                 <button class="btn-got-it" onclick="closePopup()">J'ai compris</button>
             </div>
         </div>
 
-        <div class="chat-header">
-            <b>📍 Chat sécurisé</b><br>
-            <span style="font-size: 0.8rem;">Connecté via Genlove (30m)</span>
-        </div>
+        <div class="chat-header">🔒 Chat sécurisé <br><small>Connecté via Genlove</small></div>
+
         <div class="chat-messages" id="box">
-            <div class="bubble received">Bonjour ! Ton profil correspond exactement à ce que je recherche. 👋</div>
+            <div class="message received">Bonjour ! Ton profil correspond exactement à ce que je recherche. 👋</div>
+            <div class="message sent">Bonjour ! C'est rassurant de savoir que nous sommes compatibles. 😍</div>
         </div>
-        <div class="input-area">
-            <input type="text" id="msg" class="input-box" placeholder="Écrivez votre message...">
-            <button class="btn-send" onclick="send()">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
+
+        <div class="chat-input" id="chatInput">
+            <input type="text" id="msg" placeholder="Écrivez votre message…" onfocus="scrollToBottom()" />
+            <button onclick="send()">➤</button>
         </div>
     </div>
 
     <script>
+        const chatInput = document.getElementById("chatInput");
+
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen' + id).classList.add('active');
@@ -116,15 +100,35 @@ const genloveApp = `
             document.getElementById('security-popup').style.display = 'none';
         }
 
+        // --- TON SCRIPT VISUAL VIEWPORT ---
+        function updateInputPosition() {
+            if (window.visualViewport) {
+                const viewportHeight = window.visualViewport.height;
+                const windowHeight = window.innerHeight;
+                const keyboardHeight = windowHeight - viewportHeight;
+                chatInput.style.bottom = keyboardHeight + "px";
+                scrollToBottom();
+            }
+        }
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", updateInputPosition);
+        }
+
+        function scrollToBottom() {
+            const box = document.getElementById('box');
+            setTimeout(() => { box.scrollTop = box.scrollHeight; }, 100);
+        }
+
         function send() {
             const input = document.getElementById('msg');
             if(input.value.trim()) {
                 const div = document.createElement('div');
-                div.className = 'bubble sent';
+                div.className = 'message sent';
                 div.innerText = input.value;
                 document.getElementById('box').appendChild(div);
                 input.value = '';
-                document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
+                scrollToBottom();
             }
         }
     </script>
