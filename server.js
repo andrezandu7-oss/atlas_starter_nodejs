@@ -44,6 +44,22 @@ const genloveApp = `
             display: inline-flex; align-items: center; border: 1px solid #333;
         }
 
+        /* MESSAGERIE - CORRECTIF MULTI-LIGNES */
+        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 100px; }
+        .bubble { 
+            padding: 12px 16px; 
+            border-radius: 18px; 
+            max-width: 75%; 
+            line-height: 1.4; 
+            word-wrap: break-word; 
+            white-space: pre-wrap; 
+            height: auto; 
+            display: block; 
+            position: relative;
+        }
+        .received { background: #e2ecf7; align-self: flex-start; color: #333; }
+        .sent { background: #ff416c; color: white; align-self: flex-end; }
+
         /* ÉCRAN FINAL */
         .final-bg { background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); color: white; justify-content: center; align-items: center; text-align: center; }
         .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 25px; width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
@@ -55,11 +71,6 @@ const genloveApp = `
         .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
         .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
 
-        /* MESSAGERIE */
-        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
-        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; line-height: 1.4; }
-        .received { background: #e2ecf7; align-self: flex-start; }
-        .sent { background: #ff416c; color: white; align-self: flex-end; }
         .input-area { position: fixed; bottom: 0; width: 100%; max-width: 450px; padding: 10px 15px 45px 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; box-sizing: border-box; }
 
         /* POPUP SÉCURITÉ */
