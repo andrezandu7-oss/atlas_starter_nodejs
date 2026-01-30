@@ -20,49 +20,39 @@ const genloveApp = `
             50% { transform: scale(1.3); }
             100% { transform: scale(1); }
         }
-        .heart-icon {
-            display: inline-block;
-            color: #ff416c;
-            animation: heartbeat 1s infinite; /* Bat toutes les secondes */
-            margin-right: 5px;
-            font-size: 1.2rem;
-        }
+        .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; font-size: 1.2rem; }
 
         /* STYLE HORLOGE NUMÉRIQUE */
         .digital-clock {
-            background: #222;
-            color: #ff416c;
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            font-size: 1.1rem;
-            border: 1px solid #444;
-            box-shadow: inset 0 0 5px rgba(255, 65, 108, 0.5);
-            display: inline-flex;
-            align-items: center;
+            background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 12px;
+            font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 1.2rem;
+            border: 1px solid #333; box-shadow: 0 0 10px rgba(255, 65, 108, 0.2);
+            display: inline-flex; align-items: center;
         }
 
-        /* POPUP DE SÉCURITÉ */
+        /* POPUP DE SÉCURITÉ PÉDAGOGIQUE */
         #security-popup {
             display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
+            background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
         }
-        .popup-card { background: white; border-radius: 25px; padding: 30px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 85%; }
-        .btn-got-it { background: #4a76b8; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4); width: 88%; }
+        .popup-card h3 { color: #1a1a1a; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .popup-card p { color: #444; line-height: 1.5; font-size: 0.95rem; }
+        .info-box { background: #f8f9fa; border-left: 4px solid #4a76b8; padding: 12px; text-align: left; margin: 20px 0; font-size: 0.9rem; }
+        .btn-got-it { background: #4a76b8; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
 
-        /* ÉCRANS PRÉCÉDENTS */
+        /* ÉCRANS NOTIF & CONFIRMATION */
         .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
-        .n-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .n-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; }
         .c-header { background: #0000ff; color: white; padding: 18px; font-weight: bold; }
-        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
-        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; font-weight: bold; cursor: pointer; }
+        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 20px 5%; font-weight: bold; cursor: pointer; }
+        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
 
         /* CHAT */
-        .chat-header { background: #9dbce3; color: white; padding: 10px; text-align: center; flex-shrink: 0; }
+        .chat-header { background: #9dbce3; color: white; padding: 12px; text-align: center; flex-shrink: 0; }
         .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
-        .bubble { padding: 12px; border-radius: 15px; max-width: 80%; font-size: 0.95rem; line-height: 1.4; }
+        .bubble { padding: 12px; border-radius: 15px; max-width: 80%; font-size: 0.95rem; }
         .received { background: #e2ecf7; align-self: flex-start; }
         .sent { background: #ff416c; color: white; align-self: flex-end; }
         
@@ -82,21 +72,18 @@ const genloveApp = `
         <div class="notif-card">
             <div class="n-header">📩 Genlove Notification</div>
             <div style="padding: 30px 20px; text-align: center;">
-                <p style="font-size: 1.1rem;">Quelqu'un de compatible avec vous souhaite échanger 💞</p>
+                <p style="font-size: 1.1rem; margin: 0;">Un partenaire compatible ! 💞</p>
             </div>
-            <button class="btn-blue" onclick="show(2)">📖 Ouvrir l'application Genlove</button>
+            <button class="btn-blue" onclick="show(2)">Ouvrir</button>
         </div>
     </div>
 
     <div id="screen2" class="screen notif-bg">
-        <div class="notif-card" style="width: 85%;">
+        <div class="notif-card">
             <div class="c-header">Genlove - confirmation</div>
-            <div style="padding: 25px; background: white;">
-                <p><b>Sarah</b> souhaite échanger avec vous ❤️</p>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
-                    <button style="background:#dc3545; color:white; border:none; padding:15px; border-radius:10px; flex:1;" onclick="show(1)">Refuser</button>
-                </div>
+            <div style="padding: 30px 25px; background: white;">
+                <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
+                <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
             </div>
         </div>
     </div>
@@ -104,16 +91,24 @@ const genloveApp = `
     <div id="screen3" class="screen">
         <div id="security-popup">
             <div class="popup-card">
-                <h3>🔒 Discussion privée</h3>
-                <p>Vos échanges sont éphémères.</p>
-                <p>Fermeture automatique dans 30 min.</p>
-                <button class="btn-got-it" onclick="closePopup()">J'ai compris</button>
+                <h3>🔒 Espace de confiance</h3>
+                <p>Pour garantir votre sérénité, Genlove a créé cet espace de discussion <b>strictement confidentiel</b>.</p>
+                
+                <div class="info-box">
+                    • <b>Éphémère :</b> Tout s'efface dans 30 min.<br>
+                    • <b>Sécurisé :</b> Aucune trace n'est conservée.<br>
+                    • <b>Liberté :</b> Échangez sans crainte et en toute franchise.
+                </div>
+
+                <p style="font-weight: bold; color: #ff416c;">La conversation s'autodétruira à la fin du compte à rebours.</p>
+                
+                <button class="btn-got-it" onclick="closePopup()">Démarrer l'échange</button>
             </div>
         </div>
 
         <div class="chat-header">
             <b>📍 Chat sécurisé</b><br>
-            <div style="margin-top:5px;">
+            <div style="margin-top:8px;">
                 <span class="digital-clock">
                     <span class="heart-icon">❤️</span>
                     <span id="timer-display">30:00</span>
@@ -136,6 +131,7 @@ const genloveApp = `
         let timerInterval;
 
         function show(id) {
+            document.querySelectorAll('.screen').forEach(s => s.forEach ? s.classList.remove('active') : null);
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen' + id).classList.add('active');
         }
@@ -160,7 +156,7 @@ const genloveApp = `
                 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    alert("Temps écoulé !");
+                    alert("Sécurité Genlove : La conversation a été définitivement effacée pour votre confidentialité.");
                     location.reload();
                 }
             }, 1000);
@@ -172,7 +168,6 @@ const genloveApp = `
                 document.getElementById('chatInput').style.bottom = keyboardHeight + "px";
             }
         }
-
         window.visualViewport && window.visualViewport.addEventListener("resize", updateInputPosition);
 
         function send() {
@@ -189,7 +184,3 @@ const genloveApp = `
     </script>
 </body>
 </html>
-`;
-
-app.get('/', (req, res) => res.send(genloveApp));
-app.listen(port);
