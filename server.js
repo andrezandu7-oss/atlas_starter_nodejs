@@ -8,21 +8,19 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation</title>
+    <title>Genlove Simulation - Finale</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
         .active { display: flex; }
 
-        /* ANIMATION COEUR BATTANT */
+        /* HORLOGE ET COEUR */
         @keyframes heartbeat {
             0% { transform: scale(1); }
             50% { transform: scale(1.3); }
             100% { transform: scale(1); }
         }
         .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; font-size: 1.2rem; }
-
-        /* STYLE HORLOGE NUMÉRIQUE */
         .digital-clock {
             background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 12px;
             font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 1.2rem;
@@ -30,29 +28,19 @@ const genloveApp = `
             display: inline-flex; align-items: center;
         }
 
-        /* POPUP PÉDAGOGIQUE AMÉLIORÉ */
+        /* POPUP PÉDAGOGIQUE */
         #security-popup {
             display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
         }
         .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4); width: 88%; }
-        .popup-card h3 { color: #1a1a1a; margin-top: 0; font-size: 1.4rem; font-weight: bold; }
-        .popup-card p { color: #444; line-height: 1.5; font-size: 1rem; margin: 15px 0; }
-        
         .pedagogic-box { 
             background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; 
             margin: 20px 0; border: 1px solid #d0e3ff;
         }
-        .pedagogic-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: #2c3e50; }
-        .pedagogic-item b { color: #4a76b8; }
+        .pedagogic-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; color: #2c3e50; line-height: 1.3; }
 
-        .btn-start { 
-            background: #4a76b8; color: white; border: none; padding: 16px; 
-            border-radius: 30px; font-weight: bold; cursor: pointer; width: 100%; 
-            font-size: 1.1rem; box-shadow: 0 4px 15px rgba(74, 118, 184, 0.3);
-        }
-
-        /* NOTIF & CONFIRMATION */
+        /* ÉCRANS NOTIF & CONFIRMATION */
         .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
         .n-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; }
@@ -101,16 +89,16 @@ const genloveApp = `
         <div id="security-popup">
             <div class="popup-card">
                 <h3>🔒 Espace de discussion privé</h3>
-                <p>Par mesure de confidentialité, Genlove a sécurisé cet échange pour vous permettre de faire connaissance en toute sérénité.</p>
+                <p><b>Par mesure de confidentialité, Genlove a sécurisé cet échange pour vous permettre de faire connaissance en toute sérénité.</b></p>
                 
                 <div class="pedagogic-box">
-                    <div class="pedagogic-item">🛡️ <b>Éphémère :</b> Cette conversation s'effacera automatiquement dans 30 minutes.</div>
-                    <div class="pedagogic-item">🕵️ <b>Privé :</b> Aucune donnée ni historique n'est conservé après la fermeture.</div>
-                    <div class="pedagogic-item">✨ <b>Liberté :</b> Profitez de cet instant pour échanger en toute franchise.</div>
+                    <div class="pedagogic-item">🛡️ <b>Éphémère :</b> Tout s'efface dans 30 min.</div>
+                    <div class="pedagogic-item">🕵️ <b>Privé :</b> Aucun historique n'est conservé.</div>
+                    <div class="pedagogic-item">✨ <b>Liberté :</b> Échangez en toute franchise.</div>
                 </div>
 
-                <p style="font-weight: bold; color: #ff416c;">Le décompte commence dès maintenant.</p>
-                <button class="btn-start" onclick="closePopup()">Démarrer l'échange sécurisé</button>
+                <p style="font-weight: bold; color: #ff416c;">Le décompte commence maintenant.</p>
+                <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="closePopup()">Démarrer l'échange</button>
             </div>
         </div>
 
@@ -137,7 +125,6 @@ const genloveApp = `
     <script>
         let timeLeft = 30 * 60; 
         let timerInterval;
-        const chatInput = document.getElementById("chatInput");
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -161,18 +148,15 @@ const genloveApp = `
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    alert("Session expirée pour votre sécurité.");
-                    location.reload();
-                }
+                if (timeLeft <= 0) { clearInterval(timerInterval); location.reload(); }
             }, 1000);
         }
 
         function updateInputPosition() {
             if (window.visualViewport && document.getElementById('screen3').classList.contains('active')) {
                 const keyboardHeight = window.innerHeight - window.visualViewport.height;
-                chatInput.style.bottom = keyboardHeight + "px";
+                document.getElementById('chatInput').style.bottom = keyboardHeight + "px";
+                document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
             }
         }
         window.visualViewport && window.visualViewport.addEventListener("resize", updateInputPosition);
@@ -191,3 +175,7 @@ const genloveApp = `
     </script>
 </body>
 </html>
+`;
+
+app.get('/', (req, res) => res.send(genloveApp));
+app.listen(port);
