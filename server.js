@@ -21,7 +21,6 @@ const genloveApp = `
             flex-shrink: 0;
         }
 
-        /* BOUTON QUITTER (X) */
         .btn-quit {
             background: #ffffff; color: #9dbce3; border: none;
             width: 32px; height: 32px; border-radius: 8px;
@@ -30,7 +29,6 @@ const genloveApp = `
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* BOUTON LOGOUT */
         .btn-logout-badge {
             background: #1a2a44; color: white; border: none;
             padding: 8px 15px; border-radius: 8px;
@@ -38,7 +36,6 @@ const genloveApp = `
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* HORLOGE ET COEUR */
         @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; }
         .digital-clock {
@@ -66,7 +63,7 @@ const genloveApp = `
         .input-area { position: fixed; bottom: 0; width: 100%; max-width: 450px; padding: 10px 15px 45px 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; box-sizing: border-box; }
         .input-box { flex: 1; background: #f1f3f4; border: 1px solid #ddd; padding: 12px; border-radius: 25px; outline: none; }
 
-        /* SÉCURITÉ POPUP */
+        /* POPUP SÉCURITÉ */
         #security-popup { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; width: 88%; }
         .pedagogic-box { background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; }
@@ -172,7 +169,7 @@ const genloveApp = `
                     <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
                     <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
                     <p>Votre session a été fermée en toute sécurité. À bientôt.</p>
-                    <button class="btn-restart" style="background:#1a2a44;" onclick="location.reload()">Se reconnecter</button>\`;
+                    <button class="btn-restart" style="background:#1a2a44;" onclick="location.href='about:blank';">Quitter Genlove</button>\`;
             }
             show('final');
         }
