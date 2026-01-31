@@ -16,8 +16,8 @@ const genloveApp = `
         .chat-header { background: #9dbce3; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .btn-quit { background: #ffffff; color: #9dbce3; border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-logout-badge { background: #1a2a44; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; }
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         .digital-clock { background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 10px; font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; display: inline-flex; align-items: center; border: 1px solid #333; }
         .final-bg { background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); color: white; justify-content: center; align-items: center; text-align: center; }
         .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 25px; width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
@@ -38,7 +38,7 @@ const genloveApp = `
 </head>
 <body>
 
-    <audio id="lastMinuteSound" preload="auto">
+    <audio id="lastMinuteSound" loop preload="auto">
         <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
     </audio>
 
@@ -66,10 +66,7 @@ const genloveApp = `
         <div id="security-popup">
             <div class="popup-card">
                 <h3>🔒 Espace de discussion privé</h3>
-                <p><b>Sécurisé par Genlove</b></p>
-                <div class="pedagogic-box">
-                    <div>🛡️ <b>Éphémère :</b> Tout s'efface dans 2 minutes (Mode Test).</div>
-                </div>
+                <p><b>Mode Test : Alertes toutes les 20s (sous 1 min)</b></p>
                 <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="closePopup()">Démarrer l'échange</button>
             </div>
         </div>
@@ -98,11 +95,9 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 120; // 2 minutes test
+        let timeLeft = 120; // 2 minutes pour tester
         let timerInterval;
         let alertsEnabled = true;
-        let lastMinutePlayed = false;
-        let lastTenSecondsPlayed = false;
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -113,7 +108,7 @@ const genloveApp = `
 
         function closePopup() { 
             document.getElementById('security-popup').style.display = 'none'; 
-            // Déblocage audio forcé
+            // Débloque l'audio sur mobile
             const audio = document.getElementById('lastMinuteSound');
             audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
             startTimer(); 
@@ -124,20 +119,20 @@ const genloveApp = `
             document.getElementById('alertToggle').innerText = alertsEnabled ? '🔔' : '🔕';
         }
 
-        // Fonction pour faire une alerte répétée (Son + Vibration)
-        function triggerAlarm(times) {
+        // Fonction pour déclencher une alarme continue de 5 secondes
+        function triggerContinuousAlarm() {
             if (!alertsEnabled) return;
             const audio = document.getElementById('lastMinuteSound');
-            let count = 0;
             
-            const interval = setInterval(() => {
+            audio.play().catch(e => console.log("Erreur audio:", e));
+            if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500, 200, 500, 200, 500]); // Vibration rythmée sur 5s
+
+            // Arrête l'audio et la vibration après 5 secondes
+            setTimeout(() => {
+                audio.pause();
                 audio.currentTime = 0;
-                audio.play().catch(e => console.log(e));
-                if (navigator.vibrate) navigator.vibrate(200);
-                
-                count++;
-                if (count >= times) clearInterval(interval);
-            }, 600); // Répétition toutes les 600ms
+                if (navigator.vibrate) navigator.vibrate(0);
+            }, 5000);
         }
 
         function startTimer() {
@@ -148,18 +143,11 @@ const genloveApp = `
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
 
-                // Alerte à 1 minute : On déclenche l'alarme 3 fois
-                if (timeLeft === 60 && !lastMinutePlayed) {
-                    lastMinutePlayed = true;
-                    triggerAlarm(3);
-                }
-
-                // Alerte à 10 secondes : Vibration longue
-                if (timeLeft === 10 && !lastTenSecondsPlayed) {
-                    lastTenSecondsPlayed = true;
-                    if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
-                    const audio = document.getElementById('lastMinuteSound');
-                    audio.play();
+                // Logique d'intervalle de 20 secondes sous la barre de la minute
+                if (timeLeft <= 60 && timeLeft > 0) {
+                    if (timeLeft % 20 === 0) {
+                        triggerContinuousAlarm();
+                    }
                 }
 
                 if (timeLeft <= 0) { 
@@ -172,7 +160,7 @@ const genloveApp = `
         function showFinal(type, auto = false) {
             clearInterval(timerInterval);
             const card = document.getElementById('final-card-content');
-            card.innerHTML = '<h2>Test Terminé</h2><button class="btn-restart" onclick="location.reload()">Recommencer</button>';
+            card.innerHTML = '<h2>Session Terminée</h2><button class="btn-restart" onclick="location.reload()">Recommencer</button>';
             show('final');
         }
 
