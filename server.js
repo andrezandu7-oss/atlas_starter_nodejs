@@ -38,7 +38,7 @@ const genloveApp = `
 </head>
 <body>
 
-    <audio id="lastMinuteSound" loop preload="auto">
+    <audio id="lastMinuteSound" preload="auto">
         <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
     </audio>
 
@@ -46,8 +46,8 @@ const genloveApp = `
         <div class="notif-card">
             <div style="padding:15px; border-bottom:1px solid #eee; font-weight:bold;">📩 Genlove Notification</div>
             <div style="padding: 30px 20px; text-align: center; color: #333;">
-                <p style="font-size: 1.15rem; font-weight: 500; margin-bottom: 10px;">Quelqu'un de compatible avec vous souhaite échanger 💞</p>
-                <button class="btn-blue" onclick="show(2)">📖 Ouvrir l'application Genlove</button>
+                <p style="font-size: 1.15rem; font-weight: 500; margin-bottom: 10px;">Quelqu'un de compatible souhaite échanger 💞</p>
+                <button class="btn-blue" onclick="show(2)">📖 Ouvrir Genlove</button>
             </div>
         </div>
     </div>
@@ -65,8 +65,9 @@ const genloveApp = `
     <div id="screen3" class="screen">
         <div id="security-popup">
             <div class="popup-card">
-                <h3>🔒 Espace de discussion privé</h3>
-                <p><b>Mode Test : Alertes toutes les 20s (sous 1 min)</b></p>
+                <h3>🔒 Espace sécurisé</h3>
+                <p><b>TEST 2 MINUTES</b></p>
+                <p>Alerte "Tintintin" toutes les 20s (sous 1 min).</p>
                 <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="closePopup()">Démarrer l'échange</button>
             </div>
         </div>
@@ -81,7 +82,7 @@ const genloveApp = `
         </div>
 
         <div class="chat-messages" id="box">
-            <div class="bubble received">Bonjour ! 👋</div>
+            <div class="bubble received">Bonjour ! Le test de 2 min commence. 👋</div>
         </div>
 
         <div class="input-area">
@@ -95,7 +96,7 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 120; // 2 minutes pour tester
+        let timeLeft = 120; // Test de 2 minutes
         let timerInterval;
         let alertsEnabled = true;
 
@@ -108,7 +109,6 @@ const genloveApp = `
 
         function closePopup() { 
             document.getElementById('security-popup').style.display = 'none'; 
-            // Débloque l'audio sur mobile
             const audio = document.getElementById('lastMinuteSound');
             audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
             startTimer(); 
@@ -119,20 +119,22 @@ const genloveApp = `
             document.getElementById('alertToggle').innerText = alertsEnabled ? '🔔' : '🔕';
         }
 
-        // Fonction pour déclencher une alarme continue de 5 secondes
-        function triggerContinuousAlarm() {
+        function triggerRhythmicAlarm() {
             if (!alertsEnabled) return;
             const audio = document.getElementById('lastMinuteSound');
-            
-            audio.play().catch(e => console.log("Erreur audio:", e));
-            if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500, 200, 500, 200, 500]); // Vibration rythmée sur 5s
+            let elapsed = 0;
 
-            // Arrête l'audio et la vibration après 5 secondes
-            setTimeout(() => {
-                audio.pause();
+            const rhythmicPulse = setInterval(() => {
                 audio.currentTime = 0;
-                if (navigator.vibrate) navigator.vibrate(0);
-            }, 5000);
+                audio.play().catch(() => {});
+                if (navigator.vibrate) navigator.vibrate(100);
+
+                elapsed += 400; 
+                if (elapsed >= 5000) {
+                    clearInterval(rhythmicPulse);
+                    audio.pause();
+                }
+            }, 400); 
         }
 
         function startTimer() {
@@ -143,10 +145,9 @@ const genloveApp = `
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
 
-                // Logique d'intervalle de 20 secondes sous la barre de la minute
                 if (timeLeft <= 60 && timeLeft > 0) {
-                    if (timeLeft % 20 === 0) {
-                        triggerContinuousAlarm();
+                    if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) {
+                        triggerRhythmicAlarm();
                     }
                 }
 
@@ -160,7 +161,7 @@ const genloveApp = `
         function showFinal(type, auto = false) {
             clearInterval(timerInterval);
             const card = document.getElementById('final-card-content');
-            card.innerHTML = '<h2>Session Terminée</h2><button class="btn-restart" onclick="location.reload()">Recommencer</button>';
+            card.innerHTML = '<h2>🏁 Test Terminé</h2><button class="btn-restart" onclick="location.reload()">Recommencer le test</button>';
             show('final');
         }
 
