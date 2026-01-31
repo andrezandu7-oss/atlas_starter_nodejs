@@ -129,10 +129,18 @@ const genloveApp = `
     </div>
 
     <script>
-        // TEMPS RÉDUIT POUR LE TEST : 2 MINUTES
         let timeLeft = 2 * 60; 
         let timerInterval;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -140,20 +148,26 @@ const genloveApp = `
         }
 
         function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
-        function closePopup() { document.getElementById('security-popup').style.display = 'none'; startTimer(); }
+        
+        function closePopup() { 
+            initAudio(); // Force l'activation de l'audio lors du clic
+            document.getElementById('security-popup').style.display = 'none'; 
+            startTimer(); 
+        }
 
         function playHeartbeat() {
+            if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(50, audioCtx.currentTime); // Fréquence basse pour le "poum"
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            osc.stop(audioCtx.currentTime + 0.15);
         }
 
         function startTimer() {
@@ -164,7 +178,6 @@ const genloveApp = `
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
                 
-                // Le son commence dès qu'il reste 60 secondes
                 if (timeLeft <= 60 && timeLeft > 0) {
                     if (timeLeft % 2 === 0) playHeartbeat();
                 }
