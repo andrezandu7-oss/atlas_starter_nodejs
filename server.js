@@ -68,9 +68,9 @@ const genloveApp = `
                 <h3>🔒 Espace de discussion privé</h3>
                 <p><b>Sécurisé par Genlove</b></p>
                 <div class="pedagogic-box">
-                    <div>🛡️ <b>Éphémère :</b> Tout s'efface bientôt.</div>
+                    <div>🛡️ <b>Éphémère :</b> Tout s'efface dans 2 minutes (Mode Test).</div>
                 </div>
-                <button id="startTrigger" style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="closePopup()">Démarrer l'échange</button>
+                <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="closePopup()">Démarrer l'échange</button>
             </div>
         </div>
 
@@ -98,7 +98,7 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 120; // 2 minutes pour le test
+        let timeLeft = 120; // 2 minutes test
         let timerInterval;
         let alertsEnabled = true;
         let lastMinutePlayed = false;
@@ -109,16 +109,13 @@ const genloveApp = `
             document.getElementById(id === 'final' ? 'screen-final' : 'screen' + id).classList.add('active');
         }
 
-        function showSecurityPopup() { 
-            show(3); 
-            document.getElementById('security-popup').style.display = 'flex'; 
-        }
+        function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
 
         function closePopup() { 
             document.getElementById('security-popup').style.display = 'none'; 
-            // On joue un son silencieux ou très court pour débloquer l'audio
-            const alertSound = document.getElementById('lastMinuteSound');
-            alertSound.play().then(() => { alertSound.pause(); alertSound.currentTime = 0; }).catch(e => console.log("Audio en attente"));
+            // Déblocage audio forcé
+            const audio = document.getElementById('lastMinuteSound');
+            audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
             startTimer(); 
         }
 
@@ -127,29 +124,42 @@ const genloveApp = `
             document.getElementById('alertToggle').innerText = alertsEnabled ? '🔔' : '🔕';
         }
 
+        // Fonction pour faire une alerte répétée (Son + Vibration)
+        function triggerAlarm(times) {
+            if (!alertsEnabled) return;
+            const audio = document.getElementById('lastMinuteSound');
+            let count = 0;
+            
+            const interval = setInterval(() => {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log(e));
+                if (navigator.vibrate) navigator.vibrate(200);
+                
+                count++;
+                if (count >= times) clearInterval(interval);
+            }, 600); // Répétition toutes les 600ms
+        }
+
         function startTimer() {
             if (timerInterval) return;
-            const alertSound = document.getElementById('lastMinuteSound');
-
             timerInterval = setInterval(() => {
                 timeLeft--;
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
 
-                // ALERTE SONORE ET VIBRATION à 1 minute (60 sec)
-                if (timeLeft === 60 && !lastMinutePlayed && alertsEnabled) {
+                // Alerte à 1 minute : On déclenche l'alarme 3 fois
+                if (timeLeft === 60 && !lastMinutePlayed) {
                     lastMinutePlayed = true;
-                    alertSound.play(); 
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                    console.log("Alerte 1 min déclenchée");
+                    triggerAlarm(3);
                 }
 
-                // VIBRATION FORTE à 10 secondes
-                if (timeLeft === 10 && !lastTenSecondsPlayed && alertsEnabled) {
+                // Alerte à 10 secondes : Vibration longue
+                if (timeLeft === 10 && !lastTenSecondsPlayed) {
                     lastTenSecondsPlayed = true;
-                    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
-                    console.log("Alerte 10 sec déclenchée");
+                    if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
+                    const audio = document.getElementById('lastMinuteSound');
+                    audio.play();
                 }
 
                 if (timeLeft <= 0) { 
