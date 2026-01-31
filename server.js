@@ -54,6 +54,7 @@ const genloveApp = `
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
         .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
         .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
+        .btn-red-outline { background: none; color: #dc3545; border: 1px solid #dc3545; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5% 0 5%; font-weight: bold; cursor: pointer; }
 
         /* MESSAGERIE */
         .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
@@ -90,7 +91,8 @@ const genloveApp = `
             <div style="background: #0000ff; color: white; padding: 18px; font-weight: bold;">Genlove - confirmation</div>
             <div style="padding: 30px 25px; background: white;">
                 <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
-                <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
+                <button class="btn-green" style="margin-bottom:10px;" onclick="showSecurityPopup()">Accepter</button>
+                <button class="btn-red-outline" onclick="showFinal('chat', true)">✕ Rejeter</button>
             </div>
         </div>
     </div>
@@ -111,7 +113,7 @@ const genloveApp = `
         <div class="chat-header">
             <button class="btn-quit" onclick="showFinal('chat')">✕</button>
             <div class="digital-clock">
-                <span class="heart-icon">❤️</span><span id="timer-display">02:00</span>
+                <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
             </div>
             <button class="btn-logout-badge" onclick="showFinal('app')">Logout 🔒</button>
         </div>
@@ -131,7 +133,7 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 120; // Réglé sur 2 minutes pour tes tests
+        let timeLeft = 30 * 60; // 30 Minutes officielles
         let timerInterval;
         let alertsEnabled = true;
         let currentPulseInterval = null;
@@ -145,9 +147,8 @@ const genloveApp = `
 
         function closePopup() { 
             document.getElementById('security-popup').style.display = 'none'; 
-            // Débloque l'audio pour le navigateur
             const audio = document.getElementById('lastMinuteSound');
-            audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
+            audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
             startTimer(); 
         }
 
@@ -170,7 +171,7 @@ const genloveApp = `
                 if (navigator.vibrate) navigator.vibrate(100);
                 elapsed += 400; 
                 if (elapsed >= 5000) stopAllSounds();
-            }, 400); // Rythme "tintintin"
+            }, 400);
         }
 
         function triggerFinalAlarm() {
@@ -191,15 +192,8 @@ const genloveApp = `
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
 
-                // Alertes à 60s, 40s et 20s
-                if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) {
-                    triggerRhythmicAlarm();
-                }
-
-                // Alerte finale 5 secondes avant la fin
-                if (timeLeft === 5) {
-                    triggerFinalAlarm();
-                }
+                if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) triggerRhythmicAlarm();
+                if (timeLeft === 5) triggerFinalAlarm();
 
                 if (timeLeft <= 0) { 
                     clearInterval(timerInterval); 
@@ -219,7 +213,6 @@ const genloveApp = `
                 const msg = type === 'chat' ? "Voulez-vous vraiment quitter cette conversation ?" : "Voulez-vous vraiment vous déconnecter ?";
                 if(!confirm(msg)) return;
             }
-            
             clearInterval(timerInterval);
             stopAllSounds();
             const card = document.getElementById('final-card-content');
@@ -229,14 +222,11 @@ const genloveApp = `
                     <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
                     <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
                     <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>
-                    <p style="margin-top: 20px;">
-                        <a href="#" onclick="location.reload()" style="color: #4a76b8; text-decoration: none; font-weight: bold; font-size: 0.9rem;">🏠 Retourner sur mon profil</a>
-                    </p>\`;
+                    <p style="margin-top: 20px;"><a href="#" onclick="location.reload()" style="color: #4a76b8; text-decoration: none; font-weight: bold; font-size: 0.9rem;">🏠 Retourner sur mon profil</a></p>\`;
             } else {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
                     <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
-                    <p>Votre session a été fermée en toute sécurité. À bientôt.</p>
                     <button class="btn-restart" style="background:#1a2a44; margin-bottom: 15px;" onclick="location.href='about:blank';">Quitter Genlove</button>
                     <button onclick="location.reload()" style="background: none; border: 1px solid #ccc; color: #666; padding: 12px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer;">Retour à l'accueil</button>\`;
             }
@@ -258,7 +248,7 @@ const genloveApp = `
     </script>
 </body>
 </html>
-`;
+\`;
 
 app.get('/', (req, res) => res.send(genloveApp));
 app.listen(port);
