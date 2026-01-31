@@ -114,7 +114,7 @@ const genloveApp = `
             <button id="alertToggle" onclick="toggleAlerts()" style="background:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:1.1rem;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.15);">🔔</button>
 
             <div class="digital-clock">
-                <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
+                <span class="heart-icon">❤️</span><span id="timer-display">02:00</span>
             </div>
             <button class="btn-logout-badge" onclick="showFinal('app')">Logout 🔒</button>
         </div>
@@ -134,10 +134,8 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 30 * 60; 
+        let timeLeft = 2 * 60; // ⏱️ RÉDUIT À 2 MINUTES POUR LE TEST
         let timerInterval;
-        
-        // [3ème code : Variables d'état]
         let alertsEnabled = true;
         let lastMinutePlayed = false;
         let lastTenSecondsPlayed = false;
@@ -150,13 +148,11 @@ const genloveApp = `
         function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
         function closePopup() { document.getElementById('security-popup').style.display = 'none'; startTimer(); }
 
-        // [4ème code : Fonction Toggle]
         function toggleAlerts() {
             alertsEnabled = !alertsEnabled;
             document.getElementById('alertToggle').innerText = alertsEnabled ? '🔔' : '🔕';
         }
 
-        // [5ème code : Timer avec Alertes et Vibrations]
         function startTimer() {
             if (timerInterval) return;
             const alertSound = document.getElementById('lastMinuteSound');
@@ -165,14 +161,16 @@ const genloveApp = `
                 timeLeft--;
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
-                document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
+                document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
 
+                // Alerte 1 minute (Sera déclenchée à 01:00)
                 if (timeLeft === 60 && !lastMinutePlayed && alertsEnabled) {
                     lastMinutePlayed = true;
                     alertSound.play().catch(() => {});
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
 
+                // Alerte 10 secondes (Sera déclenchée à 00:10)
                 if (timeLeft === 10 && !lastTenSecondsPlayed && alertsEnabled) {
                     lastTenSecondsPlayed = true;
                     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
@@ -195,8 +193,6 @@ const genloveApp = `
             
             clearInterval(timerInterval);
             const card = document.getElementById('final-card-content');
-            
-            // Respect exact des contenus du code original
             if(type === 'chat') {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
