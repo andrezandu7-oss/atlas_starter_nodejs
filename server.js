@@ -8,7 +8,7 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation - Officiel</title>
+    <title>Genlove Simulation - Officiel (TEST SONORE)</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
@@ -54,8 +54,6 @@ const genloveApp = `
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
         .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
         .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
-        
-        /* Bouton Rejeter avec bordure rouge */
         .btn-red-outline { background: none; color: #dc3545; border: 1px solid #dc3545; padding: 15px; border-radius: 10px; width: 90%; margin: 0 5%; font-weight: bold; cursor: pointer; }
 
         /* MESSAGERIE */
@@ -111,7 +109,7 @@ const genloveApp = `
         <div class="chat-header">
             <button class="btn-quit" onclick="showFinal('chat')">✕</button>
             <div class="digital-clock">
-                <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
+                <span class="heart-icon">❤️</span><span id="timer-display">02:00</span>
             </div>
             <button class="btn-logout-badge" onclick="showFinal('app')">Logout 🔒</button>
         </div>
@@ -131,8 +129,10 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 30 * 60; 
+        // TEMPS RÉDUIT POUR LE TEST : 2 MINUTES
+        let timeLeft = 2 * 60; 
         let timerInterval;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -142,13 +142,33 @@ const genloveApp = `
         function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
         function closePopup() { document.getElementById('security-popup').style.display = 'none'; startTimer(); }
 
+        function playHeartbeat() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
         function startTimer() {
             if (timerInterval) return;
             timerInterval = setInterval(() => {
                 timeLeft--;
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
-                document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
+                document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+                
+                // Le son commence dès qu'il reste 60 secondes
+                if (timeLeft <= 60 && timeLeft > 0) {
+                    if (timeLeft % 2 === 0) playHeartbeat();
+                }
+
                 if (timeLeft <= 0) { clearInterval(timerInterval); showFinal('chat', true); }
             }, 1000);
         }
