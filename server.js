@@ -1,4 +1,4 @@
-Const express = require('express');
+const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -8,7 +8,7 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation - Officiel (TEST SONORE)</title>
+    <title>Genlove Simulation - Officiel</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
@@ -129,10 +129,13 @@ const genloveApp = `
     </div>
 
     <script>
-        // TEMPS RÉDUIT POUR LE TEST : 2 MINUTES
         let timeLeft = 2 * 60; 
         let timerInterval;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -140,9 +143,15 @@ const genloveApp = `
         }
 
         function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
-        function closePopup() { document.getElementById('security-popup').style.display = 'none'; startTimer(); }
+        
+        function closePopup() { 
+            initAudio();
+            document.getElementById('security-popup').style.display = 'none'; 
+            startTimer(); 
+        }
 
         function playHeartbeat() {
+            if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
@@ -164,7 +173,6 @@ const genloveApp = `
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
                 
-                // Le son commence dès qu'il reste 60 secondes
                 if (timeLeft <= 60 && timeLeft > 0) {
                     if (timeLeft % 2 === 0) playHeartbeat();
                 }
