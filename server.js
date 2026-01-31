@@ -8,7 +8,7 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation - Officiel</title>
+    <title>Genlove Simulation - Test 2 min</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
@@ -33,7 +33,6 @@ const genloveApp = `
         .input-area { position: fixed; bottom: 0; width: 100%; max-width: 450px; padding: 10px 15px 45px 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; box-sizing: border-box; align-items: flex-end; }
         #security-popup { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; width: 88%; }
-        .pedagogic-box { background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; }
     </style>
 </head>
 <body>
@@ -65,9 +64,8 @@ const genloveApp = `
     <div id="screen3" class="screen">
         <div id="security-popup">
             <div class="popup-card">
-                <h3>🔒 Espace sécurisé</h3>
-                <p><b>TEST 2 MINUTES</b></p>
-                <p>Rythme "Tintintin" (60, 40, 20s) + Son prolongé final (5s).</p>
+                <h3>🔒 Mode Test (2 min)</h3>
+                <p>Alertes : 60, 40, 20s (Rythmée) <br> Final à 5s (Prolongée)</p>
                 <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="closePopup()">Démarrer l'échange</button>
             </div>
         </div>
@@ -82,7 +80,7 @@ const genloveApp = `
         </div>
 
         <div class="chat-messages" id="box">
-            <div class="bubble received">Bonjour ! Testons les alertes finalisées. 👋</div>
+            <div class="bubble received">Bonjour ! Testons l'alerte finale de 5 secondes. 👋</div>
         </div>
 
         <div class="input-area">
@@ -99,6 +97,7 @@ const genloveApp = `
         let timeLeft = 120; // Test de 2 min
         let timerInterval;
         let alertsEnabled = true;
+        let currentPulseInterval = null;
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -119,33 +118,41 @@ const genloveApp = `
             document.getElementById('alertToggle').innerText = alertsEnabled ? '🔔' : '🔕';
         }
 
-        // Alerte intermédiaire (Tintintin - 5 secondes)
+        function stopAllSounds() {
+            const audio = document.getElementById('lastMinuteSound');
+            audio.pause();
+            audio.loop = false;
+            audio.currentTime = 0;
+            if (currentPulseInterval) {
+                clearInterval(currentPulseInterval);
+                currentPulseInterval = null;
+            }
+        }
+
         function triggerRhythmicAlarm() {
             if (!alertsEnabled) return;
+            stopAllSounds();
             const audio = document.getElementById('lastMinuteSound');
             let elapsed = 0;
-            const rhythmicPulse = setInterval(() => {
+            currentPulseInterval = setInterval(() => {
                 audio.currentTime = 0;
                 audio.play().catch(() => {});
                 if (navigator.vibrate) navigator.vibrate(100);
                 elapsed += 400; 
-                if (elapsed >= 5000) { clearInterval(rhythmicPulse); audio.pause(); }
+                if (elapsed >= 5000) stopAllSounds();
             }, 400); 
         }
 
-        // Alerte FINALE (Son prolongé - 5 secondes)
         function triggerFinalAlarm() {
             if (!alertsEnabled) return;
+            stopAllSounds();
             const audio = document.getElementById('lastMinuteSound');
-            audio.loop = true; // Activer la boucle pour un son continu
+            audio.loop = true; 
             audio.play().catch(() => {});
-            if (navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 1000]); // Vibration longue
+            if (navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 1000]);
             
-            setTimeout(() => {
-                audio.loop = false;
-                audio.pause();
-                audio.currentTime = 0;
-            }, 5000);
+            // On s'assure que tout s'arrête à 0
+            setTimeout(() => { stopAllSounds(); }, 5000);
         }
 
         function startTimer() {
@@ -156,18 +163,17 @@ const genloveApp = `
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
 
-                // Alertes 60, 40, 20 secondes
                 if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) {
                     triggerRhythmicAlarm();
                 }
 
-                // Alerte FINALE à 5 secondes de la fin
                 if (timeLeft === 5) {
                     triggerFinalAlarm();
                 }
 
                 if (timeLeft <= 0) { 
                     clearInterval(timerInterval); 
+                    stopAllSounds();
                     showFinal('chat', true); 
                 }
             }, 1000);
@@ -176,7 +182,7 @@ const genloveApp = `
         function showFinal(type, auto = false) {
             clearInterval(timerInterval);
             const card = document.getElementById('final-card-content');
-            card.innerHTML = '<h2>🏁 Test Terminé</h2><button class="btn-restart" onclick="location.reload()">Recommencer</button>';
+            card.innerHTML = '<h2>🏁 Test Terminé</h2><button class="btn-restart" onclick="location.reload()">Recommencer le test</button>';
             show('final');
         }
 
@@ -194,3 +200,7 @@ const genloveApp = `
     </script>
 </body>
 </html>
+`;
+
+app.get('/', (req, res) => res.send(genloveApp));
+app.listen(port);
