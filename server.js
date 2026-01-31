@@ -8,7 +8,7 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation - Officiel (TEST SONORE)</title>
+    <title>Genlove Simulation - Officiel</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
@@ -131,16 +131,9 @@ const genloveApp = `
     <script>
         let timeLeft = 2 * 60; 
         let timerInterval;
-        let audioCtx;
-
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
+        
+        // Un son de battement "data" ultra-léger pour être compatible partout
+        const heartSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFRm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTdvT18AZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZm");
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -150,24 +143,10 @@ const genloveApp = `
         function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
         
         function closePopup() { 
-            initAudio(); // Force l'activation de l'audio lors du clic
+            // "Réveille" l'audio sur un clic utilisateur
+            heartSound.play().then(() => { heartSound.pause(); heartSound.currentTime = 0; }).catch(() => {});
             document.getElementById('security-popup').style.display = 'none'; 
             startTimer(); 
-        }
-
-        function playHeartbeat() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(50, audioCtx.currentTime); // Fréquence basse pour le "poum"
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.15);
         }
 
         function startTimer() {
@@ -179,7 +158,9 @@ const genloveApp = `
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
                 
                 if (timeLeft <= 60 && timeLeft > 0) {
-                    if (timeLeft % 2 === 0) playHeartbeat();
+                    if (timeLeft % 2 === 0) {
+                        heartSound.play().catch(e => console.log("Audio bloqué"));
+                    }
                 }
 
                 if (timeLeft <= 0) { clearInterval(timerInterval); showFinal('chat', true); }
@@ -196,7 +177,6 @@ const genloveApp = `
                 const msg = type === 'chat' ? "Voulez-vous vraiment quitter cette conversation ?" : "Voulez-vous vraiment vous déconnecter ?";
                 if(!confirm(msg)) return;
             }
-            
             clearInterval(timerInterval);
             const card = document.getElementById('final-card-content');
             if(type === 'chat') {
@@ -204,17 +184,12 @@ const genloveApp = `
                     <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
                     <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
                     <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
-                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>
-                    <p style="margin-top: 20px;">
-                        <a href="#" onclick="location.reload()" style="color: #4a76b8; text-decoration: none; font-weight: bold; font-size: 0.9rem;">🏠 Retourner sur mon profil</a>
-                    </p>\`;
+                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>\`;
             } else {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
-                    <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
-                    <p>Votre session a été fermée en toute sécurité. À bientôt.</p>
-                    <button class="btn-restart" style="background:#1a2a44; margin-bottom: 15px;" onclick="location.href='about:blank';">Quitter Genlove</button>
-                    <button onclick="location.reload()" style="background: none; border: 1px solid #ccc; color: #666; padding: 12px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer;">Retour à l'accueil</button>\`;
+                    <h2 style="color:#1a2a44;">Session fermée</h2>
+                    <button class="btn-restart" onclick="location.reload()">Retour</button>\`;
             }
             show('final');
         }
