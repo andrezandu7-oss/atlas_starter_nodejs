@@ -1,4 +1,4 @@
-Const express = require('express');
+const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -8,7 +8,7 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation - Officiel (TEST SONORE)</title>
+    <title>Genlove Simulation - Officiel</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
@@ -54,7 +54,6 @@ const genloveApp = `
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
         .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
         .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
-        .btn-red-outline { background: none; color: #dc3545; border: 1px solid #dc3545; padding: 15px; border-radius: 10px; width: 90%; margin: 0 5%; font-weight: bold; cursor: pointer; }
 
         /* MESSAGERIE */
         .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
@@ -70,6 +69,10 @@ const genloveApp = `
     </style>
 </head>
 <body>
+
+    <audio id="lastMinuteSound" preload="auto">
+        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+    </audio>
 
     <div id="screen1" class="screen active notif-bg">
         <div class="notif-card">
@@ -87,8 +90,7 @@ const genloveApp = `
             <div style="background: #0000ff; color: white; padding: 18px; font-weight: bold;">Genlove - confirmation</div>
             <div style="padding: 30px 25px; background: white;">
                 <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
-                <button class="btn-green" style="margin-bottom:10px;" onclick="showSecurityPopup()">Accepter</button>
-                <button class="btn-red-outline" onclick="showFinal('chat', true)">✕ Rejeter</button>
+                <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
             </div>
         </div>
     </div>
@@ -129,10 +131,10 @@ const genloveApp = `
     </div>
 
     <script>
-        // TEMPS RÉDUIT POUR LE TEST : 2 MINUTES
-        let timeLeft = 2 * 60; 
+        let timeLeft = 120; // Réglé sur 2 minutes pour tes tests
         let timerInterval;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let alertsEnabled = true;
+        let currentPulseInterval = null;
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -140,20 +142,45 @@ const genloveApp = `
         }
 
         function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
-        function closePopup() { document.getElementById('security-popup').style.display = 'none'; startTimer(); }
 
-        function playHeartbeat() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+        function closePopup() { 
+            document.getElementById('security-popup').style.display = 'none'; 
+            // Débloque l'audio pour le navigateur
+            const audio = document.getElementById('lastMinuteSound');
+            audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
+            startTimer(); 
+        }
+
+        function stopAllSounds() {
+            const audio = document.getElementById('lastMinuteSound');
+            audio.pause();
+            audio.loop = false;
+            audio.currentTime = 0;
+            if (currentPulseInterval) { clearInterval(currentPulseInterval); currentPulseInterval = null; }
+        }
+
+        function triggerRhythmicAlarm() {
+            if (!alertsEnabled) return;
+            stopAllSounds();
+            const audio = document.getElementById('lastMinuteSound');
+            let elapsed = 0;
+            currentPulseInterval = setInterval(() => {
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+                if (navigator.vibrate) navigator.vibrate(100);
+                elapsed += 400; 
+                if (elapsed >= 5000) stopAllSounds();
+            }, 400); // Rythme "tintintin"
+        }
+
+        function triggerFinalAlarm() {
+            if (!alertsEnabled) return;
+            stopAllSounds();
+            const audio = document.getElementById('lastMinuteSound');
+            audio.loop = true; 
+            audio.play().catch(() => {});
+            if (navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 1000]);
+            setTimeout(() => { stopAllSounds(); }, 5000);
         }
 
         function startTimer() {
@@ -162,14 +189,23 @@ const genloveApp = `
                 timeLeft--;
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
-                document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
-                
-                // Le son commence dès qu'il reste 60 secondes
-                if (timeLeft <= 60 && timeLeft > 0) {
-                    if (timeLeft % 2 === 0) playHeartbeat();
+                document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
+
+                // Alertes à 60s, 40s et 20s
+                if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) {
+                    triggerRhythmicAlarm();
                 }
 
-                if (timeLeft <= 0) { clearInterval(timerInterval); showFinal('chat', true); }
+                // Alerte finale 5 secondes avant la fin
+                if (timeLeft === 5) {
+                    triggerFinalAlarm();
+                }
+
+                if (timeLeft <= 0) { 
+                    clearInterval(timerInterval); 
+                    stopAllSounds();
+                    showFinal('chat', true); 
+                }
             }, 1000);
         }
 
@@ -185,6 +221,7 @@ const genloveApp = `
             }
             
             clearInterval(timerInterval);
+            stopAllSounds();
             const card = document.getElementById('final-card-content');
             if(type === 'chat') {
                 card.innerHTML = \`
