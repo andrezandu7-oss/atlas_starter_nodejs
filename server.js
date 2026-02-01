@@ -24,6 +24,11 @@ const styles = `
     .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; background-size: cover; background-position: center; }
     
     .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; color: #333; }
+    
+    /* REAJUSTEMENT DATE DE NAISSANCE */
+    input[type="date"]::before { content: "Date de naissance "; width: 100%; color: #757575; }
+    input[type="date"]:focus::before, input[type="date"]:valid::before { content: ""; display: none; }
+
     .serment-container { margin-top: 20px; padding: 15px; background: #fff5f7; border-radius: 12px; border: 1px solid #ffdae0; text-align: left; display: flex; gap: 10px; align-items: flex-start; }
     .serment-text { font-size: 0.82rem; color: #d63384; line-height: 1.4; }
 
@@ -36,7 +41,6 @@ const styles = `
 
     #popup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding:20px; }
     .popup-content { background:white; border-radius:20px; width:100%; max-width:380px; padding:25px; position:relative; text-align:left; animation: slideUp 0.3s ease-out; }
-    @keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
     .close-popup { position:absolute; top:15px; right:15px; font-size:1.5rem; cursor:pointer; color:#666; }
     .popup-msg { background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px; }
 
@@ -136,7 +140,6 @@ app.get('/matching', (req, res) => {
         <div id="match-container"></div>
         <a href="/profile" class="btn-pink">Retour au profil</a>
     </div>
-
     <div id="popup-overlay" onclick="closePopup()">
         <div class="popup-content" onclick="event.stopPropagation()">
             <span class="close-popup" onclick="closePopup()">&times;</span>
@@ -173,17 +176,14 @@ app.get('/matching', (req, res) => {
                     </div>
                 </div>\`;
         });
-
         function showDetails(p) {
             const myGt = localStorage.getItem('u_gt');
             document.getElementById('pop-name').innerText = "Profil #" + p.id;
             document.getElementById('pop-details').innerHTML = "<b>Génotype :</b> " + p.gt + "<br><b>Groupe Sanguin :</b> " + p.gs + "<br><br><b>Projet de vie :</b><br><i>" + p.pj + "</i>";
-            
             let msg = "";
-            if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale. En choisissant un partenaire AA, vous offrez à votre future descendance une protection totale.";
-            else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> Excellent choix. En tant que AA, vous jouez un rôle protecteur essentiel. Votre union ne présente aucun risque de naissance d'un enfant SS.";
-            else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Une union magnifique et sans crainte. Votre profil AA est le partenaire idéal pour une personne SS. Aucun de vos enfants ne souffrira de la forme majeure.";
-            
+            if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale.";
+            else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> Excellent choix. Votre union ne présente aucun risque de naissance d'un enfant SS.";
+            else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Une union magnifique. Aucun de vos enfants ne souffrira de la forme majeure.";
             document.getElementById('pop-msg').innerHTML = msg;
             document.getElementById('popup-overlay').style.display = 'flex';
         }
@@ -196,23 +196,20 @@ app.get('/settings', (req, res) => {
     <body style="background:#f4f7f6;"><div class="app-shell">
         <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
         <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
-        
         <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
         <div class="st-group">
             <div class="st-item">
                 <span>Visibilité profil</span>
                 <label class="switch">
-                    <input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'; showNotify('Paramètre mis à jour !')">
+                    <input type="checkbox" checked onchange="showNotify('Paramètre mis à jour !')">
                     <span class="slider"></span>
                 </label>
             </div>
         </div>
-
         <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
         <div class="st-group">
             <a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a>
         </div>
-        
         <div class="st-group">
             <div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div>
             <div style="display:flex; justify-content:space-around; padding:15px;">
