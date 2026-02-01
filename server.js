@@ -1,4 +1,4 @@
-const express = require('express');
+Const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -8,7 +8,7 @@ const genloveApp = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove Simulation - Officiel</title>
+    <title>Genlove Simulation - Officiel (TEST SONORE)</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; height: 100vh; }
         .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: white; flex-direction: column; position: relative; }
@@ -71,10 +71,6 @@ const genloveApp = `
 </head>
 <body>
 
-    <audio id="lastMinuteSound" preload="auto">
-        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-    </audio>
-
     <div id="screen1" class="screen active notif-bg">
         <div class="notif-card">
             <div style="padding:15px; border-bottom:1px solid #eee; font-weight:bold;">📩 Genlove Notification</div>
@@ -113,7 +109,7 @@ const genloveApp = `
         <div class="chat-header">
             <button class="btn-quit" onclick="showFinal('chat')">✕</button>
             <div class="digital-clock">
-                <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
+                <span class="heart-icon">❤️</span><span id="timer-display">02:00</span>
             </div>
             <button class="btn-logout-badge" onclick="showFinal('app')">Logout 🔒</button>
         </div>
@@ -133,10 +129,10 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 30 * 60; 
+        // TEMPS RÉDUIT POUR LE TEST : 2 MINUTES
+        let timeLeft = 2 * 60; 
         let timerInterval;
-        let alertsEnabled = true;
-        let currentPulseInterval = null;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -144,44 +140,20 @@ const genloveApp = `
         }
 
         function showSecurityPopup() { show(3); document.getElementById('security-popup').style.display = 'flex'; }
+        function closePopup() { document.getElementById('security-popup').style.display = 'none'; startTimer(); }
 
-        function closePopup() { 
-            document.getElementById('security-popup').style.display = 'none'; 
-            const audio = document.getElementById('lastMinuteSound');
-            audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
-            startTimer(); 
-        }
-
-        function stopAllSounds() {
-            const audio = document.getElementById('lastMinuteSound');
-            audio.pause();
-            audio.loop = false;
-            audio.currentTime = 0;
-            if (currentPulseInterval) { clearInterval(currentPulseInterval); currentPulseInterval = null; }
-        }
-
-        function triggerRhythmicAlarm() {
-            if (!alertsEnabled) return;
-            stopAllSounds();
-            const audio = document.getElementById('lastMinuteSound');
-            let elapsed = 0;
-            currentPulseInterval = setInterval(() => {
-                audio.currentTime = 0;
-                audio.play().catch(() => {});
-                if (navigator.vibrate) navigator.vibrate(100);
-                elapsed += 400; 
-                if (elapsed >= 5000) stopAllSounds();
-            }, 400);
-        }
-
-        function triggerFinalAlarm() {
-            if (!alertsEnabled) return;
-            stopAllSounds();
-            const audio = document.getElementById('lastMinuteSound');
-            audio.loop = true; 
-            audio.play().catch(() => {});
-            if (navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 1000]);
-            setTimeout(() => { stopAllSounds(); }, 5000);
+        function playHeartbeat() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
         }
 
         function startTimer() {
@@ -191,15 +163,13 @@ const genloveApp = `
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
-
-                if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) triggerRhythmicAlarm();
-                if (timeLeft === 5) triggerFinalAlarm();
-
-                if (timeLeft <= 0) { 
-                    clearInterval(timerInterval); 
-                    stopAllSounds();
-                    showFinal('chat', true); 
+                
+                // Le son commence dès qu'il reste 60 secondes
+                if (timeLeft <= 60 && timeLeft > 0) {
+                    if (timeLeft % 2 === 0) playHeartbeat();
                 }
+
+                if (timeLeft <= 0) { clearInterval(timerInterval); showFinal('chat', true); }
             }, 1000);
         }
 
@@ -215,20 +185,23 @@ const genloveApp = `
             }
             
             clearInterval(timerInterval);
-            stopAllSounds();
             const card = document.getElementById('final-card-content');
             if(type === 'chat') {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
                     <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
                     <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
-                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>\`;
+                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>
+                    <p style="margin-top: 20px;">
+                        <a href="#" onclick="location.reload()" style="color: #4a76b8; text-decoration: none; font-weight: bold; font-size: 0.9rem;">🏠 Retourner sur mon profil</a>
+                    </p>\`;
             } else {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
                     <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
-                    <p>Votre session a été fermée en toute sécurité.</p>
-                    <button class="btn-restart" style="background:#1a2a44;" onclick="location.reload()">Retour</button>\`;
+                    <p>Votre session a été fermée en toute sécurité. À bientôt.</p>
+                    <button class="btn-restart" style="background:#1a2a44; margin-bottom: 15px;" onclick="location.href='about:blank';">Quitter Genlove</button>
+                    <button onclick="location.reload()" style="background: none; border: 1px solid #ccc; color: #666; padding: 12px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer;">Retour à l'accueil</button>\`;
             }
             show('final');
         }
