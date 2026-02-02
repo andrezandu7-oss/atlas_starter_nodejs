@@ -48,13 +48,13 @@ const genloveApp = `
         .final-bg { background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); color: white; justify-content: center; align-items: center; text-align: center; }
         .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 25px; width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
         .btn-restart { background: #ff416c; color: white; border: none; padding: 16px; border-radius: 30px; width: 100%; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 25px; }
+        .btn-secondary { background: none; border: 1px solid #ccc; color: #666; padding: 12px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
         /* NOTIF & CONFIRMATION */
         .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
         .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 20px; overflow: hidden; }
         .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; margin: 0 5%; font-weight: bold; cursor: pointer; }
         .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; cursor: pointer; }
-        /* Style ajouté pour le bouton rejeter */
         .btn-red-outline { background: none; color: #dc3545; border: 1px solid #dc3545; padding: 15px; border-radius: 10px; width: 90%; margin: 0 5%; font-weight: bold; cursor: pointer; }
 
         /* MESSAGERIE */
@@ -114,7 +114,7 @@ const genloveApp = `
         <div class="chat-header">
             <button class="btn-quit" onclick="showFinal('chat')">✕</button>
             <div class="digital-clock">
-                <span class="heart-icon">❤️</span><span id="timer-display">02:00</span>
+                <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
             </div>
             <button class="btn-logout-badge" onclick="showFinal('app')">Logout 🔒</button>
         </div>
@@ -134,7 +134,7 @@ const genloveApp = `
     </div>
 
     <script>
-        let timeLeft = 120; 
+        let timeLeft = 30 * 60; 
         let timerInterval;
         let alertsEnabled = true;
         let currentPulseInterval = null;
@@ -191,15 +191,10 @@ const genloveApp = `
                 timeLeft--;
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
-                document.getElementById('timer-display').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
+                document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
 
-                if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) {
-                    triggerRhythmicAlarm();
-                }
-
-                if (timeLeft === 5) {
-                    triggerFinalAlarm();
-                }
+                if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) triggerRhythmicAlarm();
+                if (timeLeft === 5) triggerFinalAlarm();
 
                 if (timeLeft <= 0) { 
                     clearInterval(timerInterval); 
@@ -228,17 +223,14 @@ const genloveApp = `
                     <div style="font-size: 3rem; margin-bottom: 10px;">✨</div>
                     <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
                     <p>Genlove vous remercie pour ce moment de partage et de franchise.</p>
-                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>
-                    <p style="margin-top: 20px;">
-                        <a href="#" onclick="location.reload()" style="color: #4a76b8; text-decoration: none; font-weight: bold; font-size: 0.9rem;">🏠 Retourner sur mon profil</a>
-                    </p>\`;
+                    <button class="btn-restart" onclick="location.reload()">🔎 Trouver un autre profil</button>\`;
             } else {
                 card.innerHTML = \`
                     <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
                     <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
-                    <p>Votre session a été fermée en toute sécurité. À bientôt.</p>
-                    <button class="btn-restart" style="background:#1a2a44; margin-bottom: 15px;" onclick="location.href='about:blank';">Quitter Genlove</button>
-                    <button onclick="location.reload()" style="background: none; border: 1px solid #ccc; color: #666; padding: 12px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer;">Retour à l'accueil</button>\`;
+                    <p>Votre session a été fermée en toute sécurité.</p>
+                    <button class="btn-restart" style="background:#1a2a44;" onclick="location.href='about:blank';">Quitter</button>
+                    <button class="btn-secondary" onclick="location.reload()">Retour à l'accueil</button>\`;
             }
             show('final');
         }
