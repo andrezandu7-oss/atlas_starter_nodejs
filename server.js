@@ -20,6 +20,9 @@ const htmlApp = `
         .home-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; text-align: center; background: #f4e9da; }
         .main-logo { font-size: 4rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; }
         .tagline { color: #4a5568; font-size: 1.1rem; line-height: 1.5; margin-bottom: 50px; font-weight: 500; }
+        
+        /* Phrase de réassurance */
+        .trust-footer { position: absolute; bottom: 20px; left: 20px; right: 20px; font-size: 0.75rem; color: #8a7b6a; line-height: 1.4; font-style: italic; }
 
         #genlove-notify { position: absolute; top: -100px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; transition: 0.5s; z-index: 9999; }
         #genlove-notify.show { top: 20px; }
@@ -48,6 +51,9 @@ const htmlApp = `
                 <div onclick="showScreen('scr-signup')" style="color:#1a2a44; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
                     <span style="font-size:1.2rem;">👤</span> Créer un compte
                 </div>
+                <div class="trust-footer">
+                    🔒 Vos données sont strictement confidentielles, sécurisées et utilisées uniquement pour votre compatibilité amoureuse.
+                </div>
             </div>
         </div>
 
@@ -57,29 +63,19 @@ const htmlApp = `
                 <form onsubmit="saveProfile(event)">
                     <div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo</span></div>
                     <input type="file" id="i" style="display:none" onchange="previewPhoto(event)">
-                    
                     <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
                     <input type="text" id="ln" class="input-box" placeholder="Nom" required>
-                    
                     <span class="label-small">DATE DE NAISSANCE</span>
                     <input type="date" id="dob" class="input-box" required>
-                    
                     <select id="gender" class="input-box" required><option value="">Genre</option><option>Homme</option><option>Femme</option></select>
                     <input type="text" id="res" class="input-box" placeholder="Ville de résidence" required>
                     <select id="gt" class="input-box" required><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
-                    
-                    <div style="display:flex; gap:10px;">
-                        <select id="gs_type" class="input-box" style="flex:2;" required><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select>
-                        <select id="gs_rh" class="input-box" style="flex:1;" required><option>+</option><option>-</option></select>
-                    </div>
-                    
+                    <div style="display:flex; gap:10px;"><select id="gs_type" class="input-box" style="flex:2;" required><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select><select id="gs_rh" class="input-box" style="flex:1;" required><option>+</option><option>-</option></select></div>
                     <select id="pj" class="input-box" required><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select>
-                    
                     <div class="serment-box">
                         <input type="checkbox" id="oath" style="width:22px;height:22px; accent-color:#ff416c;" required>
                         <label for="oath" class="serment-text">Je confirme sur l'honneur la sincérité de mes informations santé.</label>
                     </div>
-
                     <button type="submit" id="btn-submit" class="btn-pink">Valider mon profil</button>
                     <p onclick="showScreen('scr-home')" style="color:#888; cursor:pointer; font-size:0.9rem;">Annuler</p>
                 </form>
@@ -88,15 +84,11 @@ const htmlApp = `
 
         <div id="scr-profile" class="screen-layer" style="background:#f8f9fa;">
             <div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div onclick="showScreen('scr-home')" style="font-size:1.2rem; cursor:pointer;">🏠</div>
-                    <div onclick="showScreen('scr-settings')" style="font-size:1.4rem; cursor:pointer;">⚙️</div>
-                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;"><div onclick="showScreen('scr-home')" style="font-size:1.2rem; cursor:pointer;">🏠</div><div onclick="showScreen('scr-settings')" style="font-size:1.4rem; cursor:pointer;">⚙️</div></div>
                 <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-position:center;"></div>
                 <h2 id="vN" style="margin:10px 0 5px 0; color:#1a2a44;">...</h2>
                 <p id="vR" style="color:#718096; margin:0; font-size:0.95rem;">📍 ...</p>
             </div>
-            
             <div style="padding:25px 20px 10px; font-size:0.8rem; color:#a0aec0; font-weight:bold; letter-spacing:1px;">DONNÉES BIOMÉDICALES</div>
             <div class="st-group">
                 <div class="st-item"><span>Génotype</span><b id="rG" style="color:#ff416c;">...</b></div>
@@ -109,93 +101,23 @@ const htmlApp = `
         <div id="scr-settings" class="screen-layer" style="background:#f4f7f6;">
             <div style="padding:30px 20px; text-align:center; color:#1a2a44;"><h3>Paramètres</h3></div>
             <div class="st-group">
-                <div onclick="openEditMode()" style="cursor:pointer;" class="st-item">
-                    <span style="display:flex; align-items:center; gap:10px;">✏️ Modifier mon profil</span>
-                    <b style="color:#cbd5e0;">➔</b>
-                </div>
-                <div onclick="if(confirm('Supprimer définitivement ?')){localStorage.clear();location.reload();}" style="cursor:pointer; color:#e53e3e;" class="st-item">
-                    <span style="display:flex; align-items:center; gap:10px;">🗑️ Supprimer mon compte</span>
-                </div>
+                <div onclick="openEditMode()" style="cursor:pointer;" class="st-item"><span>✏️ Modifier mon profil</span><b style="color:#cbd5e0;">➔</b></div>
+                <div onclick="if(confirm('Supprimer définitivement ?')){localStorage.clear();location.reload();}" style="cursor:pointer; color:#e53e3e;" class="st-item"><span>🗑️ Supprimer mon compte</span></div>
             </div>
             <button class="btn-dark" style="margin:20px auto; display:block;" onclick="showScreen('scr-profile')">Retour</button>
         </div>
     </div>
 
     <script>
-        function showScreen(id) {
-            document.querySelectorAll('.screen-layer').forEach(s => s.style.display = 'none');
-            document.getElementById(id).style.display = 'flex';
-        }
-
-        function checkAuth() {
-            if(localStorage.getItem('u_fn')) showScreen('scr-profile');
-            else showNotify("Veuillez d'abord créer un compte.");
-        }
-
-        // CALCUL DE L'ÂGE
-        function calculateAge(birthDate) {
-            if(!birthDate) return "";
-            const today = new Date();
-            const birth = new Date(birthDate);
-            let age = today.getFullYear() - birth.getFullYear();
-            const m = today.getMonth() - birth.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) { age--; }
-            return age + " ans";
-        }
-
+        function showScreen(id) { document.querySelectorAll('.screen-layer').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
+        function checkAuth() { if(localStorage.getItem('u_fn')) showScreen('scr-profile'); else showNotify("Veuillez d'abord créer un compte."); }
+        function calculateAge(birthDate) { if(!birthDate) return ""; const today = new Date(); const birth = new Date(birthDate); let age = today.getFullYear() - birth.getFullYear(); const m = today.getMonth() - birth.getMonth(); if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) { age--; } return age + " ans"; }
         let photoB64 = localStorage.getItem('u_p') || "";
-        function previewPhoto(e){ 
-            const r=new FileReader(); 
-            r.onload=()=>{ photoB64=r.result; document.getElementById('c').style.backgroundImage='url('+photoB64+')'; document.getElementById('t').style.display='none'; }; 
-            r.readAsDataURL(e.target.files[0]); 
-        }
-
-        function openEditMode() {
-            document.getElementById('form-title').innerText = "Mise à jour du profil";
-            document.getElementById('fn').value = localStorage.getItem('u_fn') || "";
-            document.getElementById('ln').value = localStorage.getItem('u_ln') || "";
-            document.getElementById('dob').value = localStorage.getItem('u_dob') || "";
-            document.getElementById('res').value = localStorage.getItem('u_res') || "";
-            document.getElementById('gt').value = localStorage.getItem('u_gt') || "";
-            document.getElementById('pj').value = localStorage.getItem('u_pj') || "";
-            document.getElementById('oath').checked = false;
-            if(photoB64) { document.getElementById('c').style.backgroundImage = 'url('+photoB64+')'; document.getElementById('t').style.display = 'none'; }
-            showScreen('scr-signup');
-        }
-
-        function saveProfile(e){
-            e.preventDefault();
-            localStorage.setItem('u_p', photoB64);
-            localStorage.setItem('u_fn', document.getElementById('fn').value);
-            localStorage.setItem('u_ln', document.getElementById('ln').value);
-            localStorage.setItem('u_dob', document.getElementById('dob').value);
-            localStorage.setItem('u_res', document.getElementById('res').value);
-            localStorage.setItem('u_gt', document.getElementById('gt').value);
-            localStorage.setItem('u_pj', document.getElementById('pj').value);
-            localStorage.setItem('u_gs', document.getElementById('gs_type').value + document.getElementById('gs_rh').value);
-            updateUI();
-            showNotify("Profil enregistré ! ✨");
-            showScreen('scr-profile');
-        }
-
-        function updateUI(){
-            const p = localStorage.getItem('u_p');
-            const age = calculateAge(localStorage.getItem('u_dob'));
-            if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
-            document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || '') + " " + (localStorage.getItem('u_ln') || '') + (age ? ", " + age : "");
-            document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || '');
-            document.getElementById('rG').innerText = localStorage.getItem('u_gt') || '-';
-            document.getElementById('rS').innerText = localStorage.getItem('u_gs') || '-';
-            document.getElementById('rP').innerText = "Enfant : " + (localStorage.getItem('u_pj') || '-');
-        }
-
-        function showNotify(m) {
-            const n = document.getElementById('genlove-notify');
-            document.getElementById('notify-msg').innerText = m;
-            n.classList.add('show');
-            setTimeout(() => n.classList.remove('show'), 3000);
-        }
-
+        function previewPhoto(e){ const r=new FileReader(); r.onload=()=>{ photoB64=r.result; document.getElementById('c').style.backgroundImage='url('+photoB64+')'; document.getElementById('t').style.display='none'; }; r.readAsDataURL(e.target.files[0]); }
+        function openEditMode() { document.getElementById('form-title').innerText = "Mise à jour du profil"; document.getElementById('fn').value = localStorage.getItem('u_fn') || ""; document.getElementById('ln').value = localStorage.getItem('u_ln') || ""; document.getElementById('dob').value = localStorage.getItem('u_dob') || ""; document.getElementById('res').value = localStorage.getItem('u_res') || ""; document.getElementById('gt').value = localStorage.getItem('u_gt') || ""; document.getElementById('pj').value = localStorage.getItem('u_pj') || ""; document.getElementById('oath').checked = false; if(photoB64) { document.getElementById('c').style.backgroundImage = 'url('+photoB64+')'; document.getElementById('t').style.display = 'none'; } showScreen('scr-signup'); }
+        function saveProfile(e){ e.preventDefault(); localStorage.setItem('u_p', photoB64); localStorage.setItem('u_fn', document.getElementById('fn').value); localStorage.setItem('u_ln', document.getElementById('ln').value); localStorage.setItem('u_dob', document.getElementById('dob').value); localStorage.setItem('u_res', document.getElementById('res').value); localStorage.setItem('u_gt', document.getElementById('gt').value); localStorage.setItem('u_pj', document.getElementById('pj').value); localStorage.setItem('u_gs', document.getElementById('gs_type').value + document.getElementById('gs_rh').value); updateUI(); showNotify("Profil enregistré ! ✨"); showScreen('scr-profile'); }
+        function updateUI(){ const p = localStorage.getItem('u_p'); const age = calculateAge(localStorage.getItem('u_dob')); if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')'; document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || '') + " " + (localStorage.getItem('u_ln') || '') + (age ? ", " + age : ""); document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || ''); document.getElementById('rG').innerText = localStorage.getItem('u_gt') || '-'; document.getElementById('rS').innerText = localStorage.getItem('u_gs') || '-'; document.getElementById('rP').innerText = "Enfant : " + (localStorage.getItem('u_pj') || '-'); }
+        function showNotify(m) { const n = document.getElementById('genlove-notify'); document.getElementById('notify-msg').innerText = m; n.classList.add('show'); setTimeout(() => n.classList.remove('show'), 3000); }
         window.onload = () => { if(localStorage.getItem('u_fn')) updateUI(); };
     </script>
 </body>
