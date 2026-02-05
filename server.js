@@ -12,18 +12,18 @@ const htmlApp = `
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Genlove</title>
     <style>
-        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        .app-shell { width: 100%; max-width: 420px; height: 100%; background: #f4e9da; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: #f4e9da; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        .app-shell { width: 100%; max-width: 420px; height: 100%; background: #f4e9da; display: flex; flex-direction: column; position: relative; }
         .screen-layer { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; overflow-y: auto; background: white; }
         .screen-layer.active { display: flex; z-index: 10; }
         
-        /* Accueil Style épuré */
         .home-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; text-align: center; background: #f4e9da; }
         .main-logo { font-size: 4rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; }
         .tagline { color: #1a2a44; font-size: 1.1rem; line-height: 1.4; margin-bottom: 40px; font-weight: 500; }
         .home-prompt { font-size: 0.9rem; color: #4a5568; margin-bottom: 15px; }
 
-        .trust-footer { position: absolute; bottom: 30px; left: 20px; right: 20px; font-size: 0.75rem; color: #8a7b6a; line-height: 1.4; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        /* LA PHRASE DE RÉASSURANCE SCELLÉE */
+        .trust-footer { position: absolute; bottom: 30px; left: 20px; right: 20px; font-size: 0.75rem; color: #8a7b6a; line-height: 1.4; display: flex; align-items: center; justify-content: center; gap: 5px; text-align: center; }
 
         #genlove-notify { position: absolute; top: -100px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; transition: 0.5s; z-index: 9999; }
         #genlove-notify.show { top: 20px; }
