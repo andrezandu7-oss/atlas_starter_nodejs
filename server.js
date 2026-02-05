@@ -66,7 +66,6 @@ const htmlApp = `
                     
                     <select id="gender" class="input-box" required><option value="">Genre</option><option>Homme</option><option>Femme</option></select>
                     <input type="text" id="res" class="input-box" placeholder="Ville de résidence" required>
-                    
                     <select id="gt" class="input-box" required><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
                     
                     <div style="display:flex; gap:10px;">
@@ -133,6 +132,17 @@ const htmlApp = `
             else showNotify("Veuillez d'abord créer un compte.");
         }
 
+        // CALCUL DE L'ÂGE
+        function calculateAge(birthDate) {
+            if(!birthDate) return "";
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) { age--; }
+            return age + " ans";
+        }
+
         let photoB64 = localStorage.getItem('u_p') || "";
         function previewPhoto(e){ 
             const r=new FileReader(); 
@@ -149,11 +159,7 @@ const htmlApp = `
             document.getElementById('gt').value = localStorage.getItem('u_gt') || "";
             document.getElementById('pj').value = localStorage.getItem('u_pj') || "";
             document.getElementById('oath').checked = false;
-            
-            if(photoB64) {
-                document.getElementById('c').style.backgroundImage = 'url('+photoB64+')';
-                document.getElementById('t').style.display = 'none';
-            }
+            if(photoB64) { document.getElementById('c').style.backgroundImage = 'url('+photoB64+')'; document.getElementById('t').style.display = 'none'; }
             showScreen('scr-signup');
         }
 
@@ -167,7 +173,6 @@ const htmlApp = `
             localStorage.setItem('u_gt', document.getElementById('gt').value);
             localStorage.setItem('u_pj', document.getElementById('pj').value);
             localStorage.setItem('u_gs', document.getElementById('gs_type').value + document.getElementById('gs_rh').value);
-            
             updateUI();
             showNotify("Profil enregistré ! ✨");
             showScreen('scr-profile');
@@ -175,8 +180,9 @@ const htmlApp = `
 
         function updateUI(){
             const p = localStorage.getItem('u_p');
+            const age = calculateAge(localStorage.getItem('u_dob'));
             if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
-            document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || '') + " " + (localStorage.getItem('u_ln') || '');
+            document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || '') + " " + (localStorage.getItem('u_ln') || '') + (age ? ", " + age : "");
             document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || '');
             document.getElementById('rG').innerText = localStorage.getItem('u_gt') || '-';
             document.getElementById('rS').innerText = localStorage.getItem('u_gs') || '-';
