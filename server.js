@@ -1,139 +1,398 @@
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
-app.use(express.urlencoded({extended:true}));
-app.get('/',(req,res)=>{res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Genlove</title>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f8f9fa;display:flex;justify-content:center;align-items:center;min-height:100vh;flex-direction:column}.container{width:100%;max-width:400px;background:#fff;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.1);overflow:hidden}.header{padding:30px 20px;text-align:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}.header h1{font-size:2.5rem;font-weight:700;margin:0}.header p{font-size:1.1rem;margin:10px 0 20px;opacity:0.9}.screen{display:none;padding:30px;flex-direction:column;gap:20px}.screen.active{display:flex}.btn{display:block;width:100%;padding:16px 20px;border:none;border-radius:12px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s;text-decoration:none;text-align:center}.btn-primary{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:white;box-shadow:0 4px 15px rgba(255,107,107,0.4)}.btn-secondary{background:#6c757d;color:white}.btn-success{background:#28a745;color:white}.input-group{position:relative}.input-group input{width:100%;padding:16px 20px;border:2px solid #e9ecef;border-radius:12px;font-size:1rem;background:#fff;transition:border-color 0.3s;box-sizing:border-box}.input-group input:focus{border-color:#ff6b6b;outline:none;box-shadow:0 0 0 3px rgba(255,107,107,0.1)}.profile-photo{width:100px;height:100px;border-radius:50%;border:4px solid #ff6b6b;margin:0 auto 15px;background:#f8f9fa;display:flex;align-items:center;justify-content:center;font-size:2rem}.match-card{background:#f8f9fa;border-radius:15px;padding:20px;margin:10px 0;border-left:4px solid #ff6b6b}.match-info h4{margin:0 0 5px;font-size:1.2rem}.match-info p{margin:0;color:#6c757d;font-size:0.9rem}.chat-header{background:#667eea;color:white;padding:20px;text-align:center;position:sticky;top:0;z-index:10}.chat-messages{min-height:300px;max-height:400px;overflow-y:auto;padding:20px;background:#f1f3f5;border-radius:15px;margin:20px 0}.message{display:flex;margin-bottom:15px}.message.sent{justify-content:flex-end}.message-bubble{max-width:70%;padding:12px 16px;border-radius:20px;font-size:0.95rem;line-height:1.4}.message.received .message-bubble{background:#fff;border:1px solid #dee2e6}.message.sent .message-bubble{background:#ff6b6b;color:white}.chat-input{position:sticky;bottom:0;background:#fff;padding:20px 0;border-top:1px solid #dee2e6;display:flex;gap:10px}.chat-input input{flex:1;padding:15px;border:2px solid #e9ecef;border-radius:25px;font-size:1rem}.chat-input input:focus{border-color:#ff6b6b;outline:none}.chat-input button{width:50px;height:50px;border:none;border-radius:50%;background:#ff6b6b;color:white;font-size:1.2rem;cursor:pointer;flex-shrink:0}@media (max-width:480px){.container{margin:10px;border-radius:15px}.header{padding:25px 15px}.header h1{font-size:2.2rem}}</style>
+
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use((req, res, next) => {
+    res.header('X-Powered-By', undefined);
+    next();
+});
+
+const genloveApp = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Genlove - Matching Santé Intelligent</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', -apple-system, sans-serif; 
+            margin: 0; background: #fdf2f2; 
+            display: flex; justify-content: center; 
+            height: 100vh; overflow: hidden; 
+            -webkit-font-smoothing: antialiased;
+        }
+        .app-shell { 
+            width: 100%; max-width: 450px; height: 100%; 
+            background: #f4e9da; display: flex; flex-direction: column; 
+            position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+        }
+        .screen { 
+            display: none; flex-direction: column; height: 100%; width: 100%; 
+            position: absolute; inset: 0; overflow-y: auto; background: white; 
+            z-index: 10; padding-bottom: 40px; 
+        }
+        .active { display: flex; }
+
+        /* NOTIFICATIONS AMÉLIORÉES */
+        #genlove-notify { 
+            position: absolute; top: -100px; left: 10px; right: 10px; 
+            background: #1a2a44; color: white; padding: 15px; border-radius: 12px; 
+            display: flex; align-items: center; gap: 10px; 
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #007bff; 
+        }
+        #genlove-notify.show { top: 20px; }
+
+        #loader { 
+            display: none; position: absolute; inset: 0; background: white; z-index: 200; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            text-align: center; padding: 20px; 
+        }
+        .spinner { 
+            width: 50px; height: 50px; border: 5px solid #f3f3f3; 
+            border-top: 5px solid #ff416c; border-radius: 50%; 
+            animation: spin 1s linear infinite; margin-bottom: 20px; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* BOUTONS */
+        .btn-pink { 
+            background: #ff416c; color: white; padding: 18px; border-radius: 50px; 
+            text-align: center; font-weight: bold; width: 85%; margin: 20px auto; 
+            border: none; cursor: pointer; display: block; font-size: 1rem; 
+            touch-action: manipulation;
+        }
+        .btn-dark { 
+            background: #1a2a44; color: white; padding: 18px; border-radius: 12px; 
+            text-align: center; font-weight: bold; width: 80%; margin: 10px auto; 
+            border: none; cursor: pointer; display: block; 
+        }
+        .btn-green { 
+            background: #28a745; color: white; border: none; padding: 15px; 
+            border-radius: 10px; width: 90%; margin: 10px 5%; font-weight: bold; 
+            cursor: pointer; 
+        }
+
+        /* FORMULAIRE */
+        .input-box { 
+            width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; 
+            margin-top: 10px; font-size: 1rem; box-sizing: border-box; 
+            background: #f8f9fa; 
+        }
+        .photo-circle { 
+            width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; 
+            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; 
+            background-size: cover; background-position: center; cursor: pointer; 
+        }
+        .serment-container { 
+            margin-top: 20px; padding: 15px; background: #fff5f7; border-radius: 12px; 
+            border: 1px solid #ffdae0; display:flex; gap:10px; align-items: flex-start; 
+        }
+        .serment-text { font-size: 0.82rem; color: #d63384; line-height: 1.4; }
+
+        /* LISTES */
+        .st-group { 
+            background: white; border-radius: 15px; margin: 0 15px 15px 15px; 
+            overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+        }
+        .st-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; 
+            font-size: 0.95rem; 
+        }
+
+        /* POPUP & MATCHING */
+        #popup-overlay { 
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); 
+            z-index:1000; align-items:center; justify-content:center; padding:20px; 
+        }
+        .popup-content { 
+            background:white; border-radius:20px; width:90%; max-width:380px; 
+            padding:25px; position:relative; text-align:left; 
+        }
+        .close-popup { 
+            position:absolute; top:15px; right:15px; font-size:1.5rem; 
+            cursor:pointer; color:#666; 
+        }
+        .popup-msg { 
+            background:#e7f3ff; padding:15px; border-radius:12px; 
+            border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; 
+            line-height:1.4; margin-top:15px; 
+        }
+        .match-card { 
+            background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; 
+            display: flex; align-items: center; gap: 12px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .match-photo-blur { 
+            width: 55px; height: 55px; border-radius: 50%; background: #eee; 
+            filter: blur(6px); 
+        }
+
+        /* SWITCH */
+        .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { 
+            position: absolute; cursor: pointer; inset: 0; background-color: #ccc; 
+            transition: .4s; border-radius: 24px; 
+        }
+        .slider:before { 
+            position: absolute; content: ""; height: 18px; width: 18px; 
+            left: 3px; bottom: 3px; background-color: white; transition: .4s; 
+            border-radius: 50%; 
+        }
+        input:checked + .slider { background-color: #007bff; }
+        input:checked + .slider:before { transform: translateX(21px); }
+
+        /* CHAT AMÉLIORÉ */
+        .chat-header { 
+            background: #9dbce3; color: white; padding: 12px 15px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            flex-shrink: 0;
+        }
+        .btn-quit {
+            background: #ffffff; color: #9dbce3; border: none;
+            width: 32px; height: 32px; border-radius: 8px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-logout-badge {
+            background: #1a2a44; color: white; border: none;
+            padding: 8px 15px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; }
+        .digital-clock {
+            background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 10px;
+            font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem;
+            display: inline-flex; align-items: center; border: 1px solid #333;
+        }
+        .chat-messages { 
+            flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; 
+        }
+        .bubble { 
+            padding: 12px 16px; border-radius: 18px; max-width: 80%; 
+            line-height: 1.4; white-space: pre-wrap; 
+        }
+        .received { background: #e2ecf7; align-self: flex-start; }
+        .sent { background: #ff416c; color: white; align-self: flex-end; }
+        .input-area { 
+            position: fixed; bottom: 0; width: 100%; max-width: 450px; 
+            padding: 10px 15px 45px 15px; border-top: 1px solid #eee; 
+            display: flex; gap: 10px; background: white; box-sizing: border-box; 
+            align-items: flex-end; 
+        }
+
+        /* ÉCRAN FINAL */
+        .final-bg { 
+            background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); 
+            color: white; justify-content: center; align-items: center; text-align: center; 
+        }
+        .final-card { 
+            background: white; color: #333; border-radius: 30px; padding: 40px 25px; 
+            width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); 
+        }
+        .btn-restart { 
+            background: #ff416c; color: white; border: none; padding: 16px; 
+            border-radius: 30px; width: 100%; font-weight: bold; font-size: 1.1rem; 
+            cursor: pointer; margin-top: 25px; 
+        }
+
+        /* POPUP SÉCURITÉ */
+        #security-popup { 
+            display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; 
+            align-items: center; padding: 20px; 
+        }
+        .popup-card { 
+            background: white; border-radius: 30px; padding: 35px 25px; 
+            text-align: center; width: 88%; 
+        }
+        .pedagogic-box { 
+            background: #f0f7ff; border-radius: 15px; padding: 15px; 
+            text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; 
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-<div class="header">
-<h1>Gen<span style="color:#ff6b6b">love</span></h1>
-<p>Trouvez l'amour en parfaite compatibilité génétique</p>
-</div>
+    <audio id="lastMinuteSound" preload="auto">
+        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+    </audio>
 
-<div id="screen-welcome" class="screen active">
-<div style="text-align:center;margin-bottom:30px">
-<div class="profile-photo" style="background:#667eea">👤</div>
-<p style="color:#6c757d;margin:10px 0">Application de matching santé</p>
-</div>
-<button class="btn btn-primary" onclick="showScreen('profile')">Se connecter</button>
-<button class="btn btn-secondary" onclick="showScreen('signup')">Créer un compte</button>
-</div>
+    <div class="app-shell">
+        <!-- NOTIFICATION -->
+        <div id="genlove-notify"><span>📩</span><span id="notify-msg"></span></div>
+        <div id="loader">
+            <div class="spinner"></div>
+            <h3>Analyse sécurisée...</h3>
+            <p>Vérification de vos données médicales.</p>
+        </div>
 
-<div id="screen-signup" class="screen">
-<h2 style="color:#333;margin-bottom:20px">Configuration Santé</h2>
-<div class="input-group"><input type="text" id="firstname" placeholder="Prénom" value="Jean"></div>
-<div class="input-group"><input type="text" id="lastname" placeholder="Nom" value="Dupont"></div>
-<div class="input-group"><input type="date" id="birthdate"></div>
-<div class="input-group">
-<select id="genotype">
-<option value="">Génotype *</option>
-<option value="AA">AA</option>
-<option value="AS">AS</option>
-<option value="SS">SS</option>
-</select>
-</div>
-<div class="input-group">
-<select id="bloodtype">
-<option value="">Groupe sanguin *</option>
-<option value="A+">A+</option>
-<option value="A-">A-</option>
-<option value="B+">B+</option>
-<option value="B-">B-</option>
-<option value="AB+">AB+</option>
-<option value="AB-">AB-</option>
-<option value="O+">O+</option>
-<option value="O-">O-</option>
-</select>
-</div>
-<div class="input-group"><input type="text" id="location" placeholder="Ville" value="Luanda"></div>
-<div style="background:#fff3cd;border:1px solid #ffeaa7;border-radius:12px;padding:15px;margin:20px 0">
-<input type="checkbox" id="oath" style="width:24px;height:24px;margin-right:10px">
-<label for="oath" style="font-size:0.95rem;color:#856404;font-weight:500">Je certifie que mes informations médicales sont exactes</label>
-</div>
-<button class="btn btn-primary" onclick="saveProfile()">🚀 Valider mon profil</button>
-<button class="btn btn-secondary" onclick="showScreen('welcome')">← Retour</button>
-</div>
+        <!-- HOME -->
+        <div id="scr-home" class="screen active" style="background:#f4e9da;">
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;">
+                <div style="font-size: 3.5rem; font-weight: bold;">
+                    <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
+                </div>
+                <div style="font-weight: bold; color: #1a2a44; margin: 20px 0 40px 0; font-size: 1rem;">
+                    Unissez cœur et santé pour bâtir des couples sains
+                </div>
+                <button class="btn-dark" onclick="checkAuth()">➔ Se connecter</button>
+                <button class="btn-pink" onclick="showSignup()">👤 Créer un compte</button>
+            </div>
+        </div>
 
-<div id="screen-profile" class="screen">
-<div style="text-align:center;margin-bottom:30px">
-<div class="profile-photo" id="profilePhoto" style="background:#28a745">✅</div>
-<h2 id="profileName">Jean Dupont</h2>
-<p id="profileInfo" style="color:#6c757d;margin:10px 0">Chargement...</p>
-</div>
-<div style="background:#f8f9fa;padding:20px;border-radius:15px;margin:20px 0">
-<h3 style="margin:0 0 15px;color:#333">Mes informations</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;font-size:0.95rem">
-<div><strong>Génotype:</strong> <span id="profileGenotype">--</span></div>
-<div><strong>Sanguin:</strong> <span id="profileBlood">--</span></div>
-</div>
-</div>
-<button class="btn btn-primary" onclick="showScreen('matching')">🔍 Lancer le matching</button>
-<button class="btn btn-secondary" onclick="showScreen('settings')">⚙️ Paramètres</button>
-</div>
+        <!-- SIGNUP -->
+        <div id="scr-signup" class="screen" style="padding:20px;">
+            <h2 style="color:#ff416c; text-align:center;">Configuration Santé</h2>
+            <div class="photo-circle" id="c" onclick="document.getElementById('i').click()">
+                <span id="t">📸 Photo *</span>
+            </div>
+            <input type="file" id="i" style="display:none" accept="image/*" onchange="preview(event)">
+            
+            <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
+            <input type="text" id="ln" class="input-box" placeholder="Nom" required>
+            <select id="gender" class="input-box" required>
+                <option value="">Genre</option>
+                <option>Homme</option>
+                <option>Femme</option>
+            </select>
+            <input type="date" id="dob" class="input-box" required>
+            <input type="text" id="res" class="input-box" placeholder="Résidence actuelle" required>
+            <select id="gt" class="input-box" required>
+                <option value="">Génotype</option>
+                <option>AA</option>
+                <option>AS</option>
+                <option>SS</option>
+            </select>
+            <div style="display:flex; gap:10px;">
+                <select id="gs_type" class="input-box" style="flex:2;" required>
+                    <option value="">Groupe</option>
+                    <option>A</option>
+                    <option>B</option>
+                    <option>AB</option>
+                    <option>O</option>
+                </select>
+                <select id="gs_rh" class="input-box" style="flex:1;" required>
+                    <option value="">Rh</option>
+                    <option>+</option>
+                    <option>-</option>
+                </select>
+            </div>
+            <select id="pj" class="input-box" required>
+                <option value="">Désir d'enfant ?</option>
+                <option>Oui</option>
+                <option>Non</option>
+            </select>
+            <div class="serment-container">
+                <input type="checkbox" id="oath" style="width:25px;height:25px;">
+                <label for="oath" class="serment-text">
+                    Je confirme sur l'honneur que les informations saisies sont sincères et conformes à mes résultats médicaux.
+                </label>
+            </div>
+            <button class="btn-pink" onclick="saveProfile()">🚀 Valider mon profil</button>
+        </div>
 
-<div id="screen-matching" class="screen">
-<h2 style="color:#333;margin-bottom:25px;text-align:center">💞 Partenaires Compatibles</h2>
-<div class="match-card">
-<div class="match-info">
-<h4>Sarah (28 ans)</h4>
-<p>AA • O+ • Luanda • Famille</p>
-</div>
-<button class="btn btn-success" style="width:auto;padding:12px 24px;font-size:1rem;margin-left:auto" onclick="startChat('Sarah')">💬 Contacter</button>
-</div>
-<div class="match-card">
-<div class="match-info">
-<h4>Léa (26 ans)</h4>
-<p>AA • B- • Luanda • Stable</p>
-</div>
-<button class="btn btn-success" style="width:auto;padding:12px 24px;font-size:1rem;margin-left:auto" onclick="startChat('Léa')">💬 Contacter</button>
-</div>
-<button class="btn btn-secondary" onclick="showScreen('profile')">← Retour profil</button>
-</div>
+        <!-- PROFILE -->
+        <div id="scr-profile" class="screen" style="background:#f8f9fa;">
+            <div style="background:white; padding:30px; text-align:center; border-radius:0 0 30px 30px; position:relative;">
+                <button onclick="showScreen('scr-home')" style="border:none; background:none; position:absolute; top:20px; left:20px; font-size:1.4rem;">🏠</button>
+                <button onclick="showScreen('scr-settings')" style="border:none; background:none; position:absolute; top:20px; right:20px; font-size:1.4rem;">⚙️</button>
+                <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover;"></div>
+                <h2 id="vN">Nom</h2>
+                <p id="vAgeLoc" style="color:#666; margin:0 0 10px 0;">-- ans • --</p>
+                <p style="color:#007bff; font-weight:bold;">Profil Santé Validé ✅</p>
+            </div>
+            <div style="padding:15px 20px 5px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div>
+            <div class="st-group">
+                <div class="st-item"><span>Génotype</span><b id="rG" style="color:#ff416c;">--</b></div>
+                <div class="st-item"><span>Groupe Sanguin</span><b id="rS">--</b></div>
+                <div class="st-item"><span>Projet de vie</span><b id="rP">--</b></div>
+            </div>
+            <button class="btn-dark" onclick="simulateMatch()">🔍 Lancer le Matching</button>
+        </div>
 
-<div id="screen-chat" class="screen">
-<div class="chat-header">
-<h3>💬 Chat avec Sarah</h3>
-<div style="font-size:1.2rem;font-weight:700;margin-top:5px">28:45</div>
-</div>
-<div class="chat-messages" id="chatMessages">
-<div class="message received">
-<div class="message-bubble">Bonjour ! Ton profil santé correspond parfaitement au mien 😊</div>
-</div>
-</div>
-<div class="chat-input">
-<input type="text" id="chatInput" placeholder="Tapez votre message..." onkeypress="if(event.keyCode==13)sendMessage()">
-<button onclick="sendMessage()">➤</button>
-</div>
-</div>
+        <!-- MATCHING -->
+        <div id="scr-matching" class="screen">
+            <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee; position:relative;">
+                <button onclick="showScreen('scr-profile')" style="border:none; background:none; position:absolute; top:20px; left:20px; font-size:1.4rem;">✕</button>
+                <h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3>
+            </div>
+            <div id="match-container" style="flex:1; padding:10px;"></div>
+            <div id="popup-overlay" onclick="closePopup()" style="position:fixed;">
+                <div class="popup-content" onclick="event.stopPropagation()">
+                    <span class="close-popup" onclick="closePopup()">&times;</span>
+                    <h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3>
+                    <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
+                    <div id="pop-msg" class="popup-msg"></div>
+                    <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="closePopup(); showNotify('Demande de contact envoyée !')">🚀 Contacter ce profil</button>
+                </div>
+            </div>
+        </div>
 
-<div id="screen-settings" class="screen">
-<h2 style="color:#333;margin-bottom:25px">⚙️ Paramètres</h2>
-<div style="background:#f8f9fa;padding:25px;border-radius:15px;margin-bottom:25px">
-<h4 style="margin:0 0 15px">Confidentialité</h4>
-<div style="display:flex;justify-content:space-between;align-items:center;padding:15px;background:#fff;border-radius:12px">
-<span>Profil public</span>
-<label style="position:relative;display:inline-block;width:50px;height:28px">
-<input type="checkbox" checked style="opacity:0;width:0;height:0">
-<span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;transition:.4s;border-radius:28px">
-<span style="position:absolute;content:'';height:24px;width:24px;left:2px;bottom:2px;background:white;transition:.4s;border-radius:50%"></span>
-</span>
-</label>
-</div>
-</div>
-<button class="btn btn-secondary" onclick="showScreen('profile')">← Retour</button>
-</div>
-</div>
+        <!-- CONFIRMATION -->
+        <div id="scr-confirm" class="screen" style="background:#f0f2f5; justify-content:center; align-items:center;">
+            <div style="background:white; width:85%; border-radius:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); overflow:hidden; text-align:center;">
+                <div style="background: #0000ff; color: white; padding: 18px; font-weight: bold;">Genlove - confirmation</div>
+                <div style="padding: 30px 25px;">
+                    <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
+                    <button class="btn-green" onclick="showChatPopup()">Accepter</button>
+                    <button class="btn-dark" style="background:none; color:#dc3545; border:1px solid #dc3545;" onclick="showScreen('scr-profile')">Rejeter</button>
+                </div>
+            </div>
+        </div>
 
-<script>
-let currentUser={};
-function showScreen(screenId){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+screenId).classList.add('active')}
-function saveProfile(){if(!document.getElementById('oath').checked){alert('Veuillez confirmer vos informations médicales');return}currentUser={firstname:document.getElementById('firstname').value,lastname:document.getElementById('lastname').value,genotype:document.getElementById('genotype').value,bloodtype:document.getElementById('bloodtype').value,location:document.getElementById('location').value};localStorage.setItem('genlove_user',JSON.stringify(currentUser));document.getElementById('profileName').textContent=currentUser.firstname+' '+currentUser.lastname;document.getElementById('profileInfo').textContent='28 ans • '+currentUser.location;document.getElementById('profileGenotype').textContent=currentUser.genotype;document.getElementById('profileBlood').textContent=currentUser.bloodtype;showScreen('profile');alert('✅ Profil médical sauvegardé!')}
-function startChat(name){document.querySelector('.chat-header h3').textContent='💬 Chat avec '+name;showScreen('chat')}
-function sendMessage(){const input=document.getElementById('chatInput'),msg=input.value.trim();if(msg){const messages=document.getElementById('chatMessages'),div=document.createElement('div');div.className='message sent';div.innerHTML='<div class="message-bubble">'+msg+'</div>';messages.appendChild(div);input.value='';messages.scrollTop=messages.scrollHeight}}
-const saved=localStorage.getItem('genlove_user');if(saved){currentUser=JSON.parse(saved);document.getElementById('firstname').value=currentUser.firstname||'';document.getElementById('lastname').value=currentUser.lastname||'';document.getElementById('genotype').value=currentUser.genotype||'';document.getElementById('bloodtype').value=currentUser.bloodtype||'';document.getElementById('location').value=currentUser.location||'';showScreen('profile')}
-</script>
-</body></html>`})
-app.listen(port,()=>console.log('Genlove ready'));
+        <!-- CHAT AMÉLIORÉ -->
+        <div id="scr-chat" class="screen">
+            <div id="security-popup">
+                <div class="popup-card">
+                    <h3>🔒 Espace de discussion privé</h3>
+                    <p><b>Par mesure de confidentialité, Genlove a sécurisé cet échange.</b></p>
+                    <div class="pedagogic-box">
+                        <div>🛡️ <b>Éphémère :</b> Tout s'efface dans 30 min.</div>
+                        <div>🕵️ <b>Privé :</b> Aucun historique n'est conservé.</div>
+                    </div>
+                    <button class="btn-pink" onclick="closePopup()">Démarrer l'échange</button>
+                </div>
+            </div>
+
+            <div class="chat-header">
+                <button class="btn-quit" onclick="showScreen('scr-profile')">✕</button>
+                <div class="digital-clock">
+                    <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
+                </div>
+                <button class="btn-logout-badge" onclick="showFinalScreen()">Logout 🔒</button>
+            </div>
+
+            <div class="chat-messages" id="box">
+                <div class="bubble received">Bonjour ! Ton profil correspond exactement à ce que je recherche. 👋</div>
+            </div>
+
+            <div class="input-area">
+                <textarea id="msg" class="input-box" style="flex:1; margin:0; resize:none; max-height:150px;" placeholder="Écrivez votre message..." rows="1" oninput="autoGrow(this)"></textarea>
+                <button class="btn-dark" style="width:45px; height:45px; border-radius:50%; padding:0;" onclick="send()">➤</button>
+            </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="scr-settings" class="screen" style="background:#f4f7f6;">
+            <div style="padding:25px; background:white; text-align:center;">
+                <div style="font-size:2rem; font-weight:bold;">Genlove</div>
+            </div>
+            <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
+            <div class="st-group">
+                <div class="st-item">
+                    <span>Visibilité profil</span>
+                    <label class="switch">
+                        <input type="checkbox" id="visibility-toggle" checked onchange="toggleVisibility(this)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="st-item" style="font-size:0.8rem; color:#666;">Statut : <b id="status" style="color:#007bff;">Publi
