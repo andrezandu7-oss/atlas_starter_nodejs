@@ -4,70 +4,60 @@ const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-const htmlApp = `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Genlove - Officiel</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        .app-shell { width: 100%; max-width: 450px; height: 100%; background: #f4e9da; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .screen { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; overflow-y: auto; background: white; }
-        .active { display: flex; z-index: 10; }
+const styles = `
+<style>
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+    .app-shell { width: 100%; max-width: 450px; height: 100%; background: #f4e9da; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    .screen { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; overflow-y: auto; background: white; z-index: 10; }
+    .active { display: flex; }
 
-        /* --- STYLES PROFIL (PARTIE 1) --- */
-        .home-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center; background: #f4e9da; }
-        .logo-text { font-size: 3.5rem; font-weight: bold; margin-bottom: 5px; }
-        .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align:center; font-weight:bold; width:85%; margin:20px auto; border:none; cursor:pointer; display:block; text-decoration:none; }
-        .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; font-weight:bold; width:80%; border:none; cursor:pointer; margin:10px auto; }
-        .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; cursor: pointer; }
-        .input-box { width: 90%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin: 10px auto; font-size: 1rem; display:block; }
-        .st-group { background: white; border-radius: 15px; margin: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .st-item { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; }
+    /* LOADER & NOTIFY */
+    #genlove-notify { position: absolute; top: -100px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #007bff; }
+    #genlove-notify.show { top: 20px; }
+    #loader { display: none; position: absolute; inset: 0; background: white; z-index: 200; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+    .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- STYLES MESSAGERIE PERTINENTS (PARTIE 2) --- */
-        .chat-header { background: #9dbce3; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .btn-quit { background: white; color: #9dbce3; border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-logout-badge { background: #1a2a44; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
-        
-        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        .heart-icon { display: inline-block; color: #ff416c; animation: heartbeat 1s infinite; margin-right: 8px; }
-        .digital-clock { background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 10px; font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; display: inline-flex; align-items: center; border: 1px solid #333; }
+    /* ACCUEIL & FORM */
+    .home-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center; background: #f4e9da; }
+    .logo-text { font-size: 3.5rem; font-weight: bold; }
+    .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; font-weight: bold; width: 85%; margin: 15px auto; border: none; cursor: pointer; display: block; }
+    .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; font-weight: bold; width: 80%; margin: 10px auto; border: none; cursor: pointer; display: block; }
+    .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; }
+    .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; cursor: pointer; }
+    
+    /* SERMENT & MATCHING */
+    .serment-container { margin-top: 15px; padding: 12px; background: #fff5f7; border-radius: 12px; border: 1px solid #ffdae0; text-align: left; display: flex; gap: 10px; }
+    .serment-text { font-size: 0.8rem; color: #d63384; line-height: 1.3; }
+    .st-group { background: white; border-radius: 15px; margin: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .st-item { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; font-size: 0.95rem; align-items: center; }
+    .info-bubble { background: #e7f3ff; color: #1a2a44; padding: 15px; border-radius: 12px; margin: 15px; font-size: 0.85rem; border-left: 5px solid #007bff; text-align: left; }
+    .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(6px); }
 
-        .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
-        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; line-height: 1.4; white-space: pre-wrap; font-size: 0.9rem; }
-        .received { background: #e2ecf7; align-self: flex-start; }
-        .sent { background: #ff416c; color: white; align-self: flex-end; }
-        
-        .input-area { position: absolute; bottom: 0; width: 100%; padding: 10px 15px 45px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; box-sizing: border-box; align-items: flex-end; }
-        
-        /* NOTIFICATIONS & POPUP */
-        .notif-bg { background: #f0f2f5; justify-content: center; align-items: center; }
-        .notif-card { background: white; width: 85%; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; padding-bottom: 20px; text-align: center; }
-        .btn-blue { background: #7ca9e6; color: white; border: none; width: 90%; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; margin: 0 auto; display: block; }
-        .btn-green { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; width: 90%; font-weight: bold; cursor: pointer; margin: 10px auto; display: block; }
-        
-        #security-popup { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .popup-card { background: white; border-radius: 30px; padding: 35px 25px; text-align: center; width: 88%; }
-        .pedagogic-box { background: #f0f7ff; border-radius: 15px; padding: 15px; text-align: left; margin: 20px 0; border: 1px solid #d0e3ff; font-size: 0.85rem; }
+    /* SWITCH */
+    .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #007bff; }
+    input:checked + .slider:before { transform: translateX(21px); }
 
-        /* FINAL */
-        .final-bg { background: linear-gradient(135deg, #4a76b8 0%, #1a2a44 100%); color: white; justify-content: center; align-items: center; text-align: center; }
-        .final-card { background: white; color: #333; border-radius: 30px; padding: 40px 25px; width: 85%; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
-        .btn-restart { background: #ff416c; color: white; border: none; padding: 16px; border-radius: 30px; width: 100%; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 25px; }
-        .btn-secondary { background: none; border: 1px solid #ccc; color: #666; padding: 12px; border-radius: 30px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    </style>
-</head>
-<body>
+    /* POPUP & CHAT (FIXE) */
+    #popup-overlay { display:none; position:absolute; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+    .popup-content { background:white; border-radius:20px; width:100%; padding:25px; box-sizing:border-box; }
+    .chat-header { background: #9dbce3; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+    .digital-clock { background: #1a1a1a; color: #ff416c; padding: 6px 12px; border-radius: 10px; font-family: monospace; font-weight: bold; }
+</style>
+`;
 
-    <audio id="lastMinuteSound" preload="auto">
-        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-    </audio>
-
+app.get('/', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body>
+    <audio id="lastMinuteSound" preload="auto"><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>
     <div class="app-shell">
-        
+        <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
+        <div id="loader"><div class="spinner"></div><h3>Analyse sécurisée...</h3><p>Vérification de vos données médicales.</p></div>
+
         <div id="scr-home" class="screen active">
             <div class="home-screen">
                 <div class="logo-text"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div>
@@ -77,191 +67,133 @@ const htmlApp = `
             </div>
         </div>
 
-        <div id="scr-signup" class="screen" style="padding:20px; text-align:center;">
-            <h2 style="color:#ff416c;">Mon Profil Santé</h2>
-            <div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo</span></div>
+        <div id="scr-signup" class="screen" style="padding:20px;">
+            <h2 style="color:#ff416c; text-align:center;">Configuration Santé</h2>
+            <div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo *</span></div>
             <input type="file" id="i" style="display:none" onchange="preview(event)">
             <input type="text" id="fn" class="input-box" placeholder="Prénom">
             <select id="gt" class="input-box"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
+            <div style="display:flex; gap:10px;"><select id="gs_type" class="input-box" style="flex:2;"><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select>
+            <select id="gs_rh" class="input-box" style="flex:1;"><option>+</option><option>-</option></select></div>
+            <select id="pj" class="input-box"><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select>
+            <div class="serment-container"><input type="checkbox" id="oath" style="width:20px;height:20px;"><label for="oath" class="serment-text">Je confirme sur l'honneur que ces informations sont conformes à mes résultats médicaux.</label></div>
             <button class="btn-pink" onclick="saveProfile()">🚀 Valider mon profil</button>
         </div>
 
         <div id="scr-profile" class="screen" style="background:#f8f9fa;">
             <div style="background:white; padding:30px; text-align:center; border-radius:0 0 30px 30px;">
-                <div id="vP" style="width:100px; height:100px; border-radius:50%; border:3px solid #ff416c; margin:0 auto 15px; background-size:cover;"></div>
-                <h2 id="vN" style="margin:0;">Nom</h2>
+                <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:0 auto 15px; background-size:cover;"></div>
+                <h2 id="vN">Nom</h2>
                 <p style="color:#007bff; font-weight:bold;">Profil Santé Validé ✅</p>
+                <button onclick="showScreen('scr-settings')" style="border:none; background:none; cursor:pointer; position:absolute; top:20px; right:20px; font-size:1.5rem;">⚙️</button>
             </div>
             <div class="st-group">
                 <div class="st-item"><span>Génotype</span><b id="rG" style="color:#ff416c;">--</b></div>
+                <div class="st-item"><span>Groupe Sanguin</span><b id="rS">--</b></div>
             </div>
-            <button class="btn-dark" onclick="showScreen('scr-notif1')">🔍 Lancer le Matching</button>
+            <button class="btn-dark" onclick="startMatching()">🔍 Lancer le Matching</button>
         </div>
 
-        <div id="scr-notif1" class="screen notif-bg">
-            <div class="notif-card">
-                <div style="padding:15px; border-bottom:1px solid #eee; text-align:left; font-weight:bold;">📩 Genlove Notification</div>
-                <div style="padding: 30px 20px;">
-                    <p style="font-size: 1.15rem; font-weight: 500; margin-bottom: 10px;">Quelqu'un de compatible avec vous souhaite échanger 💞</p>
-                    <p style="font-size: 0.95rem; color: #666; margin-bottom: 25px;">Ouvrez Genlove pour découvrir qui c'est 💖</p>
-                </div>
-                <button class="btn-blue" onclick="showScreen('scr-notif2')">📖 Ouvrir l'application Genlove</button>
-            </div>
+        <div id="scr-matching" class="screen" style="background:#f4f7f6;">
+            <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0;">Partenaires Compatibles</h3></div>
+            <div id="match-container"></div>
+            <button class="btn-pink" onclick="showScreen('scr-profile')">Retour</button>
         </div>
 
-        <div id="scr-notif2" class="screen notif-bg">
-            <div class="notif-card">
-                <div style="background: #0000ff; color: white; padding: 18px; text-align:left; font-weight: bold;">Genlove - confirmation</div>
-                <div style="padding: 30px 25px;">
-                    <p style="font-size: 1.1rem; margin-bottom: 25px;">Accepter Sarah ? ❤️</p>
-                    <button class="btn-green" onclick="showSecurityPopup()">Accepter</button>
-                    <button style="background:none; border:none; color:red; font-weight:bold; cursor:pointer; margin-top:15px;" onclick="showFinal('chat', true)">✕ Rejeter</button>
-                </div>
+        <div id="scr-settings" class="screen" style="background:#f4f7f6;">
+            <div style="padding:25px; text-align:center; background:white;"><div class="logo-text" style="font-size:2rem;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
+            <div style="padding:15px 20px 5px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
+            <div class="st-group">
+                <div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" checked onchange="showNotify('Visibilité mise à jour')"><span class="slider"></span></label></div>
             </div>
+            <div class="st-group">
+                <div class="st-item" style="color:red; font-weight:bold;" onclick="if(confirm('Supprimer ?')){localStorage.clear(); location.reload();}">Supprimer mon compte</div>
+            </div>
+            <button class="btn-pink" onclick="showScreen('scr-profile')">Retour</button>
         </div>
 
         <div id="scr-chat" class="screen">
-            <div id="security-popup">
-                <div class="popup-card">
-                    <h3>🔒 Espace de discussion privé</h3>
-                    <p><b>Par mesure de confidentialité, Genlove a sécurisé cet échange.</b></p>
-                    <div class="pedagogic-box">
-                        <div style="margin-bottom:8px;">🛡️ <b>Éphémère :</b> Tout s'efface dans 30 min.</div>
-                        <div>🕵️ <b>Privé :</b> Aucun historique conservé.</div>
-                    </div>
-                    <button class="btn-dark" style="width:100%;" onclick="closePopup()">Démarrer l'échange</button>
-                </div>
-            </div>
-
             <div class="chat-header">
-                <button class="btn-quit" onclick="showFinal('chat')">✕</button>
-                <div class="digital-clock">
-                    <span class="heart-icon">❤️</span><span id="timer-display">30:00</span>
-                </div>
-                <button class="btn-logout-badge" onclick="showFinal('app')">Logout 🔒</button>
+                <button onclick="showScreen('scr-profile')" style="border:none; background:white; border-radius:5px;">✕</button>
+                <div class="digital-clock">❤️ <span id="timer-display">30:00</span></div>
+                <button onclick="location.reload()" style="background:#1a2a44; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:0.7rem;">Logout</button>
             </div>
-
-            <div class="chat-messages" id="box">
-                <div class="bubble received">Bonjour ! Ton profil correspond exactement à ce que je recherche. 👋</div>
-            </div>
-
-            <div class="input-area">
-                <textarea id="msg" style="flex:1; background:#f1f3f4; border:1px solid #ddd; padding:12px; border-radius:25px; outline:none; resize:none; font-family:sans-serif; max-height:150px;" placeholder="Écrivez votre message..." rows="1" oninput="autoGrow(this)"></textarea>
-                <button style="background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor:pointer;" onclick="send()">➤</button>
+            <div id="box" style="flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:#f8fafb;">
+                <div class="bubble received" style="background:#e2ecf7; padding:10px; border-radius:15px; align-self:flex-start;">Bonjour ! Ton profil me correspond. 👋</div>
             </div>
         </div>
-
-        <div id="scr-final" class="screen final-bg">
-            <div id="final-card-content" class="final-card"></div>
-        </div>
-
     </div>
 
     <script>
-        let timeLeft = 30 * 60;
-        let timerInterval;
-        let currentPulseInterval = null;
-
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
+        function showNotify(msg) {
+            const n = document.getElementById('genlove-notify');
+            document.getElementById('notify-msg').innerText = msg;
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 3000);
+        }
+
         function checkAuth() {
             if(localStorage.getItem('u_fn')) { updateUI(); showScreen('scr-profile'); }
-            else alert("Veuillez créer un compte.");
+            else alert("Compte introuvable.");
         }
 
         let b64 = "";
-        function preview(e){
-            const r=new FileReader();
-            r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; };
-            r.readAsDataURL(e.target.files[0]);
-        }
+        function preview(e){ const r=new FileReader(); r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; }; r.readAsDataURL(e.target.files[0]); }
 
         function saveProfile() {
+            if(!document.getElementById('oath').checked) return alert("Veuillez confirmer le serment.");
+            document.getElementById('loader').style.display='flex';
             localStorage.setItem('u_fn', document.getElementById('fn').value);
             localStorage.setItem('u_gt', document.getElementById('gt').value);
+            localStorage.setItem('u_gs', document.getElementById('gs_type').value + document.getElementById('gs_rh').value);
             localStorage.setItem('u_p', b64);
-            updateUI(); showScreen('scr-profile');
+            setTimeout(() => { document.getElementById('loader').style.display='none'; updateUI(); showScreen('scr-profile'); }, 3000);
         }
 
         function updateUI() {
             document.getElementById('vN').innerText = localStorage.getItem('u_fn');
             document.getElementById('rG').innerText = localStorage.getItem('u_gt');
+            document.getElementById('rS').innerText = localStorage.getItem('u_gs');
             document.getElementById('vP').style.backgroundImage = 'url('+localStorage.getItem('u_p')+')';
         }
 
-        // --- LOGIQUE PERTINENTE EXTRAITE ---
-        function showSecurityPopup() { showScreen('scr-chat'); document.getElementById('security-popup').style.display = 'flex'; }
-        
-        function closePopup() { 
-            document.getElementById('security-popup').style.display = 'none'; 
-            const audio = document.getElementById('lastMinuteSound');
-            audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
-            startTimer(); 
-        }
-
-        function autoGrow(el) { el.style.height = "auto"; el.style.height = (el.scrollHeight) + "px"; }
-
-        function triggerAlarm(speed, duration, loop = false) {
-            const audio = document.getElementById('lastMinuteSound');
-            audio.loop = loop;
-            let elapsed = 0;
-            currentPulseInterval = setInterval(() => {
-                audio.currentTime = 0; audio.play().catch(()=>{});
-                if (navigator.vibrate) navigator.vibrate(100);
-                elapsed += speed; if (elapsed >= duration && !loop) { clearInterval(currentPulseInterval); }
-            }, speed);
-        }
-
-        function startTimer() {
-            if (timerInterval) return;
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                let mins = Math.floor(timeLeft / 60);
-                let secs = timeLeft % 60;
-                document.getElementById('timer-display').innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
-
-                if ([60, 40, 20].includes(timeLeft)) triggerAlarm(400, 5000);
-                if (timeLeft === 5) triggerAlarm(200, 5000, true);
-
-                if (timeLeft <= 0) { clearInterval(timerInterval); showFinal('chat', true); }
-            }, 1000);
-        }
-
-        function send() {
-            const i = document.getElementById('msg');
-            if(i.value.trim()) {
-                const d = document.createElement('div'); d.className = 'bubble sent'; d.innerText = i.value;
-                document.getElementById('box').appendChild(d);
-                i.value = ''; i.style.height = "auto";
-                document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
-            }
-        }
-
-        function showFinal(type, auto = false) {
-            if(!auto) {
-                const msg = type === 'chat' ? "Voulez-vous vraiment quitter cette conversation ?" : "Voulez-vous vraiment vous déconnecter ?";
-                if(!confirm(msg)) return;
-            }
-            clearInterval(timerInterval);
-            if(currentPulseInterval) clearInterval(currentPulseInterval);
+        function startMatching() {
+            const myGt = localStorage.getItem('u_gt');
+            const container = document.getElementById('match-container');
+            container.innerHTML = "";
             
-            const card = document.getElementById('final-card-content');
-            if(type === 'chat') {
-                card.innerHTML = '<h2>Merci pour cet échange</h2><p>Genlove vous remercie pour ce moment de partage.</p><button class="btn-restart" onclick="location.reload()">Trouver un autre profil</button>';
-            } else {
-                card.innerHTML = '<h2>Session fermée</h2><p>Votre session a été fermée en toute sécurité.</p><button class="btn-restart" style="background:#1a2a44;" onclick="location.reload()">Retour Accueil</button>';
+            const partners = [
+                {id:1, gt:"AA", gs:"O+", pj:"Famille unie"},
+                {id:2, gt:"AS", gs:"B-", pj:"Santé d'abord"},
+                {id:3, gt:"SS", gs:"A+", pj:"Relation stable"}
+            ];
+
+            let filtered = partners;
+            // RÈGLE PERSONNALISÉE : Bloquer SS si SS, et filtrer pour protéger descendance
+            if (myGt === "SS" || myGt === "AS") {
+                filtered = partners.filter(p => p.gt === "AA");
+                container.innerHTML = '<div class="info-bubble">✨ <b>Engagement Santé :</b> Pour protéger votre descendance, nous ne proposons que des profils AA.</div>';
             }
-            showScreen('scr-final');
+
+            filtered.forEach(p => {
+                container.innerHTML += \`
+                    <div class="match-card">
+                        <div class="match-photo-blur"></div>
+                        <div style="flex:1"><b>Profil #\${p.id}</b><br><small>Génotype \${p.gt}</small></div>
+                        <button class="btn-dark" style="width:auto; padding:8px 12px; margin:0;" onclick="showScreen('scr-chat')">Contacter</button>
+                    </div>\`;
+            });
+            showScreen('scr-matching');
         }
 
         window.onload = () => { if(localStorage.getItem('u_fn')) updateUI(); };
     </script>
-</body>
-</html>
-`;
+</body></html>`);
+});
 
-app.get('/', (req, res) => res.send(htmlApp));
 app.listen(port);
