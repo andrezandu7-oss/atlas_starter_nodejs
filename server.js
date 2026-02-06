@@ -11,25 +11,40 @@ const styles = `
     .screen { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; overflow-y: auto; background: white; z-index: 10; }
     .active { display: flex; }
 
+    /* NOTIFY & LOADER */
     #genlove-notify { position: absolute; top: -100px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #007bff; }
     #genlove-notify.show { top: 20px; }
     #loader { display: none; position: absolute; inset: 0; background: white; z-index: 200; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+    /* UI ELEMENTS */
     .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; font-weight: bold; width: 85%; margin: 15px auto; border: none; cursor: pointer; display: block; }
     .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; font-weight: bold; width: 80%; margin: 10px auto; border: none; cursor: pointer; display: block; }
     .st-group { background: white; border-radius: 15px; margin: 0 15px 15px 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
     .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; font-size: 0.95rem; }
 
     .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; }
-    input[type="date"]::before { content: "Date de naissance : "; color: #666; margin-right: 5px; }
     .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; cursor: pointer; }
+
+    /* MESSAGERIE & CHRONO */
+    .chat-header { background: #9dbce3; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+    .digital-clock { background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 10px; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; }
+    .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; line-height: 1.4; }
+    .received { background: #e2ecf7; align-self: flex-start; }
+    .sent { background: #ff416c; color: white; align-self: flex-end; }
+    .input-area { padding: 10px 15px 40px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; align-items: flex-end; }
+
+    /* POPUP SÉCURITÉ */
+    #security-popup { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .popup-card { background: white; border-radius: 30px; padding: 30px; text-align: center; width: 85%; }
 </style>
 `;
 
 app.get('/', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body>
+    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">${styles}</head><body>
+    <audio id="lastMinuteSound" preload="auto"><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>
     <div class="app-shell">
         <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
         <div id="loader"><div class="spinner"></div><h3>Analyse sécurisée...</h3><p>Vérification de vos données médicales.</p></div>
@@ -55,8 +70,7 @@ app.get('/', (req, res) => {
             <select id="gs_rh" class="input-box" style="flex:1;"><option>+</option><option>-</option></select></div>
             <select id="pj" class="input-box"><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select>
             <div style="margin-top:15px; padding:12px; background:#fff5f7; border-radius:12px; border:1px solid #ffdae0; display:flex; gap:10px;">
-                <input type="checkbox" id="oath" style="width:20px;height:20px;">
-                <label for="oath" style="font-size:0.8rem; color:#d63384; line-height:1.3;">Je confirme sur l'honneur que ces informations sont conformes à mes résultats médicaux.</label>
+                <input type="checkbox" id="oath" style="width:20px;height:20px;"><label for="oath" style="font-size:0.8rem; color:#d63384;">Je confirme sur l'honneur la véracité de ces données.</label>
             </div>
             <button class="btn-pink" onclick="saveProfile()">🚀 Valider mon profil</button>
         </div>
@@ -65,73 +79,71 @@ app.get('/', (req, res) => {
             <div style="background:white; padding:30px; text-align:center; border-radius:0 0 30px 30px; position:relative;">
                 <button onclick="showScreen('scr-settings')" style="border:none; background:none; cursor:pointer; position:absolute; top:20px; right:20px; font-size:1.4rem;">⚙️</button>
                 <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover;"></div>
-                <h2 id="vN" style="margin:5px 0;">Nom</h2>
-                <p id="vAgeLoc" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">Âge • Localisation</p>
-                <p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p>
+                <h2 id="vN">Nom</h2>
+                <p id="vAgeLoc" style="color:#666; margin:0 0 10px 0;">-- ans • --</p>
+                <p style="color:#007bff; font-weight:bold;">Profil Santé Validé ✅</p>
             </div>
             <div style="padding:15px 20px 5px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div>
             <div class="st-group">
                 <div class="st-item"><span>Génotype</span><b id="rG" style="color:#ff416c;">--</b></div>
                 <div class="st-item"><span>Groupe Sanguin</span><b id="rS">--</b></div>
             </div>
-            <button class="btn-dark" onclick="alert('Recherche de partenaires...')">🔍 Lancer le Matching</button>
+            <button class="btn-dark" onclick="simulateMatch()">🔍 Lancer le Matching</button>
+        </div>
+
+        <div id="scr-chat" class="screen">
+            <div id="security-popup">
+                <div class="popup-card">
+                    <h3>🔒 Espace privé</h3>
+                    <p>Cet échange est sécurisé et éphémère. Tout s'effacera dans 30 minutes.</p>
+                    <button class="btn-pink" onclick="closePopup()">Démarrer</button>
+                </div>
+            </div>
+            <div class="chat-header">
+                <button onclick="showScreen('scr-profile')" style="border:none; background:white; border-radius:8px; padding:5px 10px;">✕</button>
+                <div class="digital-clock">❤️ <span id="timer-display">30:00</span></div>
+                <button onclick="location.reload()" style="background:#1a2a44; color:white; border:none; padding:8px; border-radius:8px; font-size:0.7rem;">Logout</button>
+            </div>
+            <div class="chat-messages" id="box">
+                <div class="bubble received">Bonjour ! Ton profil correspond à ce que je recherche. 👋</div>
+            </div>
+            <div class="input-area">
+                <textarea id="msg" class="input-box" style="margin-top:0; flex:1;" placeholder="Votre message..." rows="1"></textarea>
+                <button class="btn-dark" style="width:auto; margin:0; padding:10px 15px;" onclick="send()">➤</button>
+            </div>
         </div>
 
         <div id="scr-settings" class="screen" style="background:#f4f7f6;">
             <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
             <div style="padding:15px 20px 5px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
             <div class="st-group">
-                <div class="st-item" onclick="showSignup()" style="cursor:pointer;">
-                    <span>Modifier mon profil</span>
-                    <b>Modifier ➔</b>
-                </div>
+                <div class="st-item" onclick="showSignup()"><span>Modifier mon profil</span><b>Modifier ➔</b></div>
             </div>
             <div class="st-group">
-                <div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div>
-                <div style="display:flex; justify-content:space-around; padding:15px;">
-                    <button onclick="localStorage.clear(); location.reload();" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button>
-                    <button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button>
-                </div>
+                <div class="st-item" style="color:red; font-weight:bold;" onclick="if(confirm('Supprimer ?')){localStorage.clear(); location.reload();}">Supprimer mon compte</div>
             </div>
             <button class="btn-pink" onclick="showScreen('scr-profile')">Retour</button>
         </div>
     </div>
 
     <script>
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function showNotify(msg) {
-            const n = document.getElementById('genlove-notify');
-            document.getElementById('notify-msg').innerText = msg;
-            n.classList.add('show');
-            setTimeout(() => n.classList.remove('show'), 3000);
-        }
-
-        function calculateAge(birthDate) {
-            if(!birthDate) return "--";
+        let timeLeft = 30 * 60; let timerInterval;
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        
+        function calculateAge(dob) {
+            if(!dob) return "--";
+            const birth = new Date(dob);
             const today = new Date();
-            const birth = new Date(birthDate);
             let age = today.getFullYear() - birth.getFullYear();
-            const m = today.getMonth() - birth.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+            if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
             return age;
         }
 
-        // MODIFICATION SÉLECTIVE : Pré-remplissage des champs
         function showSignup() {
             document.getElementById('fn').value = localStorage.getItem('u_fn') || "";
             document.getElementById('dob').value = localStorage.getItem('u_dob') || "";
             document.getElementById('residence').value = localStorage.getItem('u_res') || "";
             document.getElementById('gt').value = localStorage.getItem('u_gt') || "";
-            document.getElementById('pj').value = localStorage.getItem('u_pj') || "";
-            const p = localStorage.getItem('u_p');
-            if(p) { 
-                document.getElementById('c').style.backgroundImage = 'url('+p+')'; 
-                document.getElementById('t').style.display = 'none';
-            }
             showScreen('scr-signup');
         }
 
@@ -139,39 +151,55 @@ app.get('/', (req, res) => {
         function preview(e){ const r=new FileReader(); r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; }; r.readAsDataURL(e.target.files[0]); }
 
         function saveProfile() {
-            if(!document.getElementById('oath').checked) return alert("Veuillez confirmer le serment.");
+            if(!document.getElementById('oath').checked) return alert("Signez le serment.");
             document.getElementById('loader').style.display='flex';
-            
             localStorage.setItem('u_fn', document.getElementById('fn').value);
             localStorage.setItem('u_dob', document.getElementById('dob').value);
             localStorage.setItem('u_res', document.getElementById('residence').value);
             localStorage.setItem('u_gt', document.getElementById('gt').value);
             localStorage.setItem('u_gs', document.getElementById('gs_type').value + document.getElementById('gs_rh').value);
-            localStorage.setItem('u_pj', document.getElementById('pj').value);
             localStorage.setItem('u_p', b64);
-            
-            setTimeout(() => { document.getElementById('loader').style.display='none'; updateUI(); showScreen('scr-profile'); }, 3000);
+            setTimeout(() => { document.getElementById('loader').style.display='none'; updateUI(); showScreen('scr-profile'); }, 2500);
         }
 
         function updateUI() {
-            const fn = localStorage.getItem('u_fn');
-            const dob = localStorage.getItem('u_dob');
-            const res = localStorage.getItem('u_res');
-            const age = calculateAge(dob);
-
-            document.getElementById('vN').innerText = fn || "Utilisateur";
-            document.getElementById('vAgeLoc').innerText = age + " ans • " + (res || "Localisation non définie");
+            document.getElementById('vN').innerText = localStorage.getItem('u_fn') || "Utilisateur";
+            const age = calculateAge(localStorage.getItem('u_dob'));
+            document.getElementById('vAgeLoc').innerText = age + " ans • " + (localStorage.getItem('u_res') || "Lieu inconnu");
             document.getElementById('rG').innerText = localStorage.getItem('u_gt') || "--";
             document.getElementById('rS').innerText = localStorage.getItem('u_gs') || "--";
-            const p = localStorage.getItem('u_p');
-            if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
+            if(localStorage.getItem('u_p')) document.getElementById('vP').style.backgroundImage = 'url('+localStorage.getItem('u_p')+')';
         }
 
-        function checkAuth() {
-            if(localStorage.getItem('u_fn')) { updateUI(); showScreen('scr-profile'); }
-            else alert("Veuillez créer un compte.");
+        function simulateMatch() {
+            const n = document.getElementById('genlove-notify');
+            document.getElementById('notify-msg').innerText = "📩 Nouveau message de Sarah !";
+            n.classList.add('show');
+            setTimeout(() => { n.classList.remove('show'); showScreen('scr-chat'); document.getElementById('security-popup').style.display='flex'; }, 2000);
         }
 
+        function closePopup() { document.getElementById('security-popup').style.display='none'; startTimer(); }
+
+        function startTimer() {
+            if(timerInterval) return;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft/60), s = timeLeft%60;
+                document.getElementById('timer-display').innerText = (m<10?'0':'')+m+":"+(s<10?'0':'')+s;
+                if([60,40,20,5].includes(timeLeft)) { document.getElementById('lastMinuteSound').play(); if(navigator.vibrate) navigator.vibrate(200); }
+                if(timeLeft<=0) { clearInterval(timerInterval); location.reload(); }
+            }, 1000);
+        }
+
+        function send() {
+            const m = document.getElementById('msg');
+            if(!m.value.trim()) return;
+            const d = document.createElement('div'); d.className='bubble sent'; d.innerText=m.value;
+            document.getElementById('box').appendChild(d); m.value='';
+            document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
+        }
+
+        function checkAuth() { if(localStorage.getItem('u_fn')) { updateUI(); showScreen('scr-profile'); } else showSignup(); }
         window.onload = () => { if(localStorage.getItem('u_fn')) updateUI(); };
     </script>
 </body></html>`);
