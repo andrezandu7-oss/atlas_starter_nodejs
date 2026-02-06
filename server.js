@@ -395,4 +395,249 @@ const genloveApp = `
                         <span class="slider"></span>
                     </label>
                 </div>
-                <div class="st-item" style="font-size:0.8rem; color:#666;">Statut : <b id="status" style="color:#007bff;">Publi
+                <div class="st-item" style="font-size:0.8rem; color:#666;">Statut : <b id="status" style="color:#007bff;">Public</b></div>
+            </div>
+            <div class="st-group">
+                <div class="st-item" onclick="showSignup()"><span>Modifier mon profil</span><b>Modifier ➔</b></div>
+            </div>
+            <button class="btn-pink" onclick="showScreen('scr-profile')">Retour</button>
+        </div>
+
+        <!-- ÉCRAN FINAL -->
+        <div id="scr-final" class="screen final-bg">
+            <div class="final-card">
+                <div style="font-size:3rem; margin-bottom:10px;">✨</div>
+                <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
+                <p>Genlove vous remercie pour ce moment de partage.</p>
+                <button class="btn-restart" onclick="location.reload()">🔎 Nouveau matching</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 30 * 60; 
+        let timerInterval; 
+        let b64 = localStorage.getItem('u_p') || "";
+        let alertsEnabled = true;
+
+        function showScreen(id) { 
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+            document.getElementById(id).classList.add('active'); 
+        }
+
+        function showNotify(msg) {
+            const n = document.getElementById('genlove-notify');
+            document.getElementById('notify-msg').innerText = msg;
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 3000);
+        }
+
+        function calculateAge(dob) {
+            if(!dob) return "--";
+            const birth = new Date(dob); const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
+            return age;
+        }
+
+        function showSignup() {
+            ['fn','ln','gender','dob','res','gt','pj'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = localStorage.getItem('u_'+id) || "";
+            });
+            const fullGS = localStorage.getItem('u_gs') || "";
+            if(fullGS) {
+                const gs_type = document.getElementById('gs_type');
+                const gs_rh = document.getElementById('gs_rh');
+                if(gs_type) gs_type.value = fullGS.replace(/[+-]/g, "");
+                if(gs_rh) gs_rh.value = fullGS.includes('+') ? '+' : '-';
+            }
+            if(b64) { 
+                document.getElementById('c').style.backgroundImage='url('+b64+')'; 
+                document.getElementById('t').style.display='none'; 
+            }
+            showScreen('scr-signup');
+        }
+
+        function preview(e) {
+            const r = new FileReader();
+            r.onload = () => { 
+                b64 = r.result; 
+                document.getElementById('c').style.backgroundImage='url('+b64+')'; 
+                document.getElementById('t').style.display='none'; 
+            };
+            r.readAsDataURL(e.target.files[0]);
+        }
+
+        function saveProfile() {
+            if(!document.getElementById('oath').checked) return showNotify("Veuillez signer le serment.");
+            document.getElementById('loader').style.display = 'flex';
+            
+            ['fn','ln','gender','dob','res','gt','pj'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) localStorage.setItem('u_'+id, el.value);
+            });
+            const gs_type = document.getElementById('gs_type')?.value;
+            const gs_rh = document.getElementById('gs_rh')?.value;
+            if(gs_type && gs_rh) localStorage.setItem('u_gs', gs_type + gs_rh);
+            localStorage.setItem('u_p', b64);
+            
+            setTimeout(() => { 
+                document.getElementById('loader').style.display = 'none'; 
+                updateUI(); 
+                showScreen('scr-profile'); 
+            }, 2000);
+        }
+
+        function updateUI() {
+            document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || "") + " " + (localStorage.getItem('u_ln') || "");
+            document.getElementById('vAgeLoc').innerText = calculateAge(localStorage.getItem('u_dob')) + " ans • " + (localStorage.getItem('u_res') || "--");
+            document.getElementById('rG').innerText = localStorage.getItem('u_gt') || "--";
+            document.getElementById('rS').innerText = localStorage.getItem('u_gs') || "--";
+            document.getElementById('rP').innerText = "Enfant : " + (localStorage.getItem('u_pj') || "--");
+            if(localStorage.getItem('u_p')) {
+                document.getElementById('vP').style.backgroundImage = 'url('+localStorage.getItem('u_p')+')';
+            }
+        }
+
+        function simulateMatch() {
+            const myGt = localStorage.getItem('u_gt');
+            const partners = [
+                {id:1, name:"Sarah", gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", age:28},
+                {id:2, name:"Léa", gt:"AA", gs:"B-", pj:"Souhaite des enfants en bonne santé.", age:26},
+                {id:3, name:"Emma", gt:"AS", gs:"A+", pj:"Cherche une relation stable.", age:30}
+            ];
+            
+            let filtered = partners;
+            if (myGt === "SS" || myGt === "AS") {
+                filtered = partners.filter(p => p.gt === "AA");
+                showNotify("✨ Pour protéger votre descendance, seuls les profils AA sont proposés.");
+            }
+            
+            const container = document.getElementById('match-container');
+            container.innerHTML = '';
+            if(filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#666;">Aucun partenaire compatible trouvé</div>';
+            } else {
+                filtered.forEach(p => {
+                    container.innerHTML += `
+                        <div class="match-card">
+                            <div class="match-photo-blur"></div>
+                            <div style="flex:1">
+                                <b>${p.name} (${p.age} ans)</b><br>
+                                <small>Génotype ${p.gt} • ${p.gs}</small>
+                            </div>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn-dark" style="padding:8px 12px; font-size:0.8rem;" onclick="showNotify('Demande envoyée à ${p.name}!')">Contacter</button>
+                                <button class="btn-pink" style="padding:8px 12px; font-size:0.8rem;" onclick='showDetails(${JSON.stringify(p)})'>Détails</button>
+                            </div>
+                        </div>`;
+                });
+            }
+            showScreen('scr-matching');
+        }
+
+        function showDetails(p) {
+            const myGt = localStorage.getItem('u_gt');
+            document.getElementById('pop-name').innerText = p.name;
+            document.getElementById('pop-details').innerHTML = 
+                "<b>Génotype :</b> " + p.gt + "<br>" +
+                "<b>Groupe Sanguin :</b> " + p.gs + "<br><br>" +
+                "<b>Projet de vie :</b><br><i>" + p.pj + "</i>";
+            
+            let msg = "";
+            if(myGt === "AA" && p.gt === "AA") msg = "<b>Union Sérénité :</b> Compatibilité génétique idéale !";
+            else if(myGt === "AA" && p.gt === "AS") msg = "<b>Union Protectrice :</b> Aucun risque de naissance SS.";
+            else if(myGt === "AA" && p.gt === "SS") msg = "<b>Union Solidaire :</b> Partenaire idéal pour SS.";
+            
+            document.getElementById('pop-msg').innerHTML = msg || "Compatibilité analysée";
+            document.getElementById('popup-overlay').style.display = 'flex';
+        }
+
+        function closePopup() { 
+            document.getElementById('popup-overlay')?.style.display = 'none'; 
+            document.getElementById('security-popup')?.style.display = 'none'; 
+        }
+
+        function toggleVisibility(el) {
+            const status = document.getElementById('status');
+            status.innerText = el.checked ? 'Public' : 'Privé';
+            status.style.color = el.checked ? '#007bff' : '#dc3545';
+            showNotify('Paramètre mis à jour !');
+        }
+
+        function showChatPopup() { 
+            showScreen('scr-chat'); 
+            document.getElementById('security-popup').style.display='flex'; 
+        }
+
+        function triggerRhythmicAlarm() {
+            if (!alertsEnabled) return;
+            const audio = document.getElementById('lastMinuteSound');
+            audio.play().catch(() => {});
+            if(navigator.vibrate) navigator.vibrate(100);
+        }
+
+        function startTimer() {
+            if(timerInterval) return;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft/60), s = timeLeft%60;
+                document.getElementById('timer-display').innerText = (m<10?'0':'')+m+":"+(s<10?'0':'')+s;
+                
+                if (timeLeft === 60 || timeLeft === 40 || timeLeft === 20) triggerRhythmicAlarm();
+                if(timeLeft<=0) { 
+                    clearInterval(timerInterval); 
+                    showScreen('scr-final'); 
+                }
+            }, 1000);
+        }
+
+        function autoGrow(element) {
+            element.style.height = "auto";
+            element.style.height = element.scrollHeight + "px";
+        }
+
+        function showFinalScreen() {
+            if(confirm("Voulez-vous vous déconnecter ?")) {
+                clearInterval(timerInterval);
+                showScreen('scr-final');
+            }
+        }
+
+        function send() {
+            const input = document.getElementById('msg');
+            if(input.value.trim()) {
+                const div = document.createElement('div');
+                div.className = 'bubble sent';
+                div.innerText = input.value;
+                document.getElementById('box').appendChild(div);
+                input.value = ''; 
+                input.style.height = "auto";
+                document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
+            }
+        }
+
+        function checkAuth() { 
+            if(localStorage.getItem('u_fn')) { 
+                updateUI(); 
+                showScreen('scr-profile'); 
+            } else { 
+                showSignup(); 
+            } 
+        }
+
+        window.onload = () => { 
+            if(localStorage.getItem('u_fn')) updateUI(); 
+        };
+    </script>
+</body>
+</html>
+`;
+
+app.get('/', (req, res) => res.send(genloveApp));
+
+app.listen(port, () => {
+    console.log(`🚀 Genlove déployé sur port ${port} - Parfait pour mobile ! 📱`);
+});
+
