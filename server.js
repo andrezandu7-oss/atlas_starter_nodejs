@@ -22,14 +22,8 @@ const styles = `
     .st-group { background: white; border-radius: 15px; margin: 0 15px 15px 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
     .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; font-size: 0.95rem; }
 
-    .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: #007bff; }
-    input:checked + .slider:before { transform: translateX(21px); }
-
     .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; }
+    input[type="date"]::before { content: "Date de naissance : "; color: #666; margin-right: 5px; }
     .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; cursor: pointer; }
 </style>
 `;
@@ -45,7 +39,7 @@ app.get('/', (req, res) => {
                 <div style="font-size: 3.5rem; font-weight: bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div>
                 <div style="font-weight:bold; color:#1a2a44; margin-bottom:40px;">Unissez cœur et santé pour bâtir des couples sains</div>
                 <button class="btn-dark" onclick="checkAuth()">➔ Se connecter</button>
-                <button class="btn-pink" onclick="showScreen('scr-signup')">👤 Créer un compte</button>
+                <button class="btn-pink" onclick="showSignup()">👤 Créer un compte</button>
             </div>
         </div>
 
@@ -54,6 +48,8 @@ app.get('/', (req, res) => {
             <div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo *</span></div>
             <input type="file" id="i" style="display:none" onchange="preview(event)">
             <input type="text" id="fn" class="input-box" placeholder="Prénom">
+            <input type="date" id="dob" class="input-box">
+            <input type="text" id="residence" class="input-box" placeholder="Résidence actuelle">
             <select id="gt" class="input-box"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
             <div style="display:flex; gap:10px;"><select id="gs_type" class="input-box" style="flex:2;"><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select>
             <select id="gs_rh" class="input-box" style="flex:1;"><option>+</option><option>-</option></select></div>
@@ -69,7 +65,8 @@ app.get('/', (req, res) => {
             <div style="background:white; padding:30px; text-align:center; border-radius:0 0 30px 30px; position:relative;">
                 <button onclick="showScreen('scr-settings')" style="border:none; background:none; cursor:pointer; position:absolute; top:20px; right:20px; font-size:1.4rem;">⚙️</button>
                 <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover;"></div>
-                <h2 id="vN" style="margin:5px 0;">Utilisateur</h2>
+                <h2 id="vN" style="margin:5px 0;">Nom</h2>
+                <p id="vAgeLoc" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">Âge • Localisation</p>
                 <p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p>
             </div>
             <div style="padding:15px 20px 5px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div>
@@ -77,27 +74,14 @@ app.get('/', (req, res) => {
                 <div class="st-item"><span>Génotype</span><b id="rG" style="color:#ff416c;">--</b></div>
                 <div class="st-item"><span>Groupe Sanguin</span><b id="rS">--</b></div>
             </div>
-            <button class="btn-dark" onclick="alert('Recherche de partenaires compatibles...')">🔍 Lancer le Matching</button>
+            <button class="btn-dark" onclick="alert('Recherche de partenaires...')">🔍 Lancer le Matching</button>
         </div>
 
         <div id="scr-settings" class="screen" style="background:#f4f7f6;">
-            <div style="padding:25px; background:white; text-align:center;">
-                <div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div>
-            </div>
-            <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
+            <div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
+            <div style="padding:15px 20px 5px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
             <div class="st-group">
-                <div class="st-item">
-                    <span>Visibilité profil</span>
-                    <label class="switch">
-                        <input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'; showNotify('Paramètre mis à jour !')">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="st-item" style="font-size:0.8rem; color:#666;">Statut actuel : <b id="status" style="color:#007bff;">Public</b></div>
-            </div>
-            <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
-            <div class="st-group">
-                <div class="st-item" onclick="showScreen('scr-signup')" style="cursor:pointer;">
+                <div class="st-item" onclick="showSignup()" style="cursor:pointer;">
                     <span>Modifier mon profil</span>
                     <b>Modifier ➔</b>
                 </div>
@@ -126,29 +110,66 @@ app.get('/', (req, res) => {
             setTimeout(() => n.classList.remove('show'), 3000);
         }
 
-        function checkAuth() {
-            if(localStorage.getItem('u_fn')) { updateUI(); showScreen('scr-profile'); }
-            else alert("Veuillez créer un compte.");
+        function calculateAge(birthDate) {
+            if(!birthDate) return "--";
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+            return age;
         }
 
-        let b64 = "";
+        // MODIFICATION SÉLECTIVE : Pré-remplissage des champs
+        function showSignup() {
+            document.getElementById('fn').value = localStorage.getItem('u_fn') || "";
+            document.getElementById('dob').value = localStorage.getItem('u_dob') || "";
+            document.getElementById('residence').value = localStorage.getItem('u_res') || "";
+            document.getElementById('gt').value = localStorage.getItem('u_gt') || "";
+            document.getElementById('pj').value = localStorage.getItem('u_pj') || "";
+            const p = localStorage.getItem('u_p');
+            if(p) { 
+                document.getElementById('c').style.backgroundImage = 'url('+p+')'; 
+                document.getElementById('t').style.display = 'none';
+            }
+            showScreen('scr-signup');
+        }
+
+        let b64 = localStorage.getItem('u_p') || "";
         function preview(e){ const r=new FileReader(); r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; }; r.readAsDataURL(e.target.files[0]); }
 
         function saveProfile() {
             if(!document.getElementById('oath').checked) return alert("Veuillez confirmer le serment.");
             document.getElementById('loader').style.display='flex';
+            
             localStorage.setItem('u_fn', document.getElementById('fn').value);
+            localStorage.setItem('u_dob', document.getElementById('dob').value);
+            localStorage.setItem('u_res', document.getElementById('residence').value);
             localStorage.setItem('u_gt', document.getElementById('gt').value);
             localStorage.setItem('u_gs', document.getElementById('gs_type').value + document.getElementById('gs_rh').value);
+            localStorage.setItem('u_pj', document.getElementById('pj').value);
             localStorage.setItem('u_p', b64);
+            
             setTimeout(() => { document.getElementById('loader').style.display='none'; updateUI(); showScreen('scr-profile'); }, 3000);
         }
 
         function updateUI() {
-            document.getElementById('vN').innerText = localStorage.getItem('u_fn');
-            document.getElementById('rG').innerText = localStorage.getItem('u_gt');
-            document.getElementById('rS').innerText = localStorage.getItem('u_gs');
-            document.getElementById('vP').style.backgroundImage = 'url('+localStorage.getItem('u_p')+')';
+            const fn = localStorage.getItem('u_fn');
+            const dob = localStorage.getItem('u_dob');
+            const res = localStorage.getItem('u_res');
+            const age = calculateAge(dob);
+
+            document.getElementById('vN').innerText = fn || "Utilisateur";
+            document.getElementById('vAgeLoc').innerText = age + " ans • " + (res || "Localisation non définie");
+            document.getElementById('rG').innerText = localStorage.getItem('u_gt') || "--";
+            document.getElementById('rS').innerText = localStorage.getItem('u_gs') || "--";
+            const p = localStorage.getItem('u_p');
+            if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
+        }
+
+        function checkAuth() {
+            if(localStorage.getItem('u_fn')) { updateUI(); showScreen('scr-profile'); }
+            else alert("Veuillez créer un compte.");
         }
 
         window.onload = () => { if(localStorage.getItem('u_fn')) updateUI(); };
