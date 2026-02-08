@@ -456,5 +456,7 @@ app.get('/chat', (req, res) => {
 // DÉMARRAGE SERVEUR - PRÊT POUR RENDER
 // ==========================================
 const server = app.listen(port, () => {
-    console.
+    console.log(`🚀 Genlove Server running on port ${port}`);
+});
 
+module.exports = app;
