@@ -456,7 +456,7 @@ app.get(['/', '/:screen?'], (req, res) => {
             window.endSession = () => { clearInterval(chatInterval); window.location.href = '/logout'; }
         }
 
-                // CONTACT REQUEST
+                        // CONTACT REQUEST
         window.sendContactRequest = () => {
             const partner = JSON.parse(localStorage.getItem('selected_partner') || '{}');
             localStorage.setItem('notification_sender', partner.name || 'Un partenaire');
@@ -469,6 +469,5 @@ app.get(['/', '/:screen?'], (req, res) => {
 
 // Indispensable pour Render : écouter sur 0.0.0.0
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 GENLOVE LIVE: Port ${port}`);
-    console.log('📱 Flow: / → /signup → /profile → /matching → /notification → /app-open → /confidentiality → /chat → /logout');
+    console.log(`🚀 SERVEUR ACTIF : Port ${port}`);
 });
