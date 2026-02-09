@@ -467,7 +467,9 @@ app.get(['/', '/:screen?'], (req, res) => {
     </script></body></html>`);
 });
 
-app.listen(port, () => {
-    console.log('🚀 GENLOVE COMPLETE APP: http://localhost:' + port);
-    console.log('📱 Flow complet: / → /signup → /profile → /matching → /notification → /app-open → /confidentiality → /chat → /logout');
+// Correction pour le déploiement Render : ajout de '0.0.0.0'
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 GENLOVE IS LIVE: Port ${port}`);
+    console.log('📱 Flow: / → /signup → /profile → /matching → /notification → /app-open → /confidentiality → /chat → /logout');
 });
+           
