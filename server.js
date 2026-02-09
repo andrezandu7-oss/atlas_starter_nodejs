@@ -468,6 +468,4 @@ app.get(['/', '/:screen?'], (req, res) => {
 });
 
 // Indispensable pour Render : écouter sur 0.0.0.0
-app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 SERVEUR ACTIF : Port ${port}`);
-});
+app.listen(port);
