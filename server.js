@@ -364,6 +364,6 @@ app.get('/chat', (req, res) => {
 </html>`);
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Genlove unifié sur le port ${port}`);
 });
