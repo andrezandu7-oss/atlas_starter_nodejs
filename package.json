@@ -1,22 +1,11 @@
 {
-  "name": "atlas_starter_nodejs",
+  "name": "genlove-app",
   "version": "1.0.0",
-  "description": "MongoDB Node.js driver and Atlas Starter Application",
-  "main": "app.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mongodb-university/atlas_starter_nodejs.git"
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
   },
-  "author": "chris.cho@mongodb.com",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mongodb-university/atlas_starter_nodejs/issues"
-  },
-  "homepage": "https://github.com/mongodb-university/atlas_starter_nodejs#readme",
   "dependencies": {
-    "express": "^5.2.1",
-    "i18": "^0.0.6",
-    "i18next": "^25.7.2",
-    "mongodb": "^3.7.4"
+    "express": "^4.18.2"
   }
 }
