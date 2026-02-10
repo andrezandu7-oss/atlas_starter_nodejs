@@ -39,6 +39,8 @@ const styles = `
     input:checked + .slider:before { transform: translateX(21px); }
     .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(6px); }
+    
+    /* Styles pour les écrans de fin */
     .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76b8 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .btn-outline { background: white; color: #1a2a44; border: 1px solid #e2e8f0; padding: 15px; border-radius: 50px; text-decoration: none; display: block; width: 85%; margin: 10px auto; font-weight: bold; }
@@ -56,6 +58,18 @@ const notifyScript = `
 </script>
 `;
 
+// FONCTION CALCUL ÂGE
+function calculerAge(dateNaissance) {
+    const today = new Date();
+    const birthDate = new Date(dateNaissance);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
 // --- ROUTES ---
 
 app.get('/', (req, res) => {
@@ -67,53 +81,59 @@ app.get('/signup', (req, res) => {
 });
 
 app.get('/profile', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f8f9fa;"><div class="app-shell"><div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;"><div style="display:flex; justify-content:space-between; align-items:center;"><a href="/" style="text-decoration:none; background:#eff6ff; color:#1a2a44; padding:8px 14px; border-radius:12px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:8px; border: 1px solid #dbeafe;"><span style="font-size:1rem;">🏠</span> Retour Accueil</a><a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a></div><div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover;"></div><h2 id="vN" style="margin:5px 0 0 0;">Utilisateur</h2><p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Localisation</p><p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p></div><div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div><div class="st-group"><div class="st-item"><span>Génotype</span><b id="rG">...</b></div><div class="st-item"><span>Groupe Sanguin</span><b id="rS">...</b></div><div class="st-item"><span>Projet de vie</span><b id="rP">...</b></div></div><a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a></div><script>const p = localStorage.getItem('u_p'); if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')'; document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || "") + " " + (localStorage.getItem('u_ln') || ""); document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || "") + " (" + (localStorage.getItem('u_gender') || "") + ")"; document.getElementById('rG').innerText = localStorage.getItem('u_gt'); document.getElementById('rS').innerText = localStorage.getItem('u_gs'); document.getElementById('rP').innerText = "Enfant : " + localStorage.getItem('u_pj');</script></body></html>`);
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f8f9fa;"><div class="app-shell"><div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;"><div style="display:flex; justify-content:space-between; align-items:center;"><a href="/" style="text-decoration:none; background:#eff6ff; color:#1a2a44; padding:8px 14px; border-radius:12px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:8px; border: 1px solid #dbeafe;"><span style="font-size:1rem;">🏠</span> Retour Accueil</a><a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a></div><div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover;"></div><h2 id="vN" style="margin:5px 0 0 0;">Utilisateur</h2><p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Localisation</p><p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p></div><div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div><div class="st-group"><div class="st-item"><span>Génotype</span><b id="rG">...</b></div><div class="st-item"><span>Groupe Sanguin</span><b id="rS">...</b></div><div class="st-item"><span>Âge</span><b id="rAge">...</b></div><div class="st-item"><span>Résidence</span><b id="rRes">...</b></div><div class="st-item"><span>Projet de vie</span><b id="rP">...</b></div></div><a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a></div><script>const p = localStorage.getItem('u_p'); if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')'; document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || "") + " " + (localStorage.getItem('u_ln') || ""); document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || "") + " (" + (localStorage.getItem('u_gender') || "") + ")"; document.getElementById('rG').innerText = localStorage.getItem('u_gt'); document.getElementById('rS').innerText = localStorage.getItem('u_gs'); document.getElementById('rP').innerText = "Enfant : " + localStorage.getItem('u_pj'); const dob = localStorage.getItem('u_dob'); if(dob) { const age = Math.floor((new Date() - new Date(dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000)); document.getElementById('rAge').innerText = age + ' ans'; } document.getElementById('rRes').innerText = localStorage.getItem('u_res') || 'Non renseigné';</script></body></html>`);
 });
 
 app.get('/matching', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container"></div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="startChat(); closePopup(); showNotify('Conversation démarrée !')">🚀 Contacter ce profil</button></div></div>${notifyScript}
-    <script>
+    // Base de données étendue des partenaires avec âge et résidence
     const partners = [
-        {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", age: 24, city: "Dakar"},
-        {id:2, gt:"AS", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", age: 27, city: "Saint-Louis"},
-        {id:3, gt:"SS", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou", age: 26, city: "Thiès"}
-    ]; 
-    const myGt = localStorage.getItem('u_gt'); 
-    const container = document.getElementById('match-container'); 
-    let filtered = partners; 
-    if (myGt === "SS" || myGt === "AS") { 
-        filtered = partners.filter(p => p.gt === "AA"); 
-        container.innerHTML = '<div style="background:#e7f3ff; color:#1a2a44; padding:15px; border-radius:12px; margin:15px; font-size:0.85rem; border-left:5px solid #007bff; text-align:left;">✨ <b>Engagement Santé :</b> Pour protéger votre future descendance, Genlove vous propose uniquement des profils AA.</div>'; 
-    } 
-    filtered.forEach(p => { 
-        container.innerHTML += \`
+        {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", dob:"1992-03-15", res:"Luanda"},
+        {id:2, gt:"AA", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", dob:"1988-07-22", res:"Viana"}, 
+        {id:3, gt:"AA", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou", dob:"1995-11-08", res:"Talatona"},
+        {id:4, gt:"AA", gs:"AB+", pj:"Prête pour une vie de couple épanouie.", name:"Isabella", dob:"1990-05-12", res:"Luanda"},
+        {id:5, gt:"AA", gs:"O-", pj:"Rêve d'une famille harmonieuse.", name:"Mariama", dob:"1993-09-30", res:"Cacuaco"}
+    ];
+
+    // Calculer âges et filtrer
+    const partnersWithAge = partners.map(p => ({
+        ...p,
+        age: calculerAge(p.dob),
+        distance: Math.floor(Math.random() * 30) // Distance simulée
+    }));
+
+    const myGt = 'AA'; // Simplifié pour démo
+    const filtered = partnersWithAge.filter(p => p.gt === "AA");
+
+    const matchesHTML = filtered.map(p => `
         <div class="match-card">
             <div class="match-photo-blur"></div>
             <div style="flex:1">
-                <b>\${p.name}, \${p.age} ans</b><br>
-                <small style="color:#666;">📍 \${p.city} • Génotype \${p.gt}</small>
+                <b>${p.name} (#${p.id})</b><br>
+                <small>${p.age} ans • ${p.res} (${p.distance}km) • Génotype ${p.gt}</small>
             </div>
             <div style="display:flex;">
-                <button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ' + '\${p.name}')">Contacter</button>
-                <button class="btn-action btn-details" onclick='showDetails(\${JSON.stringify(p)})'>Détails</button>
+                <button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ${p.name}')">Contacter</button>
+                <button class="btn-action btn-details" onclick='showDetails(${JSON.stringify(p)})'>Détails</button>
             </div>
-        </div>\`; 
-    }); 
-    let sP = null; 
-    function showDetails(p) { 
-        sP = p; 
-        document.getElementById('pop-name').innerText = p.name + ", " + p.age + " ans"; 
-        document.getElementById('pop-details').innerHTML = "<b>Ville :</b> " + p.city + "<br><b>Génotype :</b> " + p.gt + "<br><b>Groupe Sanguin :</b> " + p.gs + "<br><br><b>Projet de vie :</b><br><i>" + p.pj + "</i>"; 
-        let msg = ""; 
-        if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Compatibilité idéale."; 
-        else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> En tant que AA, vous protégez votre descendance."; 
-        else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Profil AA idéal pour une personne SS."; 
-        document.getElementById('pop-msg').innerHTML = msg; 
-        document.getElementById('popup-overlay').style.display = 'flex'; 
-    } 
-    function startChat() { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } 
-    function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
-    </script></body></html>\`);
+        </div>
+    `).join('');
+
+    const detailsScript = filtered.map(p => `
+        case ${p.id}: 
+            document.getElementById('pop-name').innerText = '${p.name} #${p.id}';
+            document.getElementById('pop-details').innerHTML = 
+                "<b>Âge :</b> ${p.age} ans<br>"+
+                "<b>Résidence :</b> ${p.res} (${p.distance}km)<br>"+
+                "<b>Génotype :</b> ${p.gt}<br>"+
+                "<b>Groupe Sanguin :</b> ${p.gs}<br><br>"+
+                "<b>Projet de vie :</b><br><i>${p.pj}</i>";
+            document.getElementById('pop-msg').innerHTML = 
+                "<b>L'Union Sérénité :</b> Compatibilité idéale AA+AA.";
+            break;
+    `).join('
+');
+
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div style="background:#e7f3ff; color:#1a2a44; padding:15px; border-radius:12px; margin:15px; font-size:0.85rem; border-left:5px solid #007bff; text-align:left;">✨ <b>Engagement Santé :</b> Profils AA uniquement pour une descendance protégée.</div><div id="match-container">${matchesHTML}</div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="startChat(); closePopup(); showNotify('Conversation démarrée !')">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>let sP = null; function showDetails(p) { sP = p; switch(p.id) { ${detailsScript} } document.getElementById('popup-overlay').style.display = 'flex'; } function startChat() { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }</script></body></html>`);
 });
 
 app.get('/settings', (req, res) => {
@@ -165,6 +185,7 @@ app.get('/chat', (req, res) => {
             <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="this.parentElement.parentElement.style.display='none'; startTimer()">Démarrer l'échange</button>
         </div>
     </div>
+
     <div class="screen">
         <div class="chat-header">
             <button class="btn-quit" onclick="showFinal('chat')">✕</button>
@@ -179,6 +200,7 @@ app.get('/chat', (req, res) => {
             <button style="background:#4a76b8; color:white; border:none; width:45px; height:45px; border-radius:50%;" onclick="send()">➤</button>
         </div>
     </div>
+
     <script>
         let t = 1800; 
         function startTimer() {
