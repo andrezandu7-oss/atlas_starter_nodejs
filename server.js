@@ -39,6 +39,11 @@ const styles = `
     input:checked + .slider:before { transform: translateX(21px); }
     .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(6px); }
+    
+    /* Styles pour les écrans de fin */
+    .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76b8 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .btn-outline { background: white; color: #1a2a44; border: 1px solid #e2e8f0; padding: 15px; border-radius: 50px; text-decoration: none; display: block; width: 85%; margin: 10px auto; font-weight: bold; }
 </style>
 `;
 
@@ -75,7 +80,18 @@ app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div><div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div><div class="st-group"><div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" checked onchange="showNotify('Paramètre mis à jour !')"><span class="slider"></span></label></div></div><div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div><div class="st-group"><div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div><div style="display:flex; justify-content:space-around; padding:15px;"><button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button><button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button></div></div><a href="/profile" class="btn-pink">Retour</a></div>${notifyScript}</body></html>`);
 });
 
-// === ROUTE CHAT (Correction Timer & Logout) ===
+// === NOUVELLES ROUTES DE FIN (IMAGES) ===
+
+app.get('/chat-end', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px; margin-bottom:10px;">✨</div><h2 style="color:#1a2a44;">Merci pour cet échange</h2><p style="color:#666; margin-bottom:30px;">Genlove vous remercie pour ce moment de partage et de franchise.</p><a href="/matching" class="btn-pink" style="width:100%; margin:0;">🔎 Trouver un autre profil</a></div></body></html>`);
+});
+
+app.get('/logout-success', (req, res) => {
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px; margin-bottom:20px;">🛡️</div><h2 style="color:#1a2a44;">Merci pour votre confiance</h2><p style="color:#666; margin-bottom:30px;">Votre session a été fermée en toute sécurité.</p><button onclick="window.location.href='/'" class="btn-dark" style="width:100%; margin:0; border-radius:50px;">Quitter</button><a href="/" class="btn-outline">Retour à l'accueil</a></div></body></html>`);
+});
+
+// === ROUTE CHAT (Avec redirections vers les nouveaux écrans) ===
+
 app.get('/chat', (req, res) => {
     res.send(`
 <!DOCTYPE html>
@@ -136,12 +152,14 @@ app.get('/chat', (req, res) => {
                 t--;
                 let m = Math.floor(t / 60), s = t % 60;
                 document.getElementById('timer-display').innerText = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-                if (t <= 0) window.location.href = '/matching';
+                if (t <= 0) window.location.href = '/logout-success';
             }, 1000);
         }
         function showFinal(type) {
             const msg = type === 'chat' ? "Quitter la discussion ?" : "Se déconnecter ?";
-            if(confirm(msg)) window.location.href = '/matching';
+            if(confirm(msg)) {
+                window.location.href = (type === 'chat') ? '/chat-end' : '/logout-success';
+            }
         }
         function send() {
             const i = document.getElementById('msg');
