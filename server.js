@@ -40,7 +40,6 @@ const styles = `
     .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(6px); }
     
-    /* Styles pour les écrans de fin */
     .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76b8 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .btn-outline { background: white; color: #1a2a44; border: 1px solid #e2e8f0; padding: 15px; border-radius: 50px; text-decoration: none; display: block; width: 85%; margin: 10px auto; font-weight: bold; }
@@ -73,14 +72,54 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/matching', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container"></div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="startChat(); closePopup(); showNotify('Conversation démarrée !')">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>const partners = [{id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah"},{id:2, gt:"AS", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata"},{id:3, gt:"SS", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou"}]; const myGt = localStorage.getItem('u_gt'); const container = document.getElementById('match-container'); let filtered = partners; if (myGt === "SS" || myGt === "AS") { filtered = partners.filter(p => p.gt === "AA"); container.innerHTML = '<div style="background:#e7f3ff; color:#1a2a44; padding:15px; border-radius:12px; margin:15px; font-size:0.85rem; border-left:5px solid #007bff; text-align:left;">✨ <b>Engagement Santé :</b> Pour protéger votre future descendance, Genlove vous propose uniquement des profils AA.</div>'; } filtered.forEach(p => { container.innerHTML += '<div class="match-card"><div class="match-photo-blur"></div><div style="flex:1"><b>' + p.name + ' (#' + p.id + ')</b><br><small>Génotype ' + p.gt + '</small></div><div style="display:flex;"><button class="btn-action btn-contact" onclick="showNotify(\\'Demande envoyée à ' + p.name + '\\')">Contacter</button><button class="btn-action btn-details" onclick=\\'showDetails(' + JSON.stringify(p) + ')\\'>Détails</button></div></div>'; }); let sP = null; function showDetails(p) { sP = p; document.getElementById('pop-name').innerText = p.name + " #" + p.id; document.getElementById('pop-details').innerHTML = "<b>Génotype :</b> " + p.gt + "<br><b>Groupe Sanguin :</b> " + p.gs + "<br><br><b>Projet de vie :</b><br><i>" + p.pj + "</i>"; let msg = ""; if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Compatibilité idéale."; else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> En tant que AA, vous protégez votre descendance."; else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Profil AA idéal pour une personne SS."; document.getElementById('pop-msg').innerHTML = msg; document.getElementById('popup-overlay').style.display = 'flex'; } function startChat() { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }</script></body></html>`);
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container"></div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="startChat(); closePopup(); showNotify('Conversation démarrée !')">🚀 Contacter ce profil</button></div></div>${notifyScript}
+    <script>
+    const partners = [
+        {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", age: 24, city: "Dakar"},
+        {id:2, gt:"AS", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", age: 27, city: "Saint-Louis"},
+        {id:3, gt:"SS", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou", age: 26, city: "Thiès"}
+    ]; 
+    const myGt = localStorage.getItem('u_gt'); 
+    const container = document.getElementById('match-container'); 
+    let filtered = partners; 
+    if (myGt === "SS" || myGt === "AS") { 
+        filtered = partners.filter(p => p.gt === "AA"); 
+        container.innerHTML = '<div style="background:#e7f3ff; color:#1a2a44; padding:15px; border-radius:12px; margin:15px; font-size:0.85rem; border-left:5px solid #007bff; text-align:left;">✨ <b>Engagement Santé :</b> Pour protéger votre future descendance, Genlove vous propose uniquement des profils AA.</div>'; 
+    } 
+    filtered.forEach(p => { 
+        container.innerHTML += \`
+        <div class="match-card">
+            <div class="match-photo-blur"></div>
+            <div style="flex:1">
+                <b>\${p.name}, \${p.age} ans</b><br>
+                <small style="color:#666;">📍 \${p.city} • Génotype \${p.gt}</small>
+            </div>
+            <div style="display:flex;">
+                <button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ' + '\${p.name}')">Contacter</button>
+                <button class="btn-action btn-details" onclick='showDetails(\${JSON.stringify(p)})'>Détails</button>
+            </div>
+        </div>\`; 
+    }); 
+    let sP = null; 
+    function showDetails(p) { 
+        sP = p; 
+        document.getElementById('pop-name').innerText = p.name + ", " + p.age + " ans"; 
+        document.getElementById('pop-details').innerHTML = "<b>Ville :</b> " + p.city + "<br><b>Génotype :</b> " + p.gt + "<br><b>Groupe Sanguin :</b> " + p.gs + "<br><br><b>Projet de vie :</b><br><i>" + p.pj + "</i>"; 
+        let msg = ""; 
+        if(myGt === "AA" && p.gt === "AA") msg = "<b>L'Union Sérénité :</b> Compatibilité idéale."; 
+        else if(myGt === "AA" && p.gt === "AS") msg = "<b>L'Union Protectrice :</b> En tant que AA, vous protégez votre descendance."; 
+        else if(myGt === "AA" && p.gt === "SS") msg = "<b>L'Union Solidaire :</b> Profil AA idéal pour une personne SS."; 
+        document.getElementById('pop-msg').innerHTML = msg; 
+        document.getElementById('popup-overlay').style.display = 'flex'; 
+    } 
+    function startChat() { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } 
+    function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
+    </script></body></html>\`);
 });
 
 app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div><div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div><div class="st-group"><div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" checked onchange="showNotify('Paramètre mis à jour !')"><span class="slider"></span></label></div></div><div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div><div class="st-group"><div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div><div style="display:flex; justify-content:space-around; padding:15px;"><button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button><button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button></div></div><a href="/profile" class="btn-pink">Retour</a></div>${notifyScript}</body></html>`);
 });
-
-// === NOUVELLES ROUTES DE FIN (IMAGES) ===
 
 app.get('/chat-end', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px; margin-bottom:10px;">✨</div><h2 style="color:#1a2a44;">Merci pour cet échange</h2><p style="color:#666; margin-bottom:30px;">Genlove vous remercie pour ce moment de partage et de franchise.</p><a href="/matching" class="btn-pink" style="width:100%; margin:0;">🔎 Trouver un autre profil</a></div></body></html>`);
@@ -89,8 +128,6 @@ app.get('/chat-end', (req, res) => {
 app.get('/logout-success', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px; margin-bottom:20px;">🛡️</div><h2 style="color:#1a2a44;">Merci pour votre confiance</h2><p style="color:#666; margin-bottom:30px;">Votre session a été fermée en toute sécurité.</p><button onclick="window.location.href='/'" class="btn-dark" style="width:100%; margin:0; border-radius:50px;">Quitter</button><a href="/" class="btn-outline">Retour à l'accueil</a></div></body></html>`);
 });
-
-// === ROUTE CHAT (Avec redirections vers les nouveaux écrans) ===
 
 app.get('/chat', (req, res) => {
     res.send(`
@@ -129,7 +166,6 @@ app.get('/chat', (req, res) => {
             <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="this.parentElement.parentElement.style.display='none'; startTimer()">Démarrer l'échange</button>
         </div>
     </div>
-
     <div class="screen">
         <div class="chat-header">
             <button class="btn-quit" onclick="showFinal('chat')">✕</button>
@@ -144,7 +180,6 @@ app.get('/chat', (req, res) => {
             <button style="background:#4a76b8; color:white; border:none; width:45px; height:45px; border-radius:50%;" onclick="send()">➤</button>
         </div>
     </div>
-
     <script>
         let t = 1800; 
         function startTimer() {
