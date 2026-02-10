@@ -39,7 +39,6 @@ const styles = `
     input:checked + .slider:before { transform: translateX(21px); }
     .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(6px); }
-    
     .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76b8 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .btn-outline { background: white; color: #1a2a44; border: 1px solid #e2e8f0; padding: 15px; border-radius: 50px; text-decoration: none; display: block; width: 85%; margin: 10px auto; font-weight: bold; }
