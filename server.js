@@ -81,14 +81,16 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/matching', (req, res) => {
+    // Les partenaires ont désormais un champ "gender" pour le filtrage
     const partners = [
-        {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", dob:"1992-03-15", res:"Luanda"},
-        {id:2, gt:"AA", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", dob:"1988-07-22", res:"Viana"}, 
-        {id:3, gt:"AA", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou", dob:"1995-11-08", res:"Talatona"},
-        {id:4, gt:"AA", gs:"AB+", pj:"Prête pour une vie de couple épanouie.", name:"Isabella", dob:"1990-05-12", res:"Luanda"},
-        {id:5, gt:"AA", gs:"O-", pj:"Rêve d'une famille harmonieuse.", name:"Mariama", dob:"1993-09-30", res:"Cacuaco"},
-        {id:6, gt:"SS", gs:"A+", pj:"Vivre intensément chaque jour.", name:"Kadi", dob:"1996-01-10", res:"Luanda"},
-        {id:7, gt:"AS", gs:"B+", pj:"À la recherche de mon âme sœur.", name:"Marc", dob:"1994-02-20", res:"Cacuaco"}
+        {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", dob:"1992-03-15", res:"Luanda", gender:"Femme"},
+        {id:2, gt:"AA", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", dob:"1988-07-22", res:"Viana", gender:"Femme"}, 
+        {id:3, gt:"AA", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou", dob:"1995-11-08", res:"Talatona", gender:"Femme"},
+        {id:4, gt:"AA", gs:"AB+", pj:"Prête pour une vie de couple épanouie.", name:"Isabella", dob:"1990-05-12", res:"Luanda", gender:"Femme"},
+        {id:5, gt:"AA", gs:"O-", pj:"Rêve d'une famille harmonieuse.", name:"Mariama", dob:"1993-09-30", res:"Cacuaco", gender:"Femme"},
+        {id:6, gt:"SS", gs:"A+", pj:"Vivre intensément chaque jour.", name:"Kadi", dob:"1996-01-10", res:"Luanda", gender:"Femme"},
+        {id:7, gt:"AS", gs:"B+", pj:"À la recherche de mon âme sœur.", name:"Marc", dob:"1994-02-20", res:"Cacuaco", gender:"Homme"},
+        {id:8, gt:"AA", gs:"O+", pj:"Prêt à m'investir sérieusement.", name:"Jean", dob:"1991-04-10", res:"Luanda", gender:"Homme"}
     ];
 
     const partnersWithAge = partners.map(p => ({
@@ -98,7 +100,7 @@ app.get('/matching', (req, res) => {
     }));
 
     const matchesHTML = partnersWithAge.map(p => `
-        <div class="match-card" data-gt="${p.gt}">
+        <div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}">
             <div class="match-photo-blur"></div>
             <div style="flex:1">
                 <b>${p.name} (#${p.id})</b><br>
@@ -114,7 +116,7 @@ app.get('/matching', (req, res) => {
     const detailsScript = partnersWithAge.map(p => `
         case ${p.id}: 
             document.getElementById('pop-name').innerText = '${p.name} #${p.id}';
-            document.getElementById('pop-details').innerHTML = "<b>Âge :</b> ${p.age} ans<br><b>Résidence :</b> ${p.res} (${p.distance}km)<br><b>Génotype :</b> ${p.gt}<br><b>Groupe Sanguin :</b> ${p.gs}<br><br><b>Projet de vie :</b><br><i>${p.pj}</i>";
+            document.getElementById('pop-details').innerHTML = "<b>Genre :</b> ${p.gender}<br><b>Âge :</b> ${p.age} ans<br><b>Résidence :</b> ${p.res} (${p.distance}km)<br><b>Génotype :</b> ${p.gt}<br><b>Groupe Sanguin :</b> ${p.gs}<br><br><b>Projet de vie :</b><br><i>${p.pj}</i>";
             document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Compatibilité validée.";
             break;`).join('');
 
@@ -122,6 +124,22 @@ app.get('/matching', (req, res) => {
         let sP = null;
         window.onload = () => {
             const myGt = localStorage.getItem('u_gt');
+            const myGender = localStorage.getItem('u_gender');
+            
+            document.querySelectorAll('.match-card').forEach(card => {
+                const partnerGt = card.dataset.gt;
+                const partnerGender = card.dataset.gender;
+                
+                // 1. Filtre de protection santé (SS/AS voient uniquement AA)
+                let show = true;
+                if((myGt === 'SS' || myGt === 'AS') && partnerGt !== 'AA') show = false;
+                
+                // 2. Filtre de genre (ne pas afficher le même genre)
+                if(myGender && partnerGender === myGender) show = false;
+
+                if(!show) card.style.display = 'none';
+            });
+
             if(myGt === 'SS' || myGt === 'AS') {
                 document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
                 document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA. C'est notre façon de protéger votre projet de famille pour que vous puissiez construire votre avenir l'esprit léger.";
@@ -129,10 +147,6 @@ app.get('/matching', (req, res) => {
                 document.querySelector('#popup-overlay button').innerText = "D'accord, je comprends";
                 document.querySelector('#popup-overlay button').onclick = closePopup;
                 document.getElementById('popup-overlay').style.display = 'flex';
-                
-                document.querySelectorAll('.match-card').forEach(card => {
-                    if(card.dataset.gt !== 'AA') card.style.display = 'none';
-                });
             }
         };
         function showDetails(p) { 
