@@ -167,12 +167,15 @@ app.get('/settings', (req, res) => {
     <div class="st-group">
         <div class="st-item">
             <span>Visibilité profil</span>
-            <label class="switch"><input type="checkbox" checked onchange="showNotify('Paramètre mis à jour !')"><span class="slider"></span></label>
+            <label class="switch">
+                <input type="checkbox" id="vis-toggle" onchange="toggleSetting('u_vis', 'vis-toggle', 'Visibilité')">
+                <span class="slider"></span>
+            </label>
         </div>
         <div class="st-item">
             <span>Notifications Push</span>
             <label class="switch">
-                <input type="checkbox" id="push-toggle" onchange="toggleNotifications()">
+                <input type="checkbox" id="push-toggle" onchange="togglePush()">
                 <span class="slider"></span>
             </label>
         </div>
@@ -184,31 +187,37 @@ app.get('/settings', (req, res) => {
     ${notifyScript}
     <script>
         window.onload = () => {
-            if(localStorage.getItem('u_push') === 'enabled') {
-                document.getElementById('push-toggle').checked = true;
-            }
+            // Initialisation des toggles selon le stockage local
+            document.getElementById('vis-toggle').checked = localStorage.getItem('u_vis') !== 'off';
+            document.getElementById('push-toggle').checked = localStorage.getItem('u_push') === 'on';
         };
 
-        function toggleNotifications() {
-            const isChecked = document.getElementById('push-toggle').checked;
-            if (isChecked) {
+        function toggleSetting(key, id, label) {
+            const isChecked = document.getElementById(id).checked;
+            localStorage.setItem(key, isChecked ? 'on' : 'off');
+            showNotify(label + (isChecked ? ' activée' : ' désactivée'));
+        }
+
+        function togglePush() {
+            const btn = document.getElementById('push-toggle');
+            if (btn.checked) {
                 if (!('Notification' in window)) {
-                    showNotify('Notifications non supportées');
-                    document.getElementById('push-toggle').checked = false;
+                    showNotify('Non supporté par ce navigateur');
+                    btn.checked = false;
                     return;
                 }
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
-                        localStorage.setItem('u_push', 'enabled');
+                        localStorage.setItem('u_push', 'on');
                         showNotify('Notifications activées 💙');
                     } else {
-                        localStorage.setItem('u_push', 'disabled');
+                        localStorage.setItem('u_push', 'off');
                         showNotify('Permission refusée');
-                        document.getElementById('push-toggle').checked = false;
+                        btn.checked = false;
                     }
                 });
             } else {
-                localStorage.setItem('u_push', 'disabled');
+                localStorage.setItem('u_push', 'off');
                 showNotify('Notifications désactivées');
             }
         }
