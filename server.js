@@ -81,7 +81,6 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/matching', (req, res) => {
-    // AJOUT DU GENRE POUR CHAQUE PARTENAIRE
     const partners = [
         {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", dob:"1992-03-15", res:"Luanda", gender: "Femme"},
         {id:2, gt:"AA", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", dob:"1988-07-22", res:"Viana", gender: "Femme"}, 
@@ -119,27 +118,19 @@ app.get('/matching', (req, res) => {
             const myGt = localStorage.getItem('u_gt');
             const myGender = localStorage.getItem('u_gender');
 
-            // Filtrage intelligent : Genre opposé + Protection Santé
             document.querySelectorAll('.match-card').forEach(card => {
                 const pGt = card.dataset.gt;
                 const pGender = card.dataset.gender;
                 let visible = true;
-
-                // 1. Filtrer par genre (ne montre que le sexe opposé)
                 if(myGender && pGender === myGender) visible = false;
-
-                // 2. Protection santé (SS ou AS voient uniquement AA)
                 if((myGt === 'SS' || myGt === 'AS') && pGt !== 'AA') visible = false;
-                
-                // 3. Bloquer partenaire SS si utilisateur est SS (votre consigne)
                 if(myGt === 'SS' && pGt === 'SS') visible = false;
-
                 if(!visible) card.style.display = 'none';
             });
 
             if(myGt === 'SS' || myGt === 'AS') {
                 document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
-                document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA. C'est notre façon de protéger votre projet de famille.";
+                document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA.";
                 document.getElementById('pop-msg').style.display = 'none';
                 document.getElementById('pop-btn').innerText = "D'accord, je comprends";
                 document.getElementById('pop-btn').onclick = closePopup;
@@ -169,9 +160,60 @@ app.get('/matching', (req, res) => {
     </script></body></html>`);
 });
 
-// ... (Le reste des routes reste identique)
 app.get('/settings', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div><div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div><div class="st-group"><div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" checked onchange="showNotify('Paramètre mis à jour !')"><span class="slider"></span></label></div></div><div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div><div class="st-group"><div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div><div style="display:flex; justify-content:space-around; padding:15px;"><button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button><button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button></div></div><a href="/profile" class="btn-pink">Retour</a></div>${notifyScript}</body></html>`);
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
+    
+    <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
+    <div class="st-group">
+        <div class="st-item">
+            <span>Visibilité profil</span>
+            <label class="switch"><input type="checkbox" checked onchange="showNotify('Paramètre mis à jour !')"><span class="slider"></span></label>
+        </div>
+        <div class="st-item">
+            <span>Notifications Push</span>
+            <label class="switch">
+                <input type="checkbox" id="push-toggle" onchange="toggleNotifications()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div>
+    <div class="st-group"><div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div><div style="display:flex; justify-content:space-around; padding:15px;"><button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button><button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button></div></div>
+    <a href="/profile" class="btn-pink">Retour</a></div>
+    ${notifyScript}
+    <script>
+        window.onload = () => {
+            if(localStorage.getItem('u_push') === 'enabled') {
+                document.getElementById('push-toggle').checked = true;
+            }
+        };
+
+        function toggleNotifications() {
+            const isChecked = document.getElementById('push-toggle').checked;
+            if (isChecked) {
+                if (!('Notification' in window)) {
+                    showNotify('Notifications non supportées');
+                    document.getElementById('push-toggle').checked = false;
+                    return;
+                }
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        localStorage.setItem('u_push', 'enabled');
+                        showNotify('Notifications activées 💙');
+                    } else {
+                        localStorage.setItem('u_push', 'disabled');
+                        showNotify('Permission refusée');
+                        document.getElementById('push-toggle').checked = false;
+                    }
+                });
+            } else {
+                localStorage.setItem('u_push', 'disabled');
+                showNotify('Notifications désactivées');
+            }
+        }
+    </script>
+    </body></html>`);
 });
 
 app.get('/chat-end', (req, res) => {
