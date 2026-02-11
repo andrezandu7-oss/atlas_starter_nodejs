@@ -83,9 +83,9 @@ app.get('/charte-engagement', (req, res) => {
                 <b style="color:#ff416c;">1. Sincérité des Données Médicales</b><br>
                 L'utilisateur s'engage sur l'honneur à saisir un génotype et un groupe sanguin rigoureusement conformes à ses derniers examens en laboratoire.<br><br>
                 <b style="color:#ff416c;">2. Responsabilité Individuelle</b><br>
-                Comme pour votre PIN Multicaixa, vous êtes le seul garant de l'authenticité de votre profil. La vérité des informations repose sur votre intégrité.<br><br>
-                <b style="color:#ff416c;">3. Confidentialité Gmail</b><br>
-                Les échanges sont protégés et éphémères. Aucune trace n'est conservée après 30 minutes. L'utilisateur respecte la vie privée des partenaires.<br><br>
+                Comme pour votre code d'accès personnel, vous êtes le seul garant de l'authenticité de votre profil. La vérité des informations repose sur votre intégrité.<br><br>
+                <b style="color:#ff416c;">3. Confidentialité des Échanges</b><br>
+                Les échanges sont protégés et éphémères. Aucune trace n'est conservée sur nos serveurs ou via e-mail après 30 minutes. L'utilisateur respecte la vie privée des partenaires.<br><br>
                 <b style="color:#ff416c;">4. Protection de la Descendance</b><br>
                 Vous acceptez que nos algorithmes privilégient la santé de vos futurs enfants en filtrant les unions à risque (compatibilité Sérénité).<br><br>
                 <b style="color:#ff416c;">5. Non-Stigmatisation</b><br>
