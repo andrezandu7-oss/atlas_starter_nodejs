@@ -88,7 +88,8 @@ app.get('/matching', (req, res) => {
         {id:3, gt:"AA", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou", dob:"1995-11-08", res:"Talatona"},
         {id:4, gt:"AA", gs:"AB+", pj:"Prête pour une vie de couple épanouie.", name:"Isabella", dob:"1990-05-12", res:"Luanda"},
         {id:5, gt:"AA", gs:"O-", pj:"Rêve d'une famille harmonieuse.", name:"Mariama", dob:"1993-09-30", res:"Cacuaco"},
-        {id:6, gt:"SS", gs:"A+", pj:"Profiter de chaque instant.", name:"Kadi", dob:"1996-01-10", res:"Luanda"}
+        {id:6, gt:"SS", gs:"A+", pj:"Vivre intensément chaque jour.", name:"Kadi", dob:"1996-01-10", res:"Luanda"},
+        {id:7, gt:"AS", gs:"B+", pj:"À la recherche de mon âme sœur.", name:"Marc", dob:"1994-02-20", res:"Cacuaco"}
     ];
 
     const partnersWithAge = partners.map(p => ({
@@ -115,10 +116,37 @@ app.get('/matching', (req, res) => {
         case ${p.id}: 
             document.getElementById('pop-name').innerText = '${p.name} #${p.id}';
             document.getElementById('pop-details').innerHTML = "<b>Âge :</b> ${p.age} ans<br><b>Résidence :</b> ${p.res} (${p.distance}km)<br><b>Génotype :</b> ${p.gt}<br><b>Groupe Sanguin :</b> ${p.gs}<br><br><b>Projet de vie :</b><br><i>${p.pj}</i>";
-            document.getElementById('pop-msg').innerHTML = (p.gt === "AA") ? "<b>L'Union Sérénité :</b> Compatibilité idéale." : "<b>L'Union Vigilante :</b> Suivi médical conseillé.";
+            document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Compatibilité validée.";
             break;`).join('');
 
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container">${matchesHTML}</div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails du Partenaire</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="startChat(); closePopup(); showNotify('Conversation démarrée !')">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>let sP = null; const myGt = localStorage.getItem('u_gt'); document.querySelectorAll('.match-card').forEach(card => { if(myGt === 'SS' && card.dataset.gt === 'SS') card.style.display = 'none'; }); function showDetails(p) { sP = p; switch(p.id) { ${detailsScript} } document.getElementById('popup-overlay').style.display = 'flex'; } function startChat() { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }</script></body></html>`);
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container">${matchesHTML}</div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="startChat(); closePopup();">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>
+        let sP = null;
+        window.onload = () => {
+            const myGt = localStorage.getItem('u_gt');
+            if(myGt === 'SS' || myGt === 'AS') {
+                document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
+                document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA. C'est notre façon de protéger votre projet de famille pour que vous puissiez construire votre avenir l'esprit léger.";
+                document.getElementById('pop-msg').style.display = 'none';
+                document.querySelector('#popup-overlay button').innerText = "D'accord, je comprends";
+                document.querySelector('#popup-overlay button').onclick = closePopup;
+                document.getElementById('popup-overlay').style.display = 'flex';
+                
+                document.querySelectorAll('.match-card').forEach(card => {
+                    if(card.dataset.gt !== 'AA') card.style.display = 'none';
+                });
+            }
+        };
+        function showDetails(p) { 
+            sP = p;
+            document.getElementById('pop-msg').style.display = 'block';
+            document.querySelector('#popup-overlay button').innerText = "🚀 Contacter ce profil";
+            document.querySelector('#popup-overlay button').onclick = () => { startChat(); closePopup(); };
+            switch(p.id) { ${detailsScript} } 
+            document.getElementById('popup-overlay').style.display = 'flex'; 
+        }
+        function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
+        function startChat() { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; }
+    </script></body></html>`);
 });
 
 app.get('/settings', (req, res) => {
