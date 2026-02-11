@@ -157,7 +157,15 @@ app.get('/chat-end', (req, res) => {
 });
 
 app.get('/logout-success', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px; margin-bottom:20px;">🛡️</div><h2 style="color:#1a2a44;">Merci pour votre confiance</h2><p style="color:#666; margin-bottom:30px;">Votre session a été fermée en toute sécurité.</p><button onclick="localStorage.clear(); window.location.href='/';" class="btn-dark" style="width:100%; margin:0; border-radius:50px; cursor:pointer;">Quitter</button></div></body></html>`);
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
+    <body class="end-overlay">
+        <div class="end-card">
+            <div style="font-size:50px; margin-bottom:20px;">🛡️</div>
+            <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
+            <p style="color:#666; margin-bottom:30px;">Votre session a été fermée en toute sécurité.</p>
+            <button onclick="localStorage.clear(); window.location.href='/';" class="btn-dark" style="width:100%; margin:0; border-radius:50px; cursor:pointer; border:none;">Quitter</button>
+        </div>
+    </body></html>`);
 });
 
 app.get('/chat', (req, res) => {
