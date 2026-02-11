@@ -50,7 +50,7 @@ const notifyScript = `
         const n = document.getElementById('genlove-notify');
         document.getElementById('notify-msg').innerText = msg;
         n.classList.add('show');
-        setTimeout(() => { n.classList.remove('show'); }, 3000);
+        setTimeout(() => { n.classList.remove('show'); }, 3500);
     }
 </script>
 `;
@@ -60,9 +60,7 @@ function calculerAge(dateNaissance) {
     const birthDate = new Date(dateNaissance);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) { age--; }
     return age;
 }
 
@@ -91,33 +89,14 @@ app.get('/matching', (req, res) => {
         {id:7, gt:"AS", gs:"B+", pj:"À la recherche de mon âme sœur.", name:"Marc", dob:"1994-02-20", res:"Cacuaco", gender: "Homme"},
         {id:8, gt:"AA", gs:"O+", pj:"Construisons un avenir sain.", name:"Jean", dob:"1991-05-10", res:"Luanda", gender: "Homme"}
     ];
-
-    const partnersWithAge = partners.map(p => ({
-        ...p,
-        age: calculerAge(p.dob),
-        distance: Math.floor(Math.random() * 30)
-    }));
-
-    const matchesHTML = partnersWithAge.map(p => `
-        <div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}">
-            <div class="match-photo-blur"></div>
-            <div style="flex:1">
-                <b>${p.name} (#${p.id})</b><br>
-                <small>${p.age} ans • ${p.res} (${p.distance}km) • Génotype ${p.gt}</small>
-            </div>
-            <div style="display:flex;">
-                <button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ${p.name}')">Contacter</button>
-                <button class="btn-action btn-details" onclick='showDetails(${JSON.stringify(p)})'>Détails</button>
-            </div>
-        </div>
-    `).join('');
+    const partnersWithAge = partners.map(p => ({ ...p, age: calculerAge(p.dob), distance: Math.floor(Math.random() * 30) }));
+    const matchesHTML = partnersWithAge.map(p => `<div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}"><div class="match-photo-blur"></div><div style="flex:1"><b>${p.name} (#${p.id})</b><br><small>${p.age} ans • ${p.res} (${p.distance}km) • Génotype ${p.gt}</small></div><div style="display:flex;"><button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ${p.name}')">Contacter</button><button class="btn-action btn-details" onclick='showDetails(${JSON.stringify(p)})'>Détails</button></div></div>`).join('');
 
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container">${matchesHTML}</div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0; width:100%">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>
         let sP = null;
         window.onload = () => {
             const myGt = localStorage.getItem('u_gt');
             const myGender = localStorage.getItem('u_gender');
-
             document.querySelectorAll('.match-card').forEach(card => {
                 const pGt = card.dataset.gt;
                 const pGender = card.dataset.gender;
@@ -127,7 +106,6 @@ app.get('/matching', (req, res) => {
                 if(myGt === 'SS' && pGt === 'SS') visible = false;
                 if(!visible) card.style.display = 'none';
             });
-
             if(myGt === 'SS' || myGt === 'AS') {
                 document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
                 document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA.";
@@ -137,7 +115,6 @@ app.get('/matching', (req, res) => {
                 document.getElementById('popup-overlay').style.display = 'flex';
             }
         };
-
         function showDetails(p) { 
             sP = p;
             document.getElementById('pop-name').innerText = p.name + " #" + p.id;
@@ -148,81 +125,32 @@ app.get('/matching', (req, res) => {
             document.getElementById('pop-btn').onclick = startChat;
             document.getElementById('popup-overlay').style.display = 'flex'; 
         }
-
         function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
-        
-        function startChat() { 
-            if(sP) {
-                sessionStorage.setItem('chatPartner', JSON.stringify(sP)); 
-                window.location.href = '/chat'; 
-            }
-        }
+        function startChat() { if(sP) { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } }
     </script></body></html>`);
 });
 
 app.get('/settings', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:25px; background:white; text-align:center;"><div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div>
-    
     <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
     <div class="st-group">
-        <div class="st-item">
-            <span>Visibilité profil</span>
-            <label class="switch">
-                <input type="checkbox" id="vis-toggle" onchange="toggleSetting('u_vis', 'vis-toggle', 'Visibilité')">
-                <span class="slider"></span>
-            </label>
-        </div>
-        <div class="st-item">
-            <span>Notifications Push</span>
-            <label class="switch">
-                <input type="checkbox" id="push-toggle" onchange="togglePush()">
-                <span class="slider"></span>
-            </label>
-        </div>
+        <div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" id="vis-toggle" checked onchange="showNotify('Visibilité mise à jour !')"><span class="slider"></span></label></div>
+        <div class="st-item"><span>Notifications Push</span><label class="switch"><input type="checkbox" id="push-toggle" onchange="togglePush()"><span class="slider"></span></label></div>
     </div>
-
     <div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div>
     <div class="st-group"><div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div><div style="display:flex; justify-content:space-around; padding:15px;"><button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button><button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button></div></div>
     <a href="/profile" class="btn-pink">Retour</a></div>
     ${notifyScript}
     <script>
-        window.onload = () => {
-            // Initialisation des toggles selon le stockage local
-            document.getElementById('vis-toggle').checked = localStorage.getItem('u_vis') !== 'off';
-            document.getElementById('push-toggle').checked = localStorage.getItem('u_push') === 'on';
-        };
-
-        function toggleSetting(key, id, label) {
-            const isChecked = document.getElementById(id).checked;
-            localStorage.setItem(key, isChecked ? 'on' : 'off');
-            showNotify(label + (isChecked ? ' activée' : ' désactivée'));
-        }
-
         function togglePush() {
-            const btn = document.getElementById('push-toggle');
-            if (btn.checked) {
-                if (!('Notification' in window)) {
-                    showNotify('Non supporté par ce navigateur');
-                    btn.checked = false;
-                    return;
-                }
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        localStorage.setItem('u_push', 'on');
-                        showNotify('Notifications activées 💙');
-                    } else {
-                        localStorage.setItem('u_push', 'off');
-                        showNotify('Permission refusée');
-                        btn.checked = false;
-                    }
-                });
+            const isChecked = document.getElementById('push-toggle').checked;
+            if (isChecked) {
+                showNotify('Bienvenue ! 💙 Vos notifications de santé sont actives.');
             } else {
-                localStorage.setItem('u_push', 'off');
                 showNotify('Notifications désactivées');
             }
         }
-    </script>
-    </body></html>`);
+    </script></body></html>`);
 });
 
 app.get('/chat-end', (req, res) => {
@@ -230,15 +158,7 @@ app.get('/chat-end', (req, res) => {
 });
 
 app.get('/logout-success', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head>
-    <body class="end-overlay">
-        <div class="end-card">
-            <div style="font-size:50px; margin-bottom:20px;">🛡️</div>
-            <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
-            <p style="color:#666; margin-bottom:30px;">Votre session a été fermée en toute sécurité.</p>
-            <button onclick="localStorage.clear(); window.location.href='/';" class="btn-dark" style="width:100%; margin:0; border-radius:50px; cursor:pointer; border:none;">Quitter</button>
-        </div>
-    </body></html>`);
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px; margin-bottom:20px;">🛡️</div><h2 style="color:#1a2a44;">Merci pour votre confiance</h2><p style="color:#666; margin-bottom:30px;">Votre session a été fermée en toute sécurité.</p><button onclick="localStorage.clear(); window.location.href='/';" class="btn-dark" style="width:100%; margin:0; border-radius:50px; cursor:pointer; border:none;">Quitter</button></div></body></html>`);
 });
 
 app.get('/chat', (req, res) => {
