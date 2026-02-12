@@ -10,7 +10,7 @@ mongoose.connect(mongoURI)
     .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
     .catch(err => console.error("❌ Erreur de connexion MongoDB:", err));
 
-// --- MODÈLE DE DONNÉES (CORRIGÉ : PLUS SOUPLE) ---
+// --- MODÈLE DE DONNÉES ---
 const User = mongoose.model('User', new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -27,6 +27,7 @@ const User = mongoose.model('User', new mongoose.Schema({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// --- STYLES ET SCRIPTS PARTAGÉS ---
 const styles = `
 <style>
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
@@ -61,7 +62,7 @@ const styles = `
     input:checked + .slider { background-color: #007bff; }
     input:checked + .slider:before { transform: translateX(21px); }
     .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(6px); }
+    .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; background-size: cover; background-position: center; filter: blur(6px); }
     .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76b8 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 </style>
@@ -195,55 +196,86 @@ app.get('/profile', (req, res) => {
 </script></body></html>`);
 });
 
+// --- ROUTE MATCHING DYNAMIQUE (RÉPARÉE) ---
 app.get('/matching', async (req, res) => {
-    const partners = [
-        {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", dob:"1992-03-15", res:"Luanda", gender: "Femme"},
-        {id:2, gt:"AA", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", dob:"1988-07-22", res:"Viana", gender: "Femme"}, 
-        {id:3, gt:"AA", gs:"A+", pj:"Cherche une relation stable et sérieuse.", name:"Fatou", dob:"1995-11-08", res:"Talatona", gender: "Femme"},
-        {id:4, gt:"AA", gs:"AB+", pj:"Prête pour une vie de couple épanouie.", name:"Isabella", dob:"1990-05-12", res:"Luanda", gender: "Femme"},
-        {id:6, gt:"SS", gs:"A+", pj:"Vivre intensément chaque jour.", name:"Kadi", dob:"1996-01-10", res:"Luanda", gender: "Femme"},
-        {id:7, gt:"AS", gs:"B+", pj:"À la recherche de mon âme sœur.", name:"Marc", dob:"1994-02-20", res:"Cacuaco", gender: "Homme"},
-        {id:8, gt:"AA", gs:"O+", pj:"Construisons un avenir sain.", name:"Jean", dob:"1991-05-10", res:"Luanda", gender: "Homme"}
-    ];
-    const partnersWithAge = partners.map(p => ({ ...p, age: calculerAge(p.dob), distance: Math.floor(Math.random() * 30) }));
-    const matchesHTML = partnersWithAge.map(p => `<div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}"><div class="match-photo-blur"></div><div style="flex:1"><b>${p.name} (#${p.id})</b><br><small>${p.age} ans • ${p.res} (${p.distance}km) • Génotype ${p.gt}</small></div><div style="display:flex;"><button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ${p.name}')">Contacter</button><button class="btn-action btn-details" onclick='showDetails(${JSON.stringify(p)})'>Détails</button></div></div>`).join('');
+    try {
+        // 1. Récupérer tous les utilisateurs réels de MongoDB
+        const realUsers = await User.find().lean();
+        
+        // 2. Transformer les données pour l'affichage
+        const partners = realUsers.map(u => ({
+            id: u._id,
+            gt: u.genotype,
+            gs: u.bloodGroup,
+            pj: u.desireChild || "Projet de vie à discuter",
+            name: u.firstName,
+            dob: u.dob,
+            res: u.residence,
+            gender: u.gender,
+            photo: u.photo, // Récupère la photo de MongoDB
+            age: calculerAge(u.dob),
+            distance: Math.floor(Math.random() * 30)
+        }));
 
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container">${matchesHTML}</div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0; width:100%">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>
-        let sP = null;
-        window.onload = () => {
-            const myGt = localStorage.getItem('u_gt');
-            const myGender = localStorage.getItem('u_gender');
-            document.querySelectorAll('.match-card').forEach(card => {
-                const pGt = card.dataset.gt;
-                const pGender = card.dataset.gender;
-                let visible = true;
-                if(myGender && pGender === myGender) visible = false;
-                if((myGt === 'SS' || myGt === 'AS') && pGt !== 'AA') visible = false;
-                if(myGt === 'SS' && pGt === 'SS') visible = false;
-                if(!visible) card.style.display = 'none';
-            });
-            if(myGt === 'SS' || myGt === 'AS') {
-                document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
-                document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA.";
-                document.getElementById('pop-msg').style.display = 'none';
-                document.getElementById('pop-btn').innerText = "D'accord, je comprends";
-                document.getElementById('pop-btn').onclick = closePopup;
-                document.getElementById('popup-overlay').style.display = 'flex';
+        const matchesHTML = partners.map(p => `
+            <div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}">
+                <div class="match-photo-blur" style="background-image: url('${p.photo || ''}')"></div>
+                <div style="flex:1">
+                    <b>${p.name}</b><br>
+                    <small>${p.age} ans • ${p.res} (${p.distance}km) • Génotype ${p.gt}</small>
+                </div>
+                <div style="display:flex;">
+                    <button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ${p.name}')">Contacter</button>
+                    <button class="btn-action btn-details" onclick='showDetails(${JSON.stringify(p)})'>Détails</button>
+                </div>
+            </div>`).join('');
+
+        res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container">${matchesHTML || '<p style="text-align:center; padding:20px;">Aucun autre profil trouvé pour le moment...</p>'}</div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0; width:100%">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>
+            let sP = null;
+            window.onload = () => {
+                const myGt = localStorage.getItem('u_gt');
+                const myGender = localStorage.getItem('u_gender');
+                const myFn = localStorage.getItem('u_fn'); // Pour ne pas se voir soi-même
+
+                document.querySelectorAll('.match-card').forEach(card => {
+                    const pGt = card.dataset.gt;
+                    const pGender = card.dataset.gender;
+                    const pName = card.querySelector('b').innerText;
+                    
+                    let visible = true;
+                    if(myFn && pName === myFn) visible = false; // Cache ton propre profil
+                    if(myGender && pGender === myGender) visible = false;
+                    if((myGt === 'SS' || myGt === 'AS') && pGt !== 'AA') visible = false;
+                    if(myGt === 'SS' && pGt === 'SS') visible = false;
+                    if(!visible) card.style.display = 'none';
+                });
+                
+                // Pop-up pédagogique pour les profils à risque
+                if(myGt === 'SS' || myGt === 'AS') {
+                    document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
+                    document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA.";
+                    document.getElementById('pop-msg').style.display = 'none';
+                    document.getElementById('pop-btn').innerText = "D'accord, je comprends";
+                    document.getElementById('pop-btn').onclick = closePopup;
+                    document.getElementById('popup-overlay').style.display = 'flex';
+                }
+            };
+            function showDetails(p) { 
+                sP = p;
+                document.getElementById('pop-name').innerText = p.name;
+                document.getElementById('pop-details').innerHTML = "<b>Âge :</b> "+p.age+" ans<br><b>Résidence :</b> "+p.res+"<br><b>Génotype :</b> "+p.gt+"<br><b>Groupe :</b> "+p.gs+"<br><br><b>Projet :</b><br><i>"+p.pj+"</i>";
+                document.getElementById('pop-msg').style.display = 'block';
+                document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Compatibilité validée.";
+                document.getElementById('pop-btn').innerText = "🚀 Contacter ce profil";
+                document.getElementById('pop-btn').onclick = startChat;
+                document.getElementById('popup-overlay').style.display = 'flex'; 
             }
-        };
-        function showDetails(p) { 
-            sP = p;
-            document.getElementById('pop-name').innerText = p.name + " #" + p.id;
-            document.getElementById('pop-details').innerHTML = "<b>Âge :</b> "+p.age+" ans<br><b>Résidence :</b> "+p.res+"<br><b>Génotype :</b> "+p.gt+"<br><b>Groupe :</b> "+p.gs+"<br><br><b>Projet :</b><br><i>"+p.pj+"</i>";
-            document.getElementById('pop-msg').style.display = 'block';
-            document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Compatibilité validée.";
-            document.getElementById('pop-btn').innerText = "🚀 Contacter ce profil";
-            document.getElementById('pop-btn').onclick = startChat;
-            document.getElementById('popup-overlay').style.display = 'flex'; 
-        }
-        function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
-        function startChat() { if(sP) { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } }
-    </script></body></html>`);
+            function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
+            function startChat() { if(sP) { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } }
+        </script></body></html>`);
+    } catch (err) {
+        res.status(500).send("Erreur de base de données");
+    }
 });
 
 app.get('/settings', (req, res) => {
