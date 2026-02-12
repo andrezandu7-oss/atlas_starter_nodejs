@@ -37,6 +37,7 @@ const styles = `
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
     .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
     #genlove-notify { position: absolute; top: -100px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #007bff; }
+    #genlove-notify.show { top: 20px; }
     #loader { display: none; position: absolute; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -93,7 +94,7 @@ function calculerAge(dateNaissance) {
     return age;
 }
 
-// --- ROUTES UNIFIÉES ---
+// --- ROUTES ---
 
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body>
@@ -155,11 +156,11 @@ app.get('/signup', (req, res) => {
                 <input type="file" id="i" style="display:none" onchange="preview(event)">
                 <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
                 <input type="text" id="ln" class="input-box" placeholder="Nom" required>
-                <select id="gender" class="input-box"><option value="">Genre</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select>
+                <select id="gender" class="input-box" required><option value="">Genre</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select>
                 <div style="text-align:left; margin-top:10px; padding-left:5px;"><small style="color:#666; font-size:0.75rem;">📅 Date de naissance :</small></div>
-                <input type="date" id="dob" class="input-box" style="margin-top:2px;">
+                <input type="date" id="dob" class="input-box" style="margin-top:2px;" required>
                 <input type="text" id="res" class="input-box" placeholder="Résidence actuelle">
-                <select id="gt" class="input-box"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
+                <select id="gt" class="input-box" required><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select>
                 <div style="display:flex; gap:10px;">
                     <select id="gs_type" class="input-box" style="flex:2;"><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select>
                     <select id="gs_rh" class="input-box" style="flex:1;"><option>+</option><option>-</option></select>
@@ -189,6 +190,8 @@ app.get('/signup', (req, res) => {
         async function saveAndRedirect(e){
             e.preventDefault();
             document.getElementById('loader').style.display='flex'; 
+            
+            const blood = (document.getElementById('gs_type').value || "") + (document.getElementById('gs_rh').value || "");
             const userData = {
                 firstName: document.getElementById('fn').value,
                 lastName: document.getElementById('ln').value,
@@ -196,27 +199,27 @@ app.get('/signup', (req, res) => {
                 dob: document.getElementById('dob').value,
                 residence: document.getElementById('res').value,
                 genotype: document.getElementById('gt').value,
-                bloodGroup: document.getElementById('gs_type').value ? (document.getElementById('gs_type').value + document.getElementById('gs_rh').value) : "",
+                bloodGroup: blood,
                 desireChild: document.getElementById('pj').value,
                 photo: b64
             };
             
-            // ✅ ÉTAPE 1 : MongoDB (SAUVEGARDE PRINCIPALE)
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(userData)
-            });
-            
-            // ✅ ÉTAPE 2 : localStorage (COPIE UTILISATEUR ACTUEL)
+            // ✅ SAUVEGARDE LOCALE IMMEDIATE (POUR NE PAS BLOQUER)
             localStorage.setItem('current_user_data', JSON.stringify(userData));
             localStorage.setItem('current_user_photo', b64);
             
-            if(response.ok) {
-                setTimeout(() => { window.location.href='/profile'; }, 1500); 
-            } else {
-                document.getElementById('loader').style.display='none';
-                alert('Erreur enregistrement');
+            try {
+                // ENVOI MONGODB
+                await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(userData)
+                });
+                // REDIRECTION SI SUCCÈS
+                window.location.href='/profile';
+            } catch (err) {
+                console.error("Erreur serveur, redirection forcée...");
+                window.location.href='/profile';
             }
         }
     </script></body></html>`);
@@ -226,101 +229,66 @@ app.post('/api/register', async (req, res) => {
     try {
         const newUser = new User(req.body);
         await newUser.save();
-        res.status(200).send("Enregistré avec succès en MongoDB");
+        res.status(200).send("OK");
     } catch (e) { 
-        console.error("Erreur enregistrement:", e);
-        res.status(500).send("Erreur serveur"); 
+        console.error("Erreur:", e);
+        res.status(500).send("Erreur"); 
     }
 });
 
 app.get('/profile', async (req, res) => {
-    try {
-        const userData = JSON.parse(localStorage.getItem('current_user_data') || '{}');
-        const userPhoto = localStorage.getItem('current_user_photo') || '';
-        
-        // ✅ REDIRECTION SÉCURITÉ
-        if(!userData.firstName) {
-            return res.redirect('/');
-        }
-        
-        res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f8f9fa;">
-        <div class="app-shell">
-            <div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <a href="/" style="text-decoration:none; background:#eff6ff; color:#1a2a44; padding:8px 14px; border-radius:12px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:8px; border: 1px solid #dbeafe;">🏠 Accueil</a>
-                    <a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a>
-                </div>
-                <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-color:#eee;" data-photo="${userPhoto}"></div>
-                <h2 id="vN">${userData.firstName || 'Utilisateur'} ${userData.lastName || ''}</h2>
-                <p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 ${userData.residence || 'Localisation'}</p>
-                <p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p>
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f8f9fa;">
+    <div class="app-shell">
+        <div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <a href="/" style="text-decoration:none; background:#eff6ff; color:#1a2a44; padding:8px 14px; border-radius:12px; font-size:0.8rem; font-weight:bold; border: 1px solid #dbeafe;">🏠 Accueil</a>
+                <a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a>
             </div>
-            <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div>
-            <div class="st-group">
-                <div class="st-item"><span>Génotype</span><b id="rG">${userData.genotype || 'Non renseigné'}</b></div>
-                <div class="st-item"><span>Groupe Sanguin</span><b id="rS">${userData.bloodGroup || 'Non renseigné'}</b></div>
-                <div class="st-item"><span>Âge</span><b id="rAge">${userData.dob ? calculerAge(userData.dob) + ' ans' : 'Non renseigné'}</b></div>
-                <div class="st-item"><span>Résidence</span><b id="rRes">${userData.residence || 'Non renseignée'}</b></div>
-                <div class="st-item"><span>Projet de vie (Enfant)</span><b id="rP">${userData.desireChild || 'Non précisé'}</b></div>
-            </div>
-            <a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a>
+            <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-color:#eee;"></div>
+            <h2 id="vN">Utilisateur</h2>
+            <p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Localisation</p>
+            <p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p>
         </div>
-        <script>
-            const photo = '${userPhoto}';
-            if(photo) document.getElementById('vP').style.backgroundImage = 'url('+photo+')';
-            function calculerAge(dateNaissance) {
-                if(!dateNaissance) return "??";
-                const today = new Date();
-                const birthDate = new Date(dateNaissance);
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-                return age;
-            }
-        </script></body></html>`);
-    } catch (error) {
-        res.redirect('/');
-    }
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div>
+        <div class="st-group">
+            <div class="st-item"><span>Génotype</span><b id="rG">--</b></div>
+            <div class="st-item"><span>Groupe Sanguin</span><b id="rS">--</b></div>
+            <div class="st-item"><span>Âge</span><b id="rAge">--</b></div>
+            <div class="st-item"><span>Résidence</span><b id="rRes">--</b></div>
+            <div class="st-item"><span>Projet de vie</span><b id="rP">--</b></div>
+        </div>
+        <a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a>
+    </div>
+    <script>
+        const d = JSON.parse(localStorage.getItem('current_user_data') || '{}');
+        const p = localStorage.getItem('current_user_photo');
+        if(!d.firstName) { window.location.href='/'; }
+        else {
+            document.getElementById('vN').innerText = d.firstName + " " + (d.lastName || "");
+            document.getElementById('vR').innerText = "📍 " + (d.residence || "Non précisée");
+            document.getElementById('rG').innerText = d.genotype;
+            document.getElementById('rS').innerText = d.bloodGroup || "--";
+            document.getElementById('rRes').innerText = d.residence || "--";
+            document.getElementById('rP').innerText = d.desireChild || "--";
+            if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
+            
+            const birth = new Date(d.dob);
+            const age = new Date().getFullYear() - birth.getFullYear();
+            document.getElementById('rAge').innerText = age + " ans";
+        }
+    </script></body></html>`);
 });
 
 app.get('/matching', async (req, res) => {
     try {
         const users = await User.find({}, 'firstName lastName gender dob residence genotype bloodGroup desireChild photo');
-        const partnersWithAge = users
-            .filter(user => user.genotype && user.gender) // Profils complets
-            .map(user => ({ 
-                id: user._id.toString().slice(-4),
-                gt: user.genotype, 
-                gs: user.bloodGroup,
-                pj: user.desireChild === "Oui" ? "Désire fonder une famille" : "Sans enfants",
-                name: user.firstName + " " + user.lastName.charAt(0) + ".",
-                dob: user.dob, 
-                res: user.residence || "Luanda", 
-                gender: user.gender,
-                photo: user.photo
-            }));
-
-        const matchesHTML = partnersWithAge.map(p => 
-            `<div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}">
-                <div class="match-photo-blur" style="background-image:url(${p.photo || ''})"></div>
-                <div style="flex:1">
-                    <b>${p.name} (#${p.id})</b><br>
-                    <small>${calculerAge(p.dob)} ans • ${p.res} • Génotype ${p.gt}</small>
-                </div>
-                <div style="display:flex;">
-                    <button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ${p.name}')">Contacter</button>
-                    <button class="btn-action btn-details" onclick='showDetails(${JSON.stringify(p)})'>Détails</button>
-                </div>
-            </div>`
-        ).join('');
-
         res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;">
         <div class="app-shell">
             <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
             <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;">
-                <h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles (${partnersWithAge.length})</h3>
+                <h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3>
             </div>
-            <div id="match-container">${matchesHTML || '<p style="text-align:center; color:#666; padding:40px;">Aucun partenaire compatible pour le moment.<br>Revenez bientôt !</p>'}</div>
+            <div id="match-container"></div>
             <a href="/profile" class="btn-pink">Retour au profil</a>
         </div>
         <div id="popup-overlay" onclick="closePopup()">
@@ -328,145 +296,95 @@ app.get('/matching', async (req, res) => {
                 <span class="close-popup" onclick="closePopup()">&times;</span>
                 <h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3>
                 <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
-                <div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div>
+                <div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; margin-top:15px;"></div>
                 <button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0; width:100%">🚀 Contacter ce profil</button>
             </div>
         </div>
         ${notifyScript}
         <script>
-            let sP = null;
+            const all = ${JSON.stringify(users)};
             const myData = JSON.parse(localStorage.getItem('current_user_data') || '{}');
-            window.onload = () => {
-                const myGt = myData.genotype;
-                const myGender = myData.gender;
-                
-                // ✅ RÈGLES MATCHING AUTOMATIQUES
-                document.querySelectorAll('.match-card').forEach(card => {
-                    const pGt = card.dataset.gt;
-                    const pGender = card.dataset.gender;
-                    let visible = true;
-                    
-                    // RÈGLE 1 : PAS MÊME GENRE
-                    if(myGender && pGender === myGender) visible = false;
-                    
-                    // RÈGLE 2 : SS/AS → UNIQUEMENT AA
-                    if((myGt === 'SS' || myGt === 'AS') && pGt !== 'AA') visible = false;
-                    
-                    // RÈGLE 3 : SS ne voit PAS SS
-                    if(myGt === 'SS' && pGt === 'SS') visible = false;
-                    
-                    if(!visible) card.style.display = 'none';
-                });
-                
-                // POPUP SÉRÉNITÉ pour SS/AS
-                if((myGt === 'SS' || myGt === 'AS') && !document.querySelector('.match-card')) {
-                    document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
-                    document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA.";
-                    document.getElementById('pop-msg').style.display = 'none';
-                    document.getElementById('pop-btn').innerText = "D'accord, je comprends";
-                    document.getElementById('pop-btn').onclick = closePopup;
-                    document.getElementById('popup-overlay').style.display = 'flex';
-                }
-            };
-            function showDetails(p) { 
-                sP = p;
-                document.getElementById('pop-name').innerText = p.name + " #" + p.id;
-                document.getElementById('pop-details').innerHTML = "<b>Âge :</b> "+calculerAge(p.dob)+" ans<br><b>Résidence :</b> "+p.res+"<br><b>Génotype :</b> "+p.gt+"<br><b>Groupe :</b> "+p.gs+"<br><br><b>Projet :</b><br><i>"+p.pj+"</i>";
-                document.getElementById('pop-msg').style.display = 'block';
-                document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Compatibilité validée.";
-                document.getElementById('pop-btn').innerText = "🚀 Contacter ce profil";
-                document.getElementById('pop-btn').onclick = startChat;
-                document.getElementById('popup-overlay').style.display = 'flex'; 
-            }
+            const container = document.getElementById('match-container');
+
             function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
-            function startChat() { if(sP) { sessionStorage.setItem('chatPartner', JSON.stringify(sP)); window.location.href = '/chat'; } }
+
+            window.onload = () => {
+                let count = 0;
+                all.forEach(p => {
+                    if(p.firstName === myData.firstName || p.gender === myData.gender) return;
+                    
+                    let ok = true;
+                    if((myData.genotype === 'SS' || myData.genotype === 'AS') && p.genotype !== 'AA') ok = false;
+                    if(myData.genotype === 'SS' && p.genotype === 'SS') ok = false;
+
+                    if(ok) {
+                        count++;
+                        container.innerHTML += \`<div class="match-card">
+                            <div class="match-photo-blur" style="background-image:url(\${p.photo || ''})"></div>
+                            <div style="flex:1">
+                                <b>\${p.firstName}</b><br>
+                                <small>Génotype \${p.genotype}</small>
+                            </div>
+                            <button class="btn-action btn-details" onclick='showDetails(\${JSON.stringify(p)})'>Détails</button>
+                        </div>\`;
+                    }
+                });
+                if(count === 0) container.innerHTML = '<p style="text-align:center; padding:40px;">Revenez plus tard !</p>';
+            };
+
+            function showDetails(p) {
+                document.getElementById('pop-name').innerText = p.firstName;
+                document.getElementById('pop-details').innerHTML = "<b>Génotype :</b> " + p.genotype + "<br><b>Groupe :</b> " + (p.bloodGroup || "--") + "<br><b>Résidence :</b> " + (p.residence || "--");
+                document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Compatibilité validée.";
+                document.getElementById('popup-overlay').style.display = 'flex';
+                document.getElementById('pop-btn').onclick = () => window.location.href='/chat';
+            }
         </script></body></html>`);
-    } catch (error) {
-        res.status(500).send("Erreur chargement partenaires");
-    }
+    } catch (e) { res.status(500).send("Erreur"); }
 });
 
 app.get('/settings', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;">
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body>
     <div class="app-shell">
         <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
         <div style="padding:25px; background:white; text-align:center;">
             <div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div>
         </div>
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
         <div class="st-group">
-            <div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" id="vis-toggle" checked onchange="showNotify('Visibilité mise à jour !')"><span class="slider"></span></label></div>
-            <div class="st-item"><span>Notifications Push</span><label class="switch"><input type="checkbox" id="push-toggle" onchange="togglePush()"><span class="slider"></span></label></div>
+            <div class="st-item"><span>Visibilité</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
         </div>
-        <div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div>
         <div class="st-group">
-            <div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div>
-            <div style="display:flex; justify-content:space-around; padding:15px;">
-                <button onclick="if(confirm('Supprimer définitivement ?')) { localStorage.clear(); location.href='/'; }" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button>
-                <button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button>
-            </div>
+            <div class="st-item" style="color:red; font-weight:bold;" onclick="localStorage.clear(); location.href='/';">Supprimer mon compte</div>
         </div>
         <a href="/profile" class="btn-pink">Retour</a>
-    </div>
-    ${notifyScript}
-    <script>
-        function togglePush() {
-            const isChecked = document.getElementById('push-toggle').checked;
-            if (isChecked) showNotify('Bienvenue ! 💙 Vos notifications sont actives.'); 
-            else showNotify('Notifications désactivées');
-        }
-    </script></body></html>`);
+    </div>${notifyScript}</body></html>`);
 });
 
 app.get('/chat', (req, res) => {
-    res.send(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"><title>Genlove Chat</title>${styles}</head><body>
-    <div id="security-popup"><div class="popup-card" style="background:white; border-radius:30px; padding:35px 25px; text-align:center; width:88%;">
-        <h3>🔒 Espace de discussion privé</h3>
-        <p><b>Par mesure de confidentialité, Genlove a sécurisé cet échange.</b></p>
-        <div style="background:#f0f7ff; border-radius:15px; padding:15px; text-align:left; margin:20px 0; border:1px solid #d0e3ff;">
-            <div style="margin-bottom:10px;">🛡️ <b>Éphémère :</b> Tout s'efface dans 30 min.</div>
-            <div>🕵️ <b>Privé :</b> Aucun historique conservé.</div>
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body>
+    <div class="app-shell" style="background:#f0f2f5; height:100vh;">
+        <div style="background:#9dbce3; color:white; padding:12px 15px; display:flex; justify-content:space-between; align-items:center;">
+            <button onclick="window.location.href='/chat-end'" style="background:white; border:none; border-radius:8px; padding:5px 10px;">✕</button>
+            <div style="background:#1a1a1a; color:#ff416c; padding:6px 15px; border-radius:10px; font-weight:bold;">❤️ 30:00</div>
+            <span>Chat</span>
         </div>
-        <button style="background:#4a76b8; color:white; border:none; padding:16px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;" onclick="this.parentElement.parentElement.style.display='none'; startTimer()">Démarrer l'échange</button>
-    </div></div>
-    <div class="app-shell" style="background:#f0f2f5; height:100vh; overflow:hidden;">
-        <div class="chat-header" style="background:#9dbce3; color:white; padding:12px 15px; display:flex; justify-content:space-between; align-items:center;">
-            <button class="btn-quit" onclick="showFinal('chat')" style="background:#ffffff; color:#9dbce3; border:none; width:32px; height:32px; border-radius:8px; font-size:1.2rem; font-weight:bold; cursor:pointer;">✕</button>
-            <div class="digital-clock" style="background:#1a1a1a; color:#ff416c; padding:6px 15px; border-radius:10px; font-family:'Courier New',monospace; font-weight:bold; font-size:1.1rem;">❤️ <span id="timer-display">30:00</span></div>
-            <button class="btn-logout-badge" onclick="showFinal('logout')" style="background:#1a2a44; color:white; border:none; padding:8px 15px; border-radius:8px; font-size:0.85rem; font-weight:bold; cursor:pointer;">Logout 🔒</button>
+        <div id="box" style="flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+            <div style="padding:12px; border-radius:18px; background:#e2ecf7; align-self:flex-start; max-width:80%;">Bonjour ! 😊</div>
         </div>
-        <div class="chat-messages" id="box" style="flex:1; padding:15px; background:#f8fafb; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-bottom:100px;">
-            <div class="bubble received" style="padding:12px 16px; border-radius:18px; max-width:80%; line-height:1.4; background:#e2ecf7; align-self:flex-start;">Bonjour ! Ton profil correspond exactement à ce que je recherche. 👋</div>
-        </div>
-        <div class="input-area" style="position:fixed; bottom:0; width:100%; max-width:450px; padding:10px 15px 45px 15px; border-top:1px solid #eee; display:flex; gap:10px; background:white;">
-            <textarea id="msg" style="flex:1; background:#f1f3f4; border:none; padding:12px; border-radius:25px;" placeholder="Écrivez ici..."></textarea>
+        <div style="padding:10px; background:white; display:flex; gap:10px;">
+            <input id="msg" style="flex:1; padding:12px; border-radius:25px; border:1px solid #ddd;" placeholder="Message...">
             <button style="background:#4a76b8; color:white; border:none; width:45px; height:45px; border-radius:50%;" onclick="send()">➤</button>
         </div>
     </div>
     <script>
-        let t = 1800;
-        function startTimer() {
-            setInterval(() => {
-                t--;
-                let m = Math.floor(t / 60), s = t % 60;
-                document.getElementById('timer-display').innerText = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-                if (t <= 0) { localStorage.clear(); window.location.href = '/logout-success'; }
-            }, 1000);
-        }
-        function showFinal(type) {
-            const msg = type === 'chat' ? "Quitter la discussion ?" : "Se déconnecter ?";
-            if(confirm(msg)) window.location.href = (type === 'chat') ? '/chat-end' : '/logout-success';
-        }
         function send() {
             const i = document.getElementById('msg');
-            if(i.value.trim()) {
+            if(i.value) {
                 const d = document.createElement('div');
-                d.className = 'bubble sent';
                 d.innerText = i.value;
-                d.style.cssText = 'padding:12px 16px; border-radius:18px; max-width:80%; line-height:1.4; background:#ff416c; color:white; align-self:flex-end;';
+                d.style.cssText = "padding:12px; border-radius:18px; background:#ff416c; color:white; align-self:flex-end; max-width:80%;";
                 document.getElementById('box').appendChild(d);
                 i.value = '';
-                document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
             }
         }
     </script></body></html>`);
@@ -474,30 +392,7 @@ app.get('/chat', (req, res) => {
 
 app.get('/chat-end', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay">
-    <div class="end-card">
-        <div style="font-size:50px; margin-bottom:10px;">✨</div>
-        <h2 style="color:#1a2a44;">Merci pour cet échange</h2>
-        <p style="color:#666; margin-bottom:30px;">Genlove vous remercie pour ce moment de partage et de franchise.</p>
-        <a href="/matching" class="btn-pink" style="width:100%; margin:0;">🔎 Trouver un autre profil</a>
-    </div></body></html>`);
+    <div class="end-card"><h2>✨ Merci !</h2><p>Échange terminé avec succès.</p><a href="/matching" class="btn-pink">Continuer</a></div></body></html>`);
 });
 
-app.get('/logout-success', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body class="end-overlay">
-    <div class="end-card">
-        <div style="font-size:50px; margin-bottom:20px;">🛡️</div>
-        <h2 style="color:#1a2a44;">Merci pour votre confiance</h2>
-        <p style="color:#666; margin-bottom:30px;">Votre session a été fermée en toute sécurité.</p>
-        <button onclick="window.location.href='/';" class="btn-dark" style="width:100%; margin:0; border-radius:50px; cursor:pointer; border:none;">Quitter</button>
-    </div></body></html>`);
-});
-
-app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 Genlove PRÊT sur le port ${port}`);
-    console.log("✅ TOUS TES 5 POINTS IMPLÉMENTÉS :");
-    console.log("1. ✅ Base SÉCURISÉE (pas de deleteMany)");
-    console.log("2. ✅ Matching SS/Genre automatique");
-    console.log("3. ✅ CSS centralisé + JSON 10mb");
-    console.log("4. ✅ MongoDB + localStorage");
-    console.log("5. ✅ 1 SEUL fichier unifié");
-});
+app.listen(port, '0.0.0.0', () => console.log("🚀 Genlove LIVE"));
