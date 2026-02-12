@@ -196,13 +196,10 @@ app.get('/profile', (req, res) => {
 </script></body></html>`);
 });
 
-// --- ROUTE MATCHING DYNAMIQUE (RÉPARÉE) ---
+// --- ROUTE MATCHING DYNAMIQUE (RÉPARÉE AVEC FILTRAGE ROBUSTE) ---
 app.get('/matching', async (req, res) => {
     try {
-        // 1. Récupérer tous les utilisateurs réels de MongoDB
         const realUsers = await User.find().lean();
-        
-        // 2. Transformer les données pour l'affichage
         const partners = realUsers.map(u => ({
             id: u._id,
             gt: u.genotype,
@@ -212,7 +209,7 @@ app.get('/matching', async (req, res) => {
             dob: u.dob,
             res: u.residence,
             gender: u.gender,
-            photo: u.photo, // Récupère la photo de MongoDB
+            photo: u.photo,
             age: calculerAge(u.dob),
             distance: Math.floor(Math.random() * 30)
         }));
@@ -233,24 +230,35 @@ app.get('/matching', async (req, res) => {
         res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;"><h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3></div><div id="match-container">${matchesHTML || '<p style="text-align:center; padding:20px;">Aucun autre profil trouvé pour le moment...</p>'}</div><a href="/profile" class="btn-pink">Retour au profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3><div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div><button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0; width:100%">🚀 Contacter ce profil</button></div></div>${notifyScript}<script>
             let sP = null;
             window.onload = () => {
-                const myGt = localStorage.getItem('u_gt');
-                const myGender = localStorage.getItem('u_gender');
-                const myFn = localStorage.getItem('u_fn'); // Pour ne pas se voir soi-même
+                const myGt = (localStorage.getItem('u_gt') || "").toUpperCase().trim();
+                const myGender = (localStorage.getItem('u_gender') || "").toLowerCase().trim();
+                const myFn = (localStorage.getItem('u_fn') || "").trim();
+
+                let countVisible = 0;
 
                 document.querySelectorAll('.match-card').forEach(card => {
-                    const pGt = card.dataset.gt;
-                    const pGender = card.dataset.gender;
-                    const pName = card.querySelector('b').innerText;
+                    const pGt = (card.dataset.gt || "").toUpperCase().trim();
+                    const pGender = (card.dataset.gender || "").toLowerCase().trim();
+                    const pName = card.querySelector('b').innerText.trim();
                     
                     let visible = true;
-                    if(myFn && pName === myFn) visible = false; // Cache ton propre profil
+                    if(myFn && pName === myFn) visible = false; 
                     if(myGender && pGender === myGender) visible = false;
+                    
                     if((myGt === 'SS' || myGt === 'AS') && pGt !== 'AA') visible = false;
                     if(myGt === 'SS' && pGt === 'SS') visible = false;
-                    if(!visible) card.style.display = 'none';
+
+                    if(!visible) {
+                        card.style.display = 'none';
+                    } else {
+                        countVisible++;
+                    }
                 });
                 
-                // Pop-up pédagogique pour les profils à risque
+                if(countVisible === 0) {
+                    document.getElementById('match-container').innerHTML = '<p style="text-align:center; padding:20px;">Aucun partenaire compatible trouvé pour le moment.</p>';
+                }
+
                 if(myGt === 'SS' || myGt === 'AS') {
                     document.getElementById('pop-name').innerText = "Note de Sérénité 🛡️";
                     document.getElementById('pop-details').innerText = "Parce que votre bonheur mérite une sérénité totale, Genlove a sélectionné pour vous uniquement des profils AA.";
