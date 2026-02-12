@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose'); // Ajout pour la base de données
+const mongoose = require('mongoose');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -10,10 +10,10 @@ mongoose.connect(mongoURI)
     .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
     .catch(err => console.error("❌ Erreur de connexion MongoDB:", err));
 
-// --- MODÈLE DE DONNÉES ---
+// --- MODÈLE DE DONNÉES (CORRIGÉ : PLUS SOUPLE) ---
 const User = mongoose.model('User', new mongoose.Schema({
-    firstName: String,
-    lastName: String,
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     gender: String,
     dob: String,
     residence: String,
@@ -80,6 +80,7 @@ const notifyScript = `
 `;
 
 function calculerAge(dateNaissance) {
+    if(!dateNaissance) return "??";
     const today = new Date();
     const birthDate = new Date(dateNaissance);
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -136,7 +137,7 @@ app.get('/charte-engagement', (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body><div class="app-shell"><div id="loader"><div class="spinner"></div><h3>Analyse sécurisée...</h3><p>Vérification de vos données médicales.</p></div><div class="page-white" id="main-content"><h2 style="color:#ff416c; margin-top:0;">Configuration Santé</h2><form onsubmit="saveAndRedirect(event)"><div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo *</span></div><input type="file" id="i" style="display:none" onchange="preview(event)"><input type="text" id="fn" class="input-box" placeholder="Prénom" required><input type="text" id="ln" class="input-box" placeholder="Nom" required><select id="gender" class="input-box" required><option value="">Genre</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select><div style="text-align:left; margin-top:10px; padding-left:5px;"><small style="color:#666; font-size:0.75rem;">📅 Date de naissance :</small></div><input type="date" id="dob" class="input-box" style="margin-top:2px;" required><input type="text" id="res" class="input-box" placeholder="Résidence actuelle" required><select id="gt" class="input-box" required><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select><div style="display:flex; gap:10px;"><select id="gs_type" class="input-box" style="flex:2;" required><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select><select id="gs_rh" class="input-box" style="flex:1;" required><option>+</option><option>-</option></select></div><select id="pj" class="input-box" required><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select><div class="serment-container"><input type="checkbox" id="oath" style="width:20px;height:20px;" required><label for="oath" class="serment-text">Je confirme que mes saisies correspondent à l'engagement éthique signé précédemment.</label></div><button type="submit" class="btn-pink">🚀 Valider mon profil</button></form></div></div><script>let b64 = localStorage.getItem('u_p') || ""; window.onload = () => { if(b64) { document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; } document.getElementById('fn').value = localStorage.getItem('u_fn') || ""; document.getElementById('ln').value = localStorage.getItem('u_ln') || ""; document.getElementById('gender').value = localStorage.getItem('u_gender') || ""; document.getElementById('dob').value = localStorage.getItem('u_dob') || ""; document.getElementById('res').value = localStorage.getItem('u_res') || ""; document.getElementById('gt').value = localStorage.getItem('u_gt') || ""; const fullGS = localStorage.getItem('u_gs') || ""; if(fullGS) { document.getElementById('gs_type').value = fullGS.replace(/[+-]/g, ""); document.getElementById('gs_rh').value = fullGS.includes('+') ? '+' : '-'; } document.getElementById('pj').value = localStorage.getItem('u_pj') || ""; }; function preview(e){ const r=new FileReader(); r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; }; r.readAsDataURL(e.target.files[0]); } async function saveAndRedirect(e){ e.preventDefault(); document.getElementById('loader').style.display='flex'; 
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body><div class="app-shell"><div id="loader"><div class="spinner"></div><h3>Analyse sécurisée...</h3><p>Vérification de vos données médicales.</p></div><div class="page-white" id="main-content"><h2 style="color:#ff416c; margin-top:0;">Configuration Santé</h2><form onsubmit="saveAndRedirect(event)"><div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo</span></div><input type="file" id="i" style="display:none" onchange="preview(event)"><input type="text" id="fn" class="input-box" placeholder="Prénom" required><input type="text" id="ln" class="input-box" placeholder="Nom" required><select id="gender" class="input-box"><option value="">Genre</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select><div style="text-align:left; margin-top:10px; padding-left:5px;"><small style="color:#666; font-size:0.75rem;">📅 Date de naissance :</small></div><input type="date" id="dob" class="input-box" style="margin-top:2px;"><input type="text" id="res" class="input-box" placeholder="Résidence actuelle"><select id="gt" class="input-box"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select><div style="display:flex; gap:10px;"><select id="gs_type" class="input-box" style="flex:2;"><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select><select id="gs_rh" class="input-box" style="flex:1;"><option>+</option><option>-</option></select></div><select id="pj" class="input-box"><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select><div class="serment-container"><input type="checkbox" id="oath" style="width:20px;height:20px;" required><label for="oath" class="serment-text">Je confirme que mes saisies correspondent à l'engagement éthique signé précédemment.</label></div><button type="submit" class="btn-pink">🚀 Valider mon profil</button></form></div></div><script>let b64 = localStorage.getItem('u_p') || ""; window.onload = () => { if(b64) { document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; } document.getElementById('fn').value = localStorage.getItem('u_fn') || ""; document.getElementById('ln').value = localStorage.getItem('u_ln') || ""; document.getElementById('gender').value = localStorage.getItem('u_gender') || ""; document.getElementById('dob').value = localStorage.getItem('u_dob') || ""; document.getElementById('res').value = localStorage.getItem('u_res') || ""; document.getElementById('gt').value = localStorage.getItem('u_gt') || ""; const fullGS = localStorage.getItem('u_gs') || ""; if(fullGS) { document.getElementById('gs_type').value = fullGS.replace(/[+-]/g, ""); document.getElementById('gs_rh').value = fullGS.includes('+') ? '+' : '-'; } document.getElementById('pj').value = localStorage.getItem('u_pj') || ""; }; function preview(e){ const r=new FileReader(); r.onload=()=>{ b64=r.result; document.getElementById('c').style.backgroundImage='url('+b64+')'; document.getElementById('t').style.display='none'; }; r.readAsDataURL(e.target.files[0]); } async function saveAndRedirect(e){ e.preventDefault(); document.getElementById('loader').style.display='flex'; 
     const userData = {
         firstName: document.getElementById('fn').value,
         lastName: document.getElementById('ln').value,
@@ -144,42 +145,57 @@ app.get('/signup', (req, res) => {
         dob: document.getElementById('dob').value,
         residence: document.getElementById('res').value,
         genotype: document.getElementById('gt').value,
-        bloodGroup: document.getElementById('gs_type').value + document.getElementById('gs_rh').value,
+        bloodGroup: document.getElementById('gs_type').value ? (document.getElementById('gs_type').value + document.getElementById('gs_rh').value) : "",
         desireChild: document.getElementById('pj').value,
         photo: b64
     };
     localStorage.setItem('u_fn', userData.firstName);
     localStorage.setItem('u_ln', userData.lastName);
+    localStorage.setItem('u_gender', userData.gender);
     localStorage.setItem('u_gt', userData.genotype);
+    localStorage.setItem('u_gs', userData.bloodGroup);
     localStorage.setItem('u_dob', userData.dob);
+    localStorage.setItem('u_res', userData.residence);
+    localStorage.setItem('u_pj', userData.desireChild);
     localStorage.setItem('u_p', b64);
     
-    // Sauvegarde vers MongoDB via l'API
     await fetch('/api/register', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(userData)
     });
 
-    setTimeout(() => { window.location.href='/profile'; }, 2000); 
+    setTimeout(() => { window.location.href='/profile'; }, 1500); 
     }</script></body></html>`);
 });
 
-// --- API POUR MONGODB ---
 app.post('/api/register', async (req, res) => {
     try {
         const newUser = new User(req.body);
         await newUser.save();
-        res.status(200).send("Utilisateur enregistré");
+        res.status(200).send("Enregistré");
     } catch (e) { res.status(500).send(e); }
 });
 
 app.get('/profile', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f8f9fa;"><div class="app-shell"><div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;"><div style="display:flex; justify-content:space-between; align-items:center;"><a href="/" style="text-decoration:none; background:#eff6ff; color:#1a2a44; padding:8px 14px; border-radius:12px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:8px; border: 1px solid #dbeafe;"><span style="font-size:1rem;">🏠</span> Accueil</a><a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a></div><div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover;"></div><h2 id="vN" style="margin:5px 0 0 0;">Utilisateur</h2><p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Localisation</p><p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p></div><div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div><div class="st-group"><div class="st-item"><span>Génotype</span><b id="rG">...</b></div><div class="st-item"><span>Groupe Sanguin</span><b id="rS">...</b></div><div class="st-item"><span>Âge</span><b id="rAge">...</b></div><div class="st-item"><span>Résidence</span><b id="rRes">...</b></div><div class="st-item"><span>Projet de vie</span><b id="rP">...</b></div></div><a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a></div><script>const p = localStorage.getItem('u_p'); if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')'; document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || "") + " " + (localStorage.getItem('u_ln') || ""); document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || "") + " (" + (localStorage.getItem('u_gender') || "") + ")"; document.getElementById('rG').innerText = localStorage.getItem('u_gt'); document.getElementById('rS').innerText = localStorage.getItem('u_gs'); document.getElementById('rP').innerText = "Enfant : " + localStorage.getItem('u_pj'); const dob = localStorage.getItem('u_dob'); if(dob) { const age = Math.floor((new Date() - new Date(dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000)); document.getElementById('rAge').innerText = age + ' ans'; } document.getElementById('rRes').innerText = localStorage.getItem('u_res') || 'Non renseigné';</script></body></html>`);
+    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f8f9fa;"><div class="app-shell"><div style="background:white; padding:30px 20px; text-align:center; border-radius:0 0 30px 30px;"><div style="display:flex; justify-content:space-between; align-items:center;"><a href="/" style="text-decoration:none; background:#eff6ff; color:#1a2a44; padding:8px 14px; border-radius:12px; font-size:0.8rem; font-weight:bold; display:flex; align-items:center; gap:8px; border: 1px solid #dbeafe;">🏠 Accueil</a><a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a></div><div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-color:#eee;"></div><h2 id="vN" style="margin:5px 0 0 0;">Utilisateur</h2><p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">📍 Localisation</p><p style="color:#007bff; font-weight:bold; margin:0;">Profil Santé Validé ✅</p></div><div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">MES INFORMATIONS</div><div class="st-group"><div class="st-item"><span>Génotype</span><b id="rG">...</b></div><div class="st-item"><span>Groupe Sanguin</span><b id="rS">...</b></div><div class="st-item"><span>Âge</span><b id="rAge">...</b></div><div class="st-item"><span>Résidence</span><b id="rRes">...</b></div><div class="st-item"><span>Projet de vie (Enfant)</span><b id="rP">...</b></div></div><a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a></div><script>
+    const p = localStorage.getItem('u_p'); 
+    if(p) document.getElementById('vP').style.backgroundImage = 'url('+p+')';
+    document.getElementById('vN').innerText = (localStorage.getItem('u_fn') || "Prénom") + " " + (localStorage.getItem('u_ln') || "Nom");
+    document.getElementById('vR').innerText = "📍 " + (localStorage.getItem('u_res') || "Non précisée") + " (" + (localStorage.getItem('u_gender') || "?") + ")";
+    document.getElementById('rG').innerText = localStorage.getItem('u_gt') || "Non renseigné";
+    document.getElementById('rS').innerText = localStorage.getItem('u_gs') || "Non renseigné";
+    document.getElementById('rP').innerText = localStorage.getItem('u_pj') || "Non précisé";
+    document.getElementById('rRes').innerText = localStorage.getItem('u_res') || "Non renseignée";
+    const dob = localStorage.getItem('u_dob');
+    if(dob) {
+        const age = Math.floor((new Date() - new Date(dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        document.getElementById('rAge').innerText = age + ' ans';
+    }
+</script></body></html>`);
 });
 
 app.get('/matching', async (req, res) => {
-    // Dans une version finale, on récupérera ici la vraie liste de MongoDB via User.find()
     const partners = [
         {id:1, gt:"AA", gs:"O+", pj:"Désire fonder une famille unie.", name:"Sarah", dob:"1992-03-15", res:"Luanda", gender: "Femme"},
         {id:2, gt:"AA", gs:"B-", pj:"Souhaite des enfants en bonne santé.", name:"Aminata", dob:"1988-07-22", res:"Viana", gender: "Femme"}, 
@@ -237,18 +253,14 @@ app.get('/settings', (req, res) => {
         <div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" id="vis-toggle" checked onchange="showNotify('Visibilité mise à jour !')"><span class="slider"></span></label></div>
         <div class="st-item"><span>Notifications Push</span><label class="switch"><input type="checkbox" id="push-toggle" onchange="togglePush()"><span class="slider"></span></label></div>
     </div>
-    <div class="st-group"><a href="/charte-engagement" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div>
+    <div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier mon profil</span><b>Modifier ➔</b></a></div>
     <div class="st-group"><div class="st-item" style="color:red; font-weight:bold;">Supprimer mon compte</div><div style="display:flex; justify-content:space-around; padding:15px;"><button onclick="localStorage.clear(); location.href='/';" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Oui</button><button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Non</button></div></div>
     <a href="/profile" class="btn-pink">Retour</a></div>
     ${notifyScript}
     <script>
         function togglePush() {
             const isChecked = document.getElementById('push-toggle').checked;
-            if (isChecked) {
-                showNotify('Bienvenue ! 💙 Vos notifications de santé sont actives.');
-            } else {
-                showNotify('Notifications désactivées');
-            }
+            if (isChecked) { showNotify('Bienvenue ! 💙 Vos notifications de santé sont actives.'); } else { showNotify('Notifications désactivées'); }
         }
     </script></body></html>`);
 });
