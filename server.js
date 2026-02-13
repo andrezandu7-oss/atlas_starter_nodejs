@@ -1,4 +1,6 @@
-// 🚀 GENLOVE - CODE COMPLET CORRIGÉ (MOBILE READY)
+// 🚀 GENLOVE - CODE COMPLET CORRIGÉ (MONGOOSE CONNECTION FIXÉ)
+// ✅ CORRECTION: Gestion robuste MongoDB + app.listen(port, '0.0.0.0')
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -8,19 +10,48 @@ const port = process.env.PORT || 3000;
 // 🔒 SÉCURITÉ RENDER
 console.log("✅ Base MongoDB SÉCURISÉE - Vrais utilisateurs préservés");
 
-// ✅ CONNEXION MONGODB
-const mongoURI = process.env.MONGODB_URI; 
-mongoose.connect(mongoURI)
-    .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
-    .catch(err => console.error("❌ Erreur MongoDB:", err));
+// ✅ CONNEXION MONGODB CORRIGÉE (ROBUSTE)
+const mongoURI = process.env.MONGODB_URI;
 
-// ✅ CORS + JSON + STATIC (ORDRE IMPORTANT)
+const mongooseOptions = {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    family: 4
+};
+
+// Écouteurs d'événements GLOBAUX
+mongoose.connection.on('connected', () => {
+    console.log("✅ Connecté à MongoDB pour Genlove !");
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error("❌ Erreur MongoDB:", err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log("❌ Déconnecté MongoDB");
+});
+
+async function connectDB() {
+    try {
+        await mongoose.connect(mongoURI, mongooseOptions);
+        console.log("🚀 MongoDB prêt - Serveur opérationnel !");
+    } catch (error) {
+        console.error("❌ ÉCHEC MongoDB:", error.message);
+        console.error("🔧 Vérifiez MONGODB_URI sur Render");
+        process.exit(1);
+    }
+}
+
+connectDB();
+
+// ✅ CORS + JSON + STATIC
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('public'));
 
-// ✅ MODÈLE UTILISATEUR (avec fallback photo)
+// ✅ MODÈLE UTILISATEUR
 const UserSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -35,7 +66,7 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// ✅ META + FAVICON + CSS
+// ✅ CONSTANTS HTML
 const head = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23ff416c'>💕</text></svg>"><meta name="theme-color" content="#ff416c"><meta name="apple-mobile-web-app-capable" content="yes"><title>Genlove</title>`;
 
 const styles = `<style>body{font-family:'Segoe UI',sans-serif;margin:0;background:#fdf2f2;display:flex;justify-content:center}.app-shell{width:100%;max-width:420px;min-height:100vh;background:#f4e9da;display:flex;flex-direction:column;box-shadow:0 0 20px rgba(0,0,0,0.1);position:relative}#genlove-notify{position:absolute;top:-100px;left:10px;right:10px;background:#1a2a44;color:white;padding:15px;border-radius:12px;display:flex;align-items:center;gap:10px;transition:0.5s cubic-bezier(0.175,0.885,0.32,1.275);z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3);border-left:5px solid #007bff}.show{top:10px}#loader{display:none;position:absolute;inset:0;background:white;z-index:100;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.spinner{width:50px;height:50px;border:5px solid #f3f3f3;border-top:5px solid #ff416c;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.home-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}.logo-text{font-size:3.5rem;font-weight:bold;margin-bottom:5px}.slogan{font-weight:bold;color:#1a2a44;margin-bottom:40px;font-size:1rem;line-height:1.5}.page-white{background:white;min-height:100vh;padding:25px 20px;box-sizing:border-box;text-align:center}.photo-circle{width:110px;height:110px;border:2px dashed #ff416c;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;background-size:cover;background-position:center}.input-box{width:100%;padding:14px;border:1px solid #e2e8f0;border-radius:12px;margin-top:10px;font-size:1rem;box-sizing:border-box;background:#f8f9fa;color:#333}.serment-container{margin-top:20px;padding:15px;background:#fff5f7;border-radius:12px;border:1px solid #ffdae0;text-align:left;display:flex;gap:10px;align-items:flex-start}.serment-text{font-size:0.82rem;color:#d63384;line-height:1.4}.btn-pink{background:#ff416c;color:white;padding:18px;border-radius:50px;text-align:center;text-decoration:none;font-weight:bold;display:block;width:85%;margin:20px auto;border:none;cursor:pointer;transition:0.3s}.btn-dark{background:#1a2a44;color:white;padding:18px;border-radius:12px;text-align:center;text-decoration:none;font-weight:bold;display:block;margin:15px;width:auto;box-sizing:border-box}.btn-action{border:none;border-radius:8px;padding:8px 12px;font-size:0.8rem;font-weight:bold;cursor:pointer;transition:0.2s}.btn-details{background:#ff416c;color:white}.btn-contact{background:#1a2a44;color:white;margin-right:5px}#popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:20px}.popup-content{background:white;border-radius:20px;width:100%;max-width:380px;padding:25px;position:relative;text-align:left;animation:slideUp 0.3s ease-out}.close-popup{position:absolute;top:15px;right:15px;font-size:1.5rem;cursor:pointer;color:#666}.st-group{background:white;border-radius:15px;margin:0 15px 15px 15px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-align:left}.st-item{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid #f8f8f8;color:#333;font-size:0.95rem}.switch{position:relative;display:inline-block;width:45px;height:24px}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;cursor:pointer;inset:0;background-color:#ccc;transition:.4s;border-radius:24px}.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:white;transition:.4s;border-radius:50%}input:checked+.slider{background-color:#007bff}input:checked+.slider:before{transform:translateX(21px)}.match-card{background:white;margin:10px 15px;padding:15px;border-radius:15px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 5px rgba(0,0,0,0.05)}.match-photo-blur{width:55px;height:55px;border-radius:50%;background:#eee;filter:blur(6px);background-size:cover;background-position:center}.end-overlay{position:fixed;inset:0;background:linear-gradient(180deg,#4a76b8 0%,#1a2a44 100%);z-index:9999;display:flex;align-items:center;justify-content:center}.end-card{background:white;border-radius:30px;padding:40px 25px;width:85%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.2)}@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
@@ -70,3 +101,5 @@ app.get('/chat-end',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${st
 app.get('/logout-success',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px;margin-bottom:20px;">🛡️</div><h2 style="color:#1a2a44;">Session fermée</h2><p style="color:#666;margin-bottom:30px;">Sécurité assurée.</p><button onclick="location.href='/'" class="btn-dark" style="width:100%;margin:0;border-radius:50px;cursor:pointer;border:none;">Quitter</button></div></body></html>`)});
 
 app.listen(port,'0.0.0.0',()=>{console.log(`🚀 Genlove sur port ${port}`);console.log("✅ CORS + MongoDB + Matching OK");});
+
+
