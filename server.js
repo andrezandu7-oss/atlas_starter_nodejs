@@ -1,16 +1,22 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors'); // ✅ AJOUTÉ : Pour autoriser les connexions mobiles
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ SÉCURITÉ RENDER : AUCUNE SUPPRESSION AUTOMATIQUE
+// ✅ CONFIGURATION SÉCURITÉ ET CORS
+app.use(cors()); // ✅ Autorise tes téléphones à parler au serveur Render
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.static('public'));
+
 console.log("✅ Base MongoDB SÉCURISÉE - Vrais utilisateurs préservés");
 
 // --- CONNEXION MONGODB ---
 const mongoURI = process.env.MONGODB_URI; 
 mongoose.connect(mongoURI)
     .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
-    .catch(err => console.error("❌ Erreur MongoDB:", err));
+    .catch(err => console.error("❌ Erreur MongoDB critique :", err));
 
 // --- MODÈLE UTILISATEUR ---
 const User = mongoose.model('User', new mongoose.Schema({
@@ -25,11 +31,6 @@ const User = mongoose.model('User', new mongoose.Schema({
     photo: String,
     createdAt: { type: Date, default: Date.now }
 }));
-
-// ✅ OPTIMISATION PHOTOS + JSON
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static('public'));
 
 // --- CSS CENTRALISÉ ---
 const styles = `
@@ -67,8 +68,6 @@ const styles = `
     input:checked + .slider:before { transform: translateX(21px); }
     .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(6px); background-size: cover; background-position: center; }
-    .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76b8 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-    .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>`;
 
@@ -82,17 +81,6 @@ function showNotify(msg) {
     setTimeout(() => { n.classList.remove('show'); }, 3500);
 }
 </script>`;
-
-// --- FONCTION ÂGE (Serveur) ---
-function calculerAge(dateNaissance) {
-    if(!dateNaissance) return "??";
-    const today = new Date();
-    const birthDate = new Date(dateNaissance);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-    return age;
-}
 
 // --- ROUTES UNIFIÉES ---
 
@@ -122,9 +110,9 @@ app.get('/charte-engagement', (req, res) => {
             <div id="charte-box" style="height: 220px; overflow-y: scroll; background: #fff5f7; border: 2px solid #ffdae0; border-radius: 15px; padding: 20px; font-size: 0.85rem; color: #444; line-height:1.6; text-align:left;" onscroll="checkScroll(this)">
                 <b style="color:#ff416c;">1. Sincérité des Données Médicales</b><br>L'utilisateur s'engage sur l'honneur à saisir un génotype et un groupe sanguin rigoureusement conformes à ses derniers examens en laboratoire.<br><br>
                 <b style="color:#ff416c;">2. Responsabilité Individuelle</b><br>Comme pour votre code d'accès personnel, vous êtes le seul garant de l'authenticité de votre profil. La vérité des informations repose sur votre intégrité.<br><br>
-                <b style="color:#ff416c;">3. Confidentialité des Échanges</b><br>Les échanges sont protégés et éphémères. Aucune trace n'est conservée sur nos serveurs ou via e-mail après 30 minutes.<br><br>
-                <b style="color:#ff416c;">4. Protection de la Descendance</b><br>Vous acceptez que nos algorithmes privilégient la santé de vos futurs enfants en filtrant les unions à risque (compatibilité Sérénité).<br><br>
-                <b style="color:#ff416c;">5. Non-Stigmatisation</b><br>Genlove est une communauté de respect. Tout propos discriminatoire lié à la santé sera sanctionné par une exclusion définitive.<br><br>
+                <b style="color:#ff416c;">3. Confidentialité des Échanges</b><br>Les échanges sont protégés et éphémères. Aucune trace n'est conservée sur nos serveurs.<br><br>
+                <b style="color:#ff416c;">4. Protection de la Descendance</b><br>Vous acceptez que nos algorithmes privilégient la santé de vos futurs enfants en filtrant les unions à risque.<br><br>
+                <b style="color:#ff416c;">5. Non-Stigmatisation</b><br>Genlove est une communauté de respect.<br><br>
                 <hr style="border:0; border-top:1px solid #ffdae0; margin:15px 0;">
                 <center><i style="color:#ff416c;">Scrollez jusqu'en bas pour débloquer l'accès...</i></center>
             </div>
@@ -168,7 +156,7 @@ app.get('/signup', (req, res) => {
                 <select id="pj" class="input-box"><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select>
                 <div class="serment-container">
                     <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
-                    <label for="oath" class="serment-text">Je confirme que mes saisies correspondent à l'engagement éthique signé précédemment.</label>
+                    <label for="oath" class="serment-text">Je confirme que mes saisies sont conformes à l'engagement éthique.</label>
                 </div>
                 <button type="submit" class="btn-pink">🚀 Valider mon profil</button>
             </form>
@@ -207,22 +195,29 @@ app.get('/signup', (req, res) => {
                     localStorage.setItem('current_user_data', JSON.stringify(userData));
                     setTimeout(() => { window.location.href='/profile'; }, 1000); 
                 } else {
-                    throw new Error();
+                    const errorText = await response.text();
+                    throw new Error(errorText);
                 }
             } catch(err) {
                 document.getElementById('loader').style.display='none';
-                alert('Erreur de connexion au serveur. Vérifiez votre connexion.');
+                alert('Erreur de connexion : ' + err.message);
             }
         }
     </script></body></html>`);
 });
 
+// ✅ ROUTE API RENFORCÉE
 app.post('/api/register', async (req, res) => {
     try {
+        console.log("📩 Tentative d'enregistrement pour:", req.body.firstName);
         const newUser = new User(req.body);
         await newUser.save();
+        console.log("✅ Utilisateur sauvé avec succès.");
         res.status(200).send("OK");
-    } catch (e) { res.status(500).send("FAIL"); }
+    } catch (e) { 
+        console.error("❌ Erreur sauvegarde MongoDB:", e.message);
+        res.status(500).send("Erreur Base de données: " + e.message); 
+    }
 });
 
 app.get('/profile', (req, res) => {
@@ -265,68 +260,70 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/matching', async (req, res) => {
-    const users = await User.find().sort({ createdAt: -1 }).limit(50);
-    res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;">
-    <div class="app-shell">
-        <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
-        <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;">
-            <h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3>
+    try {
+        const users = await User.find().sort({ createdAt: -1 }).limit(100);
+        res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0">${styles}</head><body style="background:#f4f7f6;">
+        <div class="app-shell">
+            <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
+            <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;">
+                <h3 style="margin:0; color:#1a2a44;">Partenaires Compatibles</h3>
+            </div>
+            <div id="match-container"></div>
+            <a href="/profile" class="btn-pink">Retour au profil</a>
         </div>
-        <div id="match-container"></div>
-        <a href="/profile" class="btn-pink">Retour au profil</a>
-    </div>
-    <div id="popup-overlay" onclick="closePopup()">
-        <div class="popup-content" onclick="event.stopPropagation()">
-            <span class="close-popup" onclick="closePopup()">&times;</span>
-            <h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3>
-            <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
-            <div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div>
-            <button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0; width:100%">🚀 Contacter ce profil</button>
+        <div id="popup-overlay" onclick="closePopup()">
+            <div class="popup-content" onclick="event.stopPropagation()">
+                <span class="close-popup" onclick="closePopup()">&times;</span>
+                <h3 id="pop-name" style="color:#ff416c; margin-top:0;">Détails</h3>
+                <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
+                <div id="pop-msg" style="background:#e7f3ff; padding:15px; border-radius:12px; border-left:5px solid #007bff; font-size:0.85rem; color:#1a2a44; line-height:1.4; margin-top:15px;"></div>
+                <button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0; width:100%">🚀 Contacter ce profil</button>
+            </div>
         </div>
-    </div>
-    ${notifyScript}
-    <script>
-        const myData = JSON.parse(localStorage.getItem('current_user_data') || '{}');
-        const allUsers = ${JSON.stringify(users)};
-        const container = document.getElementById('match-container');
+        ${notifyScript}
+        <script>
+            const myData = JSON.parse(localStorage.getItem('current_user_data') || '{}');
+            const allUsers = ${JSON.stringify(users)};
+            const container = document.getElementById('match-container');
 
-        function render() {
-            let found = 0;
-            allUsers.forEach(p => {
-                if(p.firstName === myData.firstName && p.lastName === myData.lastName) return;
-                if(p.gender === myData.gender) return;
-                
-                // RÈGLES SANTÉ
-                let compatible = true;
-                if((myData.genotype === 'SS' || myData.genotype === 'AS') && p.genotype !== 'AA') compatible = false;
-                if(myData.genotype === 'SS' && p.genotype === 'SS') compatible = false;
+            function render() {
+                let found = 0;
+                allUsers.forEach(p => {
+                    if(p.firstName === myData.firstName && p.lastName === myData.lastName) return;
+                    if(p.gender === myData.gender) return;
+                    
+                    let compatible = true;
+                    // Règle SS automatique
+                    if(myData.genotype === 'SS' && p.genotype === 'SS') compatible = false;
+                    // Règle AS/SS
+                    if((myData.genotype === 'SS' || myData.genotype === 'AS') && p.genotype !== 'AA') compatible = false;
 
-                if(compatible) {
-                    found++;
-                    container.innerHTML += \`
-                    <div class="match-card">
-                        <div class="match-photo-blur" style="background-image:url(\${p.photo})"></div>
-                        <div style="flex:1">
-                            <b>\${p.firstName} \${p.lastName.charAt(0)}.</b><br>
-                            <small>Génotype \${p.genotype} • \${p.residence}</small>
-                        </div>
-                        <button class="btn-action btn-details" onclick='showDetails(\${JSON.stringify(p)})'>Voir</button>
-                    </div>\`;
-                }
-            });
-            if(found === 0) container.innerHTML = '<p style="padding:40px; color:#666; text-align:center;">Aucun partenaire compatible trouvé pour le moment.</p>';
-        }
+                    if(compatible) {
+                        found++;
+                        container.innerHTML += \`
+                        <div class="match-card">
+                            <div class="match-photo-blur" style="background-image:url(\${p.photo})"></div>
+                            <div style="flex:1">
+                                <b>\${p.firstName} \${p.lastName.charAt(0)}.</b><br>
+                                <small>Génotype \${p.genotype} • \${p.residence}</small>
+                            </div>
+                            <button class="btn-action btn-details" onclick='showDetails(\${JSON.stringify(p)})'>Voir</button>
+                        </div>\`;
+                    }
+                });
+                if(found === 0) container.innerHTML = '<p style="padding:40px; color:#666; text-align:center;">Aucun partenaire compatible trouvé.</p>';
+            }
 
-        function showDetails(p) {
-            document.getElementById('pop-name').innerText = p.firstName + " #" + p._id.slice(-4);
-            document.getElementById('pop-details').innerHTML = "<b>Résidence :</b> "+p.residence+"<br><b>Génotype :</b> "+p.genotype+"<br><b>Groupe :</b> "+p.bloodGroup+"<br><b>Projet :</b> "+p.desireChild;
-            document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Votre compatibilité génétique est validée.";
-            document.getElementById('popup-overlay').style.display = 'flex';
-        }
-        function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
-        
-        window.onload = render;
-    </script></body></html>`);
+            function showDetails(p) {
+                document.getElementById('pop-name').innerText = p.firstName;
+                document.getElementById('pop-details').innerHTML = "<b>Résidence :</b> "+p.residence+"<br><b>Génotype :</b> "+p.genotype+"<br><b>Groupe :</b> "+p.bloodGroup;
+                document.getElementById('pop-msg').innerHTML = "<b>L'Union Sérénité :</b> Votre compatibilité est validée.";
+                document.getElementById('popup-overlay').style.display = 'flex';
+            }
+            function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
+            window.onload = render;
+        </script></body></html>`);
+    } catch (err) { res.status(500).send("Erreur Matching"); }
 });
 
 app.get('/settings', (req, res) => {
@@ -337,9 +334,6 @@ app.get('/settings', (req, res) => {
             <div style="font-size:2.5rem; font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div>
         </div>
         <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
-        <div class="st-group">
-            <div class="st-item"><span>Visibilité</span><label class="switch"><input type="checkbox" checked onchange="showNotify('Visibilité mise à jour')"><span class="slider"></span></label></div>
-        </div>
         <div class="st-group">
             <div class="st-item" style="color:red; font-weight:bold;" onclick="if(confirm('Supprimer votre compte ?')){localStorage.clear();location.href='/';}">Supprimer mon compte</div>
         </div>
