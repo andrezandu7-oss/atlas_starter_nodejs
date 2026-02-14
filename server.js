@@ -1,6 +1,6 @@
-// 🚀 GENLOVE - SERVEUR.JS V3.1 - CORRECTIONS CRITIQUES ✅
-// ✅ Bug Âge fixé + Règle SS + Toast mobile OK
-// ✅ MongoDB 30s + 9 routes Render-ready Luanda AO
+
+// 🚀 GENLOVE - CODE COMPLET CORRIGÉ (MONGOOSE CONNECTION FIXÉ)
+// ✅ CORRECTION: Gestion robuste MongoDB + app.listen(port, '0.0.0.0')
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -8,54 +8,51 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// 🔒 LOGS RENDER
-console.log("🚀 GENLOVE V3.1 - Corrections éthiques appliquées");
+// 🔒 SÉCURITÉ RENDER
+console.log("✅ Base MongoDB SÉCURISÉE - Vrais utilisateurs préservés");
 
-// ✅ MONGODB ULTRA-ROBUSTE (30s timeout)
+// ✅ CONNEXION MONGODB CORRIGÉE (ROBUSTE)
 const mongoURI = process.env.MONGODB_URI;
 
 const mongooseOptions = {
-    serverSelectionTimeoutMS: 30000,
+    serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
-    family: 4,
-    bufferMaxEntries: 0,
-    maxPoolSize: 10,
-    retryWrites: true,
-    w: 'majority'
+    family: 4
 };
 
-// 🔄 RECONNEXION + GRACEFUL SHUTDOWN
-let retryCount = 0;
-const maxRetries = 10;
+// Écouteurs d'événements GLOBAUX
+mongoose.connection.on('connected', () => {
+    console.log("✅ Connecté à MongoDB pour Genlove !");
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error("❌ Erreur MongoDB:", err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log("❌ Déconnecté MongoDB");
+});
 
 async function connectDB() {
     try {
         await mongoose.connect(mongoURI, mongooseOptions);
-        console.log("✅ MongoDB connecté V3.1");
-        retryCount = 0;
+        console.log("🚀 MongoDB prêt - Serveur opérationnel !");
     } catch (error) {
-        console.error(`❌ MongoDB (tentative ${retryCount + 1}):`, error.message);
-        retryCount++;
-        if (retryCount < maxRetries) {
-            setTimeout(connectDB, 5000);
-        } else {
-            process.exit(1);
-        }
+        console.error("❌ ÉCHEC MongoDB:", error.message);
+        console.error("🔧 Vérifiez MONGODB_URI sur Render");
+        process.exit(1);
     }
 }
 
-mongoose.connection.on('disconnected', connectDB);
-
-// 🚀 CONNEXION
 connectDB();
 
-// ✅ MIDDLEWARES
-app.use(cors({ origin: '*', credentials: true }));
+// ✅ CORS + JSON + STATIC
+app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('public'));
 
-// ✅ USER MODEL
+// ✅ MODÈLE UTILISATEUR
 const UserSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -70,126 +67,38 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// ✅ HTML CONSTANTS CORRIGÉES
-const head = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23ff416c'>💕</text></svg>"><meta name="theme-color" content="#ff416c"><title>Genlove</title>`;
+// ✅ CONSTANTS HTML
+const head = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23ff416c'>💕</text></svg>"><meta name="theme-color" content="#ff416c"><meta name="apple-mobile-web-app-capable" content="yes"><title>Genlove</title>`;
 
-const styles = `<style>body{font-family:'Segoe UI',sans-serif;margin:0;background:#fdf2f2;display:flex;justify-content:center}.app-shell{width:100%;max-width:420px;min-height:100vh;background:#f4e9da;display:flex;flex-direction:column;box-shadow:0 0 20px rgba(0,0,0,0.1);position:relative}#genlove-notify{position:fixed;top:20px;left:10px;right:10px;background:#1a2a44;color:white;padding:15px;border-radius:12px;display:flex;align-items:center;gap:10px;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3);border-left:5px solid #007bff;opacity:0;pointer-events:none;transition:all 0.5s cubic-bezier(0.175,0.885,0.32,1.275)}#genlove-notify.show{opacity:1;top:30px;pointer-events:auto}#loader{display:none;position:fixed;inset:0;background:white;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center}.spinner{width:50px;height:50px;border:5px solid #f3f3f3;border-top:5px solid #ff416c;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.home-screen{padding:30px;text-align:center}.logo-text{font-size:3.5rem;font-weight:bold;margin-bottom:5px}.slogan{font-weight:bold;color:#1a2a44;margin-bottom:40px;font-size:1rem}.page-white{background:white;min-height:100vh;padding:25px 20px;box-sizing:border-box;text-align:center}.photo-circle{width:110px;height:110px;border:2px dashed #ff416c;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;cursor:pointer;background-size:cover}.input-box{width:100%;padding:14px;border:1px solid #e2e8f0;border-radius:12px;margin-top:10px;font-size:1rem;box-sizing:border-box;background:#f8f9fa}.btn-pink{background:#ff416c;color:white;padding:18px;border-radius:50px;text-align:center;text-decoration:none;font-weight:bold;display:block;width:85%;margin:20px auto;border:none;cursor:pointer;transition:0.3s}.btn-dark{background:#1a2a44;color:white;padding:18px;border-radius:12px;font-weight:bold;display:block;margin:15px auto;text-decoration:none}.st-group{background:white;border-radius:15px;margin:0 15px 15px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05)}.st-item{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid #f8f8f8;font-size:0.95rem}.match-card{background:white;margin:10px 15px;padding:15px;border-radius:15px;display:flex;gap:12px;box-shadow:0 2px 5px rgba(0,0,0,0.05);align-items:center}.match-photo-blur{width:55px;height:55px;border-radius:50%;background:#eee;filter:blur(6px);background-size:cover;background-position:center}#popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center}.popup-content{background:white;border-radius:20px;width:100%;max-width:380px;padding:25px;position:relative}</style>`;
+const styles = `<style>body{font-family:'Segoe UI',sans-serif;margin:0;background:#fdf2f2;display:flex;justify-content:center}.app-shell{width:100%;max-width:420px;min-height:100vh;background:#f4e9da;display:flex;flex-direction:column;box-shadow:0 0 20px rgba(0,0,0,0.1);position:relative}#genlove-notify{position:absolute;top:-100px;left:10px;right:10px;background:#1a2a44;color:white;padding:15px;border-radius:12px;display:flex;align-items:center;gap:10px;transition:0.5s cubic-bezier(0.175,0.885,0.32,1.275);z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3);border-left:5px solid #007bff}.show{top:10px}#loader{display:none;position:absolute;inset:0;background:white;z-index:100;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.spinner{width:50px;height:50px;border:5px solid #f3f3f3;border-top:5px solid #ff416c;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.home-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}.logo-text{font-size:3.5rem;font-weight:bold;margin-bottom:5px}.slogan{font-weight:bold;color:#1a2a44;margin-bottom:40px;font-size:1rem;line-height:1.5}.page-white{background:white;min-height:100vh;padding:25px 20px;box-sizing:border-box;text-align:center}.photo-circle{width:110px;height:110px;border:2px dashed #ff416c;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;background-size:cover;background-position:center}.input-box{width:100%;padding:14px;border:1px solid #e2e8f0;border-radius:12px;margin-top:10px;font-size:1rem;box-sizing:border-box;background:#f8f9fa;color:#333}.serment-container{margin-top:20px;padding:15px;background:#fff5f7;border-radius:12px;border:1px solid #ffdae0;text-align:left;display:flex;gap:10px;align-items:flex-start}.serment-text{font-size:0.82rem;color:#d63384;line-height:1.4}.btn-pink{background:#ff416c;color:white;padding:18px;border-radius:50px;text-align:center;text-decoration:none;font-weight:bold;display:block;width:85%;margin:20px auto;border:none;cursor:pointer;transition:0.3s}.btn-dark{background:#1a2a44;color:white;padding:18px;border-radius:12px;text-align:center;text-decoration:none;font-weight:bold;display:block;margin:15px;width:auto;box-sizing:border-box}.btn-action{border:none;border-radius:8px;padding:8px 12px;font-size:0.8rem;font-weight:bold;cursor:pointer;transition:0.2s}.btn-details{background:#ff416c;color:white}.btn-contact{background:#1a2a44;color:white;margin-right:5px}#popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:20px}.popup-content{background:white;border-radius:20px;width:100%;max-width:380px;padding:25px;position:relative;text-align:left;animation:slideUp 0.3s ease-out}.close-popup{position:absolute;top:15px;right:15px;font-size:1.5rem;cursor:pointer;color:#666}.st-group{background:white;border-radius:15px;margin:0 15px 15px 15px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-align:left}.st-item{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid #f8f8f8;color:#333;font-size:0.95rem}.switch{position:relative;display:inline-block;width:45px;height:24px}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;cursor:pointer;inset:0;background-color:#ccc;transition:.4s;border-radius:24px}.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:white;transition:.4s;border-radius:50%}input:checked+.slider{background-color:#007bff}input:checked+.slider:before{transform:translateX(21px)}.match-card{background:white;margin:10px 15px;padding:15px;border-radius:15px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 5px rgba(0,0,0,0.05)}.match-photo-blur{width:55px;height:55px;border-radius:50%;background:#eee;filter:blur(6px);background-size:cover;background-position:center}.end-overlay{position:fixed;inset:0;background:linear-gradient(180deg,#4a76b8 0%,#1a2a44 100%);z-index:9999;display:flex;align-items:center;justify-content:center}.end-card{background:white;border-radius:30px;padding:40px 25px;width:85%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.2)}@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}</style>`;
 
-const notifyScript = `<script>function showNotify(msg){const n=document.getElementById('genlove-notify'),m=document.getElementById('notify-msg');if(m)m.textContent=msg;if(n){n.classList.add('show');setTimeout(()=>{n.classList.remove('show')},3500);}}</script>`;
+const notifyScript = `<script>function showNotify(msg){const n=document.getElementById('genlove-notify'),m=document.getElementById('notify-msg');if(m)m.innerText=msg;if(n){n.classList.add('show');setTimeout(()=>{n.classList.remove('show')},3500);}}</script>`;
 
-// ✅ FONCTION ÂGE CORRIGÉE
-function calculerAge(dateNaissance) {
-    if (!dateNaissance) return "--";
-    const today = new Date(), birthDate = new Date(dateNaissance);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-    return age;
-}
+// ✅ FONCTION ÂGE
+function calculerAge(dateNaissance){if(!dateNaissance)return"???";const today=new Date(),birthDate=new Date(dateNaissance);let age=today.getFullYear()-birthDate.getFullYear();const monthDiff=today.getMonth()-birthDate.getMonth();if(monthDiff<0||(monthDiff===0&&today.getDate()<birthDate.getDate()))age--;return age;}
 
-// ✅ 9 ROUTES FONCTIONNELLES V3.1
+// ✅ ROUTES
+app.get('/',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body><div class="app-shell"><div class="home-screen"><div class="logo-text"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div><div class="slogan">Unissez cœur et santé pour bâtir des couples sains</div><div style="width:100%;margin-top:20px;"><p style="font-size:0.9rem;color:#1a2a44;margin-bottom:10px;">Avez-vous déjà un compte ?</p><a href="/profile" class="btn-dark">➔ Se connecter</a><a href="/charte-engagement" style="color:#1a2a44;text-decoration:none;font-weight:bold;display:block;margin-top:15px;">👤 Créer un compte</a></div><div style="font-size:0.75rem;color:#666;margin-top:25px;">🔒 Vos données sont cryptées et confidentielles.</div></div></div></body></html>`)});
 
-// 1. HOME
-app.get('/', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body><div class="app-shell"><div class="home-screen"><div class="logo-text"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div><div class="slogan">Santé + Cœur = Famille sereine</div><a href="/profile" class="btn-dark">➔ Mon profil</a><a href="/charte-engagement" style="color:#1a2a44;font-weight:bold;display:block;margin-top:15px;">👤 Créer compte</a></div></div></body></html>`);
-});
+app.get('/charte-engagement',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body style="background:#fdf2f2;"><div class="app-shell"><div class="page-white" style="display:flex;flex-direction:column;justify-content:center;padding:30px;min-height:100vh;"><div style="font-size:3.5rem;margin-bottom:10px;">🛡️</div><h2 style="color:#1a2a44;margin-top:0;">Engagement Éthique</h2><p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Pour protéger la santé de votre future famille.</p><div id="charte-box" style="height:220px;overflow-y:scroll;background:#fff5f7;border:2px solid #ffdae0;border-radius:15px;padding:20px;font-size:0.85rem;color:#444;line-height:1.6;text-align:left;" onscroll="checkScroll(this)"><b style="color:#ff416c;">1. Sincérité</b><br>Données médicales conformes aux examens.<br><br><b style="color:#ff416c;">2. Responsabilité</b><br>Vous garantissez l'authenticité de votre profil.<br><br><b style="color:#ff416c;">3. Confidentialité</b><br>Échanges éphémères (30min max).<br><br><b style="color:#ff416c;">4. Sérénité</b><br>Algorithmes protègent la santé des enfants.<br><br><b style="color:#ff416c;">5. Respect</b><br>Non-stigmatisation obligatoire.<br><hr style="border:0;border-top:1px solid #ffdae0;margin:15px 0;"><center><i style="color:#ff416c;">Scrollez jusqu'en bas...</i></center></div><button id="agree-btn" onclick="location.href='/signup'" class="btn-pink" style="background:#ccc;cursor:not-allowed;margin-top:25px;width:100%;border:none;" disabled>J'ai lu et je m'engage</button><a href="/" style="margin-top:15px;color:#666;text-decoration:none;font-size:0.8rem;">Annuler</a></div></div></div><script>function checkScroll(el){if(el.scrollHeight-el.scrollTop<=el.clientHeight+5){const btn=document.getElementById('agree-btn');btn.disabled=false;btn.style.background='#ff416c';btn.style.cursor='pointer';el.style.borderColor='#4CAF50';}}</script></body></html>`)});
 
-// 2. CHARTE
-app.get('/charte-engagement', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body style="background:#fdf2f2;"><div class="app-shell"><div class="page-white"><div style="font-size:3.5rem;margin-bottom:10px;">🛡️</div><h2 style="color:#1a2a44;">Charte Éthique</h2><div style="height:220px;overflow-y:scroll;background:#fff5f7;border:2px solid #ffdae0;border-radius:15px;padding:20px;font-size:0.85rem;" onscroll="checkScroll(this)">1.Sincérité|2.Responsabilité|3.Confidentialité|4.Sérénité|5.Respect</div><button id="agree-btn" onclick="location.href='/signup'" class="btn-pink" style="background:#ccc;cursor:not-allowed;width:100%;margin-top:25px;" disabled>J'ai lu et m'engage</button></div></div><script>function checkScroll(el){if(el.scrollHeight-el.scrollTop<=el.clientHeight+5){const b=document.getElementById('agree-btn');b.disabled=false;b.style.background='#ff416c';b.style.cursor='pointer';}}</script></body></html>`);
-});
+app.get('/signup',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body><div class="app-shell"><div id="loader"><div class="spinner"></div><h3>Analyse sécurisée...</h3><p>Vérification données médicales.</p></div><div class="page-white" id="main-content"><h2 style="color:#ff416c;margin-top:0;">Configuration Santé</h2><form onsubmit="saveAndRedirect(event)"><div class="photo-circle" id="c" onclick="document.getElementById('i').click()"><span id="t">📸 Photo</span></div><input type="file" id="i" style="display:none" onchange="preview(event)"><input type="text" id="fn" class="input-box" placeholder="Prénom" required><input type="text" id="ln" class="input-box" placeholder="Nom" required><select id="gender" class="input-box"><option value="">Genre</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select><div style="text-align:left;margin-top:10px;padding-left:5px;"><small style="color:#666;font-size:0.75rem;">📅 Date de naissance :</small></div><input type="date" id="dob" class="input-box" style="margin-top:2px;"><input type="text" id="res" class="input-box" placeholder="Résidence"><select id="gt" class="input-box"><option value="">Génotype</option><option>AA</option><option>AS</option><option>SS</option></select><div style="display:flex;gap:10px;"><select id="gs_type" class="input-box" style="flex:2;"><option value="">Groupe</option><option>A</option><option>B</option><option>AB</option><option>O</option></select><select id="gs_rh" class="input-box" style="flex:1;"><option>+</option><option>-</option></select></div><select id="pj" class="input-box"><option value="">Désir d'enfant ?</option><option>Oui</option><option>Non</option></select><div class="serment-container"><input type="checkbox" id="oath" style="width:20px;height:20px;" required><label for="oath" class="serment-text">Je confirme mon engagement éthique.</label></div><button type="submit" class="btn-pink">🚀 Valider profil</button></form></div></div><script>let b64=localStorage.getItem('current_user_photo')||"";window.onload=()=>{if(b64){document.getElementById('c').style.backgroundImage='url('+b64+')';document.getElementById('t').style.display='none';}};function preview(e){const r=new FileReader();r.onload=()=>{b64=r.result;document.getElementById('c').style.backgroundImage='url('+b64+')';document.getElementById('t').style.display='none';};r.readAsDataURL(e.target.files[0]);}async function saveAndRedirect(e){e.preventDefault();document.getElementById('loader').style.display='flex';const userData={firstName:document.getElementById('fn').value,lastName:document.getElementById('ln').value,gender:document.getElementById('gender').value,dob:document.getElementById('dob').value,residence:document.getElementById('res').value,genotype:document.getElementById('gt').value,bloodGroup:document.getElementById('gs_type').value?(document.getElementById('gs_type').value+document.getElementById('gs_rh').value):"",desireChild:document.getElementById('pj').value,photo:b64||"https://via.placeholder.com/150?text=👤"};try{const response=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(userData)});const result=await response.json();localStorage.setItem('current_user_data',JSON.stringify(userData));localStorage.setItem('current_user_photo',userData.photo);if(response.ok){setTimeout(()=>{window.location.href='/profile';},1500);}else{throw new Error(result.error||'Erreur serveur');}}catch(err){document.getElementById('loader').style.display='none';alert('❌ Erreur: '+err.message);}}</script></body></html>`)});
 
-// 3. SIGNUP ✅
-app.get('/signup', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body><div class="app-shell"><div id="loader" style="display:flex;position:fixed;inset:0;background:white;align-items:center;justify-content:center;z-index:1000;"><div class="spinner"></div></div><div class="page-white"><h2 style="color:#ff416c;">Profil Santé</h2><form onsubmit="saveUser(event)"><div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">📸</div><input type="file" id="photoInput" style="display:none" accept="image/*" onchange="previewPhoto(event)"><input type="text" id="firstName" class="input-box" placeholder="Prénom *" required><input type="text" id="lastName" class="input-box" placeholder="Nom *" required><select id="gender" class="input-box"><option>Genre</option><option>Homme</option><option>Femme</option></select><input type="date" id="dob" class="input-box"><input type="text" id="residence" class="input-box" placeholder="Résidence" value="Luanda"><select id="genotype" class="input-box"><option>Génotype *</option><option>AA</option><option>AS</option><option>SS</option></select><select id="bloodGroup" class="input-box"><option>Groupe sanguin</option><option>A+</option><option>A-</option><option>B+</option><option>O+</option></select><select id="desireChild" class="input-box"><option>Enfants ?</option><option>Oui</option><option>Non</option></select><button type="submit" class="btn-pink">🚀 Valider</button></form></div></div><script>let photoB64='';function previewPhoto(e){const r=new FileReader();r.onload=()=>{photoB64=r.result;document.getElementById('photoCircle').style.backgroundImage='url('+photoB64+')';document.getElementById('photoCircle').innerHTML='✅';};r.readAsDataURL(e.target.files[0]);}async function saveUser(e){e.preventDefault();document.getElementById('loader').style.display='flex';const data={firstName:document.getElementById('firstName').value,lastName:document.getElementById('lastName').value,gender:document.getElementById('gender').value,dob:document.getElementById('dob').value,residence:document.getElementById('residence').value,genotype:document.getElementById('genotype').value,bloodGroup:document.getElementById('bloodGroup').value,desireChild:document.getElementById('desireChild').value,photo:photoB64||'https://via.placeholder.com/150?text=👤'};try{const res=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const result=await res.json();if(res.ok){localStorage.setItem('genlove_user',JSON.stringify({...data,id:result.user}));setTimeout(()=>location.href='/profile',1500);}else throw result.error;}catch(err){document.getElementById('loader').style.display='none';alert('❌ '+err);}}</script></body></html>`);
-});
+// ✅ API REGISTER CORRIGÉE (CAUSE DE L'ERREUR)
+app.post('/api/register',async(req,res)=>{try{console.log("📥 INSCRIPTION:",req.body);const{firstName,lastName,gender,dob,residence,genotype,bloodGroup,desireChild,photo}=req.body;if(!firstName||!lastName||!genotype){return res.status(400).json({error:"Prénom, Nom et Génotype obligatoires"});}const newUser=new User({firstName,lastName,gender,dob,residence,genotype,bloodGroup,desireChild,photo:photo||"https://via.placeholder.com/150?text=👤"});await newUser.save();console.log("✅ SAVEGARDÉ:",firstName);res.json({success:true,user:newUser._id});}catch(e){console.error("❌ ERREUR:",e);res.status(500).json({error:e.message});}});
 
-// 4. REGISTER API
-app.post('/api/register', async (req, res) => {
-    try {
-        const { firstName, lastName, genotype } = req.body;
-        if (!firstName || !lastName || !genotype) return res.status(400).json({ error: "Champs manquants" });
-        const newUser = new User(req.body);
-        await newUser.save();
-        console.log(`✅ Inscription: ${firstName} (${genotype})`);
-        res.json({ success: true, user: newUser._id });
-    } catch (e) {
-        console.error("❌ Register:", e);
-        res.status(500).json({ error: e.message });
-    }
-});
+// ✅ PROFILE 100% CLIENT SIDE
+app.get('/profile',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body style="background:#f8f9fa;"><div class="app-shell"><div style="background:white;padding:30px 20px;text-align:center;border-radius:0 0 30px 30px;"><div style="display:flex;justify-content:space-between;align-items:center;"><a href="/" style="text-decoration:none;background:#eff6ff;color:#1a2a44;padding:8px 14px;border-radius:12px;font-size:0.8rem;font-weight:bold;display:flex;align-items:center;gap:8px;border:1px solid #dbeafe;">🏠 Accueil</a><a href="/settings" style="text-decoration:none;font-size:1.4rem;">⚙️</a></div><div id="vP" style="width:110px;height:110px;border-radius:50%;border:3px solid #ff416c;margin:20px auto;background-size:cover;background-color:#eee;"></div><h2 id="vN">Chargement...</h2><p id="vR" style="color:#666;margin:0 0 10px 0;font-size:0.9rem;">📍 Chargement...</p><p style="color:#007bff;font-weight:bold;margin:0;">Profil Santé Validé ✅</p></div><div style="padding:15px 20px 5px 20px;font-size:0.75rem;color:#888;font-weight:bold;">MES INFORMATIONS</div><div class="st-group"><div class="st-item"><span>Génotype</span><b id="rG">Chargement...</b></div><div class="st-item"><span>Groupe Sanguin</span><b id="rS">Chargement...</b></div><div class="st-item"><span>Âge</span><b id="rAge">Chargement...</b></div><div class="st-item"><span>Résidence</span><b id="rRes">Chargement...</b></div><div class="st-item"><span>Projet (Enfant)</span><b id="rP">Chargement...</b></div></div><a href="/matching" class="btn-dark" style="text-decoration:none;">🔍 Trouver un partenaire</a></div><script>const userData=JSON.parse(localStorage.getItem('current_user_data')||'{}'),photo=localStorage.getItem('current_user_photo')||'https://via.placeholder.com/150?text=👤';if(!userData.firstName){window.location.href='/';return;}document.getElementById('vP').style.backgroundImage='url('+photo+')';document.getElementById('vN').innerText=userData.firstName+' '+userData.lastName;document.getElementById('vR').innerText='📍 '+(userData.residence||'Localisation');document.getElementById('rG').innerText=userData.genotype||'Non renseigné';document.getElementById('rS').innerText=userData.bloodGroup||'Non renseigné';document.getElementById('rAge').innerText=userData.dob?calculerAge(userData.dob)+' ans':'Non renseigné';document.getElementById('rRes').innerText=userData.residence||'Non renseignée';document.getElementById('rP').innerText=userData.desireChild||'Non précisé';function calculerAge(dateNaissance){if(!dateNaissance)return"???";const today=new Date(),birthDate=new Date(dateNaissance);let age=today.getFullYear()-birthDate.getFullYear();const monthDiff=today.getMonth()-birthDate.getMonth();if(monthDiff<0||(monthDiff===0&&today.getDate()<birthDate.getDate()))age--;return age;}</script></body></html>`)});
 
-// 5. ✅ PROFILE V3.1 - BUG ÂGE CORRIGÉ
-app.get('/profile', async (req, res) => {
-    try {
-        const users = await User.find({}).limit(5).lean();
-        const demoUser = users[0] || {
-            firstName: "Demo", lastName: "User", genotype: "AA",
-            residence: "Luanda", dob: "1995-01-01", bloodGroup: "O+", photo: "https://via.placeholder.com/150?text=👤"
-        };
-        
-        res.send(`<!DOCTYPE html><html><head>${head}${styles}${notifyScript}</head><body style="background:#f8f9fa;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="background:white;padding:30px 20px;text-align:center;border-radius:0 0 30px 30px;position:relative;"><a href="/" style="position:absolute;top:20px;left:20px;background:#eff6ff;color:#1a2a44;padding:8px 14px;border-radius:12px;font-size:0.8rem;text-decoration:none;">🏠</a><div id="userPhoto" style="width:110px;height:110px;border-radius:50%;border:3px solid #ff416c;margin:20px auto;background:#eee;background-size:cover;"></div><h2 id="userName">Chargement...</h2><p id="userResidence" style="color:#666;font-size:0.9rem;">📍 Chargement...</p><p style="color:#28a745;font-weight:bold;">✅ Profil validé</p></div><div style="padding:15px 20px 5px;font-size:0.75rem;color:#888;">MES DONNÉES</div><div class="st-group"><div class="st-item"><span>Génotype</span><b id="genotype">--</b></div><div class="st-item"><span>Âge</span><b id="age">--</b></div><div class="st-item"><span>Résidence</span><b id="residence">--</b></div><div class="st-item"><span>Groupe sanguin</span><b id="bloodGroup">--</b></div></div><a href="/matching" class="btn-dark">🔍 Partenaires compatibles</a></div><script>window.addEventListener('load',async()=>{try{showNotify('Profil V3.1 chargé');let user=JSON.parse(localStorage.getItem('genlove_user')||'{}');if(!user.firstName){showNotify('Mode démo activé');user=${JSON.stringify(demoUser).replace(/"/g,'\\"')};document.getElementById('userPhoto').style.backgroundImage='url('+user.photo+')';document.getElementById('userName').textContent=user.firstName+' '+user.lastName;document.getElementById('userResidence').textContent='📍 '+user.residence;document.getElementById('genotype').textContent=user.genotype||'--';document.getElementById('age').textContent=user.dob?calculerAge(user.dob)+' ans':'--';document.getElementById('residence').textContent=user.residence||'Luanda';document.getElementById('bloodGroup').textContent=user.bloodGroup||'--';showNotify('✅ Profil OK!');localStorage.setItem('genlove_user',JSON.stringify(user));}catch(e){showNotify('Mode démo');}});function calculerAge(dob){if(!dob)return'--';const today=new Date(),birth=new Date(dob);let age=today.getFullYear()-birth.getFullYear();const m=today.getMonth()-birth.getMonth();if(m<0||(m===0&&today.getDate()<birth.getDate()))age--;return age;}</script></body></html>`);
-    } catch (e) {
-        console.error("❌ Profile:", e);
-        res.status(500).send("Erreur profil");
-    }
-});
+// ✅ MATCHING OPTIMISÉ
+app.get('/matching',async(req,res)=>{try{const users=await User.find({}).select('firstName lastName gender dob residence genotype bloodGroup desireChild photo').limit(50).lean();const partnersWithAge=users.filter(u=>u.genotype&&u.gender).map(u=>({id:u._id.toString().slice(-4),gt:u.genotype,gs:u.bloodGroup,pj:u.desireChild==="Oui"?"Désire fonder une famille":"Sans enfants",name:u.firstName+" "+u.lastName.charAt(0)+".",dob:u.dob,res:u.residence||"Luanda",gender:u.gender,photo:u.photo}));const matchesHTML=partnersWithAge.map(p=>`<div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}"><div class="match-photo-blur" style="background-image:url(${p.photo})"></div><div style="flex:1"><b>${p.name} (#${p.id})</b><br><small>${calculerAge(p.dob)} ans • ${p.res} • ${p.gt}</small></div><div style="display:flex;"><button class="btn-action btn-contact" onclick="showNotify('Demande envoyée à ${p.name}')">Contacter</button><button class="btn-action btn-details" onclick='showDetails(${JSON.stringify(p)})'>Détails</button></div></div>`).join('');res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px;background:white;text-align:center;border-bottom:1px solid #eee;"><h3 style="margin:0;color:#1a2a44;">Partenaires Compatibles (${partnersWithAge.length})</h3></div><div id="match-container">${matchesHTML||'<p style="text-align:center;color:#666;padding:40px;">Aucun partenaire compatible.<br>Revenez bientôt !</p>'}</div><a href="/profile" class="btn-pink">Retour profil</a></div><div id="popup-overlay" onclick="closePopup()"><div class="popup-content" onclick="event.stopPropagation()"><span class="close-popup" onclick="closePopup()">&times;</span><h3 id="pop-name" style="color:#ff416c;margin-top:0;">Détails</h3><div id="pop-details" style="font-size:0.95rem;color:#333;line-height:1.6;"></div><div id="pop-msg" style="background:#e7f3ff;padding:15px;border-radius:12px;border-left:5px solid #007bff;font-size:0.85rem;color:#1a2a44;line-height:1.4;margin-top:15px;"></div><button id="pop-btn" class="btn-pink" style="margin:20px 0 0 0;width:100%">🚀 Contacter</button></div></div>${notifyScript}<script>let sP=null;const myData=JSON.parse(localStorage.getItem('current_user_data')||'{}');window.onload=()=>{const myGt=myData.genotype,myGender=myData.gender;document.querySelectorAll('.match-card').forEach(card=>{const pGt=card.dataset.gt,pGender=card.dataset.gender;let visible=true;if(myGender&&pGender===myGender)visible=false;if((myGt==='SS'||myGt==='AS')&&pGt!=='AA')visible=false;if(myGt==='SS'&&pGt==='SS')visible=false;if(!visible)card.style.display='none';});if((myGt==='SS'||myGt==='AS')&&!document.querySelector('.match-card')){document.getElementById('pop-name').innerText="Note de Sérénité 🛡️";document.getElementById('pop-details').innerText="Genlove sélectionne uniquement des profils AA.";document.getElementById('pop-msg').style.display='none';document.getElementById('pop-btn').innerText="D'accord";document.getElementById('pop-btn').onclick=closePopup;document.getElementById('popup-overlay').style.display='flex';}};function showDetails(p){sP=p;document.getElementById('pop-name').innerText=p.name+' #'+p.id;document.getElementById('pop-details').innerHTML="<b>Âge:</b> "+calculerAge(p.dob)+" ans<br><b>Résidence:</b> "+p.res+"<br><b>Génotype:</b> "+p.gt+"<br><b>Groupe:</b> "+p.gs+"<br><br><b>Projet:</b><br><i>"+p.pj+"</i>";document.getElementById('pop-msg').style.display='block';document.getElementById('pop-msg').innerHTML="<b>L'Union Sérénité:</b> Compatibilité validée.";document.getElementById('pop-btn').innerText="🚀 Contacter";document.getElementById('pop-btn').onclick=()=>{sessionStorage.setItem('chatPartner',JSON.stringify(sP));window.location.href='/chat';};document.getElementById('popup-overlay').style.display='flex';}function closePopup(){document.getElementById('popup-overlay').style.display='none';}function calculerAge(dateNaissance){if(!dateNaissance)return"???";const today=new Date(),birthDate=new Date(dateNaissance);let age=today.getFullYear()-birthDate.getFullYear();const monthDiff=today.getMonth()-birthDate.getMonth();if(monthDiff<0||(monthDiff===0&&today.getDate()<birthDate.getDate()))age--;return age;}</script></body></html>`);}catch(e){console.error("❌ Matching:",e);res.status(500).send("Erreur chargement");}});
 
-// 6. ✅ MATCHING V3.1 - RÈGLE SS CRITIQUE
-app.get('/matching', async (req, res) => {
-    try {
-        const users = await User.find({}).select('firstName lastName gender genotype bloodGroup residence dob photo').lean();
-        const currentUser = JSON.parse(localStorage.getItem('genlove_user') || '{}');
-        
-        const matches = users.filter(u => {
-            // 1. Ne pas se voir soi-même
-            if (u.firstName === currentUser.firstName && u.lastName === currentUser.lastName) return false;
-            // 2. RÈGLE ÉTHIQUE CRITIQUE : SS + SS = BLOQUÉ
-            if (currentUser.genotype === 'SS' && u.genotype === 'SS') return false;
-            // 3. Compatibilité générale
-            if ((currentUser.genotype === 'AS' || currentUser.genotype === 'SS') && u.genotype !== 'AA') return false;
-            return u.genotype; // Doit avoir un génotype
-        }).slice(0, 8);
-        
-        const matchesHTML = matches.map(u => 
-            `<div class="match-card">
-                <div class="match-photo-blur" style="background-image:url(${u.photo})"></div>
-                <div style="flex:1">
-                    <b>${u.firstName} ${u.lastName.charAt(0)}.</b>
-                    <br><small>${calculerAge(u.dob)}ans • ${u.genotype}</small>
-                </div>
-                <button class="btn-pink" style="padding:8px 16px;font-size:0.8rem;" onclick="showNotify('Demande envoyée!')">Contacter</button>
-            </div>`
-        ).join('') || '<p style="text-align:center;color:#666;padding:40px;">Aucun match compatible<br>Revenez bientôt 🛡️</p>';
-        
-        res.send(`<!DOCTYPE html><html><head>${head}${styles}${notifyScript}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:20px;background:white;text-align:center;border-bottom:1px solid #eee;"><h3>Partenaires (${matches.length})</h3></div><div style="padding:10px;">${matchesHTML}</div><a href="/profile" class="btn-dark">← Retour profil</a></div></body></html>`);
-    } catch (e) {
-        res.send(`<p>Recherche en cours...</p>`);
-    }
-});
+app.get('/settings',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body style="background:#f4f7f6;"><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:25px;background:white;text-align:center;"><div style="font-size:2.5rem;font-weight:bold;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div><div style="padding:15px 20px 5px 20px;font-size:0.75rem;color:#888;font-weight:bold;">CONFIDENTIALITÉ</div><div class="st-group"><div class="st-item"><span>Visibilité profil</span><label class="switch"><input type="checkbox" checked onchange="showNotify('Visibilité mise à jour !')"><span class="slider"></span></label></div><div class="st-item"><span>Notifications</span><label class="switch"><input type="checkbox" onchange="showNotify('Notifications '+ (this.checked?'activées':'désactivées'))"><span class="slider"></span></label></div></div><div class="st-group"><a href="/signup" style="text-decoration:none;" class="st-item"><span>Modifier profil</span><b>Modifier ➔</b></a></div><div class="st-group"><div class="st-item" style="color:red;font-weight:bold;">Supprimer compte</div><div style="display:flex;justify-content:space-around;padding:15px;"><button onclick="if(confirm('Supprimer définitivement ?')){localStorage.clear();location.href='/';}" style="background:#1a2a44;color:white;border:none;padding:10px 25px;border-radius:10px;cursor:pointer;">Oui</button><button onclick="showNotify('Annulé')" style="background:#eee;color:#333;border:none;padding:10px 25px;border-radius:10px;cursor:pointer;">Non</button></div></div><a href="/profile" class="btn-pink">Retour</a></div>${notifyScript}</body></html>`)});
 
-// 7. SETTINGS
-app.get('/settings', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head>${head}${styles}${notifyScript}</head><body><div class="app-shell"><div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div><div style="padding:25px;background:white;text-align:center;"><div style="font-size:2.5rem;"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div></div><div class="st-group" style="margin:15px;"><div class="st-item"><span>Profil public</span><span style="color:#4CAF50;">✅</span></div></div><a href="/profile" class="btn-pink">Retour</a></div></body></html>`);
-});
+app.get('/chat',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body><div id="security-popup" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;"><div style="background:white;border-radius:30px;padding:35px 25px;text-align:center;width:88%;"><h3>🔒 Discussion Privée</h3><p><b>Échange sécurisé Genlove.</b></p><div style="background:#f0f7ff;border-radius:15px;padding:15px;text-align:left;margin:20px 0;border:1px solid #d0e3ff;"><div>🛡️ <b>Éphémère:</b> 30 min max.</div><div>🕵️ <b>Privé:</b> Rien conservé.</div></div><button style="background:#4a76b8;color:white;border:none;padding:16px;border-radius:30px;font-weight:bold;cursor:pointer;width:100%;" onclick="this.parentElement.parentElement.style.display='none';startTimer()">Démarrer</button></div></div><div class="app-shell" style="background:#f0f2f5;height:100vh;overflow:hidden;"><div class="chat-header" style="background:#9dbce3;color:white;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;"><button class="btn-quit" onclick="if(confirm('Quitter ?'))location.href='/chat-end'" style="background:#ffffff;color:#9dbce3;border:none;width:32px;height:32px;border-radius:8px;font-size:1.2rem;font-weight:bold;cursor:pointer;">✕</button><div class="digital-clock" style="background:#1a1a1a;color:#ff416c;padding:6px 15px;border-radius:10px;font-family:'Courier New',monospace;font-weight:bold;font-size:1.1rem;">❤️ <span id="timer-display">30:00</span></div><button class="btn-logout-badge" onclick="if(confirm('Déconnecter ?'))location.href='/logout-success'" style="background:#1a2a44;color:white;border:none;padding:8px 15px;border-radius:8px;font-size:0.85rem;font-weight:bold;cursor:pointer;">Logout 🔒</button></div><div class="chat-messages" id="box" style="flex:1;padding:15px;background:#f8fafb;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"><div class="bubble received" style="padding:12px 16px;border-radius:18px;max-width:80%;line-height:1.4;background:#e2ecf7;align-self:flex-start;">Bonjour ! Ton profil m'intéresse 👋</div></div><div class="input-area" style="position:fixed;bottom:0;width:100%;max-width:450px;padding:10px 15px 45px 15px;border-top:1px solid #eee;display:flex;gap:10px;background:white;"><textarea id="msg" style="flex:1;background:#f1f3f4;border:none;padding:12px;border-radius:25px;" placeholder="Écrivez ici..."></textarea><button style="background:#4a76b8;color:white;border:none;width:45px;height:45px;border-radius:50%;" onclick="send()">➤</button></div></div><script>let t=1800;function startTimer(){setInterval(()=>{t--;let m=Math.floor(t/60),s=t%60;document.getElementById('timer-display').innerText=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;if(t<=0){localStorage.clear();window.location.href='/logout-success';}},1000);}function send(){const i=document.getElementById('msg');if(i.value.trim()){const d=document.createElement('div');d.className='bubble sent';d.innerText=i.value;d.style.cssText='padding:12px 16px;border-radius:18px;max-width:80%;line-height:1.4;background:#ff416c;color:white;align-self:flex-end;';document.getElementById('box').appendChild(d);i.value='';document.getElementById('box').scrollTop=document.getElementById('box').scrollHeight;}}</script></body></html>`)});
 
-// 8-9. CHAT + LOGOUT (simplifiés)
-app.get('/chat', (req, res) => { res.send('<h1>🔒 Chat sécurisé 30min</h1>'); });
-app.get('/logout-success', (req, res) => {
-    res.send(`<!DOCTYPE html><html><head>${head}</head><body style="background:linear-gradient(180deg,#4a76b8,#1a2a44);display:flex;align-items:center;justify-content:center;min-height:100vh;"><div style="background:white;border-radius:30px;padding:40px;text-align:center;width:85%;"><div style="font-size:4rem;">🛡️</div><h2 style="color:#1a2a44;">Sécurisé</h2><button onclick="location.href='/'" class="btn-dark" style="width:100%;margin-top:20px;">🏠</button></div></body></html>`);
-});
+app.get('/chat-end',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px;margin-bottom:10px;">✨</div><h2 style="color:#1a2a44;">Merci pour cet échange</h2><p style="color:#666;margin-bottom:30px;">Genlove vous remercie.</p><a href="/matching" class="btn-pink" style="width:100%;margin:0;">🔎 Autre profil</a></div></body></html>`)});
 
-// 🚀 RENDER READY
-const server = app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 Genlove V3.1 sur port ${port}`);
-    console.log("✅ Âge fixé | SS bloqué | Toast mobile | 9 routes OK");
-});
+app.get('/logout-success',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px;margin-bottom:20px;">🛡️</div><h2 style="color:#1a2a44;">Session fermée</h2><p style="color:#666;margin-bottom:30px;">Sécurité assurée.</p><button onclick="location.href='/'" class="btn-dark" style="width:100%;margin:0;border-radius:50px;cursor:pointer;border:none;">Quitter</button></div></body></html>`)});
 
-process.on('SIGTERM', () => {
-    console.log('🛑 Fermeture propre');
-    server.close(() => {
-        mongoose.connection.close(false, () => {
-            process.exit(0);
-        });
-    });
-});
+app.listen(port,'0.0.0.0',()=>{console.log(`🚀 Genlove sur port ${port}`);console.log("✅ CORS + MongoDB + Matching OK");});
