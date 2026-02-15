@@ -1,17 +1,75 @@
-// public/sw.js - Agent dormant Genlove 💕
-self.addEventListener('push', function(event) {
-    const data = event.data ? event.data.json() : { title: 'Genlove', body: 'Nouveau message !' };
-    const options = {
-        body: data.body,
-        icon: 'https://img.icons8.com/emoji/96/000000/heart-suit.png',
-        badge: 'https://img.icons8.com/ios-filled/50/ff416c/heart-suit.png',
-        vibrate: [200, 100, 200], // Vibration style WhatsApp
-        data: { url: data.url || '/profile' }
-    };
-    event.waitUntil(self.registration.showNotification(data.title, options));
+// public/sw.js
+const CACHE_NAME = 'genlove-v1';
+
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installé');
+  self.skipWaiting();
 });
 
-self.addEventListener('notificationclick', function(event) {
-    event.notification.close();
-    event.waitUntil(clients.openWindow(event.notification.data.url));
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activé');
+  event.waitUntil(clients.claim());
+});
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = {
+        title: 'Genlove',
+        body: event.data.text()
+      };
+    }
+  }
+  
+  const options = {
+    body: data.body || 'Nouvelle notification Genlove',
+    icon: data.icon || '/icon-192x192.png',
+    badge: data.badge || '/badge-72x72.png',
+    vibrate: [200, 100, 200],
+    data: {
+      url: data.url || '/',
+      ...data.data
+    },
+    actions: data.actions || [
+      { action: 'open', title: 'Ouvrir' },
+      { action: 'close', title: 'Fermer' }
+    ],
+    tag: 'genlove-notification',
+    renotify: true
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(
+      data.title || 'Genlove',
+      options
+    )
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  if (event.action === 'close') return;
+  
+  const urlToOpen = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(urlToOpen) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
 });
