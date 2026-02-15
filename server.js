@@ -134,5 +134,21 @@ app.get('/chat',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles
 app.get('/chat-end',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px;margin-bottom:10px;">✨</div><h2 style="color:#1a2a44;">Merci pour cet échange</h2><p style="color:#666;margin-bottom:30px;">Genlove vous remercie.</p><a href="/matching" class="btn-pink" style="width:100%;margin:0;">🔎 Autre profil</a></div></body></html>`)});
 
 app.get('/logout-success',(req,res)=>{res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body class="end-overlay"><div class="end-card"><div style="font-size:50px;margin-bottom:20px;">🛡️</div><h2 style="color:#1a2a44;">Session fermée</h2><p style="color:#666;margin-bottom:30px;">Sécurité assurée.</p><button onclick="location.href='/'" class="btn-dark" style="width:100%;margin:0;border-radius:50px;cursor:pointer;border:none;">Quitter</button></div></body></html>`)});
+// Script à ajouter juste avant le app.listen
+const notificationScript = `
+<script>
+async function gererNotification(input) {
+    if (input.checked) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            await navigator.serviceWorker.register('/sw.js');
+            alert('🔔 Notifications Genlove activées !');
+        } else {
+            input.checked = false;
+        }
+    }
+}
+</script>
+`;
 
 app.listen(port,'0.0.0.0',()=>{console.log(`🚀 Genlove V4.4 sur port ${port}`);console.log("✅ V4.4: SUPPRIMER COMPTE + CONFIG SANTÉ FONCTIONNELS ✓");console.log("✅ Boutons Enregistrer/Annuler santé + Supprimer/Annuler OK");console.log("✅ /health-config + PUT/DELETE APIs 100% opérationnelles");});
