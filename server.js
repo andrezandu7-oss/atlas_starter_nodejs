@@ -1,43 +1,31 @@
-const webpush = require('web-push');
+// 🚀 GENLOVE - SERVEUR.JS V4.5 - NOTIFICATIONS PUSH ✅
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const webpush = require('web-push'); 
+const app = express();
+const port = process.env.PORT || 3000;
 
-// Configuration des clés de sécurité (VAPID)
-// Remplace par tes propres clés si tu en as déjà, sinon celles-ci servent au test
-const vapidKeys = {
-  publicKey: 'TON_CLE_PUBLIQUE_ICI',
-  privateKey: 'TON_CLE_PRIVEE_ICI'
-};
-
+// ✅ CONFIGURATION NOTIFICATIONS
+// Le serveur génère ses propres clés au démarrage
+const vapidKeys = webpush.generateVAPIDKeys();
 webpush.setVapidDetails(
   'mailto:tonemail@exemple.com',
   vapidKeys.publicKey,
   vapidKeys.privateKey
 );
-// 🚀 GENLOVE - SERVEUR.JS V4.4 - AMENDEMENTS 1&2 CONFIG SANTÉ ✅
-// ✅ 1️⃣ Supprimer compte = FONCTIONNEL (boutons OK)
-// ✅ 2️⃣ Config santé = ÉDITION + ENREGISTRER/ANNULER FONCTIONNELS ✅
-// ✅ Deploy direct Render Luanda AO - Février 2026
 
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const app = express();
-const port = process.env.PORT || 3000;
-
-// 🔒 SÉCURITÉ RENDER
-console.log("✅ Base MongoDB SÉCURISÉE - Vrais utilisateurs préservés");
-
-// ✅ CONNEXION MONGODB
+// 🔒 SÉCURITÉ RENDER & CONNEXION MONGODB
 const mongoURI = process.env.MONGODB_URI; 
 mongoose.connect(mongoURI)
     .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
     .catch(err => console.error("❌ Erreur MongoDB:", err));
 
-// ✅ CORS + JSON + STATIC (ORDRE IMPORTANT)
+// ✅ MIDDLEWARES & STATICS (ORDRE IMPORTANT)
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static('public'));
-
+app.use(express.static('public')); // C'est la ligne 38 : le téléphone cherchera sw.js ici
 // ✅ MODÈLE UTILISATEUR (avec fallback photo)
 const UserSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
