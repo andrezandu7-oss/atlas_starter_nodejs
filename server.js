@@ -1,3 +1,17 @@
+const webpush = require('web-push');
+
+// Configuration des clés de sécurité (VAPID)
+// Remplace par tes propres clés si tu en as déjà, sinon celles-ci servent au test
+const vapidKeys = {
+  publicKey: 'TON_CLE_PUBLIQUE_ICI',
+  privateKey: 'TON_CLE_PRIVEE_ICI'
+};
+
+webpush.setVapidDetails(
+  'mailto:tonemail@exemple.com',
+  vapidKeys.publicKey,
+  vapidKeys.privateKey
+);
 // 🚀 GENLOVE - SERVEUR.JS V4.4 - AMENDEMENTS 1&2 CONFIG SANTÉ ✅
 // ✅ 1️⃣ Supprimer compte = FONCTIONNEL (boutons OK)
 // ✅ 2️⃣ Config santé = ÉDITION + ENREGISTRER/ANNULER FONCTIONNELS ✅
