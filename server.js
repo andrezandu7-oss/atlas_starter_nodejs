@@ -8,6 +8,65 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('public'));
+// ============================================
+// ICÔNES DYNAMIQUES - ZÉRO FICHIER DANS /ICONS/
+// ============================================
+
+// CONFIGURATION UNIQUE - C'EST ICI QUE TU CHANGERAS LES ICÔNES
+const iconStyle = {
+  // Couleur de fond
+  bgColor: '#ff416c',        // ← CHANGE LA COULEUR ICI
+  // Emoji ou texte
+  symbol: '❤️',              // ← CHANGE L'EMOJI ICI
+  // Couleur du texte/symbole
+  textColor: '#ffffff',      // ← CHANGE LA COULEUR DU TEXTE ICI
+  // Afficher ou non le texte "Genlove"
+  showText: true,            // ← TRUE ou FALSE
+  // Police
+  fontFamily: 'Arial, sans-serif'
+};
+
+// Route qui génère les icônes à la volée
+app.get('/api/icons/:size', (req, res) => {
+  const size = parseInt(req.params.size);
+  
+  // Tailles acceptées
+  const validSizes = [72, 96, 128, 144, 152, 192, 384, 512];
+  if (!validSizes.includes(size)) {
+    return res.status(400).send('Taille non supportée');
+  }
+  
+  // Génération du SVG
+  const svg = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="${iconStyle.bgColor}"/>
+    <text x="50%" y="${iconStyle.showText ? '55%' : '50%'}" 
+          font-size="${size * 0.6}" 
+          text-anchor="middle" 
+          fill="${iconStyle.textColor}" 
+          dominant-baseline="middle" 
+          font-family="${iconStyle.fontFamily}">
+      ${iconStyle.symbol}
+    </text>
+    ${iconStyle.showText ? `
+      <text x="50%" y="85%" 
+            font-size="${size * 0.1}" 
+            text-anchor="middle" 
+            fill="${iconStyle.textColor}" 
+            font-family="${iconStyle.fontFamily}">
+        Genlove
+      </text>
+    ` : ''}
+  </svg>`;
+  
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache 1 an
+  res.send(svg);
+});
+
+// Optionnel : route pour voir la config actuelle
+app.get('/api/icons/config', (req, res) => {
+  res.json(iconStyle);
+});
 
 // ============================================
 // 1. CONNEXION MONGODB (AVEC TON LIEN EN DUR)
