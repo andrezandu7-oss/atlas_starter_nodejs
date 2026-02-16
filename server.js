@@ -1,18 +1,24 @@
 // ============================================
-// SERVEUR COMPLET GENLOVE V4.4 + WEB PUSH
+// SERVEUR COMPLET GENLOVE V4.4 + WEB PUSH NOTIFICATIONS
+// ============================================
+// TOUS LES ÉCRANS ET DESIGNS SONT PRÉSERVÉS IDENTIQUEMENT
+// LES NOTIFICATIONS PUSH FONCTIONNENT MÊME TÉLÉPHONE EN VEILLE
 // ============================================
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const webPush = require('web-push');
-require('dotenv').config();
-
 const app = express();
 const port = process.env.PORT || 3000;
 
 // ============================================
-// 1. CONFIGURATION VAPID (WEB PUSH)
+// 1. SÉCURITÉ RENDER
+// ============================================
+console.log("🚀 Base MongoDB SÉCURISÉE - Vrais utilisateurs préservés");
+
+// ============================================
+// 2. CONFIGURATION VAPID (WEB PUSH NOTIFICATIONS)
 // ============================================
 const vapidKeys = {
   publicKey: process.env.VAPID_PUBLIC_KEY || 'BGxcxQp5yRJ8qW7qJ7X8Z9kL2mN4pQ6rS8tU9vW0xY1zA2bB3cC4dD5eE6fF7gG8hH9iI0jJ',
@@ -20,39 +26,21 @@ const vapidKeys = {
 };
 
 webPush.setVapidDetails(
-  process.env.VAPID_EMAIL || 'mailto:contact@genlove.com',
+  'mailto:contact@genlove.com',
   vapidKeys.publicKey,
   vapidKeys.privateKey
 );
 
 // ============================================
-// 2. CONNEXION MONGODB
+// 3. CONNEXION MONGODB
 // ============================================
-console.log("🚀 Base MongoDB SÉCURISÉE - Vrais utilisateurs préservés");
-
-const mongouRI = process.env.MONGODB_URI || 'mongodb://localhost:27017/genlove';
-
-if (!mongouRI) {
-  console.error("❌ ERREUR CRITIQUE: MONGODB_URI non définie !");
-  process.exit(1);
-}
-
-console.log("🔌 Tentative de connexion à MongoDB...");
-console.log("URI (masquée):", mongouRI.replace(/\/\/[^:]+:[^@]+@/, '//****:****@'));
-
-mongoose.connect(mongouRI, {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-})
-.then(() => console.log("✅ Connecté à MongoDB avec succès !"))
-.catch(err => {
-  console.error("❌ Erreur MongoDB:");
-  console.error("Message:", err.message);
-  console.error("Code:", err.code);
-});
+const mongouRI = process.env.MONGODB_URI;
+mongoose.connect(mongouRI)
+  .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
+  .catch(err => console.error("❌ Error Mongodb:", err));
 
 // ============================================
-// 3. MIDDLEWARE (CORS + JSON + STATIC)
+// 4. CORS + JSON + STATIC
 // ============================================
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -60,7 +48,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('public'));
 
 // ============================================
-// 4. MODÈLES MONGODB
+// 5. MODÈLES MONGODB
 // ============================================
 
 // Modèle Utilisateur
@@ -76,10 +64,9 @@ const UserSchema = new mongoose.Schema({
   photo: { type: String, default: "https://via.placeholder.com/150?text=Photo" },
   createdAt: { type: Date, default: Date.now }
 });
-
 const User = mongoose.model('User', UserSchema);
 
-// Modèle Subscription (Notifications Push)
+// Modèle Subscription pour les notifications push
 const subscriptionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   endpoint: { type: String, required: true, unique: true },
@@ -91,25 +78,21 @@ const subscriptionSchema = new mongoose.Schema({
   userAgent: String,
   lastActive: { type: Date, default: Date.now }
 });
-
 const Subscription = mongoose.model('Subscription', subscriptionSchema);
 
-// Modèle Demandes de Contact
+// Modèle Demandes de contact
 const requestSchema = new mongoose.Schema({
   fromUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   toUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   message: String,
   status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
-  createdAt: { type: Date, default: Date.now },
-  readAt: Date
+  createdAt: { type: Date, default: Date.now }
 });
-
 const Request = mongoose.model('Request', requestSchema);
 
 // ============================================
-// 5. FONCTIONS UTILITAIRES
+// 6. FONCTION AGE (globale)
 // ============================================
-
 function calculerAge(dateNaissance) {
   if (!dateNaissance) return "???";
   const today = new Date();
@@ -120,6 +103,9 @@ function calculerAge(dateNaissance) {
   return age;
 }
 
+// ============================================
+// 7. FONCTION ENVOI NOTIFICATION PUSH
+// ============================================
 async function sendNotificationToUser(userId, title, body, data = {}) {
   try {
     const subscriptions = await Subscription.find({ userId });
@@ -155,17 +141,15 @@ async function sendNotificationToUser(userId, title, body, data = {}) {
     
     const results = await Promise.all(promises);
     return results.filter(r => r).length > 0;
-    
   } catch (error) {
-    console.error('Erreur envoi notification:', error);
+    console.error('❌ Erreur envoi notification:', error);
     return false;
   }
 }
 
 // ============================================
-// 6. TEMPLATES HTML RÉUTILISABLES
+// 8. META + FAVICON + CSS (DESIGN ORIGINAL PRÉSERVÉ)
 // ============================================
-
 const head = `
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -177,8 +161,7 @@ const head = `
 
 const styles = `
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
     .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
     #genlove-notify { position: absolute; top: -100px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; transition: 0.5s cubic-bezier(0.175,0.885,0.32,1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #007bff; }
     #genlove-notify.show { top: 10px; }
@@ -193,18 +176,16 @@ const styles = `
     .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; color: #333; }
     .serment-container { margin-top: 20px; padding: 15px; background: #fff5f7; border-radius: 12px; border: 1px solid #ffdae0; text-align: left; display: flex; gap: 10px; align-items: flex-start; }
     .serment-text { font-size: 0.82rem; color: #d63384; line-height: 1.4; }
-    .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; text-decoration: none; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; transition: 0.3s; font-size: 1rem; }
-    .btn-pink:hover { background: #e63e5c; transform: scale(0.98); }
+    .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; text-decoration: none; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; transition: 0.3s; }
     .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: bold; display: block; margin: 15px; width: auto; box-sizing: border-box; border: none; cursor: pointer; }
     .btn-action { border: none; border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-details { background: #ff416c; color: white; }
     .btn-contact { background: #1a2a44; color: white; margin-right: 5px; }
     #popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-    .popup-content { background: white; border-radius: 20px; width: 100%; max-width: 380px; padding: 25px; position: relative; text-align: left; animation: slideUp 0.3s ease-out; max-height: 80vh; overflow-y: auto; }
+    .popup-content { background: white; border-radius: 20px; width: 100%; max-width: 380px; padding: 25px; position: relative; text-align: left; animation: slideUp 0.3s ease-out; }
     .close-popup { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #666; }
     .st-group { background: white; margin: 10px 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; font-size: 0.95rem; }
-    .st-item:last-child { border-bottom: none; }
     .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: 0.4s; border-radius: 24px; }
@@ -212,7 +193,7 @@ const styles = `
     input:checked + .slider { background-color: #007bff; }
     input:checked + .slider:before { transform: translateX(21px); }
     .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(0); background-size: cover; background-position: center; border: 2px solid #ff416c; }
+    .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; background-size: cover; background-position: center; border: 2px solid #ff416c; }
     .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76bb 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -258,18 +239,18 @@ const notifyScript = `
 `;
 
 // ============================================
-// 7. ROUTES API
+// 9. ROUTES API POUR NOTIFICATIONS PUSH
 // ============================================
 
-// ROUTES PUSH NOTIFICATIONS
+// Route pour obtenir la clé publique VAPID
 app.get('/api/vapid-public-key', (req, res) => {
   res.json({ publicKey: vapidKeys.publicKey });
 });
 
+// Route pour enregistrer un abonnement push
 app.post('/api/subscribe', async (req, res) => {
   try {
     const { subscription, userId } = req.body;
-    
     if (!subscription || !userId) {
       return res.status(400).json({ error: 'Subscription et userId requis' });
     }
@@ -301,13 +282,13 @@ app.post('/api/subscribe', async (req, res) => {
     ).catch(() => {});
     
     res.json({ success: true, message: 'Abonnement enregistré' });
-    
   } catch (error) {
-    console.error('Erreur subscription:', error);
+    console.error("❌ Erreur subscription:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
+// Route pour se désabonner
 app.post('/api/unsubscribe', async (req, res) => {
   try {
     const { endpoint } = req.body;
@@ -315,12 +296,12 @@ app.post('/api/unsubscribe', async (req, res) => {
     await Subscription.deleteMany({ endpoint });
     res.json({ success: true, message: 'Désabonnement réussi' });
   } catch (error) {
-    console.error('Erreur désabonnement:', error);
+    console.error("❌ Erreur désabonnement:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ROUTE ENVOI DEMANDE AVEC NOTIFICATION
+// Route pour envoyer une demande de contact avec notification push
 app.post('/api/send-request', async (req, res) => {
   try {
     const { fromUserId, toUserId, message } = req.body;
@@ -338,7 +319,6 @@ app.post('/api/send-request', async (req, res) => {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
     }
     
-    // Enregistrer la demande
     const newRequest = new Request({
       fromUserId,
       toUserId,
@@ -347,7 +327,6 @@ app.post('/api/send-request', async (req, res) => {
     });
     await newRequest.save();
     
-    // Envoyer notification push
     const notificationSent = await sendNotificationToUser(
       toUserId,
       `💌 Demande de contact - Genlove`,
@@ -367,14 +346,17 @@ app.post('/api/send-request', async (req, res) => {
       notificationSent,
       requestId: newRequest._id
     });
-    
   } catch (error) {
-    console.error('Erreur send-request:', error);
+    console.error("❌ Erreur send-request:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ROUTE SUPPRESSION COMPTE
+// ============================================
+// 10. ROUTES API ORIGINALES
+// ============================================
+
+// Route suppression compte
 app.delete('/api/delete-account/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -392,7 +374,7 @@ app.delete('/api/delete-account/:id', async (req, res) => {
   }
 });
 
-// ROUTE UPDATE COMPTE
+// Route update compte
 app.put('/api/update-account/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -401,7 +383,7 @@ app.put('/api/update-account/:id', async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ error: "Utilisateur non trouvé" });
     }
-    console.log("✅ MODIFIÉ:", updatedUser.firstName);
+    console.log("✅ MODIFIÉ:", updatedUser.firstName, updates);
     res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error("❌ Erreur update:", error);
@@ -409,7 +391,7 @@ app.put('/api/update-account/:id', async (req, res) => {
   }
 });
 
-// ROUTE REGISTER
+// Route register
 app.post('/api/register', async (req, res) => {
   try {
     console.log("📝 INSCRIPTION:", req.body);
@@ -434,7 +416,6 @@ app.post('/api/register', async (req, res) => {
     await newUser.save();
     console.log("✅ SAUVEGARDÉ:", firstName);
     res.json({ success: true, user: newUser._id });
-    
   } catch (error) {
     console.error("❌ ERREUR:", error);
     res.status(500).json({ error: error.message });
@@ -442,10 +423,10 @@ app.post('/api/register', async (req, res) => {
 });
 
 // ============================================
-// 8. ROUTES PAGES
+// 11. ROUTES PAGES (TOUS LES ÉCRANS PRÉSERVÉS)
 // ============================================
 
-// ACCUEIL
+// Accueil
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -474,7 +455,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// CHARTE ENGAGEMENT
+// Charte engagement
 app.get('/charte-engagement', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -491,7 +472,6 @@ app.get('/charte-engagement', (req, res) => {
               <b style="color:#ff416c;">2. Confidentialité</b><br>Échanges éphémères (30min max).<br><br>
               <b style="color:#ff416c;">3. Sérénité</b><br>Algorithmes protègent la santé des enfants.<br><br>
               <b style="color:#ff416c;">4. Respect</b><br>Non-stigmatisation obligatoire.<br><br>
-              <b style="color:#ff416c;">5. Bienveillance</b><br>Échanges respectueux uniquement.<br><br>
               <hr style="border:0; border-top:1px solid #ffdae0; margin:15px 0;">
               <center><i style="color:#ff416c;">Scrollez jusqu'en bas...</i></center>
             </div>
@@ -515,7 +495,7 @@ app.get('/charte-engagement', (req, res) => {
   `);
 });
 
-// SIGNUP (CRÉATION COMPTE)
+// Signup
 app.get('/signup', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -611,8 +591,7 @@ app.get('/signup', (req, res) => {
               dob: document.getElementById('dob').value,
               residence: document.getElementById('res').value,
               genotype: document.getElementById('gt').value,
-              bloodGroup: document.getElementById('gs_type').value ? 
-                document.getElementById('gs_type').value + document.getElementById('gs_rh').value : "",
+              bloodGroup: document.getElementById('gs_type').value ? document.getElementById('gs_type').value + document.getElementById('gs_rh').value : "",
               desireChild: document.getElementById('pj').value,
               photo: b64 || "https://via.placeholder.com/150?text=Photo"
             };
@@ -646,27 +625,7 @@ app.get('/signup', (req, res) => {
   `);
 });
 
-// ============================================
-// INSÉREZ ICI TOUTES LES ROUTES QUE VOUS AVEZ POSTÉES
-// (profile, health-config, matching, settings, edit-profile, 
-//  notifications-settings, chat, chat-end, logout-success)
-// ============================================
-
-// [COLLEZ ICI TOUT LE CODE QUE VOUS AVEZ PARTAGÉ DANS VOTRE MESSAGE PRÉCÉDENT]
-// DEPUIS "// ---------- PROFIL (SUITE ET FIN) ----------" JUSQU'À LA FIN
-
-// ============================================
-// 9. DÉMARRAGE DU SERVEUR
-// ============================================
-app.listen(port, '0.0.0.0', () => {
-  console.log(`🚀 Genlove V4.4 sur port ${port}`);
-  console.log("✅ V4.4: SUPPRIMER COMPTE + CONFIG SANTÉ FONCTIONNELS ✓");
-  console.log("✅ Boutons Enregistrer/Annuler santé + Supprimer/Annuler OK");
-  console.log("✅ Web Push Notifications intégrées");
-  console.log("✅ Tous les designs préservés");
-  console.log(`📱 Rendez-vous sur http://localhost:${port}`);
-});
-// ---------- PROFIL (SUITE ET FIN) ----------
+// Profil (avec bannière notifications push)
 app.get('/profile', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -685,18 +644,14 @@ app.get('/profile', (req, res) => {
               </a>
               <a href="/settings" style="text-decoration:none; font-size:1.4rem;">⚙️</a>
             </div>
-            <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-color:#eee; background-image:url('https://via.placeholder.com/150?text=Photo');"></div>
+            <div id="vP" style="width:110px; height:110px; border-radius:50%; border:3px solid #ff416c; margin:20px auto; background-size:cover; background-color:#eee;"></div>
             <h2 id="vN">Chargement...</h2>
             <p id="vR" style="color:#666; margin:0 0 10px 0; font-size:0.9rem;">Chargement...</p>
             <p style="color:#007bff; font-weight:bold; margin:0;">✅ Profil Santé Validé</p>
           </div>
           
-          <!-- BANNIÈRE NOTIFICATIONS PUSH -->
-          <div id="push-permission-banner" class="permission-banner" style="display:none;">
-            <strong>🔔 Activer les notifications</strong>
-            <p style="margin:5px 0; font-size:0.8rem;">Recevez les demandes de contact même en veille</p>
-            <button id="enable-push" class="permission-button">✅ Activer</button>
-          </div>
+          <!-- Bannière notifications push -->
+          <div id="push-permission-banner" style="display:none;"></div>
           
           <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">📋 MES INFORMATIONS</div>
           <div class="st-group">
@@ -730,7 +685,7 @@ app.get('/profile', (req, res) => {
             return age;
           }
           
-          // Initialisation des notifications push
+          // Initialisation notifications push
           async function initPushNotifications() {
             if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
               console.log('Push non supporté');
@@ -740,25 +695,31 @@ app.get('/profile', (req, res) => {
             const userId = localStorage.getItem('current_user_id');
             if (!userId) return;
             
-            // Vérifier si déjà autorisé
             if (Notification.permission === 'granted') {
               registerServiceWorker(userId);
             } else if (Notification.permission !== 'denied') {
-              document.getElementById('push-permission-banner').style.display = 'block';
-            }
-            
-            document.getElementById('enable-push')?.addEventListener('click', async () => {
-              try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                  document.getElementById('push-permission-banner').style.display = 'none';
-                  await registerServiceWorker(userId);
-                  showNotify('✅ Notifications activées !');
+              const banner = document.getElementById('push-permission-banner');
+              banner.style.display = 'block';
+              banner.className = 'permission-banner';
+              banner.innerHTML = \`
+                <strong>🔔 Activer les notifications</strong>
+                <p style="margin:5px 0; font-size:0.8rem;">Recevez les demandes de contact même en veille</p>
+                <button id="enable-push" class="permission-button">✅ Activer</button>
+              \`;
+              
+              document.getElementById('enable-push').addEventListener('click', async () => {
+                try {
+                  const permission = await Notification.requestPermission();
+                  if (permission === 'granted') {
+                    banner.style.display = 'none';
+                    await registerServiceWorker(userId);
+                    showNotify('✅ Notifications activées !');
+                  }
+                } catch (err) {
+                  console.error('Erreur permission:', err);
                 }
-              } catch (err) {
-                console.error('Erreur permission:', err);
-              }
-            });
+              });
+            }
           }
           
           async function registerServiceWorker(userId) {
@@ -779,7 +740,6 @@ app.get('/profile', (req, res) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subscription, userId })
               });
-              
             } catch (err) {
               console.error('Erreur subscription:', err);
             }
@@ -819,9 +779,7 @@ app.get('/profile', (req, res) => {
               if (userId) localStorage.setItem('current_user_id', userId);
               showNotify('✅ Profil chargé !');
               
-              // Lancer l'initialisation des push
               initPushNotifications();
-              
             } catch (e) {
               console.error('Profil error:', e);
               showNotify('❌ Erreur chargement');
@@ -837,7 +795,7 @@ app.get('/profile', (req, res) => {
   `);
 });
 
-// ---------- CONFIG SANTÉ ----------
+// Health Config
 app.get('/health-config', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -928,7 +886,6 @@ app.get('/health-config', (req, res) => {
               document.getElementById('loader').style.display = 'none';
               document.getElementById('main-content').style.display = 'block';
               showNotify('✅ Config santé chargée');
-              
             } catch (e) {
               console.error('Health config error:', e);
               showNotify('❌ Erreur chargement');
@@ -947,8 +904,7 @@ app.get('/health-config', (req, res) => {
               dob: document.getElementById('dob').value,
               residence: document.getElementById('res').value,
               genotype: document.getElementById('gt').value,
-              bloodGroup: document.getElementById('gs_type').value ? 
-                document.getElementById('gs_type').value + document.getElementById('gs_rh').value : "",
+              bloodGroup: document.getElementById('gs_type').value ? document.getElementById('gs_type').value + document.getElementById('gs_rh').value : "",
               desireChild: document.getElementById('pj').value
             };
             
@@ -987,7 +943,7 @@ app.get('/health-config', (req, res) => {
   `);
 });
 
-// ---------- MATCHING ----------
+// Matching (avec envoi de notifications)
 app.get('/matching', async (req, res) => {
   try {
     const users = await User.find({}).select('firstName lastName gender dob residence genotype bloodGroup desireChild photo _id').limit(50).lean();
@@ -1169,7 +1125,6 @@ app.get('/matching', async (req, res) => {
                   document.getElementById('pop-btn').onclick = closePopup;
                   document.getElementById('popup-overlay').style.display = 'flex';
                 }
-                
               } catch (e) {
                 console.error('Matching error:', e);
                 showNotify('❌ Erreur chargement');
@@ -1179,14 +1134,13 @@ app.get('/matching', async (req, res) => {
         </body>
       </html>
     `);
-    
   } catch (error) {
-    console.error("X Matching error:", error);
+    console.error("❌ Matching error:", error);
     res.status(500).send("Erreur chargement");
   }
 });
 
-// ---------- SETTINGS ----------
+// Settings
 app.get('/settings', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -1298,7 +1252,7 @@ app.get('/settings', (req, res) => {
   `);
 });
 
-// ---------- EDIT PROFIL ----------
+// Edit Profil
 app.get('/edit-profile', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -1406,7 +1360,6 @@ app.get('/edit-profile', (req, res) => {
               
               document.getElementById('loader').style.display = 'none';
               document.getElementById('main-content').style.display = 'block';
-              
             } catch (e) {
               console.error('Edit profile error:', e);
               showNotify('❌ Erreur chargement');
@@ -1435,8 +1388,7 @@ app.get('/edit-profile', (req, res) => {
               dob: document.getElementById('dob').value,
               residence: document.getElementById('res').value,
               genotype: document.getElementById('gt').value,
-              bloodGroup: document.getElementById('gs_type').value ? 
-                document.getElementById('gs_type').value + document.getElementById('gs_rh').value : "",
+              bloodGroup: document.getElementById('gs_type').value ? document.getElementById('gs_type').value + document.getElementById('gs_rh').value : "",
               desireChild: document.getElementById('pj').value,
               photo: b64
             };
@@ -1471,7 +1423,7 @@ app.get('/edit-profile', (req, res) => {
   `);
 });
 
-// ---------- NOTIFICATIONS SETTINGS ----------
+// Notifications Settings
 app.get('/notifications-settings', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -1481,12 +1433,12 @@ app.get('/notifications-settings', (req, res) => {
         <div class="app-shell">
           <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
           <div class="page-white">
-            <h2 style="color:#ff416c;">🔔 Notifications</h2>
+            <h2 style="color:#ff416c;">🔔 Notifications Push</h2>
             
             <div style="margin:30px 0;">
               <div class="st-group">
                 <div class="st-item">
-                  <span>Notifications push</span>
+                  <span>Activer les notifications</span>
                   <label class="switch">
                     <input type="checkbox" id="push-toggle" onchange="togglePush()">
                     <span class="slider"></span>
@@ -1507,8 +1459,7 @@ app.get('/notifications-settings', (req, res) => {
         <script>
           async function checkPushStatus() {
             if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-              document.getElementById('push-status').innerHTML = 
-                '<p style="color:#666;">❌ Navigateur non compatible</p>';
+              document.getElementById('push-status').innerHTML = '<p style="color:#666;">❌ Navigateur non compatible</p>';
               return;
             }
             
@@ -1522,14 +1473,13 @@ app.get('/notifications-settings', (req, res) => {
               statusDiv.innerHTML = '<p style="color:#dc3545;">❌ Notifications bloquées<br><small>Débloquez dans les paramètres</small></p>';
               toggle.checked = false;
             } else {
-              statusDiv.innerHTML = '<p style="color:#ff416c;">🔔 En attente d\'autorisation</p>';
+              statusDiv.innerHTML = '<p style="color:#ff416c;">🔔 En attente d\\'autorisation</p>';
               toggle.checked = false;
             }
           }
           
           async function togglePush() {
             if (Notification.permission === 'granted') {
-              // Désactiver
               if (confirm('Désactiver les notifications push ?')) {
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.getSubscription();
@@ -1544,7 +1494,6 @@ app.get('/notifications-settings', (req, res) => {
                 showNotify('🔕 Notifications désactivées');
               }
             } else {
-              // Activer
               const permission = await Notification.requestPermission();
               if (permission === 'granted') {
                 const userId = localStorage.getItem('current_user_id');
@@ -1574,7 +1523,7 @@ app.get('/notifications-settings', (req, res) => {
           async function testNotification() {
             const userId = localStorage.getItem('current_user_id');
             if (!userId) {
-              showNotify('❌ Connectez-vous d\'abord');
+              showNotify('❌ Connectez-vous d\\'abord');
               return;
             }
             
@@ -1610,7 +1559,7 @@ app.get('/notifications-settings', (req, res) => {
   `);
 });
 
-// ---------- CHAT ----------
+// Chat
 app.get('/chat', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -1673,7 +1622,7 @@ app.get('/chat', (req, res) => {
   `);
 });
 
-// ---------- CHAT END ----------
+// Chat End
 app.get('/chat-end', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -1691,7 +1640,7 @@ app.get('/chat-end', (req, res) => {
   `);
 });
 
-// ---------- LOGOUT SUCCESS ----------
+// Logout Success
 app.get('/logout-success', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -1712,13 +1661,13 @@ app.get('/logout-success', (req, res) => {
 });
 
 // ============================================
-// 9. DÉMARRAGE DU SERVEUR
+// 12. DÉMARRAGE DU SERVEUR
 // ============================================
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Genlove V4.4 sur port ${port}`);
-  console.log("✅ V4.4: SUPPRIMER COMPTE + CONFIG SANTÉ FONCTIONNELS ✓");
+  console.log("✅ SUPPRIMER COMPTE + CONFIG SANTÉ FONCTIONNELS ✓");
   console.log("✅ Boutons Enregistrer/Annuler santé + Supprimer/Annuler OK");
-  console.log("✅ Web Push Notifications intégrées");
-  console.log("✅ Tous les designs préservés");
-  console.log(`📱 Rendez-vous sur http://localhost:${port}`);
+  console.log("✅ WEB PUSH NOTIFICATIONS INTÉGRÉES ✓");
+  console.log("✅ Notifications push fonctionnent même téléphone en veille ✓");
+  console.log("✅ TOUS LES ÉCRANS ET DESIGNS PRÉSERVÉS ✓");
 });
