@@ -1,7 +1,7 @@
 {
   "name": "genlove",
   "version": "4.5.0",
-  "description": "Application Genlove V4.5",
+  "description": "Genlove App V4.5",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -13,6 +13,6 @@
     "web-push": "^3.6.6"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x"
   }
 }
