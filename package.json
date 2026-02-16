@@ -2,9 +2,9 @@
   "name": "genlove",
   "version": "4.4.0",
   "description": "Application de rencontre basée sur la compatibilité génétique",
-  "main": "serveur.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node serveur.js",
+    "start": "node server.js",
     "dev": "nodemon serveur.js",
     "generate-keys": "node generate-vapid-keys.js"
   },
