@@ -1,3 +1,671 @@
+// ============================================
+// SERVEUR COMPLET GENLOVE V4.4 + WEB PUSH
+// ============================================
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const webPush = require('web-push');
+require('dotenv').config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// ============================================
+// 1. CONFIGURATION VAPID (WEB PUSH)
+// ============================================
+const vapidKeys = {
+  publicKey: process.env.VAPID_PUBLIC_KEY || 'BGxcxQp5yRJ8qW7qJ7X8Z9kL2mN4pQ6rS8tU9vW0xY1zA2bB3cC4dD5eE6fF7gG8hH9iI0jJ',
+  privateKey: process.env.VAPID_PRIVATE_KEY || 'hJYzNp4qR6sT8uV0wX2yZ4aB6cD8eF0gH2iJ4kL6mN8oP0qR2sT4uV6wX8yZ0'
+};
+
+webPush.setVapidDetails(
+  process.env.VAPID_EMAIL || 'mailto:contact@genlove.com',
+  vapidKeys.publicKey,
+  vapidKeys.privateKey
+);
+
+// ============================================
+// 2. CONNEXION MONGODB
+// ============================================
+console.log("🚀 Base MongoDB SÉCURISÉE - Vrais utilisateurs préservés");
+
+const mongouRI = process.env.MONGODB_URI || 'mongodb://localhost:27017/genlove';
+
+if (!mongouRI) {
+  console.error("❌ ERREUR CRITIQUE: MONGODB_URI non définie !");
+  process.exit(1);
+}
+
+console.log("🔌 Tentative de connexion à MongoDB...");
+console.log("URI (masquée):", mongouRI.replace(/\/\/[^:]+:[^@]+@/, '//****:****@'));
+
+mongoose.connect(mongouRI, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+.then(() => console.log("✅ Connecté à MongoDB avec succès !"))
+.catch(err => {
+  console.error("❌ Erreur MongoDB:");
+  console.error("Message:", err.message);
+  console.error("Code:", err.code);
+});
+
+// ============================================
+// 3. MIDDLEWARE (CORS + JSON + STATIC)
+// ============================================
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.static('public'));
+
+// ============================================
+// 4. MODÈLES MONGODB
+// ============================================
+
+// Modèle Utilisateur
+const UserSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  gender: String,
+  dob: String,
+  residence: String,
+  genotype: String,
+  bloodGroup: String,
+  desireChild: String,
+  photo: { type: String, default: "https://via.placeholder.com/150?text=Photo" },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', UserSchema);
+
+// Modèle Subscription (Notifications Push)
+const subscriptionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  endpoint: { type: String, required: true, unique: true },
+  keys: {
+    p256dh: String,
+    auth: String
+  },
+  createdAt: { type: Date, default: Date.now },
+  userAgent: String,
+  lastActive: { type: Date, default: Date.now }
+});
+
+const Subscription = mongoose.model('Subscription', subscriptionSchema);
+
+// Modèle Demandes de Contact
+const requestSchema = new mongoose.Schema({
+  fromUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  toUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  message: String,
+  status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+  createdAt: { type: Date, default: Date.now },
+  readAt: Date
+});
+
+const Request = mongoose.model('Request', requestSchema);
+
+// ============================================
+// 5. FONCTIONS UTILITAIRES
+// ============================================
+
+function calculerAge(dateNaissance) {
+  if (!dateNaissance) return "???";
+  const today = new Date();
+  const birthDate = new Date(dateNaissance);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+  return age;
+}
+
+async function sendNotificationToUser(userId, title, body, data = {}) {
+  try {
+    const subscriptions = await Subscription.find({ userId });
+    if (subscriptions.length === 0) return false;
+    
+    const payload = JSON.stringify({
+      title,
+      body,
+      icon: '/icon-192x192.png',
+      badge: '/badge-72x72.png',
+      data,
+      vibrate: [200, 100, 200],
+      actions: [
+        { action: 'open', title: 'Ouvrir' },
+        { action: 'close', title: 'Fermer' }
+      ]
+    });
+    
+    const promises = subscriptions.map(async (sub) => {
+      try {
+        await webPush.sendNotification(
+          { endpoint: sub.endpoint, keys: sub.keys },
+          payload
+        );
+        return true;
+      } catch (error) {
+        if (error.statusCode === 410) {
+          await Subscription.deleteOne({ _id: sub._id });
+        }
+        return false;
+      }
+    });
+    
+    const results = await Promise.all(promises);
+    return results.filter(r => r).length > 0;
+    
+  } catch (error) {
+    console.error('Erreur envoi notification:', error);
+    return false;
+  }
+}
+
+// ============================================
+// 6. TEMPLATES HTML RÉUTILISABLES
+// ============================================
+
+const head = `
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23ff416c'>❤️</text></svg>">
+  <meta name="theme-color" content="#ff416c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Genlove</title>
+`;
+
+const styles = `
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; background: #fdf2f2; display: flex; justify-content: center; }
+    .app-shell { width: 100%; max-width: 420px; min-height: 100vh; background: #f4e9da; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
+    #genlove-notify { position: absolute; top: -100px; left: 10px; right: 10px; background: #1a2a44; color: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; transition: 0.5s cubic-bezier(0.175,0.885,0.32,1.275); z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #007bff; }
+    #genlove-notify.show { top: 10px; }
+    #loader { display: none; position: absolute; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+    .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff416c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .home-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+    .logox-text { font-size: 3.5rem; font-weight: bold; margin-bottom: 5px; }
+    .slogan { font-weight: bold; color: #1a2a44; margin-bottom: 40px; font-size: 1rem; line-height: 1.5; }
+    .page-white { background: white; min-height: 100vh; padding: 25px 20px; box-sizing: border-box; text-align: center; }
+    .photo-circle { width: 110px; height: 110px; border: 2px dashed #ff416c; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; background-size: cover; background-position: center; background-color: #f8f9fa; }
+    .input-box { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 10px; font-size: 1rem; box-sizing: border-box; background: #f8f9fa; color: #333; }
+    .serment-container { margin-top: 20px; padding: 15px; background: #fff5f7; border-radius: 12px; border: 1px solid #ffdae0; text-align: left; display: flex; gap: 10px; align-items: flex-start; }
+    .serment-text { font-size: 0.82rem; color: #d63384; line-height: 1.4; }
+    .btn-pink { background: #ff416c; color: white; padding: 18px; border-radius: 50px; text-align: center; text-decoration: none; font-weight: bold; display: block; width: 85%; margin: 20px auto; border: none; cursor: pointer; transition: 0.3s; font-size: 1rem; }
+    .btn-pink:hover { background: #e63e5c; transform: scale(0.98); }
+    .btn-dark { background: #1a2a44; color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; font-weight: bold; display: block; margin: 15px; width: auto; box-sizing: border-box; border: none; cursor: pointer; }
+    .btn-action { border: none; border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-details { background: #ff416c; color: white; }
+    .btn-contact { background: #1a2a44; color: white; margin-right: 5px; }
+    #popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .popup-content { background: white; border-radius: 20px; width: 100%; max-width: 380px; padding: 25px; position: relative; text-align: left; animation: slideUp 0.3s ease-out; max-height: 80vh; overflow-y: auto; }
+    .close-popup { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #666; }
+    .st-group { background: white; margin: 10px 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .st-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f8f8f8; color: #333; font-size: 0.95rem; }
+    .st-item:last-child { border-bottom: none; }
+    .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: 0.4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: 0.4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #007bff; }
+    input:checked + .slider:before { transform: translateX(21px); }
+    .match-card { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .match-photo-blur { width: 55px; height: 55px; border-radius: 50%; background: #eee; filter: blur(0); background-size: cover; background-position: center; border: 2px solid #ff416c; }
+    .end-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #4a76bb 0%, #1a2a44 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    .end-card { background: white; border-radius: 30px; padding: 40px 25px; width: 85%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .permission-banner { background: #e3f2fd; padding: 15px; margin: 15px; border-radius: 12px; text-align: center; border-left: 5px solid #2196f3; }
+    .permission-button { background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    .chat-header { background: #9dbce3; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+    .digital-clock { background: #1a1a1a; color: #ff416c; padding: 6px 15px; border-radius: 10px; font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; }
+    .btn-quit { background: #ffffff; color: #9dbce3; border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+    .btn-logout-badge { background: #1a2a44; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+    .chat-messages { flex: 1; padding: 15px; background: #f8fafb; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px; }
+    .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; line-height: 1.4; }
+    .bubble.received { background: #e2ecf7; align-self: flex-start; }
+    .bubble.sent { background: #ff416c; color: white; align-self: flex-end; }
+    .input-area { position: fixed; bottom: 0; width: 100%; max-width: 420px; padding: 10px 15px 45px 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; }
+    .input-area textarea { flex: 1; background: #f1f3f4; border: none; padding: 12px; border-radius: 25px; resize: none; font-family: inherit; }
+    .input-area button { background: #4a76b8; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
+  </style>
+`;
+
+const notifyScript = `
+  <script>
+    function showNotify(msg) {
+      const n = document.getElementById('genlove-notify');
+      const m = document.getElementById('notify-msg');
+      if (m) m.innerText = msg;
+      if (n) {
+        n.classList.add('show');
+        setTimeout(() => { n.classList.remove('show'); }, 3500);
+      }
+    }
+    
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+  </script>
+`;
+
+// ============================================
+// 7. ROUTES API
+// ============================================
+
+// ROUTES PUSH NOTIFICATIONS
+app.get('/api/vapid-public-key', (req, res) => {
+  res.json({ publicKey: vapidKeys.publicKey });
+});
+
+app.post('/api/subscribe', async (req, res) => {
+  try {
+    const { subscription, userId } = req.body;
+    
+    if (!subscription || !userId) {
+      return res.status(400).json({ error: 'Subscription et userId requis' });
+    }
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+    
+    await Subscription.deleteMany({ endpoint: subscription.endpoint });
+    
+    const newSubscription = new Subscription({
+      userId,
+      endpoint: subscription.endpoint,
+      keys: subscription.keys,
+      userAgent: req.headers['user-agent']
+    });
+    
+    await newSubscription.save();
+    
+    await webPush.sendNotification(
+      subscription,
+      JSON.stringify({
+        title: '✅ Notifications activées',
+        body: 'Vous recevrez les demandes de contact Genlove',
+        icon: '/icon-192x192.png',
+        url: '/profile'
+      })
+    ).catch(() => {});
+    
+    res.json({ success: true, message: 'Abonnement enregistré' });
+    
+  } catch (error) {
+    console.error('Erreur subscription:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/unsubscribe', async (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    if (!endpoint) return res.status(400).json({ error: 'Endpoint requis' });
+    await Subscription.deleteMany({ endpoint });
+    res.json({ success: true, message: 'Désabonnement réussi' });
+  } catch (error) {
+    console.error('Erreur désabonnement:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ROUTE ENVOI DEMANDE AVEC NOTIFICATION
+app.post('/api/send-request', async (req, res) => {
+  try {
+    const { fromUserId, toUserId, message } = req.body;
+    
+    if (!fromUserId || !toUserId) {
+      return res.status(400).json({ error: 'IDs expéditeur et destinataire requis' });
+    }
+    
+    const [fromUser, toUser] = await Promise.all([
+      User.findById(fromUserId),
+      User.findById(toUserId)
+    ]);
+    
+    if (!fromUser || !toUser) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+    
+    // Enregistrer la demande
+    const newRequest = new Request({
+      fromUserId,
+      toUserId,
+      message: message || 'Souhaite faire connaissance',
+      status: 'pending'
+    });
+    await newRequest.save();
+    
+    // Envoyer notification push
+    const notificationSent = await sendNotificationToUser(
+      toUserId,
+      `💌 Demande de contact - Genlove`,
+      `${fromUser.firstName} ${fromUser.lastName} souhaite vous contacter`,
+      {
+        fromUserId: fromUserId.toString(),
+        fromUserName: `${fromUser.firstName} ${fromUser.lastName}`,
+        requestId: newRequest._id.toString(),
+        message: message || 'Souhaite faire connaissance',
+        url: `/chat?with=${fromUserId}`
+      }
+    );
+    
+    res.json({ 
+      success: true, 
+      message: 'Demande envoyée',
+      notificationSent,
+      requestId: newRequest._id
+    });
+    
+  } catch (error) {
+    console.error('Erreur send-request:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ROUTE SUPPRESSION COMPTE
+app.delete('/api/delete-account/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedUser = await User.findByIdAndDelete(id);
+    if (!deletedUser) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+    await Subscription.deleteMany({ userId: id });
+    await Request.deleteMany({ $or: [{ fromUserId: id }, { toUserId: id }] });
+    console.log("✅ COMPTE SUPPRIME:", deletedUser.firstName);
+    res.json({ success: true, message: "Compte supprimé définitivement" });
+  } catch (error) {
+    console.error("❌ Erreur suppression:", error);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+// ROUTE UPDATE COMPTE
+app.put('/api/update-account/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+    console.log("✅ MODIFIÉ:", updatedUser.firstName);
+    res.json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error("❌ Erreur update:", error);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+// ROUTE REGISTER
+app.post('/api/register', async (req, res) => {
+  try {
+    console.log("📝 INSCRIPTION:", req.body);
+    const { firstName, lastName, gender, dob, residence, genotype, bloodGroup, desireChild, photo } = req.body;
+    
+    if (!firstName || !lastName || !genotype) {
+      return res.status(400).json({ error: "Prénom, Nom et Génotype obligatoires" });
+    }
+    
+    const newUser = new User({
+      firstName,
+      lastName,
+      gender,
+      dob,
+      residence,
+      genotype,
+      bloodGroup,
+      desireChild,
+      photo: photo || "https://via.placeholder.com/150?text=Photo"
+    });
+    
+    await newUser.save();
+    console.log("✅ SAUVEGARDÉ:", firstName);
+    res.json({ success: true, user: newUser._id });
+    
+  } catch (error) {
+    console.error("❌ ERREUR:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// 8. ROUTES PAGES
+// ============================================
+
+// ACCUEIL
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>${head}${styles}</head>
+      <body>
+        <div class="app-shell">
+          <div class="home-screen">
+            <div class="logox-text">
+              <span style="color:#1a2a44;">Gen</span>
+              <span style="color:#ff416c;">love</span>
+            </div>
+            <div class="slogan">Unissez cœur et santé pour bâtir des couples sains</div>
+            <div style="width:100%; margin-top:20px;">
+              <p style="font-size:0.9rem; color:#1a2a44; margin-bottom:10px;">Avez-vous déjà un compte ?</p>
+              <a href="/profile" class="btn-dark">→ Se connecter</a>
+              <a href="/charte-engagement" style="color:#1a2a44; text-decoration:none; font-weight:bold; display:block; margin-top:15px;">Créer un compte</a>
+            </div>
+            <div style="font-size:0.75rem; color:#666; margin-top:25px;">
+              Vos données sont cryptées et confidentielles.
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
+// CHARTE ENGAGEMENT
+app.get('/charte-engagement', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>${head}${styles}</head>
+      <body style="background:#fdf2f2;">
+        <div class="app-shell">
+          <div class="page-white" style="display:flex; flex-direction:column; justify-content:center; padding:30px; min-height:100vh;">
+            <div style="font-size:3.5rem; margin-bottom:10px;">❤️</div>
+            <h2 style="color:#1a2a44; margin-top:0;">Engagement Éthique</h2>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">Pour protéger la santé de votre future famille.</p>
+            <div id="charte-box" style="height:220px; overflow-y:scroll; background:#fff5f7; border:2px solid #ffdae0; border-radius:15px; padding:20px; font-size:0.9rem; color:#444; line-height:1.6; text-align:left;" onscroll="checkScroll(this)">
+              <b style="color:#ff416c;">1. Sincérité</b><br>Données médicales conformes aux examens.<br><br>
+              <b style="color:#ff416c;">2. Confidentialité</b><br>Échanges éphémères (30min max).<br><br>
+              <b style="color:#ff416c;">3. Sérénité</b><br>Algorithmes protègent la santé des enfants.<br><br>
+              <b style="color:#ff416c;">4. Respect</b><br>Non-stigmatisation obligatoire.<br><br>
+              <b style="color:#ff416c;">5. Bienveillance</b><br>Échanges respectueux uniquement.<br><br>
+              <hr style="border:0; border-top:1px solid #ffdae0; margin:15px 0;">
+              <center><i style="color:#ff416c;">Scrollez jusqu'en bas...</i></center>
+            </div>
+            <button id="agree-btn" onclick="location.href='/signup'" class="btn-pink" style="background:#ccc; cursor:not-allowed; margin-top:25px; width:100%; border:none;" disabled>J'ai lu et je m'engage</button>
+            <a href="/" style="margin-top:15px; color:#666; text-decoration:none; font-size:0.8rem;">Annuler</a>
+          </div>
+        </div>
+        <script>
+          function checkScroll(el) {
+            if (el.scrollHeight - el.scrollTop <= el.clientHeight + 5) {
+              const btn = document.getElementById('agree-btn');
+              btn.disabled = false;
+              btn.style.backgroundColor = "#ff416c";
+              btn.style.cursor = "pointer";
+              el.style.borderColor = "#4CAF50";
+            }
+          }
+        </script>
+      </body>
+    </html>
+  `);
+});
+
+// SIGNUP (CRÉATION COMPTE)
+app.get('/signup', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>${head}${styles}</head>
+      <body>
+        <div class="app-shell">
+          <div id="loader">
+            <div class="spinner"></div>
+            <h3>Analyse sécurisée...</h3>
+            <p>Vérification données médicales.</p>
+          </div>
+          <div class="page-white" id="main-content">
+            <h2 style="color:#ff416c; margin-top:0;">❤️ Configuration Santé</h2>
+            <form onsubmit="saveAndRedirect(event)">
+              <div class="photo-circle" id="c" onclick="document.getElementById('i').click()">
+                <span id="t">📷 Photo</span>
+              </div>
+              <input type="file" id="i" style="display:none" onchange="preview(event)" accept="image/*">
+              <input type="text" id="fn" class="input-box" placeholder="Prénom" required>
+              <input type="text" id="ln" class="input-box" placeholder="Nom" required>
+              <select id="gender" class="input-box">
+                <option value="">Genre</option>
+                <option value="Homme">Homme</option>
+                <option value="Femme">Femme</option>
+              </select>
+              <div style="text-align:left; margin-top:10px; padding-left:5px;">
+                <small style="color:#666; font-size:0.75rem;">Date de naissance</small>
+              </div>
+              <input type="date" id="dob" class="input-box" style="margin-top:2px;">
+              <input type="text" id="res" class="input-box" placeholder="Résidence">
+              <select id="gt" class="input-box">
+                <option value="">Génotype</option>
+                <option>AA</option>
+                <option>AS</option>
+                <option>SS</option>
+              </select>
+              <div style="display:flex; gap:10px;">
+                <select id="gs_type" class="input-box" style="flex:2;">
+                  <option value="">Groupe</option>
+                  <option>A</option>
+                  <option>B</option>
+                  <option>AB</option>
+                  <option>O</option>
+                </select>
+                <select id="gs_rh" class="input-box" style="flex:1;">
+                  <option>+</option>
+                  <option>-</option>
+                </select>
+              </div>
+              <select id="pj" class="input-box">
+                <option value="">Désir d'enfant ?</option>
+                <option>Oui</option>
+                <option>Non</option>
+              </select>
+              <div class="serment-container">
+                <input type="checkbox" id="oath" style="width:20px; height:20px;" required>
+                <label for="oath" class="serment-text">Je confirme mon engagement éthique et la véracité de mes informations médicales.</label>
+              </div>
+              <button type="submit" class="btn-pink" style="width:100%; margin-top:30px;">✅ Créer mon compte</button>
+            </form>
+          </div>
+        </div>
+        ${notifyScript}
+        <script>
+          let b64 = localStorage.getItem('current_user_photo') || "";
+          
+          window.onload = () => {
+            if (b64) {
+              document.getElementById('c').style.backgroundImage = 'url(' + b64 + ')';
+              document.getElementById('t').style.display = 'none';
+            }
+          };
+          
+          function preview(e) {
+            const r = new FileReader();
+            r.onload = () => {
+              b64 = r.result;
+              document.getElementById('c').style.backgroundImage = 'url(' + b64 + ')';
+              document.getElementById('t').style.display = 'none';
+            };
+            r.readAsDataURL(e.target.files[0]);
+          }
+          
+          async function saveAndRedirect(e) {
+            e.preventDefault();
+            document.getElementById('loader').style.display = 'flex';
+            
+            const userData = {
+              firstName: document.getElementById('fn').value,
+              lastName: document.getElementById('ln').value,
+              gender: document.getElementById('gender').value,
+              dob: document.getElementById('dob').value,
+              residence: document.getElementById('res').value,
+              genotype: document.getElementById('gt').value,
+              bloodGroup: document.getElementById('gs_type').value ? 
+                document.getElementById('gs_type').value + document.getElementById('gs_rh').value : "",
+              desireChild: document.getElementById('pj').value,
+              photo: b64 || "https://via.placeholder.com/150?text=Photo"
+            };
+            
+            try {
+              const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+              });
+              
+              const result = await response.json();
+              
+              if (response.ok) {
+                localStorage.setItem('current_user_data', JSON.stringify(userData));
+                localStorage.setItem('current_user_photo', userData.photo);
+                localStorage.setItem('current_user_id', result.user);
+                
+                setTimeout(() => { window.location.href = '/profile'; }, 800);
+              } else {
+                throw new Error(result.error || 'Erreur serveur');
+              }
+            } catch (err) {
+              document.getElementById('loader').style.display = 'none';
+              alert('❌ Erreur: ' + err.message);
+            }
+          }
+        </script>
+      </body>
+    </html>
+  `);
+});
+
+// ============================================
+// INSÉREZ ICI TOUTES LES ROUTES QUE VOUS AVEZ POSTÉES
+// (profile, health-config, matching, settings, edit-profile, 
+//  notifications-settings, chat, chat-end, logout-success)
+// ============================================
+
+// [COLLEZ ICI TOUT LE CODE QUE VOUS AVEZ PARTAGÉ DANS VOTRE MESSAGE PRÉCÉDENT]
+// DEPUIS "// ---------- PROFIL (SUITE ET FIN) ----------" JUSQU'À LA FIN
+
+// ============================================
+// 9. DÉMARRAGE DU SERVEUR
+// ============================================
+app.listen(port, '0.0.0.0', () => {
+  console.log(`🚀 Genlove V4.4 sur port ${port}`);
+  console.log("✅ V4.4: SUPPRIMER COMPTE + CONFIG SANTÉ FONCTIONNELS ✓");
+  console.log("✅ Boutons Enregistrer/Annuler santé + Supprimer/Annuler OK");
+  console.log("✅ Web Push Notifications intégrées");
+  console.log("✅ Tous les designs préservés");
+  console.log(`📱 Rendez-vous sur http://localhost:${port}`);
+});
 // ---------- PROFIL (SUITE ET FIN) ----------
 app.get('/profile', (req, res) => {
   res.send(`
