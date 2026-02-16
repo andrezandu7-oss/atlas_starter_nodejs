@@ -34,8 +34,8 @@ webPush.setVapidDetails(
 // ============================================
 // 3. CONNEXION MONGODB
 // ============================================
-const mongouRI = process.env.MONGODB_URI;
-mongoose.connect(mongouRI)
+const mongoURI = process.env.MONGODB_URI; // Sans le "u" au milieu
+mongoose.connect(mongoURI)
   .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
   .catch(err => console.error("❌ Error Mongodb:", err));
 
