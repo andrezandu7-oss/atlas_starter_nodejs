@@ -179,18 +179,41 @@ app.post('/api/unblock-user/:userId/:blockedId', async (req, res) => {
   }
 });
 
-// Envoyer message
+// Envoyer message (SÉCURISÉ V4.5)
 app.post('/api/messages', async (req, res) => {
   try {
     const { senderId, receiverId, text } = req.body;
-    if (!senderId || !receiverId || !text) {
-      return res.status(400).json({ error: "Données incomplètes" });
+    
+    // 1. On récupère les profils des deux personnes
+    const sender = await User.findById(senderId);
+    const receiver = await User.findById(receiverId);
+
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: "Utilisateur introuvable" });
     }
-    const message = new Message({ senderId, receiverId, text, timestamp: new Date() });
+
+    // 2. LA SÉCURITÉ SANTÉ : On bloque si les deux sont à risque (AS ou SS)
+    const isSenderAtRisk = (sender.genotype === 'AS' || sender.genotype === 'SS');
+    const isReceiverAtRisk = (receiver.genotype === 'AS' || receiver.genotype === 'SS');
+
+    if (isSenderAtRisk && isReceiverAtRisk) {
+      return res.status(403).json({ 
+        error: "Action bloquée : Compatibilité génétique non conforme aux règles de santé Genlove." 
+      });
+    }
+
+    // 3. Si c'est compatible, on enregistre le message
+    const message = new Message({ 
+      senderId, 
+      receiverId, 
+      text, 
+      timestamp: new Date() 
+    });
     await message.save();
+    
     res.json({ success: true, message: "Message envoyé" });
   } catch (error) {
-    res.status(500).json({ error: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur lors de l'envoi" });
   }
 });
 
@@ -989,14 +1012,36 @@ app.get('/profile', (req, res) => {
 // Matching
 app.get('/matching', async (req, res) => {
   try {
-    const users = await User.find()
+    // 1. On récupère l'ID de l'utilisateur qui fait la recherche (passé en paramètre)
+    const { userId } = req.query; 
+    
+    if (!userId) {
+      return res.send(`<script>alert("Profil requis pour le matching"); window.location.href='/profile';</script>`);
+    }
+
+    const me = await User.findById(userId);
+    if (!me) return res.status(404).send("Utilisateur non trouvé");
+
+    // 2. CRÉATION DU FILTRE DE SÉCURITÉ SANTÉ
+    let query = { _id: { $ne: me._id } }; // On s'exclut soi-même des résultats
+
+    // Règle d'or : Si AS ou SS, on ne voit QUE des AA
+    if (me.genotype === 'AS' || me.genotype === 'SS') {
+      query.genotype = 'AA';
+    }
+    
+    // On exclut aussi les utilisateurs que j'ai déjà bloqués
+    if (me.blockedUsers && me.blockedUsers.length > 0) {
+      query._id = { ...query._id, $nin: me.blockedUsers };
+    }
+
+    // 3. RECHERCHE DANS LA BASE DE DONNÉES
+    const users = await User.find(query)
       .select('firstName lastName gender dob residence genotype bloodGroup desireChild photo _id blockedUsers')
       .limit(50)
       .lean();
     
-    const partnersWithAge = users
-      .filter(u => u.genotype && u.gender && u._id)
-      .map(u => ({
+    const partnersWithAge = users.map(u => ({
         id: u._id.toString().slice(-4),
         fullid: u._id.toString(),
         gt: u.genotype,
@@ -1008,10 +1053,10 @@ app.get('/matching', async (req, res) => {
         gender: u.gender,
         photo: u.photo,
         blockedUsers: u.blockedUsers || []
-      }));
+    }));
     
     const matchesHTML = partnersWithAge.map(p => `
-      <div class="match-card" data-gt="${p.gt}" data-gender="${p.gender}" data-userid="${p.fullid}" data-blockedusers='${JSON.stringify(p.blockedUsers)}'>
+      <div class="match-card">
         <div class="match-photo" style="background-image:url(${p.photo})"></div>
         <div style="flex:1">
           <b>${p.name} (#${p.id})</b>
@@ -1034,7 +1079,7 @@ app.get('/matching', async (req, res) => {
           <div class="app-shell">
             <div id="genlove-notify"><span>💙</span><span id="notify-msg"></span></div>
             <div style="padding:20px;background:white;text-align:center;border-bottom:1px solid #eee;">
-              <h3 style="margin:0;color:#1a2a44;">Partenaires Compatibles <span id="count">0</span></h3>
+              <h3 style="margin:0;color:#1a2a44;">Partenaires Compatibles <span id="count">${partnersWithAge.length}</span></h3>
             </div>
             <div id="match-container">
               ${matchesHTML || '<p style="text-align:center;color:#666;padding:40px;">Aucun partenaire compatible.<br>Revenez bientôt !</p>'}
@@ -1053,7 +1098,6 @@ app.get('/matching', async (req, res) => {
           </div>
           
           <script>
-            let selectedPartner = null;
             let currentUserId = localStorage.getItem('current_user_id');
             
             function calculerAge(dateNaissance) {
@@ -1066,73 +1110,7 @@ app.get('/matching', async (req, res) => {
               return age;
             }
             
-            window.onload = function() {
-              try {
-                const myDataStr = localStorage.getItem('current_user_data');
-                if (!myDataStr) {
-                  showNotify('Profil requis');
-                  setTimeout(() => { window.location.href = '/profile'; }, 1000);
-                  return;
-                }
-                
-                const myData = JSON.parse(myDataStr);
-                const myGt = myData.genotype;
-                const myGender = myData.gender;
-                const myId = localStorage.getItem('current_user_id');
-                
-                if (!myGt) {
-                  showNotify('Génotype requis');
-                  setTimeout(() => { window.location.href = '/profile'; }, 1000);
-                  return;
-                }
-                
-                let totalFiltered = 0;
-                const cards = document.querySelectorAll('.match-card');
-                
-                cards.forEach(card => {
-                  const pGt = card.dataset.gt;
-                  const pGender = card.dataset.gender;
-                  const pUserId = card.dataset.userid;
-                  let visible = true;
-                  
-                  if (pUserId === myId) visible = false;
-                  if (myGender && pGender === myGender) visible = false;
-                  
-                  if (myGt === 'AS' || myGt === 'SS') {
-                    if (pGt !== 'AA') visible = false;
-                  }
-                  
-                  try {
-                    const blockedUsers = JSON.parse(card.dataset.blockedusers || '[]');
-                    if (blockedUsers.includes(myId)) visible = false;
-                  } catch(e) {}
-                  
-                  if (visible) {
-                    totalFiltered++;
-                    card.style.display = 'flex';
-                  } else {
-                    card.style.display = 'none';
-                  }
-                });
-                
-                document.getElementById('count').innerText = totalFiltered;
-                
-                if ((myGt === 'AS' || myGt === 'SS') && totalFiltered === 0) {
-                  document.getElementById('pop-name').innerText = "Protection Santé";
-                  document.getElementById('pop-details').innerHTML = "Genlove vous présente <b>exclusivement</b> des partenaires AA pour garantir une descendance sans drépanocytose.";
-                  document.getElementById('pop-msg').style.display = "none";
-                  document.getElementById('pop-btn').innerText = "Je comprends";
-                  document.getElementById('pop-btn').onclick = closePopup;
-                  document.getElementById('popup-overlay').style.display = "flex";
-                }
-              } catch(e) {
-                console.error('Matching error:', e);
-                showNotify('❌ Erreur chargement');
-              }
-            };
-            
             function showDetails(p) {
-              selectedPartner = p;
               document.getElementById('pop-name').innerText = p.name + ' #' + p.id;
               document.getElementById('pop-details').innerHTML = 
                 '<b>Âge:</b> ' + calculerAge(p.dob) + ' ans<br>' +
@@ -1141,13 +1119,8 @@ app.get('/matching', async (req, res) => {
                 '<b>Groupe:</b> ' + (p.gs || 'NR') + '<br><br>' +
                 '<b>Projet:</b><br><i>' + p.pj + '</i>';
               document.getElementById('pop-msg').style.display = 'block';
-              document.getElementById('pop-msg').innerHTML = '<b>Compatibilité:</b> ' + 
-                (p.gt === 'AA' ? '✅ Partenaire recommandé' : '⚠️ Vérifiez compatibilité');
-              document.getElementById('pop-btn').innerText = '💬 Contacter';
-              document.getElementById('pop-btn').onclick = () => {
-                sessionStorage.setItem('chatPartner', JSON.stringify(p));
-                window.location.href = '/chat?partner=' + p.fullid;
-              };
+              document.getElementById('pop-msg').innerHTML = '<b>Compatibilité:</b> ✅ Partenaire compatible';
+              document.getElementById('pop-btn').onclick = () => contactUser(p.fullid);
               document.getElementById('popup-overlay').style.display = 'flex';
             }
             
@@ -1156,36 +1129,21 @@ app.get('/matching', async (req, res) => {
             }
             
             async function blockUser(blockedId) {
-              if (!confirm('Bloquer cet utilisateur ? Il n\\'apparaîtra plus dans vos recherches.')) return;
-              
+              if (!confirm('Bloquer cet utilisateur ?')) return;
               try {
-                const userId = localStorage.getItem('current_user_id');
-                const response = await fetch('/api/block-user/' + userId + '/' + blockedId, {
-                  method: 'POST'
-                });
-                
-                if (response.ok) {
-                  showNotify('✅ Utilisateur bloqué');
-                  setTimeout(() => { window.location.reload(); }, 1000);
-                } else {
-                  throw new Error('Erreur blocage');
-                }
-              } catch(e) {
-                showNotify('❌ Erreur: ' + e.message);
-              }
+                const response = await fetch('/api/block-user/' + currentUserId + '/' + blockedId, { method: 'POST' });
+                if (response.ok) { window.location.reload(); }
+              } catch(e) { alert('Erreur blocage'); }
             }
             
-            function closePopup() {
-              document.getElementById('popup-overlay').style.display = 'none';
-            }
+            function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
           </script>
           ${notifyScript}
         </body>
       </html>
     `);
   } catch(e) {
-    console.error("❌ Matching error:", e);
-    res.status(500).send("Erreur chargement");
+    res.status(500).send("Erreur serveur");
   }
 });
 
@@ -2007,3 +1965,6 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`   /settings - Paramètres`);
   console.log('='.repeat(60));
 });
+
+
+
