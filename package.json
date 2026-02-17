@@ -1,17 +1,13 @@
+Ton package.json doit contenir :
 {
   "name": "genlove",
   "version": "4.5.0",
-  "description": "Genlove App V4.5",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^7.5.0",
-    "cors": "^2.8.5",
-  },
-  "engines": {
-    "node": "20.x"
+    "express": "^4.18.0",
+    "mongoose": "^8.0.0",
+    "cors": "^2.8.5"
   }
 }
