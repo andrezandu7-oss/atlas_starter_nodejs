@@ -1,5 +1,5 @@
 // ============================================
-// GENLOVE - ÉTAPE 3 CORRIGÉE
+// GENLOVE - ÉTAPE 4 (Ajout de la charte)
 // ============================================
 
 const express = require('express');
@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema);
 
 // ============================================
-// STYLES
+// STYLES (avec styles pour la charte)
 // ============================================
 const styles = `
   <style>
@@ -144,6 +144,21 @@ const styles = `
       font-size: 0.82rem; 
       color: #d63384; 
     }
+    /* Styles pour la charte */
+    .charte-box {
+      height: 220px;
+      overflow-y: scroll;
+      background: #fff5f7;
+      border: 2px solid #ffdae0;
+      border-radius: 15px;
+      padding: 20px;
+      font-size: 0.85rem;
+      color: #444;
+      line-height: 1.6;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .charte-box b { color: #ff416c; }
   </style>
 `;
 
@@ -172,7 +187,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // ============================================
-// ROUTE API HEALTH (CORRIGÉE)
+// ROUTE API HEALTH
 // ============================================
 app.get('/api/health', async (req, res) => {
   try {
@@ -215,10 +230,58 @@ app.get('/', (req, res) => {
             <div style="width:100%;margin-top:20px;">
               <p style="font-size:0.9rem;color:#1a2a44;margin-bottom:10px;">Avez-vous déjà un compte ?</p>
               <a href="/profile" class="btn-dark">➔ Se connecter</a>
-              <a href="/signup" style="color:#1a2a44;text-decoration:none;font-weight:bold;display:block;margin-top:15px;">Créer un compte</a>
+              <a href="/charte-engagement" style="color:#1a2a44;text-decoration:none;font-weight:bold;display:block;margin-top:15px;">Créer un compte</a>
             </div>
           </div>
         </div>
+      </body>
+    </html>
+  `);
+});
+
+// ============================================
+// PAGE CHARTE D'ENGAGEMENT (NOUVELLE)
+// ============================================
+app.get('/charte-engagement', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>${styles}</head>
+      <body style="background:#fdf2f2;">
+        <div class="app-shell">
+          <div class="page-white" style="display:flex;flex-direction:column;justify-content:center;padding:30px;min-height:100vh;">
+            <div style="font-size:3.5rem;margin-bottom:10px;">📜</div>
+            <h2 style="color:#1a2a44;margin-top:0;">Engagement Éthique</h2>
+            <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Pour protéger la santé de votre future famille.</p>
+            
+            <div class="charte-box" id="charte-box" onscroll="checkScroll(this)">
+              <b>1. Sincérité</b><br>Données médicales conformes aux examens.<br><br>
+              <b>2. Responsabilité</b><br>Vous garantissez l'authenticité de votre profil.<br><br>
+              <b>3. Confidentialité</b><br>Messages privés et sécurisés.<br><br>
+              <b>4. Sérénité</b><br>Algorithmes protègent la santé des enfants.<br><br>
+              <b>5. Respect</b><br>Non-stigmatisation obligatoire.<br>
+              <hr style="border:0;border-top:1px solid #ffdae0;margin:15px 0;">
+              <center><i style="color:#ff416c;">Scrollez jusqu'en bas...</i></center>
+            </div>
+            
+            <button id="agree-btn" onclick="location.href='/signup'" class="btn-pink" style="background:#ccc;cursor:not-allowed;margin-top:25px;width:100%;border:none;" disabled>
+              J'ai lu et je m'engage
+            </button>
+            <a href="/" style="margin-top:15px;color:#666;text-decoration:none;font-size:0.8rem;">Annuler</a>
+          </div>
+        </div>
+        
+        <script>
+          function checkScroll(el) {
+            if (el.scrollHeight - el.scrollTop <= el.clientHeight + 5) {
+              const btn = document.getElementById('agree-btn');
+              btn.disabled = false;
+              btn.style.background = '#ff416c';
+              btn.style.cursor = 'pointer';
+              el.style.borderColor = '#4CAF50';
+            }
+          }
+        </script>
       </body>
     </html>
   `);
@@ -320,7 +383,7 @@ app.get('/signup', (req, res) => {
                 localStorage.setItem('current_user_photo', userData.photo);
                 localStorage.setItem('current_user_id', result.user);
                 alert('✅ Inscription réussie !');
-                window.location.href = '/';
+                window.location.href = '/profile';
               } else {
                 alert('❌ Erreur: ' + result.error);
               }
@@ -346,7 +409,8 @@ app.get('/profile', (req, res) => {
         <div class="app-shell">
           <div class="page-white">
             <h2 style="color:#ff416c;">Profil</h2>
-            <p>Page profil en construction</p>
+            <p>Bienvenue sur votre profil !</p>
+            <p>L'inscription a réussi ✅</p>
             <a href="/" class="btn-dark">Retour accueil</a>
           </div>
         </div>
@@ -360,7 +424,13 @@ app.get('/profile', (req, res) => {
 // ============================================
 app.listen(port, '0.0.0.0', () => {
   console.log('='.repeat(50));
-  console.log(`✅ GENLOVE ÉTAPE 3 CORRIGÉE`);
+  console.log(`✅ GENLOVE ÉTAPE 4 - AVEC CHARTE`);
   console.log(`🌍 Port: ${port}`);
+  console.log('='.repeat(50));
+  console.log(`📱 Routes disponibles:`);
+  console.log(`   / - Accueil`);
+  console.log(`   /charte-engagement - Charte (NOUVEAU)`);
+  console.log(`   /signup - Inscription`);
+  console.log(`   /profile - Profil`);
   console.log('='.repeat(50));
 });
