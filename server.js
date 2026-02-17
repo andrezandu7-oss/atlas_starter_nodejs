@@ -1,5 +1,5 @@
 // ============================================
-// GENLOVE - ÉTAPE 1 (Ajout d'une route)
+// GENLOVE - ÉTAPE 2 (Styles CSS complets)
 // ============================================
 
 const express = require('express');
@@ -15,8 +15,6 @@ app.use(express.json());
 
 // Connexion MongoDB
 const mongoURI = process.env.MONGODB_URI;
-console.log('🔄 Connexion à MongoDB...');
-
 mongoose.connect(mongoURI)
   .then(() => console.log('✅ MongoDB connecté !'))
   .catch(err => {
@@ -24,67 +22,113 @@ mongoose.connect(mongoURI)
     process.exit(1);
   });
 
-// Route d'accueil
+// Styles CSS complets (identiques à l'original)
+const styles = `
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background: #fdf2f2; 
+      display: flex; 
+      justify-content: center;
+    }
+    .app-shell { 
+      width: 100%; 
+      max-width: 420px; 
+      min-height: 100vh; 
+      background: #f4e9da; 
+      display: flex; 
+      flex-direction: column; 
+      box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+    }
+    .home-screen { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 30px; 
+      text-align: center;
+    }
+    .logo-text { 
+      font-size: 3.5rem; 
+      font-weight: bold; 
+      margin-bottom: 5px;
+    }
+    .slogan { 
+      font-weight: bold; 
+      color: #1a2a44; 
+      margin-bottom: 40px; 
+      font-size: 1rem; 
+    }
+    .btn-dark { 
+      background: #1a2a44; 
+      color: white; 
+      padding: 18px; 
+      border-radius: 12px; 
+      text-decoration: none; 
+      font-weight: bold; 
+      display: block; 
+      margin: 15px; 
+    }
+    .btn-pink { 
+      background: #ff416c; 
+      color: white; 
+      padding: 18px; 
+      border-radius: 50px; 
+      text-decoration: none; 
+      font-weight: bold; 
+      display: block; 
+      width: 85%; 
+      margin: 20px auto; 
+    }
+  </style>
+`;
+
+// Page d'accueil avec styles
 app.get('/', (req, res) => {
   res.send(`
+    <!DOCTYPE html>
     <html>
-    <head>
-        <title>Genlove - Étape 1</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body { background: #fdf2f2; font-family: Arial; display: flex; justify-content: center; padding: 20px; }
-            .card { background: white; border-radius: 20px; padding: 30px; max-width: 400px; text-align: center; }
-            h1 { color: #ff416c; }
-            .success { color: green; }
-            .btn { background: #ff416c; color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; display: inline-block; margin-top: 20px; }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <h1>💙 Genlove</h1>
-            <p class="success">✅ Étape 1 réussie !</p>
-            <p>MongoDB: ${mongoose.connection.readyState === 1 ? '✅ Connecté' : '⏳ En attente'}</p>
-            <a href="/test" class="btn">Tester route /test</a>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Genlove</title>
+        ${styles}
+      </head>
+      <body>
+        <div class="app-shell">
+          <div class="home-screen">
+            <div class="logo-text">
+              <span style="color:#1a2a44;">Gen</span>
+              <span style="color:#ff416c;">love</span>
+            </div>
+            <div class="slogan">Unissez cœur et santé pour bâtir des couples sains</div>
+            <div style="width:100%;margin-top:20px;">
+              <p style="font-size:0.9rem;color:#1a2a44;margin-bottom:10px;">Avez-vous déjà un compte ?</p>
+              <a href="/profile" class="btn-dark">➔ Se connecter</a>
+              <a href="/signup" style="color:#1a2a44;text-decoration:none;font-weight:bold;display:block;margin-top:15px;">Créer un compte</a>
+            </div>
+            <div style="font-size:0.75rem;color:#666;margin-top:25px;">Vos données sont cryptées et confidentielles.</div>
+          </div>
         </div>
-    </body>
+      </body>
     </html>
   `);
 });
 
-// Nouvelle route de test
-app.get('/test', (req, res) => {
-  res.send(`
-    <html>
-    <head>
-        <title>Route test</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body { background: #fdf2f2; font-family: Arial; display: flex; justify-content: center; padding: 20px; }
-            .card { background: white; border-radius: 20px; padding: 30px; max-width: 400px; text-align: center; }
-            .success { color: green; }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <h1>✅ Route /test fonctionne</h1>
-            <p><a href="/">Retour</a></p>
-        </div>
-    </body>
-    </html>
-  `);
-});
+// Routes temporaires (redirection vers accueil)
+app.get('/profile', (req, res) => res.redirect('/'));
+app.get('/signup', (req, res) => res.redirect('/'));
 
 // Route API
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    success: true, 
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-  });
+  res.json({ success: true, mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
 app.listen(port, '0.0.0.0', () => {
   console.log('='.repeat(50));
-  console.log(`✅ GENLOVE ÉTAPE 1 DÉMARRÉE`);
+  console.log(`✅ GENLOVE ÉTAPE 2 - STYLES COMPLETS`);
   console.log(`🌍 Port: ${port}`);
   console.log('='.repeat(50));
 });
