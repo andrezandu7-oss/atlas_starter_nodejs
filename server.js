@@ -243,85 +243,77 @@ app.get('/inbox', async (req, res) => {
 });
 
 // ✅ CHAT AMÉLIORÉ (Permanente + Blocage + Suppression)
-app.get('/chat', async (req, res) => {
-    // Logique chat identique mais avec messages permanents via API /api/messages/:u1/:u2
+app.get('/chat', (req, res) => {
     res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body>
-        <div class="app-shell">
-            <div style="background:white;padding:20px;text-align:center;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <a href="/inbox" style="font-size:1.4rem;">←</a>
-                    <h3 id="chat-partner-name" style="margin:0;color:#1a2a44;">Discussion</h3>
-                    <div style="display:flex;gap:10px;">
-                        <button class="btn-action btn-block" onclick="blockUser()">🚫 Bloquer</button>
-                        <button class="btn-action btn-delete" onclick="deleteChat()">🗑️ Supprimer</button>
-                    </div>
+    <div class="app-shell">
+        <div style="background:white;padding:20px;text-align:center;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <a href="/inbox" style="font-size:1.4rem;">←</a>
+                <h3>Discussion</h3>
+                <div>
+                    <button class="btn-action" style="background:#dc3545;color:white;padding:8px 12px;border-radius:8px;border:none;margin-right:5px;cursor:pointer;" onclick="blockUser()">🚫</button>
+                    <button class="btn-action" style="background:#6c757d;color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;" onclick="deleteChat()">🗑️</button>
                 </div>
             </div>
-            <div class="chat-container" id="chat-messages"></div>
-            <div class="chat-input">
-                <input type="text" class="message-input" id="message-input" placeholder="Tapez votre message..." onkeypress="if(event.key==='Enter')sendMessage()">
-                <button onclick="sendMessage()" style="width:50px;height:50px;border-radius:50%;background:#ff416c;color:white;border:none;font-size:1.2rem;">➤</button>
-            </div>
         </div>
-        <script>
-            // Logique chat complète avec API MongoDB permanente
-            let currentChatId = sessionStorage.getItem('chatPartnerId');
+        <div id="chat-messages" style="padding:20px;height:calc(100vh - 200px);overflow-y:auto;background:#f8f9fa;"></div>
+        <div style="display:flex;gap:10px;padding:15px;background:white;border-top:1px solid #eee;">
+            <input id="message-input" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:25px;outline:none;" placeholder="Votre message..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()" style="width:50px;height:50px;border-radius:50%;background:#ff416c;color:white;border:none;font-size:1.2em;">→</button>
+        </div>
+    </div>
+    <script>
+    let currentChatId=sessionStorage.getItem('chatPartnerId');
+    let userId=localStorage.getItem('current_user_id');
+    
+    async function loadMessages(){
+        if(!currentChatId||!userId)return;
+        try{
+            const response=await fetch(`/api/messages/${userId}/${currentChatId}`);
+            const messages=await response.json();
+            document.getElementById('chat-messages').innerHTML=messages.map(m=>
+                `<div style="margin:10px 0;padding:12px 16px;border-radius:18px;max-width:80%;${
+                    m.senderID===userId?'background:#ff416c;color:white;margin-left:auto;text-align:right':'background:#e9ecef;margin-right:auto'
+                }">${m.text}</div>`
+            ).join('');
+            document.getElementById('chat-messages').scrollTop=document.getElementById('chat-messages').scrollHeight;
+        }catch(e){console.error('Erreur:',e);}
+    }
+    
+    async function sendMessage(){
+        const input=document.getElementById('message-input');
+        const text=input.value.trim();
+        if(!text||!currentChatId)return;
+        try{
+            await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({senderID:userId,receiverID:currentChatId,text})
+            });
+            input.value='';
             loadMessages();
-            async function sendMessage() {
-                const input = document.getElementById('message-input');
-                const text = input.value.trim();
-                if (!text || !currentChatId) return;
-                try {
-                    await fetch('/api/messages', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            senderID: localStorage.getItem('current_user_id'),
-                            receiverID: currentChatId,
-                            text: text
-                        })
-                    });
-                    input.value = '';
-                    loadMessages();
-                } catch(e) { showNotify('❌ Erreur envoi'); }
-            }
-            async function loadMessages() {
-                if (!currentChatId) return;
-                const userId = localStorage.getItem('current_user_id');
-                const response = await fetch(`/api/messages/${userId}/${currentChatId}`);
-                const messages = await response.json();
-                const container = document.getElementById('chat-messages');
-                container.innerHTML = messages.map(m => 
-                    `<div class="chat-message ${m.senderID._id === userId ? 'chat-sent' : 'chat-received'}">
-                        ${m.text}
-                    </div>`
-                ).join('');
-                container.scrollTop = container.scrollHeight;
-            }
-            async function blockUser() {
-                if (confirm('Bloquer cet utilisateur ?')) {
-                    await fetch('/api/block-user', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            userId: localStorage.getItem('current_user_id'),
-                            blockedId: currentChatId
-                        })
-                    });
-                    showNotify('👤 Utilisateur bloqué');
-                    setTimeout(() => window.location.href = '/inbox', 1500);
-                }
-            }
-            async function deleteChat() {
-                if (confirm('Supprimer définitivement cette discussion ?')) {
-                    const userId = localStorage.getItem('current_user_id');
-                    await fetch(`/api/messages/${userId}/${currentChatId}`, { method: 'DELETE' });
-                    showNotify('🗑️ Discussion supprimée');
-                    setTimeout(() => window.location.href = '/inbox', 1500);
-                }
-            }
-            setInterval(loadMessages, 3000);
-        </script>${notifyScript}</body></html>`);
+        }catch(e){alert('❌ Erreur envoi');}
+    }
+    
+    async function blockUser(){
+        if(confirm('Bloquer cet utilisateur ?')){
+            await fetch('/api/block-user',{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({userId:userId,blockedId:currentChatId})
+            });
+            alert('👤 Bloqué');
+            setTimeout(()=>location.href='/inbox',1500);
+        }
+    }
+    
+    async function deleteChat(){
+        if(confirm('Supprimer discussion ?')){
+            await fetch(`/api/messages/${userId}/${currentChatId}`,{method:'DELETE'});
+            alert('🗑️ Supprimé');
+            setTimeout(()=>location.href='/inbox',1500);
+        }
+    }
+    
+    loadMessages();
+    setInterval(loadMessages,3000);
+    </script>${notifyScript}</body></html>`);
 });
 
 // ✅ MATCHING AVEC RÈGLES SANTÉ ÉTENDUES + NAV INBOX
@@ -335,3 +327,4 @@ app.get('/matching', async (req, res) => {
 app.listen(port, () => {
     console.log(`🚀 Genlove V4.5 live sur port ${port}`);
 });
+
