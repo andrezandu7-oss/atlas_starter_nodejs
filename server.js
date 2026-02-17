@@ -1,5 +1,5 @@
 // ============================================
-// GENLOVE - CHARTE DIRECTEMENT SUR ACCUEIL
+// GENLOVE - VERSION AVEC CHARTE ORIGINALE
 // ============================================
 
 const express = require('express');
@@ -12,6 +12,8 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.static('public'));
 
 // Connexion MongoDB
 const mongoURI = process.env.MONGODB_URI;
@@ -38,7 +40,18 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
-// Styles COMPLETS (incluant la charte)
+// ============================================
+// HEAD ET STYLES ORIGINAUX (TRÈS IMPORTANT)
+// ============================================
+const head = `
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23ff416c'>💙</text></svg>">
+  <meta name="theme-color" content="#ff416c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Genlove</title>
+`;
+
 const styles = `
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,12 +70,6 @@ const styles = `
       flex-direction: column; 
       box-shadow: 0 0 20px rgba(0,0,0,0.1); 
     }
-    .page-white { 
-      background: white; 
-      min-height: 100vh; 
-      padding: 25px 20px; 
-      text-align: center;
-    }
     .home-screen { 
       flex: 1; 
       display: flex; 
@@ -70,6 +77,7 @@ const styles = `
       align-items: center; 
       justify-content: center; 
       padding: 30px; 
+      text-align: center;
     }
     .logo-text { 
       font-size: 3.5rem; 
@@ -81,6 +89,12 @@ const styles = `
       color: #1a2a44; 
       margin-bottom: 40px; 
       font-size: 1rem; 
+    }
+    .page-white { 
+      background: white; 
+      min-height: 100vh; 
+      padding: 25px 20px; 
+      text-align: center;
     }
     .btn-dark { 
       background: #1a2a44; 
@@ -140,48 +154,12 @@ const styles = `
       font-size: 0.82rem; 
       color: #d63384; 
     }
-    /* STYLES SPÉCIFIQUES POUR LA CHARTE */
-    .charte-section {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      margin: 20px 0;
-      text-align: left;
-    }
-    .charte-title {
-      color: #ff416c;
-      font-size: 1.5rem;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    .charte-item {
-      margin-bottom: 15px;
-      padding: 10px;
-      background: #fff5f7;
-      border-radius: 10px;
-      border-left: 4px solid #ff416c;
-    }
-    .charte-item b {
-      color: #1a2a44;
-      display: block;
-      margin-bottom: 5px;
-    }
-    .charte-item p {
-      color: #666;
-      font-size: 0.9rem;
-    }
-    .charte-scroll {
-      max-height: 300px;
-      overflow-y: auto;
-      padding: 10px;
-      border: 2px solid #ffdae0;
-      border-radius: 15px;
-      background: white;
-    }
   </style>
 `;
 
-// Route API inscription
+// ============================================
+// ROUTE API
+// ============================================
 app.post('/api/register', async (req, res) => {
   try {
     const { firstName, lastName, gender, dob, residence, genotype, bloodGroup, desireChild, photo } = req.body;
@@ -203,7 +181,6 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Route API health
 app.get('/api/health', async (req, res) => {
   try {
     const userCount = mongoose.connection.readyState === 1 ? await User.countDocuments() : 0;
@@ -221,135 +198,49 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// PAGE D'ACCUEIL AVEC CHARTE DIRECTEMENT INTÉGRÉE
+// ============================================
+// PAGE D'ACCUEIL
+// ============================================
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Genlove</title>
-        ${styles}
-      </head>
+      <head>${head}${styles}</head>
       <body>
         <div class="app-shell">
-          <!-- SECTION ACCUEIL -->
           <div class="home-screen">
             <div class="logo-text">
               <span style="color:#1a2a44;">Gen</span>
               <span style="color:#ff416c;">love</span>
             </div>
             <div class="slogan">Unissez cœur et santé pour bâtir des couples sains</div>
-          </div>
-          
-          <!-- SECTION CHARTE DIRECTEMENT VISIBLE -->
-          <div class="charte-section">
-            <div class="charte-title">📜 Engagement Santé</div>
-            <div class="charte-scroll" id="charteScroll" onscroll="checkCharteScroll()">
-              
-              <div class="charte-item">
-                <b>1. Sincérité</b>
-                <p>Données médicales conformes aux examens. Vous vous engagez à fournir des informations véridiques sur votre génotype et votre groupe sanguin.</p>
-              </div>
-              
-              <div class="charte-item">
-                <b>2. Responsabilité</b>
-                <p>Vous garantissez l'authenticité de votre profil. Toute fausse déclaration entraînera la suppression immédiate de votre compte.</p>
-              </div>
-              
-              <div class="charte-item">
-                <b>3. Confidentialité</b>
-                <p>Messages privés et sécurisés. Vos conversations sont cryptées et protégées.</p>
-              </div>
-              
-              <div class="charte-item">
-                <b>4. Sérénité</b>
-                <p>Algorithmes protègent la santé des enfants. La compatibilité génétique est notre priorité pour éviter les risques de drépanocytose.</p>
-              </div>
-              
-              <div class="charte-item">
-                <b>5. Respect</b>
-                <p>Non-stigmatisation obligatoire. Toute discrimination basée sur le génotype est interdite.</p>
-              </div>
-              
-              <div style="text-align:center; color:#ff416c; padding:10px; font-style:italic;">
-                ↓ Scrollez jusqu'en bas pour accepter ↓
-              </div>
+            <div style="width:100%;margin-top:20px;">
+              <p style="font-size:0.9rem;color:#1a2a44;margin-bottom:10px;">Avez-vous déjà un compte ?</p>
+              <a href="/profile" class="btn-dark">➔ Se connecter</a>
+              <a href="/charte-engagement" style="color:#1a2a44;text-decoration:none;font-weight:bold;display:block;margin-top:15px;">Créer un compte</a>
             </div>
-            
-            <div style="display:flex; align-items:center; margin:15px 0; padding:10px; background:#f0f7ff; border-radius:10px;">
-              <input type="checkbox" id="acceptCharte" disabled style="width:20px; height:20px; margin-right:10px;">
-              <label for="acceptCharte" id="charteLabel" style="color:#999;">J'ai lu et j'accepte la charte d'engagement santé (scrollez d'abord)</label>
-            </div>
-            
-            <button id="continueBtn" class="btn-pink" style="background:#ccc; cursor:not-allowed; width:100%;" disabled onclick="goToSignup()">
-              Continuer vers l'inscription
-            </button>
-            
-            <p style="text-align:center; margin-top:15px;">
-              <a href="#login" style="color:#1a2a44;">Déjà un compte ? Se connecter</a>
-            </p>
-          </div>
-          
-          <div style="font-size:0.75rem; color:#666; text-align:center; padding:20px;">
-            Vos données sont cryptées et confidentielles.
           </div>
         </div>
-        
-        <script>
-          function checkCharteScroll() {
-            const scrollDiv = document.getElementById('charteScroll');
-            const isAtBottom = scrollDiv.scrollHeight - scrollDiv.scrollTop <= scrollDiv.clientHeight + 10;
-            
-            const checkbox = document.getElementById('acceptCharte');
-            const label = document.getElementById('charteLabel');
-            const button = document.getElementById('continueBtn');
-            
-            if (isAtBottom) {
-              checkbox.disabled = false;
-              label.style.color = '#1a2a44';
-              label.innerHTML = '✅ J'ai lu et j'accepte la charte d'engagement santé';
-              
-              checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                  button.disabled = false;
-                  button.style.background = '#ff416c';
-                  button.style.cursor = 'pointer';
-                } else {
-                  button.disabled = true;
-                  button.style.background = '#ccc';
-                  button.style.cursor = 'not-allowed';
-                }
-              });
-            }
-          }
-          
-          function goToSignup() {
-            if (document.getElementById('acceptCharte').checked) {
-              window.location.href = '/signup';
-            } else {
-              alert('Veuillez accepter la charte d\\'engagement');
-            }
-          }
-          
-          // Vérifier au chargement
-          window.onload = function() {
-            const scrollDiv = document.getElementById('charteScroll');
-            scrollDiv.addEventListener('scroll', checkCharteScroll);
-          };
-        </script>
       </body>
     </html>
   `);
 });
 
+// ============================================
+// ✅ CHARTE ENGAGEMENT (EXACTEMENT TON CODE)
+// ============================================
+app.get('/charte-engagement', (req, res) => {
+  res.send(`<!DOCTYPE html><html><head>${head}${styles}</head><body style="background:#fdf2f2;"><div class="app-shell"><div class="page-white" style="display:flex;flex-direction:column;justify-content:center;padding:30px;min-height:100vh;"><div style="font-size:3.5rem;margin-bottom:10px;">🛡️</div><h2 style="color:#1a2a44;margin-top:0;">Engagement Éthique</h2><p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Pour protéger la santé de votre future famille.</p><div id="charte-box" style="height:220px;overflow-y:scroll;background:#fff5f7;border:2px solid #ffdae0;border-radius:15px;padding:20px;font-size:0.85rem;color:#444;line-height:1.6;text-align:left;" onscroll="checkScroll(this)"><b style="color:#ff416c;">1. Sincérité</b><br>Données médicales conformes aux examens.<br><br><b style="color:#ff416c;">2. Responsabilité</b><br>Vous garantissez l'authenticité de votre profil.<br><br><b style="color:#ff416c;">3. Confidentialité</b><br>Échanges éphémères (30min max).<br><br><b style="color:#ff416c;">4. Sérénité</b><br>Algorithmes protègent la santé des enfants.<br><br><b style="color:#ff416c;">5. Respect</b><br>Non-stigmatisation obligatoire.<br><hr style="border:0;border-top:1px solid #ffdae0;margin:15px 0;"><center><i style="color:#ff416c;">Scrollez jusqu'en bas...</i></center></div><button id="agree-btn" onclick="location.href='/signup'" class="btn-pink" style="background:#ccc;cursor:not-allowed;margin-top:25px;width:100%;border:none;" disabled>J'ai lu et je m'engage</button><a href="/" style="margin-top:15px;color:#666;text-decoration:none;font-size:0.8rem;">Annuler</a></div></div></div><script>function checkScroll(el){if(el.scrollHeight-el.scrollTop<=el.clientHeight+5){const btn=document.getElementById('agree-btn');btn.disabled=false;btn.style.background='#ff416c';btn.style.cursor='pointer';el.style.borderColor='#4CAF50';}}</script></body></html>`);
+});
+
+// ============================================
 // PAGE INSCRIPTION
+// ============================================
 app.get('/signup', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html>
-      <head>${styles}</head>
+      <head>${head}${styles}</head>
       <body>
         <div class="app-shell">
           <div class="page-white">
@@ -452,12 +343,14 @@ app.get('/signup', (req, res) => {
   `);
 });
 
-// PAGE PROFIL
+// ============================================
+// PAGE PROFIL (simplifiée)
+// ============================================
 app.get('/profile', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html>
-      <head>${styles}</head>
+      <head>${head}${styles}</head>
       <body>
         <div class="app-shell">
           <div class="page-white">
@@ -472,10 +365,18 @@ app.get('/profile', (req, res) => {
   `);
 });
 
+// ============================================
 // DÉMARRAGE
+// ============================================
 app.listen(port, '0.0.0.0', () => {
   console.log('='.repeat(50));
-  console.log(`✅ GENLOVE - CHARTE SUR ACCUEIL`);
+  console.log(`✅ GENLOVE - CHARTE ORIGINALE`);
   console.log(`🌍 Port: ${port}`);
+  console.log('='.repeat(50));
+  console.log(`📱 Routes:`);
+  console.log(`   / - Accueil`);
+  console.log(`   /charte-engagement - Charte (ORIGINALE)`);
+  console.log(`   /signup - Inscription`);
+  console.log(`   /profile - Profil`);
   console.log('='.repeat(50));
 });
