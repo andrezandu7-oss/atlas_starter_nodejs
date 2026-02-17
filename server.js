@@ -1,5 +1,5 @@
 // ============================================
-// GENLOVE - ÉTAPE 3 (Schéma User + Inscription)
+// GENLOVE - ÉTAPE 3 CORRIGÉE
 // ============================================
 
 const express = require('express');
@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema);
 
 // ============================================
-// STYLES (identiques à l'étape 2)
+// STYLES
 // ============================================
 const styles = `
   <style>
@@ -168,6 +168,26 @@ app.post('/api/register', async (req, res) => {
     res.json({ success: true, user: newUser._id });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================
+// ROUTE API HEALTH (CORRIGÉE)
+// ============================================
+app.get('/api/health', async (req, res) => {
+  try {
+    const userCount = mongoose.connection.readyState === 1 ? await User.countDocuments() : 0;
+    res.json({ 
+      success: true, 
+      mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+      users: userCount
+    });
+  } catch (e) {
+    res.json({ 
+      success: true, 
+      mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+      users: 0
+    });
   }
 });
 
@@ -336,22 +356,11 @@ app.get('/profile', (req, res) => {
 });
 
 // ============================================
-// ROUTE API HEALTH
-// ============================================
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    success: true, 
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    users: mongoose.connection.readyState === 1 ? await User.countDocuments() : 0
-  });
-});
-
-// ============================================
 // DÉMARRAGE
 // ============================================
 app.listen(port, '0.0.0.0', () => {
   console.log('='.repeat(50));
-  console.log(`✅ GENLOVE ÉTAPE 3 - SCHÉMA USER`);
+  console.log(`✅ GENLOVE ÉTAPE 3 CORRIGÉE`);
   console.log(`🌍 Port: ${port}`);
   console.log('='.repeat(50));
 });
