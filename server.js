@@ -1,5 +1,5 @@
 // ============================================
-// GENLOVE - ÉTAPE 4 (Ajout de la charte)
+// GENLOVE - ÉTAPE 4 CORRIGÉE (charte visible)
 // ============================================
 
 const express = require('express');
@@ -22,9 +22,7 @@ mongoose.connect(mongoURI)
     process.exit(1);
   });
 
-// ============================================
-// SCHÉMA USER
-// ============================================
+// Schéma User
 const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -40,9 +38,7 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
-// ============================================
-// STYLES (avec styles pour la charte)
-// ============================================
+// Styles
 const styles = `
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -144,7 +140,6 @@ const styles = `
       font-size: 0.82rem; 
       color: #d63384; 
     }
-    /* Styles pour la charte */
     .charte-box {
       height: 220px;
       overflow-y: scroll;
@@ -162,9 +157,7 @@ const styles = `
   </style>
 `;
 
-// ============================================
-// ROUTE API D'INSCRIPTION
-// ============================================
+// Route API inscription
 app.post('/api/register', async (req, res) => {
   try {
     const { firstName, lastName, gender, dob, residence, genotype, bloodGroup, desireChild, photo } = req.body;
@@ -186,9 +179,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// ============================================
-// ROUTE API HEALTH
-// ============================================
+// Route API health
 app.get('/api/health', async (req, res) => {
   try {
     const userCount = mongoose.connection.readyState === 1 ? await User.countDocuments() : 0;
@@ -206,9 +197,7 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// ============================================
 // PAGE D'ACCUEIL
-// ============================================
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -230,7 +219,7 @@ app.get('/', (req, res) => {
             <div style="width:100%;margin-top:20px;">
               <p style="font-size:0.9rem;color:#1a2a44;margin-bottom:10px;">Avez-vous déjà un compte ?</p>
               <a href="/profile" class="btn-dark">➔ Se connecter</a>
-              <a href="/charte-engagement" style="color:#1a2a44;text-decoration:none;font-weight:bold;display:block;margin-top:15px;">Créer un compte</a>
+              <a href="/charte-engagement" style="color:#1a2a44;text-decoration:none;font-weight:bold;display:block;margin-top:15px;">📜 Créer un compte (charte)</a>
             </div>
           </div>
         </div>
@@ -239,9 +228,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// ============================================
-// PAGE CHARTE D'ENGAGEMENT (NOUVELLE)
-// ============================================
+// PAGE CHARTE D'ENGAGEMENT
 app.get('/charte-engagement', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -287,9 +274,7 @@ app.get('/charte-engagement', (req, res) => {
   `);
 });
 
-// ============================================
-// PAGE D'INSCRIPTION
-// ============================================
+// PAGE INSCRIPTION
 app.get('/signup', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -397,9 +382,7 @@ app.get('/signup', (req, res) => {
   `);
 });
 
-// ============================================
-// PAGE PROFIL (temporaire)
-// ============================================
+// PAGE PROFIL
 app.get('/profile', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -419,17 +402,15 @@ app.get('/profile', (req, res) => {
   `);
 });
 
-// ============================================
 // DÉMARRAGE
-// ============================================
 app.listen(port, '0.0.0.0', () => {
   console.log('='.repeat(50));
-  console.log(`✅ GENLOVE ÉTAPE 4 - AVEC CHARTE`);
+  console.log(`✅ GENLOVE ÉTAPE 4 - CHARTE VISIBLE`);
   console.log(`🌍 Port: ${port}`);
   console.log('='.repeat(50));
-  console.log(`📱 Routes disponibles:`);
+  console.log(`📱 Routes:`);
   console.log(`   / - Accueil`);
-  console.log(`   /charte-engagement - Charte (NOUVEAU)`);
+  console.log(`   /charte-engagement - Charte (avec scroll)`);
   console.log(`   /signup - Inscription`);
   console.log(`   /profile - Profil`);
   console.log('='.repeat(50));
