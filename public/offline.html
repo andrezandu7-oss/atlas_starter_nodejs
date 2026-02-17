@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genlove - Hors ligne</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fdf2f2 0%, #f4e9da 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .offline-container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 25px;
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .emoji-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #ff416c;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: #1a2a44;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        
+        .btn-retry {
+            background: #ff416c;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .btn-retry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 65, 108, 0.3);
+        }
+        
+        .btn-retry:active {
+            transform: translateY(0);
+        }
+        
+        .small-note {
+            color: #999;
+            font-size: 0.8rem;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="emoji-icon">📱</div>
+        <h1>Hors ligne</h1>
+        <p>
+            Oups ! Vous n'êtes pas connecté à Internet.<br>
+            Pas d'inquiétude, reconnectez-vous pour retrouver vos matchs et messages.
+        </p>
+        <button class="btn-retry" onclick="window.location.reload()">
+            🔄 Réessayer
+        </button>
+        <p class="small-note">
+            💙 Genlove fonctionnera automatiquement dès que vous serez connecté
+        </p>
+    </div>
+</body>
+</html>
