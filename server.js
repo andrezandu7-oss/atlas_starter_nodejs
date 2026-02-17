@@ -510,4 +510,4 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`   /signup - Inscription`);
   console.log(`   /profile - Profil`);
   console.log('='.repeat(50));
-});
+})
