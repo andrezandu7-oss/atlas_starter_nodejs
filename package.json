@@ -1,17 +1,20 @@
-{
-  "name": "genlove",
-  "version": "4.5.0",
-  "description": "Genlove V4.5 - Dating Santé PWA Luanda AO",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "mongoose": "^8.3.1",
-    "cors": "^2.8.5"
-  },
-  "engines": {
-    "node": "22.x"
-  }
-}
+# 1. Créer le dossier du projet
+mkdir genlove-v4.5
+cd genlove-v4.5
+
+# 2. Initialiser le projet
+npm init -y
+
+# 3. Installer les dépendances
+npm install express mongoose cors dotenv
+npm install --save-dev nodemon
+
+# 4. Créer le fichier .env
+echo "MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/genlove" > .env
+echo "PORT=3000" >> .env
+
+# 5. Copier le code serveur dans server.js
+# (mettez le code que je vous ai fourni dans server.js)
+
+# 6. Lancer l'application
+npm start
