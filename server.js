@@ -92,7 +92,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ============================================
-// STYLES CSS
+// STYLES CSS MIS À JOUR
 // ============================================
 const styles = `
 <style>
@@ -251,11 +251,58 @@ const styles = `
     .inbox-item {
         cursor: pointer;
         transition: all 0.3s;
+        position: relative;
     }
     
     .inbox-item:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 25px rgba(255,65,108,0.15);
+    }
+    
+    /* Style pour les messages non lus */
+    .inbox-item.unread {
+        background: #e8f0fe;
+        border-left: 5px solid #ff416c;
+    }
+    
+    .inbox-item.unread .user-name {
+        color: #ff416c;
+        font-weight: bold;
+    }
+    
+    .inbox-item.unread .message-preview {
+        color: #1a2a44;
+        font-weight: 600;
+    }
+    
+    .unread-badge {
+        background: #ff416c;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+        min-width: 22px;
+        height: 22px;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+        margin-left: 8px;
+    }
+    
+    .profile-unread {
+        background: #ff416c;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 5px;
+        padding: 0 4px;
     }
     
     .st-item { 
@@ -494,6 +541,21 @@ function calculerAge(dateNaissance) {
     return age;
 }
 
+function formatTimeAgo(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "À l'instant";
+    if (diffMins < 60) return `Il y a ${diffMins} min`;
+    if (diffHours < 24) return `Il y a ${diffHours} h`;
+    if (diffDays === 1) return 'Hier';
+    return date.toLocaleDateString();
+}
+
 // ============================================
 // ROUTES PRINCIPALES
 // ============================================
@@ -524,17 +586,23 @@ app.get('/sas-validation', async (req, res) => {
     res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Validation - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><div style="font-size:5rem; margin:20px 0;">⚖️</div><h2>Serment d\'Honneur</h2><div style="background:#fff5f7; border-radius:25px; padding:30px; margin:20px 0; border:2px solid #ffdae0; text-align:left; font-size:1.2rem;"><p><strong>"Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité."</strong></p></div><label style="display:flex; align-items:center; justify-content:center; gap:15px; padding:20px; background:#f8f9fa; border-radius:15px; margin:20px 0; font-size:1.2rem;"><input type="checkbox" id="honorCheck" style="width:25px; height:25px;"> Je le jure</label><button id="validateBtn" class="btn-pink" onclick="validateHonor()" disabled>Accéder à mon profil</button></div></div><script>document.getElementById("honorCheck").addEventListener("change",function(){document.getElementById("validateBtn").disabled=!this.checked;});async function validateHonor(){const res=await fetch("/api/validate-honor",{method:"POST"});if(res.ok) window.location.href="/profile";}</script></body></html>');
 });
 
-// PROFIL - AVEC MENU ACCUEIL
+// PROFIL - AVEC BADGE DE MESSAGES NON LUS
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
         if (!user) return res.redirect('/');
+        
         const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false });
+        
+        // Formatage du badge pour afficher 0 ou le nombre
+        const unreadBadge = unreadCount > 0 
+            ? '<span class="profile-unread" style="background:#ff416c; color:white; padding:3px 8px; border-radius:15px; font-size:0.8rem; margin-left:5px;">' + unreadCount + '</span>'
+            : '';
         
         res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Mon Profil - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">' +
             '<a href="/" class="btn-dark" style="padding:12px 20px; margin:0; font-size:1rem;">🏠 Accueil</a>' +
-            '<a href="/inbox" class="btn-pink" style="padding:12px 20px; margin:0; font-size:1rem;">📬 ' + (unreadCount > 0 ? unreadCount : '') + '</a>' +
+            '<a href="/inbox" class="btn-pink" style="padding:12px 20px; margin:0; font-size:1rem; display:flex; align-items:center;">📬 ' + unreadBadge + '</a>' +
             '<a href="/settings" style="font-size:2rem; color:#1a2a44;">⚙️</a>' +
             '</div>' +
             '<div class="photo-circle" style="background-image:url(\'' + (user.photo || '') + '\');"></div>' +
@@ -609,7 +677,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// INBOX
+// INBOX - AVEC INDICATEURS DE MESSAGES NON LUS
 app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -627,7 +695,18 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
             if (currentUser.blockedUsers?.includes(otherUser._id)) continue;
             
             if (!conversations.has(otherUser._id.toString())) {
-                conversations.set(otherUser._id.toString(), { user: otherUser, lastMessage: msg });
+                // Compter les messages non lus pour cette conversation
+                const unreadCount = await Message.countDocuments({
+                    senderId: otherUser._id,
+                    receiverId: currentUser._id,
+                    read: false
+                });
+                
+                conversations.set(otherUser._id.toString(), { 
+                    user: otherUser, 
+                    lastMessage: msg,
+                    unreadCount: unreadCount
+                });
             }
         }
         
@@ -636,17 +715,36 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
             inboxHTML = '<div class="empty-message"><span>📭</span><h3>Boîte vide</h3><p>Commencez une conversation !</p><a href="/matching" class="btn-pink" style="width:auto; display:inline-block; margin-top:15px;">Trouver des partenaires</a></div>';
         } else {
             conversations.forEach(conv => {
-                inboxHTML += '<div class="inbox-item" onclick="window.location.href=\'/chat?partnerId=' + conv.user._id + '\'"><div><b style="font-size:1.3rem;">' + conv.user.firstName + ' ' + conv.user.lastName + '</b><br><span style="font-size:1.1rem;">' + conv.lastMessage.text.substring(0,50) + '...</span></div></div>';
+                const hasUnread = conv.unreadCount > 0;
+                const unreadClass = hasUnread ? 'unread' : '';
+                const unreadBadge = hasUnread ? '<span class="unread-badge">' + conv.unreadCount + '</span>' : '';
+                const lastMessageText = conv.lastMessage.text.substring(0, 50) + (conv.lastMessage.text.length > 50 ? '...' : '');
+                const timeAgo = formatTimeAgo(conv.lastMessage.timestamp);
+                
+                inboxHTML += '<div class="inbox-item ' + unreadClass + '" onclick="window.location.href=\'/chat?partnerId=' + conv.user._id + '\'">' +
+                    '<div style="flex:1">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+                    '<b class="user-name" style="font-size:1.3rem;">' + conv.user.firstName + ' ' + conv.user.lastName + unreadBadge + '</b>' +
+                    '<span style="font-size:0.9rem; color:#999;">' + timeAgo + '</span>' +
+                    '</div>' +
+                    '<div class="message-preview" style="font-size:1.1rem; margin-top:5px; ' + (hasUnread ? 'font-weight:600; color:#1a2a44;' : 'color:#666;') + '">' + lastMessageText + '</div>' +
+                    '</div>' +
+                    '</div>';
             });
         }
         
-        res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Messages - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Boîte de réception</h2>' + inboxHTML + '<div class="navigation"><a href="/profile" class="nav-link">← Mon profil</a><a href="/matching" class="nav-link">Matching →</a></div></div></div></body></html>');
+        // Compter le total des messages non lus pour afficher dans le titre
+        const totalUnread = await Message.countDocuments({ receiverId: currentUser._id, read: false });
+        const titleUnread = totalUnread > 0 ? ' (' + totalUnread + ')' : '';
+        
+        res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Messages - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Boîte de réception' + titleUnread + '</h2>' + inboxHTML + '<div class="navigation"><a href="/profile" class="nav-link">← Mon profil</a><a href="/matching" class="nav-link">Matching →</a></div></div></div></body></html>');
     } catch (error) {
+        console.error(error);
         res.status(500).send('Erreur inbox');
     }
 });
 
-// CHAT
+// CHAT - AVEC MARQUAGE DES MESSAGES COMME LUS
 app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -664,7 +762,18 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         
         if (currentUser.blockedUsers?.includes(partnerId)) return res.redirect('/inbox');
         
-        const messages = await Message.find({ $or: [{ senderId: currentUser._id, receiverId: partnerId }, { senderId: partnerId, receiverId: currentUser._id }] }).sort({ timestamp: 1 });
+        // Marquer les messages comme lus quand on ouvre le chat
+        await Message.updateMany(
+            { senderId: partnerId, receiverId: currentUser._id, read: false },
+            { read: true }
+        );
+        
+        const messages = await Message.find({ 
+            $or: [
+                { senderId: currentUser._id, receiverId: partnerId },
+                { senderId: partnerId, receiverId: currentUser._id }
+            ] 
+        }).sort({ timestamp: 1 });
         
         let messagesHTML = '';
         messages.forEach(m => {
@@ -782,9 +891,27 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
 // ENVOI MESSAGE
 app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     try {
-        const message = new Message({ senderId: req.session.userId, receiverId: req.body.receiverId, text: req.body.text, read: false });
+        const message = new Message({ 
+            senderId: req.session.userId, 
+            receiverId: req.body.receiverId, 
+            text: req.body.text, 
+            read: false 
+        });
         await message.save();
         res.json(message);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// RÉCUPÉRATION DES MESSAGES NON LUS
+app.get('/api/messages/unread', requireAuth, requireVerified, async (req, res) => {
+    try {
+        const count = await Message.countDocuments({ 
+            receiverId: req.session.userId, 
+            read: false 
+        });
+        res.json({ count });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
