@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema({
     photo: String,
     isVerified: { type: Boolean, default: false },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Effet miroir
+    blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -498,14 +498,14 @@ function calculerAge(dateNaissance) {
 // ROUTES PRINCIPALES
 // ============================================
 
-// ACCUEIL AVEC BOUTON CONNEXION
+// ACCUEIL
 app.get('/', (req, res) => {
     res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Genlove - Rencontres Santé</title>' + styles + '</head><body><div class="app-shell"><div class="home-screen"><div class="logo-text"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div><div class="slogan">Unissez cœur et santé pour bâtir des couples sains 💑</div><div class="login-prompt">Avez-vous déjà un compte ?</div><a href="/login" class="btn-dark">🔐 Se connecter</a><a href="/charte-engagement" class="btn-pink">✨ Créer un compte</a><div style="margin-top:40px; font-size:1rem; color:#666;">🛡️ Vos données de santé sont cryptées</div></div></div></body></html>');
 });
 
 // PAGE DE CONNEXION
 app.get('/login', (req, res) => {
-    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Connexion - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Connexion</h2><p style="font-size:1.2rem; margin:20px 0;">Pour vous connecter, veuillez entrer vos identifiants</p><form id="loginForm"><input type="text" id="firstName" class="input-box" placeholder="Votre prénom" required><button type="submit" class="btn-pink">Se connecter</button></form><a href="/" class="back-link">← Retour à l\'accueil</a></div></div><script>document.getElementById("loginForm").addEventListener("submit", async function(e){e.preventDefault();const firstName=document.getElementById("firstName").value;const res=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({firstName})});if(res.ok){window.location.href="/profile";}else{alert("Prénom non trouvé. Veuillez créer un compte.");}});</script></body></html>');
+    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Connexion - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Connexion</h2><p style="font-size:1.2rem; margin:20px 0;">Entrez votre prénom pour vous connecter</p><form id="loginForm"><input type="text" id="firstName" class="input-box" placeholder="Votre prénom" required><button type="submit" class="btn-pink">Se connecter</button></form><a href="/" class="back-link">← Retour à l\'accueil</a></div></div><script>document.getElementById("loginForm").addEventListener("submit", async function(e){e.preventDefault();const firstName=document.getElementById("firstName").value;const res=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({firstName})});if(res.ok){window.location.href="/profile";}else{alert("Prénom non trouvé. Veuillez créer un compte.");}});</script></body></html>');
 });
 
 // CHARTE ENGAGEMENT
@@ -524,14 +524,31 @@ app.get('/sas-validation', async (req, res) => {
     res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Validation - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><div style="font-size:5rem; margin:20px 0;">⚖️</div><h2>Serment d\'Honneur</h2><div style="background:#fff5f7; border-radius:25px; padding:30px; margin:20px 0; border:2px solid #ffdae0; text-align:left; font-size:1.2rem;"><p><strong>"Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité."</strong></p></div><label style="display:flex; align-items:center; justify-content:center; gap:15px; padding:20px; background:#f8f9fa; border-radius:15px; margin:20px 0; font-size:1.2rem;"><input type="checkbox" id="honorCheck" style="width:25px; height:25px;"> Je le jure</label><button id="validateBtn" class="btn-pink" onclick="validateHonor()" disabled>Accéder à mon profil</button></div></div><script>document.getElementById("honorCheck").addEventListener("change",function(){document.getElementById("validateBtn").disabled=!this.checked;});async function validateHonor(){const res=await fetch("/api/validate-honor",{method:"POST"});if(res.ok) window.location.href="/profile";}</script></body></html>');
 });
 
-// PROFIL
+// PROFIL - AVEC MENU ACCUEIL
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
         if (!user) return res.redirect('/');
         const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false });
         
-        res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Mon Profil - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;"><a href="/matching" class="btn-dark" style="padding:12px 20px; margin:0; font-size:1rem;">🔍 Matching</a><a href="/inbox" class="btn-pink" style="padding:12px 20px; margin:0; font-size:1rem;">📬 ' + (unreadCount > 0 ? unreadCount : '') + '</a><a href="/settings" style="font-size:2rem; color:#1a2a44;">⚙️</a></div><div class="photo-circle" style="background-image:url(\'' + (user.photo || '') + '\');"></div><h2>' + user.firstName + ' ' + user.lastName + '</h2><p style="font-size:1.2rem;">📍 ' + (user.residence || '') + ' • ' + user.gender + '</p><div class="st-group"><div class="st-item"><span>🧬 Génotype</span><b>' + user.genotype + '</b></div><div class="st-item"><span>🩸 Groupe</span><b>' + user.bloodGroup + '</b></div><div class="st-item"><span>📅 Âge</span><b>' + calculerAge(user.dob) + ' ans</b></div><div class="st-item"><span>👶 Projet</span><b>' + user.desireChild + '</b></div></div><a href="/matching" class="btn-pink">🔍 Trouver un partenaire</a><a href="/edit-profile" class="btn-dark">✏️ Modifier mon profil</a></div></div></body></html>');
+        res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Mon Profil - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">' +
+            '<a href="/" class="btn-dark" style="padding:12px 20px; margin:0; font-size:1rem;">🏠 Accueil</a>' +
+            '<a href="/inbox" class="btn-pink" style="padding:12px 20px; margin:0; font-size:1rem;">📬 ' + (unreadCount > 0 ? unreadCount : '') + '</a>' +
+            '<a href="/settings" style="font-size:2rem; color:#1a2a44;">⚙️</a>' +
+            '</div>' +
+            '<div class="photo-circle" style="background-image:url(\'' + (user.photo || '') + '\');"></div>' +
+            '<h2>' + user.firstName + ' ' + user.lastName + '</h2>' +
+            '<p style="font-size:1.2rem;">📍 ' + (user.residence || '') + ' • ' + user.gender + '</p>' +
+            '<div class="st-group">' +
+            '<div class="st-item"><span>🧬 Génotype</span><b>' + user.genotype + '</b></div>' +
+            '<div class="st-item"><span>🩸 Groupe</span><b>' + user.bloodGroup + '</b></div>' +
+            '<div class="st-item"><span>📅 Âge</span><b>' + calculerAge(user.dob) + ' ans</b></div>' +
+            '<div class="st-item"><span>👶 Projet</span><b>' + user.desireChild + '</b></div>' +
+            '</div>' +
+            '<a href="/matching" class="btn-pink">🔍 Trouver un partenaire</a>' +
+            '<a href="/edit-profile" class="btn-dark">✏️ Modifier mon profil</a>' +
+            '</div></div></body></html>');
     } catch (error) {
         res.status(500).send('Erreur profil');
     }
@@ -561,10 +578,8 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         
         let query = { _id: { $ne: currentUser._id } };
         
-        // Exclure ceux qui ont bloqué l'utilisateur ET ceux que l'utilisateur a bloqués
         if (currentUser.blockedUsers?.length) query._id.$nin = currentUser.blockedUsers;
         
-        // Exclure aussi les utilisateurs qui ont bloqué currentUser
         const blockedByOthers = await User.find({ blockedBy: currentUser._id }).distinct('_id');
         if (blockedByOthers.length > 0) {
             query._id.$nin = query._id.$nin ? [...query._id.$nin, ...blockedByOthers] : blockedByOthers;
@@ -607,13 +622,8 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
         for (const msg of messages) {
             const otherUser = msg.senderId._id.equals(currentUser._id) ? msg.receiverId : msg.senderId;
             
-            // Vérifier si l'autre utilisateur n'a pas bloqué currentUser
             const otherUserDoc = await User.findById(otherUser._id);
-            if (otherUserDoc && otherUserDoc.blockedBy?.includes(currentUser._id)) {
-                continue; // L'autre a bloqué currentUser
-            }
-            
-            // Vérifier si currentUser n'a pas bloqué l'autre
+            if (otherUserDoc && otherUserDoc.blockedBy?.includes(currentUser._id)) continue;
             if (currentUser.blockedUsers?.includes(otherUser._id)) continue;
             
             if (!conversations.has(otherUser._id.toString())) {
@@ -645,7 +655,6 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         const partnerId = req.query.partnerId;
         if (!partnerId) return res.redirect('/inbox');
         
-        // Vérifier si l'autre a bloqué currentUser
         const partner = await User.findById(partnerId);
         if (!partner) return res.redirect('/inbox');
         
@@ -653,10 +662,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
             return res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bloqué</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>⛔ Conversation impossible</h2><p style="font-size:1.2rem; margin:30px 0;">Cet utilisateur vous a bloqué. Vous ne pouvez pas lui envoyer de messages.</p><a href="/inbox" class="btn-pink">Retour</a></div></div></body></html>');
         }
         
-        // Vérifier si currentUser a bloqué l'autre
-        if (currentUser.blockedUsers?.includes(partnerId)) {
-            return res.redirect('/inbox');
-        }
+        if (currentUser.blockedUsers?.includes(partnerId)) return res.redirect('/inbox');
         
         const messages = await Message.find({ $or: [{ senderId: currentUser._id, receiverId: partnerId }, { senderId: partnerId, receiverId: currentUser._id }] }).sort({ timestamp: 1 });
         
@@ -784,13 +790,12 @@ app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// BLOQUER (AVEC EFFET MIROIR)
+// BLOQUER AVEC EFFET MIROIR
 app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
         const targetUserId = req.params.userId;
         
-        // Bloquer l'autre utilisateur
         const currentUser = await User.findById(currentUserId);
         if (!currentUser.blockedUsers) currentUser.blockedUsers = [];
         if (!currentUser.blockedUsers.includes(targetUserId)) {
@@ -798,7 +803,6 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
             await currentUser.save();
         }
         
-        // Ajouter currentUser à la liste blockedBy de l'autre utilisateur (effet miroir)
         const targetUser = await User.findById(targetUserId);
         if (!targetUser.blockedBy) targetUser.blockedBy = [];
         if (!targetUser.blockedBy.includes(currentUserId)) {
@@ -812,20 +816,18 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
     }
 });
 
-// DÉBLOQUER (AVEC EFFET MIROIR)
+// DÉBLOQUER AVEC EFFET MIROIR
 app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
         const targetUserId = req.params.userId;
         
-        // Débloquer l'autre utilisateur
         const currentUser = await User.findById(currentUserId);
         if (currentUser.blockedUsers) {
             currentUser.blockedUsers = currentUser.blockedUsers.filter(id => id.toString() !== targetUserId);
             await currentUser.save();
         }
         
-        // Retirer currentUser de la liste blockedBy de l'autre utilisateur
         const targetUser = await User.findById(targetUserId);
         if (targetUser.blockedBy) {
             targetUser.blockedBy = targetUser.blockedBy.filter(id => id.toString() !== currentUserId);
@@ -856,10 +858,7 @@ app.delete('/api/delete-account', requireAuth, requireVerified, async (req, res)
     try {
         const userId = req.session.userId;
         await Message.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] });
-        
-        // Retirer cet utilisateur des listes blockedBy des autres
         await User.updateMany({ blockedBy: userId }, { $pull: { blockedBy: userId } });
-        
         await User.findByIdAndDelete(userId);
         req.session.destroy();
         res.json({ success: true });
