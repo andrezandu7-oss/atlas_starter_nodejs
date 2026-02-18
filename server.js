@@ -15,9 +15,9 @@ mongoose.connect(mongoURI)
     .catch(err => console.error("❌ Erreur de connexion MongoDB:", err));
 
 // ============================================
-// CONFIGURATION SESSION (Correction 1 & 3)
+// CONFIGURATION SESSION
 // ============================================
-app.set('trust proxy', 1); // Important pour Render
+app.set('trust proxy', 1);
 
 const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'genlove-secret-key-2026',
@@ -28,7 +28,7 @@ const sessionConfig = {
         touchAfter: 24 * 3600
     }),
     cookie: { 
-        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 jours
+        maxAge: 1000 * 60 * 60 * 24 * 30,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax'
@@ -39,7 +39,7 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 
 // ============================================
-// MODÈLES DE DONNÉES AVEC INDEX
+// MODÈLES DE DONNÉES
 // ============================================
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
@@ -53,6 +53,7 @@ const userSchema = new mongoose.Schema({
     photo: String,
     isVerified: { type: Boolean, default: false },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Effet miroir
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -91,7 +92,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ============================================
-// STYLES CSS CORRIGÉS (Plus grands et centrés)
+// STYLES CSS
 // ============================================
 const styles = `
 <style>
@@ -118,12 +119,10 @@ const styles = `
         margin: 0 auto;
     }
     
-    /* TYPOGRAPHIE AGRANDIE */
     h1 { font-size: 2.4rem; margin: 10px 0; }
     h2 { font-size: 2rem; margin-bottom: 20px; color: #1a2a44; }
     h3 { font-size: 1.6rem; margin: 15px 0; }
     p { font-size: 1.2rem; line-height: 1.6; }
-    small { font-size: 1rem; }
     
     .logo-text { 
         font-size: 5rem; 
@@ -143,6 +142,17 @@ const styles = `
         text-align: center;
     }
     
+    .home-screen { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        padding: 30px; 
+        text-align: center; 
+        background: linear-gradient(135deg, #fff5f7 0%, #f4e9da 100%);
+    }
+    
     .page-white { 
         background: white; 
         min-height: 100vh; 
@@ -152,7 +162,6 @@ const styles = `
         flex-direction: column;
     }
     
-    /* BOUTONS PLUS GRANDS */
     .btn-pink, .btn-dark { 
         padding: 20px 25px; 
         border-radius: 60px; 
@@ -195,10 +204,8 @@ const styles = `
     }
     
     .btn-contact { background: #ff416c; color: white; }
-    .btn-details { background: #1a2a44; color: white; }
     .btn-block { background: #dc3545; color: white; }
     
-    /* CHAMPS DE FORMULAIRE */
     .input-box { 
         width: 100%; 
         padding: 18px; 
@@ -207,7 +214,6 @@ const styles = `
         margin: 12px 0; 
         font-size: 1.2rem; 
         background: #f8f9fa; 
-        transition: all 0.3s;
     }
     
     .input-box:focus {
@@ -216,7 +222,6 @@ const styles = `
         box-shadow: 0 0 0 4px rgba(255,65,108,0.2);
     }
     
-    /* PHOTO DE PROFIL */
     .photo-circle { 
         width: 160px; 
         height: 160px; 
@@ -228,7 +233,6 @@ const styles = `
         box-shadow: 0 10px 25px rgba(255,65,108,0.3);
     }
     
-    /* CARTES */
     .match-card, .inbox-item, .st-group { 
         background: white; 
         border-radius: 25px; 
@@ -263,9 +267,6 @@ const styles = `
         font-size: 1.2rem;
     }
     
-    .st-item:last-child { border-bottom: none; }
-    
-    /* CHARTE */
     .charte-box {
         height: 500px;
         overflow-y: auto;
@@ -286,21 +287,10 @@ const styles = `
         border-bottom: 2px dashed #ffdae0;
     }
     
-    .charte-section:last-child {
-        border-bottom: none;
-    }
-    
     .charte-title {
         color: #ff416c;
         font-size: 1.5rem;
         font-weight: bold;
-        margin-bottom: 12px;
-    }
-    
-    .charte-subtitle {
-        color: #1a2a44;
-        font-size: 1.2rem;
-        font-style: italic;
         margin-bottom: 12px;
     }
     
@@ -314,7 +304,6 @@ const styles = `
         border-radius: 40px;
     }
     
-    /* CHAT */
     .chat-header { 
         background: #1a2a44; 
         color: white; 
@@ -341,7 +330,6 @@ const styles = `
         max-width: 80%; 
         font-size: 1.2rem; 
         line-height: 1.5; 
-        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
     }
     
     .received { 
@@ -374,10 +362,6 @@ const styles = `
         outline: none;
     }
     
-    .input-area input:focus {
-        border-color: #ff416c;
-    }
-    
     .input-area button {
         padding: 16px 25px;
         font-size: 1.2rem;
@@ -388,7 +372,6 @@ const styles = `
         cursor: pointer;
     }
     
-    /* MESSAGES VIDES */
     .empty-message {
         text-align: center;
         padding: 50px 20px;
@@ -405,14 +388,12 @@ const styles = `
         margin-bottom: 20px;
     }
     
-    /* ZONE DE DANGER */
     .danger-zone {
         border: 2px solid #dc3545;
         background: #fff5f5;
         margin-top: 30px;
     }
     
-    /* NOTIFICATION */
     #genlove-notify { 
         position: fixed; 
         top: -100px; 
@@ -436,35 +417,6 @@ const styles = `
     
     #genlove-notify.show { top: 20px; }
     
-    /* LOADER */
-    #loader { 
-        display: none; 
-        position: fixed; 
-        inset: 0; 
-        background: rgba(255,255,255,0.98); 
-        z-index: 10000; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center; 
-        font-size: 1.3rem;
-    }
-    
-    .spinner { 
-        width: 70px; 
-        height: 70px; 
-        border: 6px solid #f3f3f3; 
-        border-top: 6px solid #ff416c; 
-        border-radius: 50%; 
-        animation: spin 1s linear infinite; 
-        margin-bottom: 25px; 
-    }
-    
-    @keyframes spin { 
-        0% { transform: rotate(0deg); } 
-        100% { transform: rotate(360deg); } 
-    }
-    
-    /* NAVIGATION */
     .navigation {
         display: flex;
         justify-content: space-between;
@@ -493,7 +445,12 @@ const styles = `
         font-size: 1.1rem;
     }
     
-    /* RESPONSIVE */
+    .login-prompt {
+        font-size: 1.2rem;
+        color: #1a2a44;
+        margin: 20px 0 10px;
+    }
+    
     @media (max-width: 420px) {
         body { font-size: 15px; }
         .app-shell { max-width: 100%; }
@@ -502,6 +459,26 @@ const styles = `
         .btn-pink, .btn-dark { width: 95%; padding: 18px; font-size: 1.2rem; }
     }
 </style>
+`;
+
+// ============================================
+// SCRIPT DE NOTIFICATION
+// ============================================
+const notifyScript = `
+<script>
+    function showNotify(msg, type) {
+        const n = document.getElementById('genlove-notify');
+        const m = document.getElementById('notify-msg');
+        if(m) m.innerText = msg;
+        if(n) {
+            n.style.backgroundColor = type === 'success' ? '#4CAF50' : '#1a2a44';
+            n.classList.add('show');
+        }
+        setTimeout(() => { 
+            if(n) n.classList.remove('show'); 
+        }, 3000);
+    }
+</script>
 `;
 
 // ============================================
@@ -521,19 +498,24 @@ function calculerAge(dateNaissance) {
 // ROUTES PRINCIPALES
 // ============================================
 
-// ACCUEIL
+// ACCUEIL AVEC BOUTON CONNEXION
 app.get('/', (req, res) => {
-    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Genlove - Rencontres Santé</title>' + styles + '</head><body><div class="app-shell"><div class="home-screen"><div class="logo-text"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div><div class="slogan">Unissez cœur et santé pour bâtir des couples sains 💑</div><div><a href="/charte-engagement" class="btn-pink">✨ Créer un compte</a></div><div style="margin-top:40px; font-size:1rem; color:#666;">🛡️ Vos données de santé sont cryptées</div></div></div></body></html>');
+    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Genlove - Rencontres Santé</title>' + styles + '</head><body><div class="app-shell"><div class="home-screen"><div class="logo-text"><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></div><div class="slogan">Unissez cœur et santé pour bâtir des couples sains 💑</div><div class="login-prompt">Avez-vous déjà un compte ?</div><a href="/login" class="btn-dark">🔐 Se connecter</a><a href="/charte-engagement" class="btn-pink">✨ Créer un compte</a><div style="margin-top:40px; font-size:1rem; color:#666;">🛡️ Vos données de santé sont cryptées</div></div></div></body></html>');
+});
+
+// PAGE DE CONNEXION
+app.get('/login', (req, res) => {
+    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Connexion - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Connexion</h2><p style="font-size:1.2rem; margin:20px 0;">Pour vous connecter, veuillez entrer vos identifiants</p><form id="loginForm"><input type="text" id="firstName" class="input-box" placeholder="Votre prénom" required><button type="submit" class="btn-pink">Se connecter</button></form><a href="/" class="back-link">← Retour à l\'accueil</a></div></div><script>document.getElementById("loginForm").addEventListener("submit", async function(e){e.preventDefault();const firstName=document.getElementById("firstName").value;const res=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({firstName})});if(res.ok){window.location.href="/profile";}else{alert("Prénom non trouvé. Veuillez créer un compte.");}});</script></body></html>');
 });
 
 // CHARTE ENGAGEMENT
 app.get('/charte-engagement', (req, res) => {
-    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Engagement Éthique - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>📜 La Charte d\'Honneur</h2><p style="font-size:1.2rem; margin-bottom:25px;">Lisez attentivement ces 5 engagements</p><div class="charte-box" id="charteBox" onscroll="checkScroll(this)"><div class="charte-section"><div class="charte-title">1. Le Serment de Sincérité</div><div class="charte-subtitle">Vérité Médicale</div><p>Je m\'engage sur l\'honneur à fournir des informations exactes concernant mon génotype et mes données de santé.</p></div><div class="charte-section"><div class="charte-title">2. Le Pacte de Confidentialité</div><div class="charte-subtitle">Secret Partagé</div><p>Je m\'engage à garder confidentielles toutes les informations personnelles et médicales.</p></div><div class="charte-section"><div class="charte-title">3. Le Principe de Non-Discrimination</div><div class="charte-subtitle">Égalité de Respect</div><p>Je traite chaque membre avec dignité, quel que soit son génotype.</p></div><div class="charte-section"><div class="charte-title">4. La Responsabilité Préventive</div><div class="charte-subtitle">Orientation Santé</div><p>J\'accepte les mesures de protection comme le filtrage des compatibilités à risque.</p></div><div class="charte-section"><div class="charte-title">5. La Bienveillance Éthique</div><div class="charte-subtitle">Courtoisie</div><p>J\'adopte une conduite exemplaire et respectueuse dans mes messages.</p></div></div><div class="scroll-indicator" id="scrollIndicator">⬇️ Faites défiler jusqu\'en bas ⬇️</div><button id="agreeBtn" class="btn-pink" onclick="acceptCharte()" disabled>J\'accepte et je continue</button><a href="/" class="back-link">← Retour à l\'accueil</a></div></div><script>function checkScroll(el){if(el.scrollHeight - el.scrollTop <= el.clientHeight + 5){document.getElementById("agreeBtn").disabled=false;document.getElementById("agreeBtn").style.opacity="1";document.getElementById("scrollIndicator").style.opacity="0.3";}}function acceptCharte(){if(!document.getElementById("agreeBtn").disabled) window.location.href="/signup";}</script></body></html>');
+    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Engagement Éthique - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>📜 La Charte d\'Honneur</h2><p style="font-size:1.2rem; margin-bottom:25px;">Lisez attentivement ces 5 engagements</p><div class="charte-box" id="charteBox" onscroll="checkScroll(this)"><div class="charte-section"><div class="charte-title">1. Le Serment de Sincérité</div><p>Je m\'engage sur l\'honneur à fournir des informations exactes concernant mon génotype et mes données de santé.</p></div><div class="charte-section"><div class="charte-title">2. Le Pacte de Confidentialité</div><p>Je m\'engage à garder confidentielles toutes les informations personnelles et médicales.</p></div><div class="charte-section"><div class="charte-title">3. Le Principe de Non-Discrimination</div><p>Je traite chaque membre avec dignité, quel que soit son génotype.</p></div><div class="charte-section"><div class="charte-title">4. La Responsabilité Préventive</div><p>J\'accepte les mesures de protection comme le filtrage des compatibilités à risque.</p></div><div class="charte-section"><div class="charte-title">5. La Bienveillance Éthique</div><p>J\'adopte une conduite exemplaire et respectueuse dans mes messages.</p></div></div><div class="scroll-indicator" id="scrollIndicator">⬇️ Faites défiler jusqu\'en bas ⬇️</div><button id="agreeBtn" class="btn-pink" onclick="acceptCharte()" disabled>J\'accepte et je continue</button><a href="/" class="back-link">← Retour à l\'accueil</a></div></div><script>function checkScroll(el){if(el.scrollHeight - el.scrollTop <= el.clientHeight + 5){document.getElementById("agreeBtn").disabled=false;document.getElementById("agreeBtn").style.opacity="1";document.getElementById("scrollIndicator").style.opacity="0.3";}}function acceptCharte(){if(!document.getElementById("agreeBtn").disabled) window.location.href="/signup";}</script></body></html>');
 });
 
 // INSCRIPTION
 app.get('/signup', (req, res) => {
-    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Inscription - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Créer mon profil</h2><form id="signupForm"><input type="text" name="firstName" class="input-box" placeholder="Prénom" required><input type="text" name="lastName" class="input-box" placeholder="Nom" required><select name="gender" class="input-box" required><option value="">Genre</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select><input type="date" name="dob" class="input-box" required><input type="text" name="residence" class="input-box" placeholder="Ville" required><select name="genotype" class="input-box" required><option value="">Génotype</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select><select name="bloodGroup" class="input-box" required><option value="">Groupe sanguin</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select><select name="desireChild" class="input-box" required><option value="">Désir d\'enfant ?</option><option value="Oui">Oui</option><option value="Non">Non</option></select><button type="submit" class="btn-pink">Créer mon profil</button></form><a href="/charte-engagement" class="back-link">← Retour à la charte</a></div></div><script>document.getElementById("signupForm").addEventListener("submit", async function(e){e.preventDefault();const data=Object.fromEntries(new FormData(e.target));const res=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});if(res.ok) window.location.href="/sas-validation"; else alert("Erreur");});</script></body></html>');
+    res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Inscription - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Créer mon profil</h2><form id="signupForm"><input type="text" name="firstName" class="input-box" placeholder="Prénom" required><input type="text" name="lastName" class="input-box" placeholder="Nom" required><select name="gender" class="input-box" required><option value="">Genre</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select><input type="date" name="dob" class="input-box" required><input type="text" name="residence" class="input-box" placeholder="Ville" required><select name="genotype" class="input-box" required><option value="">Génotype</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select><select name="bloodGroup" class="input-box" required><option value="">Groupe sanguin</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select><select name="desireChild" class="input-box" required><option value="">Désir d\'enfant ?</option><option value="Oui">Oui</option><option value="Non">Non</option></select><button type="submit" class="btn-pink">Créer mon profil</button></form><a href="/charte-engagement" class="back-link">← Retour à la charte</a></div></div><script>document.getElementById("signupForm").addEventListener("submit", async function(e){e.preventDefault();const data=Object.fromEntries(new FormData(e.target));const res=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});if(res.ok) window.location.href="/sas-validation"; else alert("Erreur lors de l\'inscription");});</script></body></html>');
 });
 
 // SAS DE VALIDATION
@@ -578,7 +560,16 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         if (!currentUser) return res.redirect('/');
         
         let query = { _id: { $ne: currentUser._id } };
+        
+        // Exclure ceux qui ont bloqué l'utilisateur ET ceux que l'utilisateur a bloqués
         if (currentUser.blockedUsers?.length) query._id.$nin = currentUser.blockedUsers;
+        
+        // Exclure aussi les utilisateurs qui ont bloqué currentUser
+        const blockedByOthers = await User.find({ blockedBy: currentUser._id }).distinct('_id');
+        if (blockedByOthers.length > 0) {
+            query._id.$nin = query._id.$nin ? [...query._id.$nin, ...blockedByOthers] : blockedByOthers;
+        }
+        
         if (currentUser.gender === 'Homme') query.gender = 'Femme';
         else if (currentUser.gender === 'Femme') query.gender = 'Homme';
         
@@ -615,7 +606,16 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
         const conversations = new Map();
         for (const msg of messages) {
             const otherUser = msg.senderId._id.equals(currentUser._id) ? msg.receiverId : msg.senderId;
+            
+            // Vérifier si l'autre utilisateur n'a pas bloqué currentUser
+            const otherUserDoc = await User.findById(otherUser._id);
+            if (otherUserDoc && otherUserDoc.blockedBy?.includes(currentUser._id)) {
+                continue; // L'autre a bloqué currentUser
+            }
+            
+            // Vérifier si currentUser n'a pas bloqué l'autre
             if (currentUser.blockedUsers?.includes(otherUser._id)) continue;
+            
             if (!conversations.has(otherUser._id.toString())) {
                 conversations.set(otherUser._id.toString(), { user: otherUser, lastMessage: msg });
             }
@@ -643,10 +643,20 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         if (!currentUser) return res.redirect('/');
         
         const partnerId = req.query.partnerId;
-        if (!partnerId || currentUser.blockedUsers?.includes(partnerId)) return res.redirect('/inbox');
+        if (!partnerId) return res.redirect('/inbox');
         
+        // Vérifier si l'autre a bloqué currentUser
         const partner = await User.findById(partnerId);
         if (!partner) return res.redirect('/inbox');
+        
+        if (partner.blockedBy?.includes(currentUser._id)) {
+            return res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bloqué</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>⛔ Conversation impossible</h2><p style="font-size:1.2rem; margin:30px 0;">Cet utilisateur vous a bloqué. Vous ne pouvez pas lui envoyer de messages.</p><a href="/inbox" class="btn-pink">Retour</a></div></div></body></html>');
+        }
+        
+        // Vérifier si currentUser a bloqué l'autre
+        if (currentUser.blockedUsers?.includes(partnerId)) {
+            return res.redirect('/inbox');
+        }
         
         const messages = await Message.find({ $or: [{ senderId: currentUser._id, receiverId: partnerId }, { senderId: partnerId, receiverId: currentUser._id }] }).sort({ timestamp: 1 });
         
@@ -707,7 +717,29 @@ app.get('/logout-success', (req, res) => {
 // ROUTES API
 // ============================================
 
-// ENREGISTREMENT AVEC ATTENTE SESSION
+// CONNEXION
+app.post('/api/login', async (req, res) => {
+    try {
+        const { firstName } = req.body;
+        const user = await User.findOne({ firstName: firstName }).sort({ createdAt: -1 });
+        
+        if (!user) {
+            return res.status(404).json({ error: "Utilisateur non trouvé" });
+        }
+        
+        await new Promise((resolve) => {
+            req.session.userId = user._id;
+            req.session.isVerified = user.isVerified;
+            req.session.save(resolve);
+        });
+        
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ENREGISTREMENT
 app.post('/api/register', async (req, res) => {
     try {
         const newUser = new User(req.body);
@@ -725,7 +757,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// VALIDATION D'HONNEUR AVEC ATTENTE SESSION
+// VALIDATION D'HONNEUR
 app.post('/api/validate-honor', requireAuth, async (req, res) => {
     try {
         await User.findByIdAndUpdate(req.session.userId, { isVerified: true });
@@ -752,29 +784,54 @@ app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// BLOQUER
+// BLOQUER (AVEC EFFET MIROIR)
 app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
-        const user = await User.findById(req.session.userId);
-        if (!user.blockedUsers) user.blockedUsers = [];
-        if (!user.blockedUsers.includes(req.params.userId)) {
-            user.blockedUsers.push(req.params.userId);
-            await user.save();
+        const currentUserId = req.session.userId;
+        const targetUserId = req.params.userId;
+        
+        // Bloquer l'autre utilisateur
+        const currentUser = await User.findById(currentUserId);
+        if (!currentUser.blockedUsers) currentUser.blockedUsers = [];
+        if (!currentUser.blockedUsers.includes(targetUserId)) {
+            currentUser.blockedUsers.push(targetUserId);
+            await currentUser.save();
         }
+        
+        // Ajouter currentUser à la liste blockedBy de l'autre utilisateur (effet miroir)
+        const targetUser = await User.findById(targetUserId);
+        if (!targetUser.blockedBy) targetUser.blockedBy = [];
+        if (!targetUser.blockedBy.includes(currentUserId)) {
+            targetUser.blockedBy.push(currentUserId);
+            await targetUser.save();
+        }
+        
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// DÉBLOQUER
+// DÉBLOQUER (AVEC EFFET MIROIR)
 app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
-        const user = await User.findById(req.session.userId);
-        if (user.blockedUsers) {
-            user.blockedUsers = user.blockedUsers.filter(id => id.toString() !== req.params.userId);
-            await user.save();
+        const currentUserId = req.session.userId;
+        const targetUserId = req.params.userId;
+        
+        // Débloquer l'autre utilisateur
+        const currentUser = await User.findById(currentUserId);
+        if (currentUser.blockedUsers) {
+            currentUser.blockedUsers = currentUser.blockedUsers.filter(id => id.toString() !== targetUserId);
+            await currentUser.save();
         }
+        
+        // Retirer currentUser de la liste blockedBy de l'autre utilisateur
+        const targetUser = await User.findById(targetUserId);
+        if (targetUser.blockedBy) {
+            targetUser.blockedBy = targetUser.blockedBy.filter(id => id.toString() !== currentUserId);
+            await targetUser.save();
+        }
+        
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -799,6 +856,10 @@ app.delete('/api/delete-account', requireAuth, requireVerified, async (req, res)
     try {
         const userId = req.session.userId;
         await Message.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] });
+        
+        // Retirer cet utilisateur des listes blockedBy des autres
+        await User.updateMany({ blockedBy: userId }, { $pull: { blockedBy: userId } });
+        
         await User.findByIdAndDelete(userId);
         req.session.destroy();
         res.json({ success: true });
