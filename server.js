@@ -672,18 +672,197 @@ function calculateCompatibility(user1, user2) {
 // DÉBUT DES ROUTES - INSÉREZ TOUS LES ÉCRANS ICI
 // ============================================
 
-/* 
- * COPIEZ TOUS LES ÉCRANS (ROUTES GET) ENTRE CES COMMENTAIRES :
- * - app.get('/')
- * - app.get('/charte-engagement')
- * - app.get('/signup')
- * - app.get('/profile')
- * - app.get('/matching')
- * - app.get('/inbox')
- * - app.get('/chat')
- * - app.get('/settings')
- * - app.get('/chat-end')
- * - app.get('/logout-success')
- * 
- * PUIS TOUTES LES ROUTES API (POST, GET, PUT, DELETE)
- */
+app.get('/', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Genlove - Rencontres Santé</title>
+    ${styles}
+    <style>
+        .home-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff5f7 0%, #f4e9da 100%);
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .logo-text {
+            font-size: 4.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-shadow: 3px 3px 0 rgba(255, 65, 108, 0.1);
+        }
+        .slogan {
+            font-size: 1.1rem;
+            color: #1a2a44;
+            text-align: center;
+            line-height: 1.6;
+            margin: 20px 30px 40px;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50px;
+            border: 1px solid rgba(255,65,108,0.2);
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 20px;
+        }
+        .feature-item {
+            background: white;
+            padding: 15px 10px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid #ffe4e8;
+        }
+        .feature-item span {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .feature-item p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #1a2a44;
+            font-weight: 500;
+        }
+        .btn-home {
+            background: #ff416c;
+            color: white;
+            padding: 18px 25px;
+            border-radius: 60px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: block;
+            margin: 15px 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(255, 65, 108, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-home.secondary {
+            background: #1a2a44;
+            box-shadow: 0 10px 20px rgba(26, 42, 68, 0.3);
+        }
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(255, 65, 108, 0.4);
+        }
+        .security-badge {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            font-size: 0.75rem;
+            color: #666;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .security-badge img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .delay-1 { animation-delay: 0.2s; opacity: 0; }
+        .delay-2 { animation-delay: 0.4s; opacity: 0; }
+        .delay-3 { animation-delay: 0.6s; opacity: 0; }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <div class="home-screen">
+            <div class="logo-container animate">
+                <div class="logo-text">
+                    <span style="color:#1a2a44;">Gen</span>
+                    <span style="color:#ff416c;">love</span>
+                </div>
+            </div>
+            
+            <div class="slogan animate delay-1">
+                Unissez cœur et santé pour bâtir des couples sains 💑
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-item animate delay-2">
+                    <span>🧬</span>
+                    <p>Compatibilité génétique</p>
+                </div>
+                <div class="feature-item animate delay-2">
+                    <span>🩺</span>
+                    <p>Profil santé vérifié</p>
+                </div>
+                <div class="feature-item animate delay-2">
+                    <span>🤝</span>
+                    <p>Rencontres sérieuses</p>
+                </div>
+                <div class="feature-item animate delay-2">
+                    <span>🔒</span>
+                    <p>Confidentialité totale</p>
+                </div>
+            </div>
+
+            <div style="width:100%; margin-top:20px;">
+                <p style="font-size:0.9rem; color:#1a2a44; margin-bottom:10px; text-align:center;">
+                    Avez-vous déjà un compte ?
+                </p>
+                
+                <a href="/profile" class="btn-home secondary animate delay-3">
+                    🔐 Se connecter
+                </a>
+                
+                <a href="/charte-engagement" class="btn-home animate delay-3">
+                    ✨ Créer un compte
+                </a>
+            </div>
+
+            <div class="security-badge animate delay-3">
+                <span>🛡️</span> Vos données de santé sont cryptées et confidentielles<br>
+                <small>Conformité RGPD & Sécurité niveau banque</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animation supplémentaire au scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.animate');
+            elements.forEach(el => {
+                el.classList.add('fadeInUp');
+            });
+        });
+
+        // Préchargement des pages pour une meilleure expérience
+        const preloadPages = ['/profile', '/charte-engagement'];
+        preloadPages.forEach(page => {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = page;
+            document.head.appendChild(link);
+        });
+    </script>
+</body>
+</html>`);
+});
