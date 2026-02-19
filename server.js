@@ -97,7 +97,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ============================================
-// SYSTÈME DE TRADUCTION MULTILINGUE (6 langues)
+// SYSTÈME DE TRADUCTION MULTILINGUE COMPLET
 // ============================================
 const translations = {
     fr: {
@@ -962,7 +962,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============================================
-// STYLES CSS COMPLETS (design original)
+// STYLES CSS COMPLETS
 // ============================================
 const styles = `
 <style>
@@ -1426,7 +1426,6 @@ const styles = `
         color: #1a2a44;
         margin: 20px 0 10px;
     }
-    /* Popups */
     #genlove-popup, #request-popup, #system-popup, #message-choice-popup {
         display: none;
         position: fixed;
@@ -1943,7 +1942,7 @@ app.get('/sas-validation', async (req, res) => {
 </html>`);
 });
 
-// PROFIL (avec popup de demande)
+// PROFIL
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -2019,44 +2018,108 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
             <a href="/matching" class="btn-pink">${t('findPartner')}</a>
         </div>
     </div>
+    
+    <!-- BOUTON TEST POUR DÉBOGAGE (À SUPPRIMER PLUS TARD) -->
+    <div style="position:fixed; bottom:80px; right:10px; z-index:10001;">
+        <button onclick="testPopup()" style="background:#ff416c; color:white; border:none; border-radius:30px; padding:10px 15px; font-size:0.9rem;">🔍 TEST POPUP</button>
+    </div>
+
     <script>
         let currentRequestId = null, currentSenderId = null;
+        
+        // Fonction de test manuel
+        window.testPopup = function() {
+            console.log("🧪 Test du popup avec une fausse demande");
+            showRequestPopup({
+                _id: 'test123',
+                senderId: {
+                    _id: 'test456',
+                    firstName: 'Maria',
+                    gender: 'Femme',
+                    dob: '1995-06-15',
+                    genotype: 'AA',
+                    residence: 'Luanda'
+                },
+                message: 'Je suis très intéressé(e) par votre profil. Souhaitez-vous faire connaissance ?',
+                choiceIndex: 0
+            });
+        };
+
+        // Initialisation du polling
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("✅ Profil chargé, démarrage du polling...");
+            setTimeout(checkPendingRequests, 1000); // Premier appel après 1s
+            setInterval(checkPendingRequests, 5000); // Puis toutes les 5s
+            setInterval(checkSystemMessages, 5000);
+        });
+
         async function checkPendingRequests() {
             try {
+                console.log("🔍 Vérification des demandes...");
                 const res = await fetch('/api/requests/pending');
                 const reqs = await res.json();
-                if (reqs.length > 0) showRequestPopup(reqs[0]);
-            } catch(e){}
+                console.log("📬 Demandes reçues:", reqs);
+                if (reqs.length > 0) {
+                    showRequestPopup(reqs[0]);
+                }
+            } catch(e) {
+                console.error("❌ Erreur checkPendingRequests:", e);
+            }
         }
+
         function showRequestPopup(r) {
+            console.log("📬 Affichage du popup pour:", r);
             currentRequestId = r._id;
             currentSenderId = r.senderId._id;
+            
+            // Vérification que toutes les données sont présentes
+            if (!r.senderId || !r.senderId.firstName) {
+                console.error("❌ Données du sender manquantes:", r);
+                return;
+            }
+            
             const prenom = r.senderId.firstName;
             const genre = r.senderId.gender === 'Homme' ? 'Monsieur' : 'Madame';
+            const age = r.senderId.dob ? calculerAge(r.senderId.dob) : '?';
+            
             let msg = '';
-            switch(r.choiceIndex) {
-                case 0: msg = genre + ' ' + prenom + ' est intéressé(e) par votre profil. Souhaitez-vous accepter sa demande ?'; break;
-                case 1: msg = genre + ' ' + prenom + ' est vivement attiré(e) par votre profil et souhaite échanger avec vous. Acceptez-vous la conversation ?'; break;
-                case 2: msg = genre + ' ' + prenom + ' cherche une relation sincère et votre profil correspond à ce qu\'il/elle espère trouver. Souhaitez-vous échanger ?'; break;
+            switch(Number(r.choiceIndex)) {
+                case 0: msg = genre + ' ' + prenom + ' (' + age + ' ans) est intéressé(e) par votre profil. Souhaitez-vous accepter sa demande ?'; break;
+                case 1: msg = genre + ' ' + prenom + ' (' + age + ' ans) est vivement attiré(e) par votre profil et souhaite échanger avec vous. Acceptez-vous la conversation ?'; break;
+                case 2: msg = genre + ' ' + prenom + ' (' + age + ' ans) cherche une relation sincère et votre profil correspond à ce qu\'il/elle espère trouver. Souhaitez-vous échanger ?'; break;
+                default: msg = genre + ' ' + prenom + ' (' + age + ' ans) s\'intéresse à votre profil.';
             }
+            
             document.getElementById('popup-message').innerText = msg;
             document.getElementById('popup-note').innerText = 'ℹ️ ' + prenom + ' sera informé(e) de votre choix.';
             document.getElementById('request-popup').style.display = 'flex';
             vibrate([200,100,200]);
         }
+
         async function acceptRequest() {
             if (!currentRequestId) return;
-            await fetch('/api/requests/' + currentRequestId + '/accept', { method:'POST' });
-            document.getElementById('request-popup').style.display = 'none';
-            window.location.href = '/inbox';
+            console.log("✅ Acceptation de la demande:", currentRequestId);
+            const res = await fetch('/api/requests/' + currentRequestId + '/accept', { method:'POST' });
+            if (res.ok) {
+                document.getElementById('request-popup').style.display = 'none';
+                window.location.href = '/inbox';
+            } else {
+                const data = await res.json();
+                alert('Erreur: ' + (data.error || 'Inconnue'));
+            }
         }
+
         async function ignoreRequest() {
             if (!currentRequestId) return;
             if (confirm('${t('ignore')} ?')) {
-                await fetch('/api/requests/' + currentRequestId + '/ignore', { method:'POST' });
-                document.getElementById('request-popup').style.display = 'none';
+                console.log("🌿 Ignorance de la demande:", currentRequestId);
+                const res = await fetch('/api/requests/' + currentRequestId + '/ignore', { method:'POST' });
+                if (res.ok) {
+                    document.getElementById('request-popup').style.display = 'none';
+                }
             }
         }
+
         async function checkSystemMessages() {
             try {
                 const res = await fetch('/api/messages/system/unread');
@@ -2064,28 +2127,36 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 if (msgs.length > 0) showSystemPopup(msgs[0]);
             } catch(e){}
         }
+
         function showSystemPopup(msg) {
             document.getElementById('system-message').innerText = msg.text;
             document.getElementById('system-popup').style.display = 'flex';
             fetch('/api/messages/' + msg._id + '/read', { method:'POST' });
         }
+
         function closeSystemPopup() {
             document.getElementById('system-popup').style.display = 'none';
         }
-        setInterval(checkPendingRequests, 5000);
-        setInterval(checkSystemMessages, 5000);
-        checkPendingRequests();
-        checkSystemMessages();
+
+        function calculerAge(dob) {
+            if (!dob) return '?';
+            const birthDate = new Date(dob);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+            return age;
+        }
     </script>
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("❌ Erreur dans /profile:", error);
         res.status(500).send('Erreur profil');
     }
 });
 
-// MATCHING (avec popup SS/AS, exclusion contacts existants et boutons de contact)
+// MATCHING
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2228,25 +2299,48 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             currentReceiverName = receiverName;
             document.getElementById('message-choice-popup').style.display = 'flex';
         }
+        
         function sendMessageChoice(index) {
             if (!currentReceiverId) return;
             const message = messages[index];
+            console.log("📨 Envoi de la demande:", { receiverId: currentReceiverId, message: message.substring(0,30) + '...', choiceIndex: index });
+            
             fetch('/api/requests', {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ receiverId: currentReceiverId, message: message, choiceIndex: index })
+                body: JSON.stringify({ 
+                    receiverId: currentReceiverId, 
+                    message: message, 
+                    choiceIndex: index 
+                })
             })
-            .then(res => res.json())
+            .then(res => {
+                console.log("📬 Réponse du serveur (status):", res.status);
+                return res.json();
+            })
             .then(data => {
-                if (data.success) showNotify('✅ Demande envoyée à ' + currentReceiverName, 'success');
-                else showNotify('❌ ' + (data.error || 'Erreur'), 'error');
+                console.log("📬 Réponse du serveur (données):", data);
+                if (data.success) {
+                    if (data.direct) {
+                        showNotify('✅ Message envoyé à ' + currentReceiverName, 'success');
+                    } else {
+                        showNotify('✅ Demande envoyée à ' + currentReceiverName, 'success');
+                    }
+                } else {
+                    showNotify('❌ ' + (data.error || 'Erreur'), 'error');
+                }
             })
-            .catch(() => showNotify('❌ Erreur réseau', 'error'));
+            .catch(err => {
+                console.error("❌ Erreur réseau:", err);
+                showNotify('❌ Erreur réseau', 'error');
+            });
             closeMessageChoice();
         }
+        
         function closeMessageChoice() {
             document.getElementById('message-choice-popup').style.display = 'none';
         }
+        
         function showDetails(partner) {
             const content = document.getElementById('details-content');
             content.innerHTML = \`
@@ -2263,7 +2357,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("❌ Erreur dans /matching:", error);
         res.status(500).send('Erreur matching');
     }
 });
@@ -2334,7 +2428,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("❌ Erreur dans /inbox:", error);
         res.status(500).send('Erreur inbox');
     }
 });
@@ -2422,7 +2516,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("❌ Erreur dans /chat:", error);
         res.status(500).send('Erreur chat');
     }
 });
@@ -2488,7 +2582,7 @@ app.get('/settings', requireAuth, requireVerified, async (req, res) => {
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("❌ Erreur dans /settings:", error);
         res.status(500).send('Erreur paramètres');
     }
 });
@@ -2569,7 +2663,7 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("❌ Erreur dans /edit-profile:", error);
         res.status(500).send('Erreur édition');
     }
 });
@@ -2615,7 +2709,7 @@ app.get('/blocked-list', requireAuth, requireVerified, async (req, res) => {
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("❌ Erreur dans /blocked-list:", error);
         res.status(500).send('Erreur');
     }
 });
@@ -2665,7 +2759,7 @@ app.get('/logout-success', (req, res) => {
 });
 
 // ============================================
-// ROUTES API (CORRIGÉES POUR LA MESSAGERIE)
+// ROUTES API
 // ============================================
 
 app.post('/api/login', async (req, res) => {
@@ -2677,6 +2771,7 @@ app.post('/api/login', async (req, res) => {
         await new Promise(resolve => req.session.save(resolve));
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/login:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2690,6 +2785,7 @@ app.post('/api/register', async (req, res) => {
         await new Promise(resolve => req.session.save(resolve));
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/register:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2701,6 +2797,7 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
         await new Promise(resolve => req.session.save(resolve));
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/validate-honor:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2709,7 +2806,19 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
 app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     try {
         const { receiverId, message, choiceIndex } = req.body;
-        console.log("📨 Nouvelle demande reçue:", { senderId: req.session.userId, receiverId, message, choiceIndex });
+        console.log("📨 Nouvelle demande reçue:", { 
+            senderId: req.session.userId, 
+            receiverId, 
+            message: message.substring(0,30) + '...', 
+            choiceIndex 
+        });
+
+        // Vérifier que le destinataire existe
+        const receiver = await User.findById(receiverId);
+        if (!receiver) {
+            console.log("❌ Destinataire non trouvé:", receiverId);
+            return res.status(404).json({ error: "Destinataire non trouvé" });
+        }
 
         // Vérifier si une conversation existe déjà
         const existing = await Message.findOne({
@@ -2720,7 +2829,7 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
         });
 
         if (existing) {
-            // Si conversation existe, créer directement le message visible pour les deux
+            console.log("✅ Conversation existante, création du message direct");
             const msg = new Message({
                 senderId: req.session.userId,
                 receiverId,
@@ -2729,11 +2838,10 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
                 visibleFor: [req.session.userId, receiverId]
             });
             await msg.save();
-            console.log("✅ Message direct créé (conversation existante)");
             return res.json({ success: true, direct: true });
         }
 
-        // Vérifier si une demande est déjà en attente pour éviter les doublons
+        // Vérifier si une demande est déjà en attente
         const existingRequest = await Request.findOne({
             senderId: req.session.userId,
             receiverId,
@@ -2745,7 +2853,7 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             return res.status(400).json({ error: "Une demande est déjà en attente pour cette personne" });
         }
 
-        // Créer une nouvelle demande
+        // Créer la demande
         const request = new Request({
             senderId: req.session.userId,
             receiverId,
@@ -2754,7 +2862,8 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             status: 'pending'
         });
         await request.save();
-        console.log("✅ Nouvelle demande créée avec ID:", request._id);
+        console.log("✅ Demande créée avec succès, ID:", request._id);
+        
         res.json({ success: true, pending: true });
     } catch(e) {
         console.error("❌ Erreur dans /api/requests:", e);
@@ -2856,6 +2965,7 @@ app.get('/api/messages/system/unread', requireAuth, requireVerified, async (req,
         }).sort({ timestamp: -1 });
         res.json(msgs);
     } catch(e) {
+        console.error("❌ Erreur dans /api/messages/system/unread:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2865,6 +2975,7 @@ app.post('/api/messages/:id/read', requireAuth, requireVerified, async (req, res
         await Message.findByIdAndUpdate(req.params.id, { read: true });
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/messages/read:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2881,8 +2992,10 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
         if (!target.blockedBy.includes(req.session.userId)) target.blockedBy.push(req.session.userId);
         await current.save();
         await target.save();
+        console.log("✅ Utilisateur bloqué:", req.params.userId);
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/block:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2900,8 +3013,10 @@ app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) 
         }
         await current.save();
         await target.save();
+        console.log("✅ Utilisateur débloqué:", req.params.userId);
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/unblock:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2911,6 +3026,7 @@ app.put('/api/users/profile', requireAuth, requireVerified, async (req, res) => 
         await User.findByIdAndUpdate(req.session.userId, req.body);
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/users/profile:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2922,8 +3038,10 @@ app.delete('/api/delete-account', requireAuth, requireVerified, async (req, res)
         await Request.deleteMany({ $or: [{ senderId: id }, { receiverId: id }] });
         await User.findByIdAndDelete(id);
         req.session.destroy();
+        console.log("✅ Compte supprimé:", id);
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/delete-account:", e);
         res.status(500).json({ error: e.message });
     }
 });
