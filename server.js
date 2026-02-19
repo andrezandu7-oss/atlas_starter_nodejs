@@ -72,6 +72,22 @@ const messageSchema = new mongoose.Schema({
 messageSchema.index({ senderId: 1, receiverId: 1, timestamp: -1 });
 const Message = mongoose.model('Message', messageSchema);
 
+// NOUVEAU MODÈLE POUR LES DEMANDES DE PREMIER CONTACT
+const requestSchema = new mongoose.Schema({
+    senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message: { type: String, required: true },
+    status: { 
+        type: String, 
+        enum: ['pending', 'accepted', 'rejected'],
+        default: 'pending'
+    },
+    createdAt: { type: Date, default: Date.now }
+});
+
+requestSchema.index({ receiverId: 1, status: 1 });
+const Request = mongoose.model('Request', requestSchema);
+
 // ============================================
 // SYSTÈME DE TRADUCTION MULTILINGUE
 // ============================================
@@ -127,6 +143,7 @@ const translations = {
         no: 'Non',
         createProfile: 'Créer mon profil',
         backCharter: '← Retour à la charte',
+        required: 'obligatoire',
         
         honorTitle: 'Serment d\'Honneur',
         honorText: '"Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité."',
@@ -201,7 +218,32 @@ const translations = {
         pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.',
         
         residence_label: 'Résidence',
-        project_life: 'Projet de vie'
+        project_life: 'Projet de vie',
+        
+        // Messages pour les demandes
+        newRequest: '📬 Nouvelle demande',
+        interested: 's\'intéresse à votre profil.',
+        whatToDo: '❓ Que souhaitez-vous faire ?',
+        openChat: '✅ Ouvrir la discussion',
+        ignore: '🌿 Ignorer',
+        willBeInformed: 'ℹ️ {name} sera informé(e) de votre choix.',
+        requestAccepted: '✅ Votre demande a été acceptée ! Vous pouvez maintenant échanger avec cette personne.',
+        requestRejected: '🌸 Merci pour votre message. Cette personne préfère ne pas donner suite pour le moment. Continuez votre chemin, la bonne personne vous attend ailleurs.',
+        day: 'Jour',
+        month: 'Mois',
+        year: 'Année',
+        january: 'Janvier',
+        february: 'Février',
+        march: 'Mars',
+        april: 'Avril',
+        may: 'Mai',
+        june: 'Juin',
+        july: 'Juillet',
+        august: 'Août',
+        september: 'Septembre',
+        october: 'Octobre',
+        november: 'Novembre',
+        december: 'Décembre'
     },
     
     en: {
@@ -255,6 +297,7 @@ const translations = {
         no: 'No',
         createProfile: 'Create my profile',
         backCharter: '← Back to charter',
+        required: 'required',
         
         honorTitle: 'Oath of Honor',
         honorText: '"I confirm on my honor that my information is sincere and conforms to reality."',
@@ -329,7 +372,31 @@ const translations = {
         pageNotFoundMessage: 'The page you are looking for does not exist.',
         
         residence_label: 'Residence',
-        project_life: 'Life project'
+        project_life: 'Life project',
+        
+        newRequest: '📬 New request',
+        interested: 'is interested in your profile.',
+        whatToDo: '❓ What would you like to do?',
+        openChat: '✅ Open chat',
+        ignore: '🌿 Ignore',
+        willBeInformed: 'ℹ️ {name} will be informed of your choice.',
+        requestAccepted: '✅ Your request has been accepted! You can now chat with this person.',
+        requestRejected: '🌸 Thank you for your message. This person prefers not to respond at this time. Continue your journey, the right person is waiting for you elsewhere.',
+        day: 'Day',
+        month: 'Month',
+        year: 'Year',
+        january: 'January',
+        february: 'February',
+        march: 'March',
+        april: 'April',
+        may: 'May',
+        june: 'June',
+        july: 'July',
+        august: 'August',
+        september: 'September',
+        october: 'October',
+        november: 'November',
+        december: 'December'
     },
     
     pt: {
@@ -383,6 +450,7 @@ const translations = {
         no: 'Não',
         createProfile: 'Criar meu perfil',
         backCharter: '← Voltar à carta',
+        required: 'obrigatório',
         
         honorTitle: 'Juramento de Honra',
         honorText: '"Confirmo por minha honra que minhas informações são sinceras e conformes à realidade."',
@@ -457,7 +525,31 @@ const translations = {
         pageNotFoundMessage: 'A página que você procura não existe.',
         
         residence_label: 'Residência',
-        project_life: 'Projeto de vida'
+        project_life: 'Projeto de vida',
+        
+        newRequest: '📬 Nova solicitação',
+        interested: 'está interessado(a) no seu perfil.',
+        whatToDo: '❓ O que você deseja fazer?',
+        openChat: '✅ Abrir chat',
+        ignore: '🌿 Ignorar',
+        willBeInformed: 'ℹ️ {name} será informado(a) da sua escolha.',
+        requestAccepted: '✅ Sua solicitação foi aceita! Agora você pode conversar com esta pessoa.',
+        requestRejected: '🌸 Obrigado pela sua mensagem. Esta pessoa prefere não responder no momento. Continue seu caminho, a pessoa certa está esperando por você em outro lugar.',
+        day: 'Dia',
+        month: 'Mês',
+        year: 'Ano',
+        january: 'Janeiro',
+        february: 'Fevereiro',
+        march: 'Março',
+        april: 'Abril',
+        may: 'Maio',
+        june: 'Junho',
+        july: 'Julho',
+        august: 'Agosto',
+        september: 'Setembro',
+        october: 'Outubro',
+        november: 'Novembro',
+        december: 'Dezembro'
     },
     
     es: {
@@ -511,6 +603,7 @@ const translations = {
         no: 'No',
         createProfile: 'Crear mi perfil',
         backCharter: '← Volver a la carta',
+        required: 'obligatorio',
         
         honorTitle: 'Juramento de Honor',
         honorText: '"Confirmo bajo mi honor que mi información es sincera y conforme a la realidad."',
@@ -585,7 +678,31 @@ const translations = {
         pageNotFoundMessage: 'La página que busca no existe.',
         
         residence_label: 'Residencia',
-        project_life: 'Proyecto de vida'
+        project_life: 'Proyecto de vida',
+        
+        newRequest: '📬 Nueva solicitud',
+        interested: 'está interesado(a) en tu perfil.',
+        whatToDo: '❓ ¿Qué deseas hacer?',
+        openChat: '✅ Abrir chat',
+        ignore: '🌿 Ignorar',
+        willBeInformed: 'ℹ️ {name} será informado(a) de tu elección.',
+        requestAccepted: '✅ ¡Tu solicitud ha sido aceptada! Ahora puedes conversar con esta persona.',
+        requestRejected: '🌸 Gracias por tu mensaje. Esta persona prefiere no responder por ahora. Continúa tu camino, la persona adecuada te espera en otro lugar.',
+        day: 'Día',
+        month: 'Mes',
+        year: 'Año',
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre'
     },
     
     ar: {
@@ -639,6 +756,7 @@ const translations = {
         no: 'لا',
         createProfile: 'إنشاء ملفي الشخصي',
         backCharter: '← العودة إلى الميثاق',
+        required: 'إلزامي',
         
         honorTitle: 'قسم الشرف',
         honorText: '"أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع."',
@@ -713,7 +831,31 @@ const translations = {
         pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
         
         residence_label: 'الإقامة',
-        project_life: 'مشروع الحياة'
+        project_life: 'مشروع الحياة',
+        
+        newRequest: '📬 طلب جديد',
+        interested: 'مهتم بملفك الشخصي.',
+        whatToDo: '❓ ماذا تريد أن تفعل؟',
+        openChat: '✅ فتح المحادثة',
+        ignore: '🌿 تجاهل',
+        willBeInformed: 'ℹ️ {name} سيتم إعلامه باختيارك.',
+        requestAccepted: '✅ تم قبول طلبك! يمكنك الآن الدردشة مع هذا الشخص.',
+        requestRejected: '🌸 شكرًا على رسالتك. هذا الشخص يفضل عدم الرد في الوقت الحالي. استمر في طريقك، الشخص المناسب ينتظرك في مكان آخر.',
+        day: 'يوم',
+        month: 'شهر',
+        year: 'سنة',
+        january: 'يناير',
+        february: 'فبراير',
+        march: 'مارس',
+        april: 'أبريل',
+        may: 'مايو',
+        june: 'يونيو',
+        july: 'يوليو',
+        august: 'أغسطس',
+        september: 'سبتمبر',
+        october: 'أكتوبر',
+        november: 'نوفمبر',
+        december: 'ديسمبر'
     },
     
     zh: {
@@ -767,6 +909,7 @@ const translations = {
         no: '否',
         createProfile: '创建个人资料',
         backCharter: '← 返回宪章',
+        required: '必填',
         
         honorTitle: '荣誉誓言',
         honorText: '"我以荣誉确认我的信息是真实的，符合实际情况。"',
@@ -841,7 +984,31 @@ const translations = {
         pageNotFoundMessage: '您查找的页面不存在。',
         
         residence_label: '居住地',
-        project_life: '人生计划'
+        project_life: '人生计划',
+        
+        newRequest: '📬 新请求',
+        interested: '对你的个人资料感兴趣。',
+        whatToDo: '❓ 你想做什么？',
+        openChat: '✅ 打开聊天',
+        ignore: '🌿 忽略',
+        willBeInformed: 'ℹ️ {name} 将被告知你的选择。',
+        requestAccepted: '✅ 你的请求已被接受！你现在可以和这个人聊天了。',
+        requestRejected: '🌸 谢谢你的留言。这个人目前不想回应。继续你的旅程，合适的人在别处等你。',
+        day: '日',
+        month: '月',
+        year: '年',
+        january: '一月',
+        february: '二月',
+        march: '三月',
+        april: '四月',
+        may: '五月',
+        june: '六月',
+        july: '七月',
+        august: '八月',
+        september: '九月',
+        october: '十月',
+        november: '十一月',
+        december: '十二月'
     }
 };
 
@@ -870,10 +1037,17 @@ app.use(async (req, res, next) => {
         else req.lang = 'fr';
     }
     
-    req.t = (key) => {
-        return translations[req.lang] && translations[req.lang][key] 
+    req.t = (key, params = {}) => {
+        let text = translations[req.lang] && translations[req.lang][key] 
             ? translations[req.lang][key] 
             : translations['fr'][key] || key;
+        
+        // Remplacer les variables dans le texte
+        for (const [param, value] of Object.entries(params)) {
+            text = text.replace(`{${param}}`, value);
+        }
+        
+        return text;
     };
     
     next();
@@ -1406,65 +1580,106 @@ const styles = `
         margin: 20px 0 10px;
     }
     
-    #genlove-popup {
+    /* POPUP DE DEMANDE */
+    #request-popup {
         display: none;
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0,0,0,0.8);
-        z-index: 10000;
+        background: rgba(0,0,0,0.9);
+        z-index: 20000;
         align-items: center;
         justify-content: center;
         padding: 20px;
         backdrop-filter: blur(5px);
     }
-    .popup-card {
+    .request-card {
         background: white;
         border-radius: 30px;
         padding: 35px 25px;
         max-width: 380px;
         width: 100%;
         text-align: center;
-        animation: popupAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: popupAppear 0.4s ease-out;
         border: 3px solid #ff416c;
         box-shadow: 0 20px 40px rgba(255,65,108,0.3);
     }
-    .popup-icon {
+    .request-icon {
         font-size: 4rem;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
-    .popup-title {
+    .request-title {
         color: #ff416c;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .request-user {
         font-size: 1.6rem;
         font-weight: bold;
+        color: #1a2a44;
+        margin-bottom: 5px;
+    }
+    .request-details {
+        font-size: 1.2rem;
+        color: #666;
         margin-bottom: 15px;
     }
-    .popup-message {
+    .request-message {
+        background: #fff5f7;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        font-size: 1.2rem;
         color: #1a2a44;
-        font-size: 1.2rem;
-        line-height: 1.6;
-        margin-bottom: 25px;
-        padding: 0 10px;
+        font-style: italic;
+        border: 2px solid #ffdae0;
     }
-    .popup-button {
-        background: #ff416c;
-        color: white;
-        border: none;
-        padding: 18px 30px;
-        border-radius: 60px;
+    .request-question {
+        font-size: 1.3rem;
+        color: #1a2a44;
+        margin: 20px 0;
+        font-weight: 600;
+    }
+    .request-buttons {
+        display: flex;
+        gap: 15px;
+        margin: 20px 0;
+    }
+    .request-buttons button {
+        flex: 1;
+        padding: 15px;
         font-size: 1.2rem;
+        border-radius: 50px;
+        border: none;
         font-weight: bold;
         cursor: pointer;
-        width: 100%;
         transition: all 0.3s;
+    }
+    .accept-btn {
+        background: #ff416c;
+        color: white;
+    }
+    .accept-btn:hover {
+        transform: translateY(-3px);
         box-shadow: 0 10px 20px rgba(255,65,108,0.3);
     }
-    .popup-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(255,65,108,0.4);
+    .ignore-btn {
+        background: #1a2a44;
+        color: white;
     }
+    .ignore-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(26,42,68,0.3);
+    }
+    .request-note {
+        font-size: 0.95rem;
+        color: #888;
+        margin-top: 15px;
+    }
+    
     @keyframes popupAppear {
         from {
             opacity: 0;
@@ -1476,18 +1691,38 @@ const styles = `
         }
     }
     
+    .custom-date-picker {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+    }
+    .date-part {
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        font-size: 1rem;
+        background: #f8f9fa;
+        margin: 0 2px;
+    }
+    .date-part:focus {
+        border-color: #ff416c;
+        outline: none;
+    }
+    
     @media (max-width: 420px) {
         body { font-size: 15px; }
         .app-shell { max-width: 100%; }
         .logo-text { font-size: 4.2rem; }
         h2 { font-size: 1.8rem; }
         .btn-pink, .btn-dark { width: 95%; padding: 18px; font-size: 1.2rem; }
+        .custom-date-picker { flex-wrap: wrap; }
+        .date-part { width: 100% !important; margin: 5px 0; }
     }
 </style>
 `;
 
 // ============================================
-// SCRIPT DE NOTIFICATION
+// SCRIPT DE NOTIFICATION ET VIBRATION
 // ============================================
 const notifyScript = `
 <script>
@@ -1502,6 +1737,13 @@ const notifyScript = `
         setTimeout(() => { 
             if(n) n.classList.remove('show'); 
         }, 3000);
+    }
+    
+    // Fonction pour faire vibrer le téléphone
+    function vibrate(pattern) {
+        if ("vibrate" in navigator) {
+            navigator.vibrate(pattern);
+        }
     }
 </script>
 `;
@@ -1567,6 +1809,57 @@ function formatTimeAgo(timestamp, lang = 'fr') {
     return date.toLocaleDateString();
 }
 
+function generateDateOptions(req, selectedDate = null) {
+    const t = req.t;
+    const lang = req.lang;
+    
+    const monthNames = {
+        fr: [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')],
+        en: [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')],
+        pt: [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')],
+        es: [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')],
+        ar: [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')],
+        zh: [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')]
+    };
+    
+    const months = monthNames[lang] || monthNames.fr;
+    const currentYear = new Date().getFullYear();
+    const selected = selectedDate ? new Date(selectedDate) : null;
+    
+    let html = '<div class="custom-date-picker">';
+    
+    // Jour
+    html += '<select name="day" class="input-box date-part" required style="width:30%;">';
+    html += '<option value="">' + t('day') + '</option>';
+    for (let d = 1; d <= 31; d++) {
+        const selectedAttr = (selected && selected.getDate() === d) ? 'selected' : '';
+        html += `<option value="${d}" ${selectedAttr}>${d}</option>`;
+    }
+    html += '</select>';
+    
+    // Mois
+    html += '<select name="month" class="input-box date-part" required style="width:38%;">';
+    html += '<option value="">' + t('month') + '</option>';
+    for (let m = 0; m < 12; m++) {
+        const monthValue = m + 1;
+        const selectedAttr = (selected && selected.getMonth() === m) ? 'selected' : '';
+        html += `<option value="${monthValue}" ${selectedAttr}>${months[m]}</option>`;
+    }
+    html += '</select>';
+    
+    // Année
+    html += '<select name="year" class="input-box date-part" required style="width:28%;">';
+    html += '<option value="">' + t('year') + '</option>';
+    for (let y = currentYear - 100; y <= currentYear - 18; y++) {
+        const selectedAttr = (selected && selected.getFullYear() === y) ? 'selected' : '';
+        html += `<option value="${y}" ${selectedAttr}>${y}</option>`;
+    }
+    html += '</select>';
+    html += '</div>';
+    
+    return html;
+}
+
 // ============================================
 // ROUTE POUR CHANGER DE LANGUE
 // ============================================
@@ -1597,6 +1890,7 @@ app.get('/', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('welcome')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1634,6 +1928,7 @@ app.get('/login', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('loginTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1678,6 +1973,7 @@ app.get('/charte-engagement', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('charterTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1732,9 +2028,12 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION MULTILINGUE AVEC LABEL POUR DATE
+// INSCRIPTION MULTILINGUE AVEC CALENDRIER PERSONNALISÉ
 app.get('/signup', (req, res) => {
     const t = req.t;
+    
+    // Générer le calendrier personnalisé
+    const datePicker = generateDateOptions(req);
     
     res.send(`<!DOCTYPE html>
 <html>
@@ -1743,6 +2042,7 @@ app.get('/signup', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('signupTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1763,8 +2063,8 @@ app.get('/signup', (req, res) => {
                     <option value="Femme">${t('female')}</option>
                 </select>
                 
-                <div class="input-label">${t('dob')} (${t('dobPlaceholder')})</div>
-                <input type="date" name="dob" class="input-box" placeholder="${t('dobPlaceholder')}" required>
+                <div class="input-label">${t('dob')}</div>
+                ${datePicker}
                 
                 <div class="input-label">${t('city')}</div>
                 <input type="text" name="residence" class="input-box" placeholder="${t('city')}" required>
@@ -1806,7 +2106,23 @@ app.get('/signup', (req, res) => {
     <script>
         document.getElementById("signupForm").addEventListener("submit", async function(e){
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
+            
+            // Reconstituer la date à partir des selects
+            const day = document.querySelector('select[name="day"]').value;
+            const month = document.querySelector('select[name="month"]').value;
+            const year = document.querySelector('select[name="year"]').value;
+            
+            if (!day || !month || !year) {
+                alert("${t('dob')} ${t('required')}");
+                return;
+            }
+            
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            data.dob = dob;
+            
             const res = await fetch("/api/register", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -1832,6 +2148,7 @@ app.get('/sas-validation', async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('honorTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1860,7 +2177,7 @@ app.get('/sas-validation', async (req, res) => {
 </html>`);
 });
 
-// PROFIL MULTILINGUE - AVEC SÉLECTEUR DÉROULANT (COMPACT)
+// PROFIL MULTILINGUE
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -1868,6 +2185,9 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
         
         const t = req.t;
         const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false });
+        
+        // Traduction du genre
+        const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         
         const unreadBadge = unreadCount > 0 
             ? '<span class="profile-unread">' + unreadCount + '</span>'
@@ -1880,10 +2200,110 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('myProfile')}</title>
     ${styles}
+    ${notifyScript}
+    <script>
+        // Fonction pour vérifier les demandes en attente
+        let currentRequestId = null;
+        
+        async function checkPendingRequests() {
+            try {
+                const res = await fetch('/api/requests/pending');
+                const requests = await res.json();
+                
+                if (requests.length > 0) {
+                    showRequestPopup(requests[0]);
+                }
+            } catch (e) {
+                console.error('Erreur lors de la vérification des demandes', e);
+            }
+        }
+        
+        function showRequestPopup(request) {
+            currentRequestId = request._id;
+            
+            document.getElementById('request-sender-name').textContent = 
+                request.senderId.firstName + ', ' + calculerAge(request.senderId.dob) + ' ans';
+            document.getElementById('request-sender-details').textContent = 
+                'Génotype: ' + request.senderId.genotype + ' • Résidence: ' + request.senderId.residence;
+            document.getElementById('request-message-text').textContent = request.message;
+            document.getElementById('request-note').textContent = 
+                'ℹ️ ' + request.senderId.firstName + ' sera informé(e) de votre choix.';
+            
+            // Faire vibrer le téléphone (pattern: deux petites vibrations)
+            vibrate([200, 100, 200]);
+            
+            document.getElementById('request-popup').style.display = 'flex';
+        }
+        
+        async function acceptRequest() {
+            if (!currentRequestId) return;
+            
+            const res = await fetch('/api/requests/' + currentRequestId + '/accept', {
+                method: 'POST'
+            });
+            
+            if (res.ok) {
+                document.getElementById('request-popup').style.display = 'none';
+                window.location.href = '/inbox';
+            }
+        }
+        
+        async function ignoreRequest() {
+            if (!currentRequestId) return;
+            
+            if (confirm('Ignorer cette demande ?')) {
+                const res = await fetch('/api/requests/' + currentRequestId + '/ignore', {
+                    method: 'POST'
+                });
+                
+                if (res.ok) {
+                    document.getElementById('request-popup').style.display = 'none';
+                    showNotify('Demande ignorée', 'info');
+                }
+            }
+        }
+        
+        function calculerAge(dob) {
+            const birthDate = new Date(dob);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+            return age;
+        }
+        
+        // Vérifier les demandes toutes les 10 secondes
+        setInterval(checkPendingRequests, 10000);
+        
+        // Vérifier au chargement de la page
+        document.addEventListener('DOMContentLoaded', checkPendingRequests);
+    </script>
 </head>
 <body>
     <div class="app-shell">
         <div class="page-white">
+            <!-- POPUP DE DEMANDE DE PREMIER CONTACT -->
+            <div id="request-popup">
+                <div class="request-card">
+                    <div class="request-icon">📬</div>
+                    <div class="request-title">${t('newRequest')}</div>
+                    
+                    <div class="request-user" id="request-sender-name"></div>
+                    <div class="request-details" id="request-sender-details"></div>
+                    
+                    <div class="request-message" id="request-message-text"></div>
+                    
+                    <div class="request-question">${t('whatToDo')}</div>
+                    
+                    <div class="request-buttons">
+                        <button class="accept-btn" onclick="acceptRequest()">${t('openChat')}</button>
+                        <button class="ignore-btn" onclick="ignoreRequest()">${t('ignore')}</button>
+                    </div>
+                    
+                    <div class="request-note" id="request-note"></div>
+                </div>
+            </div>
+            
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <a href="/" class="btn-dark" style="padding:12px 20px; margin:0; font-size:1rem;">🏠 ${t('home')}</a>
                 <a href="/inbox" class="btn-pink" style="padding:12px 20px; margin:0; font-size:1rem; display:flex; align-items:center;">
@@ -1892,7 +2312,6 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 <a href="/settings" style="font-size:2rem; color:#1a2a44;">⚙️</a>
             </div>
             
-            <!-- SÉLECTEUR DE LANGUE COMPACT (COMME DANS PARAMÈTRES) -->
             <div class="language-selector-compact">
                 <span class="language-label">${t('language')} :</span>
                 <select onchange="window.location.href='/lang/'+this.value">
@@ -1907,7 +2326,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
             
             <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
             <h2>${user.firstName} ${user.lastName}</h2>
-            <p style="font-size:1.2rem;">📍 ${user.residence || ''} • ${user.gender}</p>
+            <p style="font-size:1.2rem;">📍 ${user.residence || ''} • ${genderDisplay}</p>
             <div class="st-group">
                 <div class="st-item"><span>🧬 ${t('genotype_label')}</span><b>${user.genotype}</b></div>
                 <div class="st-item"><span>🩸 ${t('blood_label')}</span><b>${user.bloodGroup}</b></div>
@@ -1920,6 +2339,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
 </body>
 </html>`);
     } catch (error) {
+        console.error(error);
         res.status(500).send('Erreur profil');
     }
 });
@@ -1931,6 +2351,7 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
         if (!user) return res.redirect('/');
         
         const t = req.t;
+        const datePicker = generateDateOptions(req, user.dob);
         
         const bloodOptions = ['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(g => 
             '<option value="' + g + '" ' + (user.bloodGroup === g ? 'selected' : '') + '>' + g + '</option>'
@@ -1943,6 +2364,7 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('editProfile')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1962,7 +2384,7 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
                 </select>
                 
                 <div class="input-label">${t('dob')}</div>
-                <input type="date" name="dob" class="input-box" value="${user.dob}" required>
+                ${datePicker}
                 
                 <div class="input-label">${t('city')}</div>
                 <input type="text" name="residence" class="input-box" value="${user.residence}" placeholder="${t('city')}" required>
@@ -1993,7 +2415,22 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
     <script>
         document.getElementById("editForm").addEventListener("submit", async function(e){
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
+            
+            const day = document.querySelector('select[name="day"]').value;
+            const month = document.querySelector('select[name="month"]').value;
+            const year = document.querySelector('select[name="year"]').value;
+            
+            if (!day || !month || !year) {
+                alert("${t('dob')} ${t('required')}");
+                return;
+            }
+            
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            data.dob = dob;
+            
             const res = await fetch("/api/users/profile", {
                 method: "PUT",
                 headers: {"Content-Type": "application/json"},
@@ -2010,7 +2447,7 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING MULTILINGUE AVEC BOUTONS DÉTAILS ET CONTACTER
+// MATCHING MULTILINGUE
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2059,7 +2496,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                             desireChild: p.desireChild,
                             age: calculerAge(p.dob)
                         })})'>📋 ${t('details')}</button>
-                        <button class="btn-action btn-contact small" onclick="window.location.href='/chat?partnerId=${p._id}'">💬 ${t('contact')}</button>
+                        <button class="btn-action btn-contact small" onclick="sendRequest('${p._id}', '${p.firstName}')">💬 ${t('contact')}</button>
                     </div>
                 </div>`;
             });
@@ -2097,6 +2534,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('compatiblePartners')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2123,6 +2561,23 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                 <p><strong>${t('project_life')} :</strong> \${partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}'}</p>
             \`;
             document.getElementById('details-popup').style.display = 'flex';
+        }
+        
+        function sendRequest(receiverId, receiverName) {
+            const message = prompt("Votre message d'introduction:", "Bonjour, je suis très intéressé par votre profil !");
+            if (message) {
+                fetch('/api/requests', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ receiverId, message })
+                }).then(res => res.json()).then(data => {
+                    if (data.success) {
+                        showNotify('✅ Demande envoyée à ' + receiverName, 'success');
+                    } else {
+                        showNotify('❌ Erreur lors de l\'envoi', 'error');
+                    }
+                });
+            }
         }
     </script>
 </body>
@@ -2201,6 +2656,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('inboxTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2241,6 +2697,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     <meta charset="UTF-8">
     <title>${t('blockedByUser')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2281,6 +2738,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - Chat avec ${partner.firstName}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2337,6 +2795,7 @@ app.get('/settings', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('settingsTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2413,6 +2872,7 @@ app.get('/blocked-list', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('blockedUsers')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2446,6 +2906,7 @@ app.get('/chat-end', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('thankYou')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body class="end-overlay">
     <div class="end-card">
@@ -2470,6 +2931,7 @@ app.get('/logout-success', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('logoutSuccess')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body class="end-overlay">
     <div class="end-card">
@@ -2482,7 +2944,150 @@ app.get('/logout-success', (req, res) => {
 });
 
 // ============================================
-// ROUTES API
+// ROUTES API POUR LES DEMANDES
+// ============================================
+
+// Envoyer une demande de premier contact
+app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
+    try {
+        const senderId = req.session.userId;
+        const { receiverId, message } = req.body;
+        
+        // Vérifier s'il y a déjà une conversation entre ces deux personnes
+        const existingConversation = await Message.findOne({
+            $or: [
+                { senderId: senderId, receiverId: receiverId },
+                { senderId: receiverId, receiverId: senderId }
+            ]
+        });
+        
+        if (existingConversation) {
+            // Si conversation existe, créer directement le message
+            const newMessage = new Message({
+                senderId: senderId,
+                receiverId: receiverId,
+                text: message,
+                read: false
+            });
+            await newMessage.save();
+            return res.json({ success: true, direct: true });
+        }
+        
+        // Vérifier si une demande est déjà en attente
+        const existingRequest = await Request.findOne({
+            senderId: senderId,
+            receiverId: receiverId,
+            status: 'pending'
+        });
+        
+        if (existingRequest) {
+            return res.status(400).json({ error: 'Une demande est déjà en attente' });
+        }
+        
+        // Créer une nouvelle demande
+        const request = new Request({
+            senderId: senderId,
+            receiverId: receiverId,
+            message: message,
+            status: 'pending'
+        });
+        await request.save();
+        
+        res.json({ success: true, pending: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Récupérer les demandes en attente pour l'utilisateur connecté
+app.get('/api/requests/pending', requireAuth, requireVerified, async (req, res) => {
+    try {
+        const requests = await Request.find({
+            receiverId: req.session.userId,
+            status: 'pending'
+        }).populate('senderId', 'firstName lastName genotype residence dob');
+        
+        res.json(requests);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Accepter une demande
+app.post('/api/requests/:id/accept', requireAuth, requireVerified, async (req, res) => {
+    try {
+        const request = await Request.findById(req.params.id).populate('senderId receiverId');
+        
+        if (!request) {
+            return res.status(404).json({ error: 'Demande non trouvée' });
+        }
+        
+        if (request.receiverId._id.toString() !== req.session.userId) {
+            return res.status(403).json({ error: 'Non autorisé' });
+        }
+        
+        // Créer le premier message
+        const message = new Message({
+            senderId: request.senderId._id,
+            receiverId: request.receiverId._id,
+            text: request.message,
+            read: false
+        });
+        await message.save();
+        
+        // Envoyer un message de confirmation au demandeur
+        const confirmationMessage = new Message({
+            senderId: request.receiverId._id,
+            receiverId: request.senderId._id,
+            text: `✅ ${request.receiverId.firstName} a accepté votre demande. Vous pouvez maintenant échanger !`,
+            read: false
+        });
+        await confirmationMessage.save();
+        
+        // Mettre à jour le statut de la demande
+        request.status = 'accepted';
+        await request.save();
+        
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Ignorer une demande
+app.post('/api/requests/:id/ignore', requireAuth, requireVerified, async (req, res) => {
+    try {
+        const request = await Request.findById(req.params.id).populate('senderId receiverId');
+        
+        if (!request) {
+            return res.status(404).json({ error: 'Demande non trouvée' });
+        }
+        
+        if (request.receiverId._id.toString() !== req.session.userId) {
+            return res.status(403).json({ error: 'Non autorisé' });
+        }
+        
+        // Envoyer un message de rejet bienveillant
+        const rejectMessage = new Message({
+            senderId: request.receiverId._id,
+            receiverId: request.senderId._id,
+            text: `🌸 Merci pour votre message. Cette personne préfère ne pas donner suite pour le moment. Continuez votre chemin, la bonne personne vous attend ailleurs.`,
+            read: false
+        });
+        await rejectMessage.save();
+        
+        // Mettre à jour le statut de la demande
+        request.status = 'rejected';
+        await request.save();
+        
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
+// AUTRES ROUTES API
 // ============================================
 
 // CONNEXION
@@ -2541,7 +3146,7 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
     }
 });
 
-// ENVOI MESSAGE
+// ENVOI MESSAGE (pour conversations existantes)
 app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     try {
         const message = new Message({ 
@@ -2638,6 +3243,7 @@ app.delete('/api/delete-account', requireAuth, requireVerified, async (req, res)
     try {
         const userId = req.session.userId;
         await Message.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] });
+        await Request.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] });
         await User.updateMany({ blockedBy: userId }, { $pull: { blockedBy: userId } });
         await User.findByIdAndDelete(userId);
         req.session.destroy();
@@ -2664,6 +3270,7 @@ app.use((req, res) => {
     <meta charset="UTF-8">
     <title>404 - ${t('appName')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body class="end-overlay">
     <div class="end-card">
@@ -2679,7 +3286,7 @@ app.use((req, res) => {
 // DÉMARRAGE
 // ============================================
 app.listen(port, '0.0.0.0', () => {
-    console.log('🚀 Genlove multilingue démarré sur http://localhost:' + port);
+    console.log('🚀 Genlove démarré sur http://localhost:' + port);
 });
 
 process.on('SIGINT', () => {
