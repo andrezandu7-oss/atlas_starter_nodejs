@@ -970,7 +970,7 @@ const styles = `
         flex-direction: column;
     }
     
-    .language-selector {
+    .language-selector-home {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
@@ -981,6 +981,37 @@ const styles = `
         overflow-y: auto;
         background: rgba(255,255,255,0.5);
         border-radius: 20px;
+    }
+    
+    .language-selector-compact {
+        background: white;
+        border-radius: 15px;
+        padding: 10px 15px;
+        margin: 10px 0 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .language-selector-compact select {
+        padding: 8px 12px;
+        border: 2px solid #ff416c;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        background: white;
+        color: #1a2a44;
+        cursor: pointer;
+        outline: none;
+        width: 150px;
+    }
+    .language-selector-compact select:hover {
+        background: #fff5f7;
+    }
+    .language-label {
+        font-size: 1.1rem;
+        color: #1a2a44;
+        font-weight: 600;
     }
     
     .lang-btn {
@@ -1570,7 +1601,7 @@ app.get('/', (req, res) => {
 <body>
     <div class="app-shell">
         <div class="home-screen">
-            <div class="language-selector">
+            <div class="language-selector-home">
                 <a href="/lang/fr" class="lang-btn ${currentLang === 'fr' ? 'active' : ''}">🇫🇷 ${t('french')}</a>
                 <a href="/lang/en" class="lang-btn ${currentLang === 'en' ? 'active' : ''}">🇬🇧 ${t('english')}</a>
                 <a href="/lang/pt" class="lang-btn ${currentLang === 'pt' ? 'active' : ''}">🇵🇹 ${t('portuguese')}</a>
@@ -1829,7 +1860,7 @@ app.get('/sas-validation', async (req, res) => {
 </html>`);
 });
 
-// PROFIL MULTILINGUE (SANS BOUTON EDIT EN BAS)
+// PROFIL MULTILINGUE - AVEC SÉLECTEUR DÉROULANT (COMPACT)
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -1853,21 +1884,27 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
 <body>
     <div class="app-shell">
         <div class="page-white">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <a href="/" class="btn-dark" style="padding:12px 20px; margin:0; font-size:1rem;">🏠 ${t('home')}</a>
                 <a href="/inbox" class="btn-pink" style="padding:12px 20px; margin:0; font-size:1rem; display:flex; align-items:center;">
                     📬 ${unreadBadge}
                 </a>
                 <a href="/settings" style="font-size:2rem; color:#1a2a44;">⚙️</a>
             </div>
-            <div class="language-selector" style="margin-bottom:20px;">
-                <a href="/lang/fr" class="lang-btn ${user.language === 'fr' ? 'active' : ''}">🇫🇷 ${t('french')}</a>
-                <a href="/lang/en" class="lang-btn ${user.language === 'en' ? 'active' : ''}">🇬🇧 ${t('english')}</a>
-                <a href="/lang/pt" class="lang-btn ${user.language === 'pt' ? 'active' : ''}">🇵🇹 ${t('portuguese')}</a>
-                <a href="/lang/es" class="lang-btn ${user.language === 'es' ? 'active' : ''}">🇪🇸 ${t('spanish')}</a>
-                <a href="/lang/ar" class="lang-btn ${user.language === 'ar' ? 'active' : ''}">🇸🇦 ${t('arabic')}</a>
-                <a href="/lang/zh" class="lang-btn ${user.language === 'zh' ? 'active' : ''}">🇨🇳 ${t('chinese')}</a>
+            
+            <!-- SÉLECTEUR DE LANGUE COMPACT (COMME DANS PARAMÈTRES) -->
+            <div class="language-selector-compact">
+                <span class="language-label">${t('language')} :</span>
+                <select onchange="window.location.href='/lang/'+this.value">
+                    <option value="fr" ${user.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
+                    <option value="en" ${user.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
+                    <option value="pt" ${user.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
+                    <option value="es" ${user.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
+                    <option value="ar" ${user.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
+                    <option value="zh" ${user.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
+                </select>
             </div>
+            
             <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
             <h2>${user.firstName} ${user.lastName}</h2>
             <p style="font-size:1.2rem;">📍 ${user.residence || ''} • ${user.gender}</p>
@@ -1887,6 +1924,92 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
+// ÉDITION PROFIL MULTILINGUE
+app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (!user) return res.redirect('/');
+        
+        const t = req.t;
+        
+        const bloodOptions = ['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(g => 
+            '<option value="' + g + '" ' + (user.bloodGroup === g ? 'selected' : '') + '>' + g + '</option>'
+        ).join('');
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('editProfile')}</title>
+    ${styles}
+</head>
+<body>
+    <div class="app-shell">
+        <div class="page-white">
+            <h2>${t('editProfile')}</h2>
+            <form id="editForm">
+                <div class="input-label">${t('firstName')}</div>
+                <input type="text" name="firstName" class="input-box" value="${user.firstName}" placeholder="${t('firstName')}" required>
+                
+                <div class="input-label">${t('lastName')}</div>
+                <input type="text" name="lastName" class="input-box" value="${user.lastName}" placeholder="${t('lastName')}" required>
+                
+                <div class="input-label">${t('gender')}</div>
+                <select name="gender" class="input-box">
+                    <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
+                    <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
+                </select>
+                
+                <div class="input-label">${t('dob')}</div>
+                <input type="date" name="dob" class="input-box" value="${user.dob}" required>
+                
+                <div class="input-label">${t('city')}</div>
+                <input type="text" name="residence" class="input-box" value="${user.residence}" placeholder="${t('city')}" required>
+                
+                <div class="input-label">${t('genotype')}</div>
+                <select name="genotype" class="input-box">
+                    <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
+                    <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
+                    <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
+                </select>
+                
+                <div class="input-label">${t('bloodGroup')}</div>
+                <select name="bloodGroup" class="input-box">
+                    ${bloodOptions}
+                </select>
+                
+                <div class="input-label">${t('desireChild')}</div>
+                <select name="desireChild" class="input-box">
+                    <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
+                    <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
+                </select>
+                
+                <button type="submit" class="btn-pink">${t('editProfile')}</button>
+            </form>
+            <a href="/profile" class="back-link">← ${t('backProfile')}</a>
+        </div>
+    </div>
+    <script>
+        document.getElementById("editForm").addEventListener("submit", async function(e){
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            const res = await fetch("/api/users/profile", {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(data)
+            });
+            if(res.ok) window.location.href = "/profile";
+            else alert("Erreur");
+        });
+    </script>
+</body>
+</html>`);
+    } catch (error) {
+        res.status(500).send('Erreur édition');
+    }
+});
+
 // MATCHING MULTILINGUE AVEC BOUTONS DÉTAILS ET CONTACTER
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
@@ -1895,7 +2018,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         
         const t = req.t;
         const isSSorAS = currentUser.genotype === 'SS' || currentUser.genotype === 'AS';
-        const genotypeText = currentUser.genotype;
         
         let query = { _id: { $ne: currentUser._id } };
         
@@ -1956,7 +2078,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         </div>
         ` : '';
         
-        // Popup pour les détails
         const detailsPopupStyles = `
         <div id="details-popup" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);">
             <div style="background:white; border-radius:30px; padding:30px; max-width:380px; width:100%;">
@@ -2264,92 +2385,6 @@ app.get('/settings', requireAuth, requireVerified, async (req, res) => {
 </html>`);
     } catch (error) {
         res.status(500).send('Erreur paramètres');
-    }
-});
-
-// ÉDITION PROFIL MULTILINGUE
-app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
-    try {
-        const user = await User.findById(req.session.userId);
-        if (!user) return res.redirect('/');
-        
-        const t = req.t;
-        
-        const bloodOptions = ['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(g => 
-            '<option value="' + g + '" ' + (user.bloodGroup === g ? 'selected' : '') + '>' + g + '</option>'
-        ).join('');
-        
-        res.send(`<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>${t('appName')} - ${t('editProfile')}</title>
-    ${styles}
-</head>
-<body>
-    <div class="app-shell">
-        <div class="page-white">
-            <h2>${t('editProfile')}</h2>
-            <form id="editForm">
-                <div class="input-label">${t('firstName')}</div>
-                <input type="text" name="firstName" class="input-box" value="${user.firstName}" placeholder="${t('firstName')}" required>
-                
-                <div class="input-label">${t('lastName')}</div>
-                <input type="text" name="lastName" class="input-box" value="${user.lastName}" placeholder="${t('lastName')}" required>
-                
-                <div class="input-label">${t('gender')}</div>
-                <select name="gender" class="input-box">
-                    <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
-                    <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
-                </select>
-                
-                <div class="input-label">${t('dob')}</div>
-                <input type="date" name="dob" class="input-box" value="${user.dob}" required>
-                
-                <div class="input-label">${t('city')}</div>
-                <input type="text" name="residence" class="input-box" value="${user.residence}" placeholder="${t('city')}" required>
-                
-                <div class="input-label">${t('genotype')}</div>
-                <select name="genotype" class="input-box">
-                    <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
-                    <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
-                    <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
-                </select>
-                
-                <div class="input-label">${t('bloodGroup')}</div>
-                <select name="bloodGroup" class="input-box">
-                    ${bloodOptions}
-                </select>
-                
-                <div class="input-label">${t('desireChild')}</div>
-                <select name="desireChild" class="input-box">
-                    <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
-                    <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
-                </select>
-                
-                <button type="submit" class="btn-pink">${t('editProfile')}</button>
-            </form>
-            <a href="/profile" class="back-link">← ${t('backProfile')}</a>
-        </div>
-    </div>
-    <script>
-        document.getElementById("editForm").addEventListener("submit", async function(e){
-            e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
-            const res = await fetch("/api/users/profile", {
-                method: "PUT",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(data)
-            });
-            if(res.ok) window.location.href = "/profile";
-            else alert("Erreur");
-        });
-    </script>
-</body>
-</html>`);
-    } catch (error) {
-        res.status(500).send('Erreur édition');
     }
 });
 
