@@ -92,7 +92,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ============================================
-// STYLES CSS MIS À JOUR
+// STYLES CSS
 // ============================================
 const styles = `
 <style>
@@ -259,7 +259,6 @@ const styles = `
         box-shadow: 0 10px 25px rgba(255,65,108,0.15);
     }
     
-    /* Style pour les messages non lus */
     .inbox-item.unread {
         background: #e8f0fe;
         border-left: 5px solid #ff416c;
@@ -498,6 +497,77 @@ const styles = `
         margin: 20px 0 10px;
     }
     
+    /* Styles pour le popup SS/AS */
+    #genlove-popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.8);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        backdrop-filter: blur(5px);
+    }
+    .popup-card {
+        background: white;
+        border-radius: 30px;
+        padding: 35px 25px;
+        max-width: 380px;
+        width: 100%;
+        text-align: center;
+        animation: popupAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 3px solid #ff416c;
+        box-shadow: 0 20px 40px rgba(255,65,108,0.3);
+    }
+    .popup-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+    }
+    .popup-title {
+        color: #ff416c;
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    .popup-message {
+        color: #1a2a44;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        padding: 0 10px;
+    }
+    .popup-button {
+        background: #ff416c;
+        color: white;
+        border: none;
+        padding: 18px 30px;
+        border-radius: 60px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s;
+        box-shadow: 0 10px 20px rgba(255,65,108,0.3);
+    }
+    .popup-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(255,65,108,0.4);
+    }
+    @keyframes popupAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
     @media (max-width: 420px) {
         body { font-size: 15px; }
         .app-shell { max-width: 100%; }
@@ -594,7 +664,6 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
         
         const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false });
         
-        // Formatage du badge pour afficher 0 ou le nombre
         const unreadBadge = unreadCount > 0 
             ? '<span class="profile-unread" style="background:#ff416c; color:white; padding:3px 8px; border-radius:15px; font-size:0.8rem; margin-left:5px;">' + unreadCount + '</span>'
             : '';
@@ -638,11 +707,14 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING
+// MATCHING - AVEC POPUP POUR SS/AS
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
         if (!currentUser) return res.redirect('/');
+        
+        const isSSorAS = currentUser.genotype === 'SS' || currentUser.genotype === 'AS';
+        const genotypeText = currentUser.genotype === 'SS' ? 'SS' : 'AS';
         
         let query = { _id: { $ne: currentUser._id } };
         
@@ -671,7 +743,21 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             });
         }
         
-        res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Matching - Genlove</title>' + styles + '</head><body><div class="app-shell"><div class="page-white"><h2>Partenaires compatibles</h2>' + partnersHTML + '<div class="navigation"><a href="/profile" class="nav-link">← Mon profil</a><a href="/inbox" class="nav-link">Messages →</a></div></div></div></body></html>');
+        const popupMessage = isSSorAS ? `
+        <div id="genlove-popup" style="display:flex;">
+            <div class="popup-card">
+                <div class="popup-icon">🛡️</div>
+                <div class="popup-title">Votre engagement santé</div>
+                <div class="popup-message">
+                    "En tant que profil ${genotypeText}, nous ne vous présentons que des partenaires AA.<br><br>
+                    Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑"
+                </div>
+                <button class="popup-button" onclick="document.getElementById('genlove-popup').style.display='none';">J'ai compris</button>
+            </div>
+        </div>
+        ` : '';
+        
+        res.send('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Matching - Genlove</title>' + styles + '</head><body><div class="app-shell">' + popupMessage + '<div class="page-white"><h2>Partenaires compatibles</h2>' + partnersHTML + '<div class="navigation"><a href="/profile" class="nav-link">← Mon profil</a><a href="/inbox" class="nav-link">Messages →</a></div></div></div></body></html>');
     } catch (error) {
         res.status(500).send('Erreur matching');
     }
@@ -695,7 +781,6 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
             if (currentUser.blockedUsers?.includes(otherUser._id)) continue;
             
             if (!conversations.has(otherUser._id.toString())) {
-                // Compter les messages non lus pour cette conversation
                 const unreadCount = await Message.countDocuments({
                     senderId: otherUser._id,
                     receiverId: currentUser._id,
@@ -733,7 +818,6 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
             });
         }
         
-        // Compter le total des messages non lus pour afficher dans le titre
         const totalUnread = await Message.countDocuments({ receiverId: currentUser._id, read: false });
         const titleUnread = totalUnread > 0 ? ' (' + totalUnread + ')' : '';
         
@@ -744,7 +828,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// CHAT - AVEC MARQUAGE DES MESSAGES COMME LUS
+// CHAT
 app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -762,7 +846,6 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         
         if (currentUser.blockedUsers?.includes(partnerId)) return res.redirect('/inbox');
         
-        // Marquer les messages comme lus quand on ouvre le chat
         await Message.updateMany(
             { senderId: partnerId, receiverId: currentUser._id, read: false },
             { read: true }
