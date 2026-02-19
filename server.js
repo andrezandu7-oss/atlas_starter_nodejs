@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
     bloodGroup: String,
     desireChild: String,
     photo: String,
-    language: { type: String, default: 'fr' }, // Langue préférée
+    language: { type: String, default: 'fr' },
     isVerified: { type: Boolean, default: false },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -73,56 +73,43 @@ messageSchema.index({ senderId: 1, receiverId: 1, timestamp: -1 });
 const Message = mongoose.model('Message', messageSchema);
 
 // ============================================
-// SYSTÈME DE TRADUCTION
+// SYSTÈME DE TRADUCTION MULTILINGUE
 // ============================================
 const translations = {
     fr: {
-        // Général
         appName: 'Genlove',
         slogan: 'Unissez cœur et santé pour bâtir des couples sains 💑',
         security: '🛡️ Vos données de santé sont cryptées',
-        
-        // Accueil
         welcome: 'Bienvenue sur Genlove',
         haveAccount: 'Avez-vous déjà un compte ?',
         login: 'Se connecter',
         createAccount: 'Créer un compte',
-        
-        // Connexion
         loginTitle: 'Connexion',
         enterName: 'Entrez votre prénom pour vous connecter',
         yourName: 'Votre prénom',
         backHome: 'Retour à l\'accueil',
         nameNotFound: 'Prénom non trouvé. Veuillez créer un compte.',
-        
-        // Charte
         charterTitle: '📜 La Charte d\'Honneur',
         charterSubtitle: 'Lisez attentivement ces 5 engagements',
         scrollDown: '⬇️ Faites défiler jusqu\'en bas ⬇️',
         accept: 'J\'accepte et je continue',
         
-        // Points de la charte
         oath1: '1. Le Serment de Sincérité',
         oath1Sub: 'Vérité Médicale',
         oath1Text: 'Je m\'engage sur l\'honneur à fournir des informations exactes concernant mon génotype et mes données de santé.',
-        
         oath2: '2. Le Pacte de Confidentialité',
         oath2Sub: 'Secret Partagé',
         oath2Text: 'Je m\'engage à garder confidentielles toutes les informations personnelles et médicales.',
-        
         oath3: '3. Le Principe de Non-Discrimination',
         oath3Sub: 'Égalité de Respect',
         oath3Text: 'Je traite chaque membre avec dignité, quel que soit son génotype.',
-        
         oath4: '4. La Responsabilité Préventive',
         oath4Sub: 'Orientation Santé',
         oath4Text: 'J\'accepte les mesures de protection comme le filtrage des compatibilités à risque.',
-        
         oath5: '5. La Bienveillance Éthique',
         oath5Sub: 'Courtoisie',
         oath5Text: 'J\'adopte une conduite exemplaire et respectueuse dans mes messages.',
         
-        // Inscription
         signupTitle: 'Créer mon profil',
         signupSub: 'Toutes les informations sont confidentielles',
         firstName: 'Prénom',
@@ -131,6 +118,7 @@ const translations = {
         male: 'Homme',
         female: 'Femme',
         dob: 'Date de naissance',
+        dobPlaceholder: 'jj/mm/aaaa',
         city: 'Ville de résidence',
         genotype: 'Génotype',
         bloodGroup: 'Groupe sanguin',
@@ -140,13 +128,11 @@ const translations = {
         createProfile: 'Créer mon profil',
         backCharter: '← Retour à la charte',
         
-        // Sas de validation
         honorTitle: 'Serment d\'Honneur',
         honorText: '"Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité."',
         swear: 'Je le jure',
         accessProfile: 'Accéder à mon profil',
         
-        // Profil
         myProfile: 'Mon Profil',
         home: 'Accueil',
         messages: 'Messages',
@@ -158,38 +144,35 @@ const translations = {
         findPartner: '🔍 Trouver un partenaire',
         editProfile: '✏️ Modifier mon profil',
         
-        // Matching
         compatiblePartners: 'Partenaires compatibles',
         noPartners: 'Aucun partenaire trouvé pour le moment',
         searchOngoing: 'Recherche en cours...',
         expandCommunity: 'Nous élargissons notre communauté. Revenez bientôt !',
+        details: 'Détails',
         contact: 'Contacter',
         backProfile: '← Mon profil',
         toMessages: 'Messages →',
         
-        // Popup SS/AS
         healthCommitment: '🛡️ Votre engagement santé',
         popupMessageAS: '"En tant que profil AS, nous ne vous présentons que des partenaires AA.<br><br>Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑"',
         popupMessageSS: '"En tant que profil SS, nous ne vous présentons que des partenaires AA.<br><br>Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑"',
         understood: 'J\'ai compris',
         
-        // Inbox
         inboxTitle: 'Boîte de réception',
         emptyInbox: '📭 Boîte vide',
         startConversation: 'Commencez une conversation !',
         findPartners: 'Trouver des partenaires',
         
-        // Chat
         block: '🚫 Bloquer',
         yourMessage: 'Votre message...',
         send: 'Envoyer',
         blockedByUser: '⛔ Conversation impossible',
         blockedMessage: 'Cet utilisateur vous a bloqué. Vous ne pouvez pas lui envoyer de messages.',
         
-        // Paramètres
         settingsTitle: 'Paramètres',
         visibility: 'Visibilité du profil',
         notifications: 'Notifications push',
+        language: 'Langue',
         blockedUsers: 'Utilisateurs bloqués',
         dangerZone: '⚠️ ZONE DE DANGER',
         deleteAccount: '🗑️ Supprimer mon compte',
@@ -197,77 +180,64 @@ const translations = {
         logout: 'Déconnexion',
         confirmDelete: 'Supprimer définitivement ?',
         
-        // Bloqués
         noBlocked: 'Aucun utilisateur bloqué',
         unblock: 'Débloquer',
         
-        // Fin de chat
         thankYou: 'Merci pour cet échange',
         thanksMessage: 'Genlove vous remercie',
         newSearch: 'Nouvelle recherche',
         
-        // Déconnexion
         logoutSuccess: 'Déconnexion réussie',
         seeYouSoon: 'À bientôt !',
         
-        // Langue
-        language: 'Langue',
         french: 'Français',
         english: 'English',
         portuguese: 'Português',
+        spanish: 'Español',
+        arabic: 'العربية',
+        chinese: '中文',
         
-        // 404
         pageNotFound: 'Page non trouvée',
-        pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.'
+        pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.',
+        
+        residence_label: 'Résidence',
+        project_life: 'Projet de vie'
     },
     
     en: {
-        // General
         appName: 'Genlove',
         slogan: 'Unite heart and health to build healthy couples 💑',
         security: '🛡️ Your health data is encrypted',
-        
-        // Home
         welcome: 'Welcome to Genlove',
         haveAccount: 'Already have an account?',
         login: 'Login',
         createAccount: 'Create account',
-        
-        // Login
         loginTitle: 'Login',
         enterName: 'Enter your first name to login',
         yourName: 'Your first name',
         backHome: '← Back to home',
         nameNotFound: 'Name not found. Please create an account.',
-        
-        // Charter
         charterTitle: '📜 The Honor Charter',
         charterSubtitle: 'Read these 5 commitments carefully',
         scrollDown: '⬇️ Scroll to the bottom ⬇️',
         accept: 'I accept and continue',
         
-        // Charter points
         oath1: '1. The Oath of Sincerity',
         oath1Sub: 'Medical Truth',
         oath1Text: 'I pledge on my honor to provide accurate information about my genotype and health data.',
-        
         oath2: '2. The Pact of Confidentiality',
         oath2Sub: 'Shared Secret',
         oath2Text: 'I commit to keeping all personal and medical information confidential.',
-        
         oath3: '3. The Principle of Non-Discrimination',
         oath3Sub: 'Equality of Respect',
         oath3Text: 'I treat every member with dignity, regardless of their genotype.',
-        
         oath4: '4. Preventive Responsibility',
         oath4Sub: 'Health Orientation',
         oath4Text: 'I accept protective measures such as filtering risky compatibilities.',
-        
         oath5: '5. Ethical Benevolence',
         oath5Sub: 'Courtesy',
         oath5Text: 'I adopt exemplary and respectful conduct in my messages.',
         
-        // Signup
         signupTitle: 'Create my profile',
         signupSub: 'All information is confidential',
         firstName: 'First name',
@@ -276,6 +246,7 @@ const translations = {
         male: 'Male',
         female: 'Female',
         dob: 'Date of birth',
+        dobPlaceholder: 'dd/mm/yyyy',
         city: 'City of residence',
         genotype: 'Genotype',
         bloodGroup: 'Blood group',
@@ -285,13 +256,11 @@ const translations = {
         createProfile: 'Create my profile',
         backCharter: '← Back to charter',
         
-        // Validation
         honorTitle: 'Oath of Honor',
         honorText: '"I confirm on my honor that my information is sincere and conforms to reality."',
         swear: 'I swear',
         accessProfile: 'Access my profile',
         
-        // Profile
         myProfile: 'My Profile',
         home: 'Home',
         messages: 'Messages',
@@ -303,38 +272,35 @@ const translations = {
         findPartner: '🔍 Find a partner',
         editProfile: '✏️ Edit my profile',
         
-        // Matching
         compatiblePartners: 'Compatible partners',
         noPartners: 'No partners found at the moment',
         searchOngoing: 'Search in progress...',
         expandCommunity: 'We are expanding our community. Come back soon!',
+        details: 'Details',
         contact: 'Contact',
         backProfile: '← My profile',
         toMessages: 'Messages →',
         
-        // SS/AS Popup
         healthCommitment: '🛡️ Your health commitment',
         popupMessageAS: '"As an AS profile, we only show you AA partners.<br><br>This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑"',
         popupMessageSS: '"As an SS profile, we only show you AA partners.<br><br>This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑"',
         understood: 'I understand',
         
-        // Inbox
         inboxTitle: 'Inbox',
         emptyInbox: '📭 Empty inbox',
         startConversation: 'Start a conversation!',
         findPartners: 'Find partners',
         
-        // Chat
         block: '🚫 Block',
         yourMessage: 'Your message...',
         send: 'Send',
         blockedByUser: '⛔ Conversation impossible',
         blockedMessage: 'This user has blocked you. You cannot send them messages.',
         
-        // Settings
         settingsTitle: 'Settings',
         visibility: 'Profile visibility',
         notifications: 'Push notifications',
+        language: 'Language',
         blockedUsers: 'Blocked users',
         dangerZone: '⚠️ DANGER ZONE',
         deleteAccount: '🗑️ Delete my account',
@@ -342,77 +308,64 @@ const translations = {
         logout: 'Logout',
         confirmDelete: 'Delete permanently?',
         
-        // Blocked list
         noBlocked: 'No blocked users',
         unblock: 'Unblock',
         
-        // Chat end
         thankYou: 'Thank you for this exchange',
         thanksMessage: 'Genlove thanks you',
         newSearch: 'New search',
         
-        // Logout
         logoutSuccess: 'Logout successful',
         seeYouSoon: 'See you soon!',
         
-        // Language
-        language: 'Language',
         french: 'French',
         english: 'English',
         portuguese: 'Portuguese',
+        spanish: 'Spanish',
+        arabic: 'Arabic',
+        chinese: 'Chinese',
         
-        // 404
         pageNotFound: 'Page not found',
-        pageNotFoundMessage: 'The page you are looking for does not exist.'
+        pageNotFoundMessage: 'The page you are looking for does not exist.',
+        
+        residence_label: 'Residence',
+        project_life: 'Life project'
     },
     
     pt: {
-        // General
         appName: 'Genlove',
         slogan: 'Una coração e saúde para construir casais saudáveis 💑',
         security: '🛡️ Seus dados de saúde estão criptografados',
-        
-        // Home
         welcome: 'Bem-vindo ao Genlove',
         haveAccount: 'Já tem uma conta?',
         login: 'Entrar',
         createAccount: 'Criar conta',
-        
-        // Login
         loginTitle: 'Entrar',
         enterName: 'Digite seu primeiro nome para entrar',
         yourName: 'Seu primeiro nome',
         backHome: '← Voltar ao início',
         nameNotFound: 'Nome não encontrado. Por favor, crie uma conta.',
-        
-        // Charter
         charterTitle: '📜 A Carta de Honra',
         charterSubtitle: 'Leia estes 5 compromissos atentamente',
         scrollDown: '⬇️ Role até o final ⬇️',
         accept: 'Aceito e continuo',
         
-        // Charter points
         oath1: '1. O Juramento de Sinceridade',
         oath1Sub: 'Verdade Médica',
         oath1Text: 'Comprometo-me, sob minha honra, a fornecer informações precisas sobre meu genótipo e dados de saúde.',
-        
         oath2: '2. O Pacto de Confidencialidade',
         oath2Sub: 'Segredo Compartilhado',
         oath2Text: 'Comprometo-me a manter todas as informações pessoais e médicas confidenciais.',
-        
         oath3: '3. O Princípio da Não-Discriminação',
         oath3Sub: 'Igualdade de Respeito',
         oath3Text: 'Trato cada membro com dignidade, independentemente do seu genótipo.',
-        
         oath4: '4. Responsabilidade Preventiva',
         oath4Sub: 'Orientação para a Saúde',
         oath4Text: 'Aceito medidas de proteção como a filtragem de compatibilidades de risco.',
-        
         oath5: '5. Benevolência Ética',
         oath5Sub: 'Cortesia',
         oath5Text: 'Adoto uma conduta exemplar e respeitosa em minhas mensagens.',
         
-        // Signup
         signupTitle: 'Criar meu perfil',
         signupSub: 'Todas as informações são confidenciais',
         firstName: 'Primeiro nome',
@@ -421,6 +374,7 @@ const translations = {
         male: 'Homem',
         female: 'Mulher',
         dob: 'Data de nascimento',
+        dobPlaceholder: 'dd/mm/aaaa',
         city: 'Cidade de residência',
         genotype: 'Genótipo',
         bloodGroup: 'Grupo sanguíneo',
@@ -430,13 +384,11 @@ const translations = {
         createProfile: 'Criar meu perfil',
         backCharter: '← Voltar à carta',
         
-        // Validation
         honorTitle: 'Juramento de Honra',
         honorText: '"Confirmo por minha honra que minhas informações são sinceras e conformes à realidade."',
         swear: 'Eu juro',
         accessProfile: 'Acessar meu perfil',
         
-        // Profile
         myProfile: 'Meu Perfil',
         home: 'Início',
         messages: 'Mensagens',
@@ -448,38 +400,35 @@ const translations = {
         findPartner: '🔍 Encontrar parceiro(a)',
         editProfile: '✏️ Editar perfil',
         
-        // Matching
         compatiblePartners: 'Parceiros compatíveis',
         noPartners: 'Nenhum parceiro encontrado no momento',
         searchOngoing: 'Pesquisa em andamento...',
         expandCommunity: 'Estamos expandindo nossa comunidade. Volte em breve!',
+        details: 'Detalhes',
         contact: 'Contatar',
         backProfile: '← Meu perfil',
         toMessages: 'Mensagens →',
         
-        // SS/AS Popup
         healthCommitment: '🛡️ Seu compromisso com a saúde',
         popupMessageAS: '"Como perfil AS, mostramos apenas parceiros AA.<br><br>Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑"',
         popupMessageSS: '"Como perfil SS, mostramos apenas parceiros AA.<br><br>Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑"',
         understood: 'Entendi',
         
-        // Inbox
         inboxTitle: 'Caixa de entrada',
         emptyInbox: '📭 Caixa vazia',
         startConversation: 'Comece uma conversa!',
         findPartners: 'Encontrar parceiros',
         
-        // Chat
         block: '🚫 Bloquear',
         yourMessage: 'Sua mensagem...',
         send: 'Enviar',
         blockedByUser: '⛔ Conversa impossível',
         blockedMessage: 'Este usuário bloqueou você. Não é possível enviar mensagens.',
         
-        // Settings
         settingsTitle: 'Configurações',
         visibility: 'Visibilidade do perfil',
         notifications: 'Notificações push',
+        language: 'Idioma',
         blockedUsers: 'Usuários bloqueados',
         dangerZone: '⚠️ ZONA DE PERIGO',
         deleteAccount: '🗑️ Excluir minha conta',
@@ -487,28 +436,412 @@ const translations = {
         logout: 'Sair',
         confirmDelete: 'Excluir permanentemente?',
         
-        // Blocked list
         noBlocked: 'Nenhum usuário bloqueado',
         unblock: 'Desbloquear',
         
-        // Chat end
         thankYou: 'Obrigado por este encontro',
         thanksMessage: 'Genlove agradece',
         newSearch: 'Nova pesquisa',
         
-        // Logout
         logoutSuccess: 'Saída bem-sucedida',
         seeYouSoon: 'Até breve!',
         
-        // Language
-        language: 'Idioma',
         french: 'Francês',
         english: 'Inglês',
         portuguese: 'Português',
+        spanish: 'Espanhol',
+        arabic: 'Árabe',
+        chinese: 'Chinês',
         
-        // 404
         pageNotFound: 'Página não encontrada',
-        pageNotFoundMessage: 'A página que você procura não existe.'
+        pageNotFoundMessage: 'A página que você procura não existe.',
+        
+        residence_label: 'Residência',
+        project_life: 'Projeto de vida'
+    },
+    
+    es: {
+        appName: 'Genlove',
+        slogan: 'Une corazón y salud para construir parejas saludables 💑',
+        security: '🛡️ Sus datos de salud están encriptados',
+        welcome: 'Bienvenido a Genlove',
+        haveAccount: '¿Ya tienes una cuenta?',
+        login: 'Iniciar sesión',
+        createAccount: 'Crear cuenta',
+        loginTitle: 'Iniciar sesión',
+        enterName: 'Ingrese su nombre para iniciar sesión',
+        yourName: 'Su nombre',
+        backHome: '← Volver al inicio',
+        nameNotFound: 'Nombre no encontrado. Por favor, cree una cuenta.',
+        charterTitle: '📜 La Carta de Honor',
+        charterSubtitle: 'Lea estos 5 compromisos atentamente',
+        scrollDown: '⬇️ Desplácese hasta el final ⬇️',
+        accept: 'Acepto y continúo',
+        
+        oath1: '1. El Juramento de Sinceridad',
+        oath1Sub: 'Verdad Médica',
+        oath1Text: 'Me comprometo bajo mi honor a proporcionar información precisa sobre mi genotipo y datos de salud.',
+        oath2: '2. El Pacto de Confidencialidad',
+        oath2Sub: 'Secreto Compartido',
+        oath2Text: 'Me comprometo a mantener toda la información personal y médica confidencial.',
+        oath3: '3. El Principio de No Discriminación',
+        oath3Sub: 'Igualdad de Respeto',
+        oath3Text: 'Trato a cada miembro con dignidad, independientemente de su genotipo.',
+        oath4: '4. Responsabilidad Preventiva',
+        oath4Sub: 'Orientación para la Salud',
+        oath4Text: 'Acepto medidas de protección como el filtrado de compatibilidades de riesgo.',
+        oath5: '5. Benevolencia Ética',
+        oath5Sub: 'Cortesía',
+        oath5Text: 'Adopto una conducta ejemplar y respetuosa en mis mensajes.',
+        
+        signupTitle: 'Crear mi perfil',
+        signupSub: 'Toda la información es confidencial',
+        firstName: 'Nombre',
+        lastName: 'Apellido',
+        gender: 'Género',
+        male: 'Hombre',
+        female: 'Mujer',
+        dob: 'Fecha de nacimiento',
+        dobPlaceholder: 'dd/mm/aaaa',
+        city: 'Ciudad de residencia',
+        genotype: 'Genotipo',
+        bloodGroup: 'Grupo sanguíneo',
+        desireChild: '¿Deseo de tener hijos?',
+        yes: 'Sí',
+        no: 'No',
+        createProfile: 'Crear mi perfil',
+        backCharter: '← Volver a la carta',
+        
+        honorTitle: 'Juramento de Honor',
+        honorText: '"Confirmo bajo mi honor que mi información es sincera y conforme a la realidad."',
+        swear: 'Lo juro',
+        accessProfile: 'Acceder a mi perfil',
+        
+        myProfile: 'Mi Perfil',
+        home: 'Inicio',
+        messages: 'Mensajes',
+        settings: 'Configuración',
+        genotype_label: 'Genotipo',
+        blood_label: 'Grupo',
+        age_label: 'Edad',
+        project_label: 'Proyecto',
+        findPartner: '🔍 Encontrar pareja',
+        editProfile: '✏️ Editar perfil',
+        
+        compatiblePartners: 'Parejas compatibles',
+        noPartners: 'No se encontraron parejas por el momento',
+        searchOngoing: 'Búsqueda en curso...',
+        expandCommunity: 'Estamos expandiendo nuestra comunidad. ¡Vuelva pronto!',
+        details: 'Detalles',
+        contact: 'Contactar',
+        backProfile: '← Mi perfil',
+        toMessages: 'Mensajes →',
+        
+        healthCommitment: '🛡️ Su compromiso con la salud',
+        popupMessageAS: '"Como perfil AS, solo le mostramos parejas AA.<br><br>Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑"',
+        popupMessageSS: '"Como perfil SS, solo le mostramos parejas AA.<br><br>Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑"',
+        understood: 'Entiendo',
+        
+        inboxTitle: 'Bandeja de entrada',
+        emptyInbox: '📭 Bandeja vacía',
+        startConversation: '¡Comience una conversación!',
+        findPartners: 'Encontrar parejas',
+        
+        block: '🚫 Bloquear',
+        yourMessage: 'Su mensaje...',
+        send: 'Enviar',
+        blockedByUser: '⛔ Conversación imposible',
+        blockedMessage: 'Este usuario le ha bloqueado. No puede enviarle mensajes.',
+        
+        settingsTitle: 'Configuración',
+        visibility: 'Visibilidad del perfil',
+        notifications: 'Notificaciones push',
+        language: 'Idioma',
+        blockedUsers: 'Usuarios bloqueados',
+        dangerZone: '⚠️ ZONA DE PELIGRO',
+        deleteAccount: '🗑️ Eliminar mi cuenta',
+        delete: 'Eliminar',
+        logout: 'Cerrar sesión',
+        confirmDelete: '¿Eliminar permanentemente?',
+        
+        noBlocked: 'No hay usuarios bloqueados',
+        unblock: 'Desbloquear',
+        
+        thankYou: 'Gracias por este intercambio',
+        thanksMessage: 'Genlove le agradece',
+        newSearch: 'Nueva búsqueda',
+        
+        logoutSuccess: 'Sesión cerrada',
+        seeYouSoon: '¡Hasta pronto!',
+        
+        french: 'Francés',
+        english: 'Inglés',
+        portuguese: 'Portugués',
+        spanish: 'Español',
+        arabic: 'Árabe',
+        chinese: 'Chino',
+        
+        pageNotFound: 'Página no encontrada',
+        pageNotFoundMessage: 'La página que busca no existe.',
+        
+        residence_label: 'Residencia',
+        project_life: 'Proyecto de vida'
+    },
+    
+    ar: {
+        appName: 'Genlove',
+        slogan: 'وحدوا القلب والصحة لبناء أزواج أصحاء 💑',
+        security: '🛡️ بياناتك الصحية مشفرة',
+        welcome: 'مرحبًا بكم في Genlove',
+        haveAccount: 'هل لديك حساب بالفعل؟',
+        login: 'تسجيل الدخول',
+        createAccount: 'إنشاء حساب',
+        loginTitle: 'تسجيل الدخول',
+        enterName: 'أدخل اسمك الأول لتسجيل الدخول',
+        yourName: 'اسمك الأول',
+        backHome: '← العودة إلى الرئيسية',
+        nameNotFound: 'الاسم غير موجود. يرجى إنشاء حساب.',
+        charterTitle: '📜 ميثاق الشرف',
+        charterSubtitle: 'اقرأ هذه الالتزامات الخمسة بعناية',
+        scrollDown: '⬇️ انتقل إلى الأسفل ⬇️',
+        accept: 'أوافق وأواصل',
+        
+        oath1: '١. قسم الإخلاص',
+        oath1Sub: 'الحقيقة الطبية',
+        oath1Text: 'أتعهد بشرفي بتقديم معلومات دقيقة عن نمطي الوراثي وبياناتي الصحية.',
+        oath2: '٢. ميثاق السرية',
+        oath2Sub: 'السر المشترك',
+        oath2Text: 'أتعهد بالحفاظ على سرية جميع المعلومات الشخصية والطبية.',
+        oath3: '٣. مبدأ عدم التمييز',
+        oath3Sub: 'المساواة في الاحترام',
+        oath3Text: 'أعامل كل عضو بكرامة، بغض النظر عن نمطه الوراثي.',
+        oath4: '٤. المسؤولية الوقائية',
+        oath4Sub: 'التوجيه الصحي',
+        oath4Text: 'أقبل التدابير الوقائية مثل تصفية التوافقات الخطرة.',
+        oath5: '٥. الإحسان الأخلاقي',
+        oath5Sub: 'المجاملة',
+        oath5Text: 'أتبنى سلوكًا مثاليًا ومحترمًا في رسائلي.',
+        
+        signupTitle: 'إنشاء ملفي الشخصي',
+        signupSub: 'جميع المعلومات سرية',
+        firstName: 'الاسم الأول',
+        lastName: 'اسم العائلة',
+        gender: 'الجنس',
+        male: 'ذكر',
+        female: 'أنثى',
+        dob: 'تاريخ الميلاد',
+        dobPlaceholder: 'yyyy/mm/dd',
+        city: 'مدينة الإقامة',
+        genotype: 'النمط الوراثي',
+        bloodGroup: 'فصيلة الدم',
+        desireChild: 'الرغبة في الأطفال؟',
+        yes: 'نعم',
+        no: 'لا',
+        createProfile: 'إنشاء ملفي الشخصي',
+        backCharter: '← العودة إلى الميثاق',
+        
+        honorTitle: 'قسم الشرف',
+        honorText: '"أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع."',
+        swear: 'أقسم',
+        accessProfile: 'الوصول إلى ملفي الشخصي',
+        
+        myProfile: 'ملفي الشخصي',
+        home: 'الرئيسية',
+        messages: 'الرسائل',
+        settings: 'الإعدادات',
+        genotype_label: 'النمط الوراثي',
+        blood_label: 'الفصيلة',
+        age_label: 'العمر',
+        project_label: 'المشروع',
+        findPartner: '🔍 العثور على شريك',
+        editProfile: '✏️ تعديل الملف الشخصي',
+        
+        compatiblePartners: 'الشركاء المتوافقون',
+        noPartners: 'لم يتم العثور على شركاء في الوقت الحالي',
+        searchOngoing: 'البحث جار...',
+        expandCommunity: 'نحن نوسع مجتمعنا. عد قريبًا!',
+        details: 'التفاصيل',
+        contact: 'اتصال',
+        backProfile: '← ملفي الشخصي',
+        toMessages: 'الرسائل →',
+        
+        healthCommitment: '🛡️ التزامك الصحي',
+        popupMessageAS: '"كملف AS، نعرض لك فقط شركاء AA.<br><br>هذا الاختيار المسؤول يضمن serenity منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑"',
+        popupMessageSS: '"كملف SS، نعرض لك فقط شركاء AA.<br><br>هذا الاختيار المسؤول يضمن serenity منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑"',
+        understood: 'فهمت',
+        
+        inboxTitle: 'صندوق الوارد',
+        emptyInbox: '📭 صندوق فارغ',
+        startConversation: 'ابدأ محادثة!',
+        findPartners: 'العثور على شركاء',
+        
+        block: '🚫 حظر',
+        yourMessage: 'رسالتك...',
+        send: 'إرسال',
+        blockedByUser: '⛔ محادثة مستحيلة',
+        blockedMessage: 'هذا المستخدم قام بحظرك. لا يمكنك إرسال رسائل له.',
+        
+        settingsTitle: 'الإعدادات',
+        visibility: 'رؤية الملف الشخصي',
+        notifications: 'إشعارات',
+        language: 'اللغة',
+        blockedUsers: 'المستخدمون المحظورون',
+        dangerZone: '⚠️ منطقة الخطر',
+        deleteAccount: '🗑️ حذف حسابي',
+        delete: 'حذف',
+        logout: 'تسجيل الخروج',
+        confirmDelete: 'حذف نهائي؟',
+        
+        noBlocked: 'لا يوجد مستخدمين محظورين',
+        unblock: 'إلغاء الحظر',
+        
+        thankYou: 'شكرًا لهذا التبادل',
+        thanksMessage: 'Genlove يشكرك',
+        newSearch: 'بحث جديد',
+        
+        logoutSuccess: 'تم تسجيل الخروج بنجاح',
+        seeYouSoon: 'أراك قريبًا!',
+        
+        french: 'الفرنسية',
+        english: 'الإنجليزية',
+        portuguese: 'البرتغالية',
+        spanish: 'الإسبانية',
+        arabic: 'العربية',
+        chinese: 'الصينية',
+        
+        pageNotFound: 'الصفحة غير موجودة',
+        pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
+        
+        residence_label: 'الإقامة',
+        project_life: 'مشروع الحياة'
+    },
+    
+    zh: {
+        appName: 'Genlove',
+        slogan: '结合心灵与健康，建立健康的伴侣关系 💑',
+        security: '🛡️ 您的健康数据已加密',
+        welcome: '欢迎来到 Genlove',
+        haveAccount: '已有帐户？',
+        login: '登录',
+        createAccount: '创建帐户',
+        loginTitle: '登录',
+        enterName: '输入您的名字以登录',
+        yourName: '您的名字',
+        backHome: '← 返回首页',
+        nameNotFound: '未找到名字。请创建帐户。',
+        charterTitle: '📜 荣誉宪章',
+        charterSubtitle: '请仔细阅读这5项承诺',
+        scrollDown: '⬇️ 滚动到底部 ⬇️',
+        accept: '我接受并继续',
+        
+        oath1: '1. 真诚誓言',
+        oath1Sub: '医疗真相',
+        oath1Text: '我以荣誉保证提供关于我的基因型和健康数据的准确信息。',
+        oath2: '2. 保密契约',
+        oath2Sub: '共享秘密',
+        oath2Text: '我承诺对所有个人和医疗信息保密。',
+        oath3: '3. 非歧视原则',
+        oath3Sub: '尊重平等',
+        oath3Text: '我尊重每一位成员，无论其基因型如何。',
+        oath4: '4. 预防责任',
+        oath4Sub: '健康导向',
+        oath4Text: '我接受保护措施，如过滤风险兼容性。',
+        oath5: '5. 道德仁慈',
+        oath5Sub: '礼貌',
+        oath5Text: '我在信息中采取模范和尊重的行为。',
+        
+        signupTitle: '创建我的个人资料',
+        signupSub: '所有信息都是保密的',
+        firstName: '名字',
+        lastName: '姓氏',
+        gender: '性别',
+        male: '男',
+        female: '女',
+        dob: '出生日期',
+        dobPlaceholder: 'yyyy/mm/dd',
+        city: '居住城市',
+        genotype: '基因型',
+        bloodGroup: '血型',
+        desireChild: '想要孩子吗？',
+        yes: '是',
+        no: '否',
+        createProfile: '创建个人资料',
+        backCharter: '← 返回宪章',
+        
+        honorTitle: '荣誉誓言',
+        honorText: '"我以荣誉确认我的信息是真实的，符合实际情况。"',
+        swear: '我发誓',
+        accessProfile: '访问我的个人资料',
+        
+        myProfile: '我的个人资料',
+        home: '首页',
+        messages: '消息',
+        settings: '设置',
+        genotype_label: '基因型',
+        blood_label: '血型',
+        age_label: '年龄',
+        project_label: '项目',
+        findPartner: '🔍 寻找伴侣',
+        editProfile: '✏️ 编辑个人资料',
+        
+        compatiblePartners: '兼容的伴侣',
+        noPartners: '目前未找到伴侣',
+        searchOngoing: '搜索中...',
+        expandCommunity: '我们正在扩大社区。请稍后再来！',
+        details: '详情',
+        contact: '联系',
+        backProfile: '← 我的个人资料',
+        toMessages: '消息 →',
+        
+        healthCommitment: '🛡️ 您的健康承诺',
+        popupMessageAS: '"作为AS档案，我们只向您展示AA伴侣。<br><br>这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑"',
+        popupMessageSS: '"作为SS档案，我们只向您展示AA伴侣。<br><br>这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑"',
+        understood: '我明白',
+        
+        inboxTitle: '收件箱',
+        emptyInbox: '📭 空收件箱',
+        startConversation: '开始对话！',
+        findPartners: '寻找伴侣',
+        
+        block: '🚫 屏蔽',
+        yourMessage: '您的消息...',
+        send: '发送',
+        blockedByUser: '⛔ 无法对话',
+        blockedMessage: '此用户已屏蔽您。您无法向他发送消息。',
+        
+        settingsTitle: '设置',
+        visibility: '个人资料可见性',
+        notifications: '推送通知',
+        language: '语言',
+        blockedUsers: '已屏蔽用户',
+        dangerZone: '⚠️ 危险区域',
+        deleteAccount: '🗑️ 删除我的帐户',
+        delete: '删除',
+        logout: '退出',
+        confirmDelete: '永久删除？',
+        
+        noBlocked: '没有已屏蔽的用户',
+        unblock: '解除屏蔽',
+        
+        thankYou: '感谢您的交流',
+        thanksMessage: 'Genlove感谢您',
+        newSearch: '新搜索',
+        
+        logoutSuccess: '退出成功',
+        seeYouSoon: '再见！',
+        
+        french: '法语',
+        english: '英语',
+        portuguese: '葡萄牙语',
+        spanish: '西班牙语',
+        arabic: '阿拉伯语',
+        chinese: '中文',
+        
+        pageNotFound: '页面未找到',
+        pageNotFoundMessage: '您查找的页面不存在。',
+        
+        residence_label: '居住地',
+        project_life: '人生计划'
     }
 };
 
@@ -516,7 +849,6 @@ const translations = {
 // MIDDLEWARE DE LANGUE
 // ============================================
 app.use(async (req, res, next) => {
-    // Déterminer la langue depuis la session ou le header Accept-Language
     if (req.session && req.session.userId) {
         try {
             const user = await User.findById(req.session.userId);
@@ -529,14 +861,15 @@ app.use(async (req, res, next) => {
             req.lang = 'fr';
         }
     } else {
-        // Détection depuis le navigateur
         const acceptLanguage = req.headers['accept-language'] || '';
         if (acceptLanguage.includes('pt')) req.lang = 'pt';
+        else if (acceptLanguage.includes('es')) req.lang = 'es';
+        else if (acceptLanguage.includes('ar')) req.lang = 'ar';
+        else if (acceptLanguage.includes('zh')) req.lang = 'zh';
         else if (acceptLanguage.includes('en')) req.lang = 'en';
         else req.lang = 'fr';
     }
     
-    // Fonction de traduction disponible dans les vues
     req.t = (key) => {
         return translations[req.lang] && translations[req.lang][key] 
             ? translations[req.lang][key] 
@@ -639,19 +972,24 @@ const styles = `
     
     .language-selector {
         display: flex;
+        flex-wrap: wrap;
         justify-content: center;
-        gap: 10px;
+        gap: 8px;
         margin: 15px 0;
         padding: 10px;
+        max-height: 120px;
+        overflow-y: auto;
+        background: rgba(255,255,255,0.5);
+        border-radius: 20px;
     }
     
     .lang-btn {
         background: white;
         border: 2px solid #ff416c;
         color: #1a2a44;
-        padding: 8px 16px;
+        padding: 8px 12px;
         border-radius: 30px;
-        font-size: 1rem;
+        font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s;
@@ -709,9 +1047,16 @@ const styles = `
         border-radius: 30px;
         border: none;
         cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-action.small {
+        padding: 10px 15px;
+        font-size: 1rem;
     }
     
     .btn-contact { background: #ff416c; color: white; }
+    .btn-details { background: #1a2a44; color: white; }
     .btn-block { background: #dc3545; color: white; }
     
     .input-box { 
@@ -728,6 +1073,15 @@ const styles = `
         border-color: #ff416c;
         outline: none;
         box-shadow: 0 0 0 4px rgba(255,65,108,0.2);
+    }
+    
+    .input-label {
+        text-align: left;
+        font-size: 1rem;
+        color: #1a2a44;
+        margin-top: 10px;
+        margin-bottom: -5px;
+        font-weight: 600;
     }
     
     .photo-circle { 
@@ -752,8 +1106,24 @@ const styles = `
     
     .match-card {
         display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .match-header {
+        display: flex;
         align-items: center;
         gap: 20px;
+    }
+    
+    .match-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .match-actions .btn-action {
+        flex: 1;
     }
     
     .inbox-item {
@@ -1144,6 +1514,24 @@ function formatTimeAgo(timestamp, lang = 'fr') {
         if (diffHours < 24) return `${diffHours} horas atrás`;
         if (diffDays === 1) return 'Ontem';
         return date.toLocaleDateString('pt-BR');
+    } else if (lang === 'es') {
+        if (diffMins < 1) return "Ahora mismo";
+        if (diffMins < 60) return `hace ${diffMins} min`;
+        if (diffHours < 24) return `hace ${diffHours} h`;
+        if (diffDays === 1) return 'Ayer';
+        return date.toLocaleDateString('es-ES');
+    } else if (lang === 'ar') {
+        if (diffMins < 1) return "الآن";
+        if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+        if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+        if (diffDays === 1) return 'أمس';
+        return date.toLocaleDateString('ar-SA');
+    } else if (lang === 'zh') {
+        if (diffMins < 1) return "刚刚";
+        if (diffMins < 60) return `${diffMins}分钟前`;
+        if (diffHours < 24) return `${diffHours}小时前`;
+        if (diffDays === 1) return '昨天';
+        return date.toLocaleDateString('zh-CN');
     }
     return date.toLocaleDateString();
 }
@@ -1153,7 +1541,7 @@ function formatTimeAgo(timestamp, lang = 'fr') {
 // ============================================
 app.get('/lang/:lang', async (req, res) => {
     const lang = req.params.lang;
-    if (['fr', 'en', 'pt'].includes(lang)) {
+    if (['fr', 'en', 'pt', 'es', 'ar', 'zh'].includes(lang)) {
         if (req.session.userId) {
             await User.findByIdAndUpdate(req.session.userId, { language: lang });
         }
@@ -1183,9 +1571,12 @@ app.get('/', (req, res) => {
     <div class="app-shell">
         <div class="home-screen">
             <div class="language-selector">
-                <a href="/lang/fr" class="lang-btn ${currentLang === 'fr' ? 'active' : ''}">🇫🇷 FR</a>
-                <a href="/lang/en" class="lang-btn ${currentLang === 'en' ? 'active' : ''}">🇬🇧 EN</a>
-                <a href="/lang/pt" class="lang-btn ${currentLang === 'pt' ? 'active' : ''}">🇵🇹 PT</a>
+                <a href="/lang/fr" class="lang-btn ${currentLang === 'fr' ? 'active' : ''}">🇫🇷 ${t('french')}</a>
+                <a href="/lang/en" class="lang-btn ${currentLang === 'en' ? 'active' : ''}">🇬🇧 ${t('english')}</a>
+                <a href="/lang/pt" class="lang-btn ${currentLang === 'pt' ? 'active' : ''}">🇵🇹 ${t('portuguese')}</a>
+                <a href="/lang/es" class="lang-btn ${currentLang === 'es' ? 'active' : ''}">🇪🇸 ${t('spanish')}</a>
+                <a href="/lang/ar" class="lang-btn ${currentLang === 'ar' ? 'active' : ''}">🇸🇦 ${t('arabic')}</a>
+                <a href="/lang/zh" class="lang-btn ${currentLang === 'zh' ? 'active' : ''}">🇨🇳 ${t('chinese')}</a>
             </div>
             <div class="logo-text">
                 <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
@@ -1310,7 +1701,7 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION MULTILINGUE
+// INSCRIPTION MULTILINGUE AVEC LABEL POUR DATE
 app.get('/signup', (req, res) => {
     const t = req.t;
     
@@ -1328,21 +1719,34 @@ app.get('/signup', (req, res) => {
             <h2>${t('signupTitle')}</h2>
             <p style="font-size:1.2rem; margin-bottom:20px;">${t('signupSub')}</p>
             <form id="signupForm">
+                <div class="input-label">${t('firstName')}</div>
                 <input type="text" name="firstName" class="input-box" placeholder="${t('firstName')}" required>
+                
+                <div class="input-label">${t('lastName')}</div>
                 <input type="text" name="lastName" class="input-box" placeholder="${t('lastName')}" required>
+                
+                <div class="input-label">${t('gender')}</div>
                 <select name="gender" class="input-box" required>
                     <option value="">${t('gender')}</option>
                     <option value="Homme">${t('male')}</option>
                     <option value="Femme">${t('female')}</option>
                 </select>
-                <input type="date" name="dob" class="input-box" placeholder="${t('dob')}" required>
+                
+                <div class="input-label">${t('dob')} (${t('dobPlaceholder')})</div>
+                <input type="date" name="dob" class="input-box" placeholder="${t('dobPlaceholder')}" required>
+                
+                <div class="input-label">${t('city')}</div>
                 <input type="text" name="residence" class="input-box" placeholder="${t('city')}" required>
+                
+                <div class="input-label">${t('genotype')}</div>
                 <select name="genotype" class="input-box" required>
                     <option value="">${t('genotype')}</option>
                     <option value="AA">AA</option>
                     <option value="AS">AS</option>
                     <option value="SS">SS</option>
                 </select>
+                
+                <div class="input-label">${t('bloodGroup')}</div>
                 <select name="bloodGroup" class="input-box" required>
                     <option value="">${t('bloodGroup')}</option>
                     <option value="A+">A+</option>
@@ -1354,11 +1758,14 @@ app.get('/signup', (req, res) => {
                     <option value="O+">O+</option>
                     <option value="O-">O-</option>
                 </select>
+                
+                <div class="input-label">${t('desireChild')}</div>
                 <select name="desireChild" class="input-box" required>
                     <option value="">${t('desireChild')}</option>
                     <option value="Oui">${t('yes')}</option>
                     <option value="Non">${t('no')}</option>
                 </select>
+                
                 <input type="hidden" name="language" value="${req.lang}">
                 <button type="submit" class="btn-pink">${t('createProfile')}</button>
             </form>
@@ -1422,7 +1829,7 @@ app.get('/sas-validation', async (req, res) => {
 </html>`);
 });
 
-// PROFIL MULTILINGUE
+// PROFIL MULTILINGUE (SANS BOUTON EDIT EN BAS)
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -1454,9 +1861,12 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 <a href="/settings" style="font-size:2rem; color:#1a2a44;">⚙️</a>
             </div>
             <div class="language-selector" style="margin-bottom:20px;">
-                <a href="/lang/fr" class="lang-btn ${user.language === 'fr' ? 'active' : ''}">🇫🇷 FR</a>
-                <a href="/lang/en" class="lang-btn ${user.language === 'en' ? 'active' : ''}">🇬🇧 EN</a>
-                <a href="/lang/pt" class="lang-btn ${user.language === 'pt' ? 'active' : ''}">🇵🇹 PT</a>
+                <a href="/lang/fr" class="lang-btn ${user.language === 'fr' ? 'active' : ''}">🇫🇷 ${t('french')}</a>
+                <a href="/lang/en" class="lang-btn ${user.language === 'en' ? 'active' : ''}">🇬🇧 ${t('english')}</a>
+                <a href="/lang/pt" class="lang-btn ${user.language === 'pt' ? 'active' : ''}">🇵🇹 ${t('portuguese')}</a>
+                <a href="/lang/es" class="lang-btn ${user.language === 'es' ? 'active' : ''}">🇪🇸 ${t('spanish')}</a>
+                <a href="/lang/ar" class="lang-btn ${user.language === 'ar' ? 'active' : ''}">🇸🇦 ${t('arabic')}</a>
+                <a href="/lang/zh" class="lang-btn ${user.language === 'zh' ? 'active' : ''}">🇨🇳 ${t('chinese')}</a>
             </div>
             <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
             <h2>${user.firstName} ${user.lastName}</h2>
@@ -1464,11 +1874,10 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
             <div class="st-group">
                 <div class="st-item"><span>🧬 ${t('genotype_label')}</span><b>${user.genotype}</b></div>
                 <div class="st-item"><span>🩸 ${t('blood_label')}</span><b>${user.bloodGroup}</b></div>
-                <div class="st-item"><span>📅 ${t('age_label')}</span><b>${calculerAge(user.dob)} ${t('age_label') === 'Âge' ? 'ans' : t('age_label') === 'Age' ? 'years' : 'anos'}</b></div>
+                <div class="st-item"><span>📅 ${t('age_label')}</span><b>${calculerAge(user.dob)} ${t('age_label') === 'Âge' ? 'ans' : t('age_label') === 'Age' ? 'years' : t('age_label') === 'Edad' ? 'años' : ''}</b></div>
                 <div class="st-item"><span>👶 ${t('project_label')}</span><b>${user.desireChild === 'Oui' ? t('yes') : t('no')}</b></div>
             </div>
             <a href="/matching" class="btn-pink">${t('findPartner')}</a>
-            <a href="/edit-profile" class="btn-dark">${t('editProfile')}</a>
         </div>
     </div>
 </body>
@@ -1478,77 +1887,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// ÉDITION PROFIL MULTILINGUE
-app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
-    try {
-        const user = await User.findById(req.session.userId);
-        if (!user) return res.redirect('/');
-        
-        const t = req.t;
-        
-        const bloodOptions = ['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(g => 
-            '<option value="' + g + '" ' + (user.bloodGroup === g ? 'selected' : '') + '>' + g + '</option>'
-        ).join('');
-        
-        res.send(`<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>${t('appName')} - ${t('editProfile')}</title>
-    ${styles}
-</head>
-<body>
-    <div class="app-shell">
-        <div class="page-white">
-            <h2>${t('editProfile')}</h2>
-            <form id="editForm">
-                <input type="text" name="firstName" class="input-box" value="${user.firstName}" placeholder="${t('firstName')}" required>
-                <input type="text" name="lastName" class="input-box" value="${user.lastName}" placeholder="${t('lastName')}" required>
-                <select name="gender" class="input-box">
-                    <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
-                    <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
-                </select>
-                <input type="date" name="dob" class="input-box" value="${user.dob}" required>
-                <input type="text" name="residence" class="input-box" value="${user.residence}" placeholder="${t('city')}" required>
-                <select name="genotype" class="input-box">
-                    <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
-                    <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
-                    <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
-                </select>
-                <select name="bloodGroup" class="input-box">
-                    ${bloodOptions}
-                </select>
-                <select name="desireChild" class="input-box">
-                    <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
-                    <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
-                </select>
-                <button type="submit" class="btn-pink">${t('editProfile')}</button>
-            </form>
-            <a href="/profile" class="back-link">← ${t('backProfile')}</a>
-        </div>
-    </div>
-    <script>
-        document.getElementById("editForm").addEventListener("submit", async function(e){
-            e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
-            const res = await fetch("/api/users/profile", {
-                method: "PUT",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(data)
-            });
-            if(res.ok) window.location.href = "/profile";
-            else alert("Erreur");
-        });
-    </script>
-</body>
-</html>`);
-    } catch (error) {
-        res.status(500).send('Erreur édition');
-    }
-});
-
-// MATCHING MULTILINGUE
+// MATCHING MULTILINGUE AVEC BOUTONS DÉTAILS ET CONTACTER
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -1582,12 +1921,24 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         } else {
             partners.forEach(p => {
                 partnersHTML += `<div class="match-card">
-                    <div class="match-photo-blur"></div>
-                    <div style="flex:1">
-                        <b style="font-size:1.3rem;">${p.firstName}</b>
-                        <br><span style="font-size:1.1rem;">${p.genotype} • ${p.residence}</span>
+                    <div class="match-header">
+                        <div class="match-photo-blur"></div>
+                        <div style="flex:1">
+                            <b style="font-size:1.3rem;">${p.firstName}</b>
+                            <br><span style="font-size:1.1rem;">${p.genotype} • ${p.residence}</span>
+                        </div>
                     </div>
-                    <button class="btn-action btn-contact" onclick="window.location.href='/chat?partnerId=${p._id}'">${t('contact')}</button>
+                    <div class="match-actions">
+                        <button class="btn-action btn-details small" onclick='showDetails(${JSON.stringify({
+                            name: p.firstName + ' ' + p.lastName,
+                            genotype: p.genotype,
+                            bloodGroup: p.bloodGroup,
+                            residence: p.residence,
+                            desireChild: p.desireChild,
+                            age: calculerAge(p.dob)
+                        })})'>📋 ${t('details')}</button>
+                        <button class="btn-action btn-contact small" onclick="window.location.href='/chat?partnerId=${p._id}'">💬 ${t('contact')}</button>
+                    </div>
                 </div>`;
             });
         }
@@ -1605,6 +1956,19 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         </div>
         ` : '';
         
+        // Popup pour les détails
+        const detailsPopupStyles = `
+        <div id="details-popup" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);">
+            <div style="background:white; border-radius:30px; padding:30px; max-width:380px; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="color:#ff416c;">📋 ${t('details')}</h3>
+                    <span onclick="document.getElementById('details-popup').style.display='none'" style="font-size:2rem; cursor:pointer;">&times;</span>
+                </div>
+                <div id="details-content" style="font-size:1.2rem; line-height:2;"></div>
+            </div>
+        </div>
+        `;
+        
         res.send(`<!DOCTYPE html>
 <html>
 <head>
@@ -1616,6 +1980,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
 <body>
     <div class="app-shell">
         ${popupMessage}
+        ${detailsPopupStyles}
         <div class="page-white">
             <h2>${t('compatiblePartners')}</h2>
             ${partnersHTML}
@@ -1625,6 +1990,20 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             </div>
         </div>
     </div>
+    <script>
+        function showDetails(partner) {
+            const content = document.getElementById('details-content');
+            content.innerHTML = \`
+                <p><strong>${t('firstName')} :</strong> \${partner.name}</p>
+                <p><strong>${t('genotype_label')} :</strong> \${partner.genotype}</p>
+                <p><strong>${t('blood_label')} :</strong> \${partner.bloodGroup}</p>
+                <p><strong>${t('residence_label')} :</strong> \${partner.residence}</p>
+                <p><strong>${t('age_label')} :</strong> \${partner.age} ${t('age_label') === 'Âge' ? 'ans' : t('age_label') === 'Age' ? 'years' : t('age_label') === 'Edad' ? 'años' : ''}</p>
+                <p><strong>${t('project_life')} :</strong> \${partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}'}</p>
+            \`;
+            document.getElementById('details-popup').style.display = 'flex';
+        }
+    </script>
 </body>
 </html>`);
     } catch (error) {
@@ -1852,6 +2231,9 @@ app.get('/settings', requireAuth, requireVerified, async (req, res) => {
                         <option value="fr" ${currentUser.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
                         <option value="en" ${currentUser.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
                         <option value="pt" ${currentUser.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
+                        <option value="es" ${currentUser.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
+                        <option value="ar" ${currentUser.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
+                        <option value="zh" ${currentUser.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
                     </select>
                 </div>
             </div>
@@ -1882,6 +2264,92 @@ app.get('/settings', requireAuth, requireVerified, async (req, res) => {
 </html>`);
     } catch (error) {
         res.status(500).send('Erreur paramètres');
+    }
+});
+
+// ÉDITION PROFIL MULTILINGUE
+app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (!user) return res.redirect('/');
+        
+        const t = req.t;
+        
+        const bloodOptions = ['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(g => 
+            '<option value="' + g + '" ' + (user.bloodGroup === g ? 'selected' : '') + '>' + g + '</option>'
+        ).join('');
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('editProfile')}</title>
+    ${styles}
+</head>
+<body>
+    <div class="app-shell">
+        <div class="page-white">
+            <h2>${t('editProfile')}</h2>
+            <form id="editForm">
+                <div class="input-label">${t('firstName')}</div>
+                <input type="text" name="firstName" class="input-box" value="${user.firstName}" placeholder="${t('firstName')}" required>
+                
+                <div class="input-label">${t('lastName')}</div>
+                <input type="text" name="lastName" class="input-box" value="${user.lastName}" placeholder="${t('lastName')}" required>
+                
+                <div class="input-label">${t('gender')}</div>
+                <select name="gender" class="input-box">
+                    <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
+                    <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
+                </select>
+                
+                <div class="input-label">${t('dob')}</div>
+                <input type="date" name="dob" class="input-box" value="${user.dob}" required>
+                
+                <div class="input-label">${t('city')}</div>
+                <input type="text" name="residence" class="input-box" value="${user.residence}" placeholder="${t('city')}" required>
+                
+                <div class="input-label">${t('genotype')}</div>
+                <select name="genotype" class="input-box">
+                    <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
+                    <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
+                    <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
+                </select>
+                
+                <div class="input-label">${t('bloodGroup')}</div>
+                <select name="bloodGroup" class="input-box">
+                    ${bloodOptions}
+                </select>
+                
+                <div class="input-label">${t('desireChild')}</div>
+                <select name="desireChild" class="input-box">
+                    <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
+                    <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
+                </select>
+                
+                <button type="submit" class="btn-pink">${t('editProfile')}</button>
+            </form>
+            <a href="/profile" class="back-link">← ${t('backProfile')}</a>
+        </div>
+    </div>
+    <script>
+        document.getElementById("editForm").addEventListener("submit", async function(e){
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            const res = await fetch("/api/users/profile", {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(data)
+            });
+            if(res.ok) window.location.href = "/profile";
+            else alert("Erreur");
+        });
+    </script>
+</body>
+</html>`);
+    } catch (error) {
+        res.status(500).send('Erreur édition');
     }
 });
 
