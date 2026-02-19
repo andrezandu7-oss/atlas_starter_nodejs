@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>🔍 Diagnostic Genlove</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4e9da;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff416c;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        h2 {
+            color: #1a2a44;
+            font-size: 1.5rem;
+            margin: 30px 0 15px;
+            border-bottom: 3px solid #ffdae0;
+            padding-bottom: 8px;
+        }
+        .test {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 18px;
+            margin: 12px 0;
+            border-left: 6px solid #ccc;
+            transition: all 0.3s;
+        }
+        .test:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .test.success {
+            border-left-color: #4CAF50;
+            background: #f0fff4;
+        }
+        .test.warning {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        .test.error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        .test-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .test-details {
+            color: #444;
+            font-size: 1rem;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+            line-height: 1.5;
+        }
+        .button {
+            background: #ff416c;
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 8px 5px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255,65,108,0.3);
+            border: 2px solid transparent;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255,65,108,0.4);
+        }
+        .button.secondary {
+            background: #1a2a44;
+            box-shadow: 0 5px 15px rgba(26,42,68,0.3);
+        }
+        .button.secondary:hover {
+            background: #0f1a2c;
+        }
+        .button.outline {
+            background: transparent;
+            color: #ff416c;
+            border: 2px solid #ff416c;
+            box-shadow: none;
+        }
+        .button.outline:hover {
+            background: #ff416c;
+            color: white;
+        }
+        .log {
+            background: #1a2a44;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border: 2px solid #ff416c;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .badge.success { background: #4CAF50; color: white; }
+        .badge.warning { background: #ff9800; color: white; }
+        .badge.error { background: #f44336; color: white; }
+        .badge.info { background: #2196F3; color: white; }
+        
+        .input-box {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            margin: 12px 0;
+            font-size: 1rem;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+        .input-box:focus {
+            border-color: #ff416c;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255,65,108,0.2);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #ffdae0;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff416c;
+            line-height: 1;
+        }
+        .stat-label {
+            color: #1a2a44;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .result-badge {
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .result-badge.success {
+            background: #4CAF50;
+            color: white;
+        }
+        .result-badge.error {
+            background: #f44336;
+            color: white;
+        }
+        
+        hr {
+            border: none;
+            border-top: 2px dashed #ffdae0;
+            margin: 25px 0;
+        }
+        
+        @media (max-width: 480px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1.8rem; }
+            .button { width: 100%; margin: 8px 0; }
+            .flex-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 DIAGNOSTIC GENLOVE</h1>
+        
+        <!-- En-tête avec stats rapides -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="browserScore">-</div>
+                <div class="stat-label">Compatibilité navigateur</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="serverScore">-</div>
+                <div class="stat-label">État du serveur</div>
+            </div>
+        </div>
+        
+        <!-- Boutons d'action -->
+        <div class="flex-row" style="justify-content: center; margin: 20px 0;">
+            <button class="button" onclick="runAllTests()">
+                🔄 Lancer tous les tests
+            </button>
+            <button class="button secondary" onclick="clearLogs()">
+                🗑️ Effacer les logs
+            </button>
+            <button class="button outline" onclick="exportResults()">
+                📋 Exporter les résultats
+            </button>
+        </div>
+        
+        <!-- Tests navigateur -->
+        <h2>📱 Tests navigateur</h2>
+        <div id="browserTests">
+            <div class="test">
+                <div class="test-title">
+                    <span>⏳</span> Analyse en cours...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tests API -->
+        <h2>🔌 Tests API</h2>
+        <div id="apiTests"></div>
+        
+        <!-- Tests interactifs -->
+        <h2>🎯 Tests interactifs</h2>
+        
+        <!-- Test vibration -->
+        <div class="test">
+            <div class="test-title">
+                <span>📳</span> Test vibration
+                <span class="badge info" id="vibrationSupport">À tester</span>
+            </div>
+            <div class="flex-row">
+                <button class="button secondary" onclick="testVibration()">
+                    Tester vibration simple
+                </button>
+                <button class="button secondary" onclick="testVibrationPattern()">
+                    Tester pattern
+                </button>
+            </div>
+            <div id="vibrationResult" class="test-details"></div>
+        </div>
+        
+        <!-- Test popup -->
+        <div class="test">
+            <div class="test-title">
+                <span>📬</span> Test popup de demande
+            </div>
+            <button class="button secondary" onclick="testPopup()">
+                Afficher un popup de test
+            </button>
+            <div id="popupResult" class="test-details"></div>
+        </div>
+        
+        <!-- Test envoi demande -->
+        <div class="test">
+            <div class="test-title">
+                <span>📨</span> Test envoi de demande
+            </div>
+            <input type="text" id="testMessage" class="input-box" 
+                   placeholder="Votre message" 
+                   value="Bonjour, je suis très intéressé par votre profil !">
+            <div class="flex-row">
+                <button class="button secondary" onclick="testSendRequest()">
+                    Envoyer demande test
+                </button>
+                <button class="button outline" onclick="checkPendingRequests()">
+                    Vérifier demandes
+                </button>
+            </div>
+            <div id="sendResult" class="test-details"></div>
+        </div>
+        
+        <!-- Test acceptation/refus -->
+        <div class="test">
+            <div class="test-title">
+                <span>✅❌</span> Test acceptation/refus
+            </div>
+            <div class="flex-row">
+                <button class="button secondary" onclick="testAcceptRequest()">
+                    Simuler acceptation
+                </button>
+                <button class="button outline" onclick="testRejectRequest()">
+                    Simuler refus
+                </button>
+            </div>
+            <div id="actionResult" class="test-details"></div>
+        </div>
+        
+        <!-- Logs en direct -->
+        <h2>📋 Console de diagnostic</h2>
+        <div class="log" id="logContainer">
+            [System] Diagnostic démarré à <span id="startTime"></span><br>
+        </div>
+        
+        <!-- Bouton retour -->
+        <hr>
+        <div style="text-align: center;">
+            <a href="/profile" class="button" style="text-decoration: none; display: inline-block;">
+                ← Retour au profil
+            </a>
+            <a href="/" class="button secondary" style="text-decoration: none; display: inline-block;">
+                🏠 Accueil
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let testResults = {
+            browser: {},
+            api: {},
+            timestamp: new Date().toISOString()
+        };
+        
+        // ============================================
+        // FONCTIONS DE LOG
+        // ============================================
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                success: '#4CAF50',
+                error: '#f44336',
+                warning: '#ff9800',
+                info: '#2196F3'
+            };
+            const color = colors[type] || '#fff';
+            
+            logContainer.innerHTML += `[${timestamp}] <span style="color:${color}">${message}</span><br>`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[Diagnostic] ${message}`);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '[System] Logs effacés<br>';
+            log('🧹 Logs effacés', 'warning');
+        }
+        
+        function updateScore() {
+            const browserTests = document.querySelectorAll('#browserTests .test');
+            const apiTests = document.querySelectorAll('#apiTests .test');
+            
+            let browserSuccess = 0;
+            browserTests.forEach(test => {
+                if (test.classList.contains('success')) browserSuccess++;
+            });
+            
+            let apiSuccess = 0;
+            apiTests.forEach(test => {
+                if (test.classList.contains('success')) apiSuccess++;
+            });
+            
+            document.getElementById('browserScore').textContent = 
+                browserTests.length ? Math.round((browserSuccess / browserTests.length) * 100) + '%' : '-';
+            document.getElementById('serverScore').textContent = 
+                apiTests.length ? Math.round((apiSuccess / apiTests.length) * 100) + '%' : '-';
+        }
+        
+        // ============================================
+        // TESTS NAVIGATEUR
+        // ============================================
+        function checkBrowserFeatures() {
+            log('🔍 Analyse des fonctionnalités navigateur...', 'info');
+            const tests = document.getElementById('browserTests');
+            let html = '';
+            let successCount = 0;
+            let totalTests = 0;
+            
+            // Test 1: Vibration API
+            totalTests++;
+            if ("vibrate" in navigator) {
+                html += '<div class="test success"><div class="test-title">✅ Vibration API</div><div class="test-details">Supportée - Pattern possible: [200,100,200]</div></div>';
+                successCount++;
+                testResults.browser.vibration = true;
+                document.getElementById('vibrationSupport').textContent = '✅ Supporté';
+                document.getElementById('vibrationSupport').className = 'badge success';
+            } else {
+                html += '<div class="test warning"><div class="test-title">⚠️ Vibration API</div><div class="test-details">Non supportée sur ce navigateur (normal sur certains appareils)</div></div>';
+                testResults.browser.vibration = false;
+                document.getElementById('vibrationSupport').textContent = '❌ Non supporté';
+                document.getElementById('vibrationSupport').className = 'badge error';
+            }
+            
+            // Test 2: localStorage
+            totalTests++;
+            try {
+                localStorage.setItem('test_diag', 'test');
+                const value = localStorage.getItem('test_diag');
+                localStorage.removeItem('test_diag');
+                if (value === 'test') {
+                    html += '<div class="test success"><div class="test-title">✅ localStorage</div><div class="test-details">Fonctionnel - Stockage local disponible</div></div>';
+                    successCount++;
+                    testResults.browser.localStorage = true;
+                } else {
+                    throw new Error('Valeur incorrecte');
+                }
+            } catch (e) {
+                html += '<div class="test error"><div class="test-title">❌ localStorage</div><div class="test-details">Non disponible - Les préférences ne seront pas sauvegardées</div></div>';
+                testResults.browser.localStorage = false;
+            }
+            
+            // Test 3: Fetch API
+            totalTests++;
+            if (window.fetch) {
+                html += '<div class="test success"><div class="test-title">✅ Fetch API</div><div class="test-details">Disponible - Requêtes AJAX possibles</div></div>';
+                successCount++;
+                testResults.browser.fetch = true;
+            } else {
+                html += '<div class="test error"><div class="test-title">❌ Fetch API</div><div class="test-details">Non disponible - L\'application ne fonctionnera pas</div></div>';
+                testResults.browser.fetch = false;
+            }
+            
+            // Test 4: Session (via cookie)
+            totalTests++;
+            if (navigator.cookieEnabled) {
+                html += '<div class="test success"><div class="test-title">✅ Cookies</div><div class="test-details">Activés - Sessions possibles</div></div>';
+                successCount++;
+                testResults.browser.cookies = true;
+            } else {
+                html += '<div class="test error"><div class="test-title">❌ Cookies</div><div class="test-details">Désactivés - Connexion impossible</div></div>';
+                testResults.browser.cookies = false;
+            }
+            
+            // Test 5: Service Worker (optionnel)
+            totalTests++;
+            if ('serviceWorker' in navigator) {
+                html += '<div class="test success"><div class="test-title">✅ Service Workers</div><div class="test-details">Supportés - PWA possible</div></div>';
+                successCount++;
+                testResults.browser.serviceWorker = true;
+            } else {
+                html += '<div class="test warning"><div class="test-title">⚠️ Service Workers</div><div class="test-details">Non supportés - Pas de mode hors-ligne</div></div>';
+                testResults.browser.serviceWorker = false;
+            }
+            
+            tests.innerHTML = html;
+            log(`✅ Tests navigateur: ${successCount}/${totalTests} réussis`, 'success');
+            updateScore();
+        }
+        
+        // ============================================
+        // TESTS API
+        // ============================================
+        async function checkApiTests() {
+            log('🔌 Test des endpoints API...', 'info');
+            const tests = document.getElementById('apiTests');
+            let html = '';
+            let successCount = 0;
+            let totalTests = 0;
+            
+            // Test 1: Health check
+            totalTests++;
+            try {
+                const res = await fetch('/api/health');
+                const data = await res.json();
+                if (res.ok) {
+                    html += '<div class="test success"><div class="test-title">✅ /api/health</div><div class="test-details">Serveur OK - MongoDB: ' + (data.mongodb || 'connecté') + '</div></div>';
+                    successCount++;
+                    testResults.api.health = true;
+                } else {
+                    throw new Error('Réponse non OK');
+                }
+            } catch (e) {
+                html += '<div class="test error"><div class="test-title">❌ /api/health</div><div class="test-details">Serveur inaccessible: ' + e.message + '</div></div>';
+                testResults.api.health = false;
+            }
+            
+            // Test 2: Vérifier si connecté
+            totalTests++;
+            try {
+                const res = await fetch('/api/messages/unread');
+                if (res.status === 401) {
+                    html += '<div class="test warning"><div class="test-title">⚠️ Authentification</div><div class="test-details">Non connecté - Allez sur /login d\'abord</div></div>';
+                    testResults.api.auth = false;
+                } else if (res.ok) {
+                    const data = await res.json();
+                    html += '<div class="test success"><div class="test-title">✅ Authentification</div><div class="test-details">Connecté - ' + (data.count || 0) + ' message(s) non lu(s)</div></div>';
+                    successCount++;
+                    testResults.api.auth = true;
+                }
+            } catch (e) {
+                html += '<div class="test error"><div class="test-title">❌ Authentification</div><div class="test-details">Erreur: ' + e.message + '</div></div>';
+                testResults.api.auth = false;
+            }
+            
+            // Test 3: Endpoint demandes
+            totalTests++;
+            try {
+                const res = await fetch('/api/requests/pending');
+                if (res.status === 401) {
+                    html += '<div class="test warning"><div class="test-title">⚠️ /api/requests/pending</div><div class="test-details">Non connecté</div></div>';
+                } else if (res.ok) {
+                    const data = await res.json();
+                    html += '<div class="test success"><div class="test-title">✅ /api/requests/pending</div><div class="test-details">Accessible - ' + (data.length || 0) + ' demande(s) en attente</div></div>';
+                    successCount++;
+                    testResults.api.requests = true;
+                } else {
+                    html += '<div class="test error"><div class="test-title">❌ /api/requests/pending</div><div class="test-details">Erreur ' + res.status + '</div></div>';
+                    testResults.api.requests = false;
+                }
+            } catch (e) {
+                html += '<div class="test error"><div class="test-title">❌ /api/requests/pending</div><div class="test-details">Erreur réseau: ' + e.message + '</div></div>';
+                testResults.api.requests = false;
+            }
+            
+            tests.innerHTML = html;
+            log(`✅ Tests API: ${successCount}/${totalTests} réussis`, 'success');
+            updateScore();
+        }
+        
+        // ============================================
+        // TESTS INTERACTIFS
+        // ============================================
+        
+        // Test vibration simple
+        function testVibration() {
+            log('📳 Test vibration lancé...', 'info');
+            if ("vibrate" in navigator) {
+                navigator.vibrate(200);
+                document.getElementById('vibrationResult').innerHTML = '✅ Vibration de 200ms envoyée';
+                log('✅ Vibration simple exécutée', 'success');
+            } else {
+                document.getElementById('vibrationResult').innerHTML = '❌ Vibration non supportée';
+                log('❌ Vibration impossible', 'error');
+            }
+        }
+        
+        // Test pattern vibration
+        function testVibrationPattern() {
+            log('📳 Test pattern vibration lancé...', 'info');
+            if ("vibrate" in navigator) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+                document.getElementById('vibrationResult').innerHTML = '✅ Pattern vibration envoyé (3x)';
+                log('✅ Pattern vibration exécuté', 'success');
+            } else {
+                document.getElementById('vibrationResult').innerHTML = '❌ Vibration non supportée';
+                log('❌ Pattern impossible', 'error');
+            }
+        }
+        
+        // Test popup
+        function testPopup() {
+            log('📬 Test popup lancé...', 'info');
+            
+            // Créer un popup de test
+            const popup = document.createElement('div');
+            popup.id = 'test-popup';
+            popup.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.9);
+                z-index: 30000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                backdrop-filter: blur(5px);
+            `;
+            
+            popup.innerHTML = `
+                <div style="background:white; border-radius:30px; padding:35px; max-width:380px; width:100%; text-align:center; border:3px solid #ff416c; animation: slideUp 0.4s;">
+                    <style>
+                        @keyframes slideUp {
+                            from { transform: translateY(30px); opacity: 0; }
+                            to { transform: translateY(0); opacity: 1; }
+                        }
+                    </style>
+                    <div style="font-size:4rem; margin-bottom:10px;">📬</div>
+                    <div style="color:#ff416c; font-size:1.8rem; font-weight:bold; margin-bottom:20px;">NOUVELLE DEMANDE</div>
+                    <div style="font-size:1.6rem; font-weight:bold; color:#1a2a44; margin-bottom:5px;">Maria, 28 ans</div>
+                    <div style="font-size:1.2rem; color:#666; margin-bottom:15px;">Génotype: AA • Résidence: Luanda</div>
+                    <div style="background:#fff5f7; border-radius:15px; padding:20px; margin:20px 0; font-size:1.2rem; color:#1a2a44; font-style:italic; border:2px solid #ffdae0;">
+                        "Bonjour, je suis très intéressé par votre profil !"
+                    </div>
+                    <div style="font-size:1.3rem; color:#1a2a44; margin:20px 0; font-weight:600;">❓ Que souhaitez-vous faire ?</div>
+                    <div style="display:flex; gap:15px; margin:20px 0;">
+                        <button onclick="acceptTestPopup()" style="flex:1; background:#ff416c; color:white; padding:15px; border-radius:50px; border:none; font-weight:bold; cursor:pointer; font-size:1.1rem;">✅ Ouvrir la discussion</button>
+                        <button onclick="ignoreTestPopup()" style="flex:1; background:#1a2a44; color:white; padding:15px; border-radius:50px; border:none; font-weight:bold; cursor:pointer; font-size:1.1rem;">🌿 Ignorer</button>
+                    </div>
+                    <div style="font-size:0.95rem; color:#888;">ℹ️ Maria sera informée de votre choix.</div>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            document.getElementById('popupResult').innerHTML = '✅ Popup affiché avec succès';
+            log('✅ Popup de test affiché', 'success');
+            
+            // Tester la vibration en même temps
+            if ("vibrate" in navigator) {
+                navigator.vibrate([200, 100, 200]);
+            }
+        }
+        
+        window.acceptTestPopup = function() {
+            document.getElementById('test-popup').remove();
+            document.getElementById('popupResult').innerHTML = '✅ Bouton "Ouvrir" cliqué';
+            log('✅ Test acceptation', 'success');
+        };
+        
+        window.ignoreTestPopup = function() {
+            document.getElementById('test-popup').remove();
+            document.getElementById('popupResult').innerHTML = '✅ Bouton "Ignorer" cliqué';
+            log('✅ Test refus', 'info');
+        };
+        
+        // Test envoi demande
+        async function testSendRequest() {
+            const message = document.getElementById('testMessage').value;
+            log('📨 Envoi demande test...', 'info');
+            
+            try {
+                const res = await fetch('/api/requests', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        receiverId: '000000000000000000000000', // ID factice pour test
+                        message: message
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById('sendResult').innerHTML = '✅ Demande simulée - Réponse: ' + JSON.stringify(data);
+                    log('✅ Demande test: ' + JSON.stringify(data), 'success');
+                } else {
+                    document.getElementById('sendResult').innerHTML = '❌ Erreur ' + res.status + ': ' + (data.error || 'Inconnue');
+                    log('❌ Erreur envoi: ' + JSON.stringify(data), 'error');
+                }
+            } catch (e) {
+                document.getElementById('sendResult').innerHTML = '❌ Erreur réseau: ' + e.message;
+                log('❌ Erreur réseau: ' + e.message, 'error');
+            }
+        }
+        
+        // Vérifier demandes en attente
+        async function checkPendingRequests() {
+            log('🔍 Vérification des demandes en attente...', 'info');
+            try {
+                const res = await fetch('/api/requests/pending');
+                const data = await res.json();
+                
+                if (res.ok) {
+                    if (data.length > 0) {
+                        log(`✅ ${data.length} demande(s) en attente trouvée(s)`, 'success');
+                        document.getElementById('sendResult').innerHTML = `✅ ${data.length} demande(s) en attente`;
+                    } else {
+                        log('ℹ️ Aucune demande en attente', 'info');
+                        document.getElementById('sendResult').innerHTML = 'ℹ️ Aucune demande en attente';
+                    }
+                } else {
+                    log('❌ Erreur vérification: ' + res.status, 'error');
+                }
+            } catch (e) {
+                log('❌ Erreur réseau: ' + e.message, 'error');
+            }
+        }
+        
+        // Tests acceptation/refus simulés
+        function testAcceptRequest() {
+            log('✅ Test acceptation simulée', 'success');
+            document.getElementById('actionResult').innerHTML = '✅ Simulation: demande acceptée';
+            
+            // Vibration de confirmation
+            if ("vibrate" in navigator) {
+                navigator.vibrate(200);
+            }
+        }
+        
+        function testRejectRequest() {
+            log('❌ Test refus simulé', 'warning');
+            document.getElementById('actionResult').innerHTML = '❌ Simulation: demande refusée avec message bienveillant';
+            
+            // Vibration courte
+            if ("vibrate" in navigator) {
+                navigator.vibrate(100);
+            }
+        }
+        
+        // Exporter les résultats
+        function exportResults() {
+            const results = {
+                ...testResults,
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `genlove-diagnostic-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            a.click();
+            
+            log('📋 Résultats exportés', 'success');
+        }
+        
+        // Lancer tous les tests
+        function runAllTests() {
+            log('=== LANCEMENT DE TOUS LES TESTS ===', 'info');
+            checkBrowserFeatures();
+            checkApiTests();
+            log('=== TESTS TERMINÉS ===', 'info');
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('startTime').textContent = new Date().toLocaleTimeString();
+            checkBrowserFeatures();
+            checkApiTests();
+            log('✅ Diagnostic initialisé', 'success');
+        });
+    </script>
+</body>
+</html>
