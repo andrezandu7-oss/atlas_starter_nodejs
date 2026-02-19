@@ -3285,6 +3285,454 @@ app.use((req, res) => {
 // ============================================
 // DÉMARRAGE
 // ============================================
+// ============================================
+// ROUTE DE DIAGNOSTIC (À AJOUTER TEMPORAIREMENT)
+// ============================================
+app.get('/diagnostic', async (req, res) => {
+    let diagnostic = {
+        timestamp: new Date().toISOString(),
+        tests: [],
+        errors: []
+    };
+    
+    // Test 1: Vérifier la session
+    try {
+        if (req.session && req.session.userId) {
+            const user = await User.findById(req.session.userId);
+            diagnostic.tests.push({
+                name: "Session utilisateur",
+                status: "✅ OK",
+                details: `Utilisateur connecté: ${user ? user.firstName : 'Inconnu'}`
+            });
+        } else {
+            diagnostic.tests.push({
+                name: "Session utilisateur",
+                status: "⚠️ Non connecté",
+                details: "Utilisez /login d'abord"
+            });
+        }
+    } catch (e) {
+        diagnostic.errors.push({
+            test: "Session",
+            error: e.message
+        });
+    }
+    
+    // Test 2: Vérifier le modèle Request
+    try {
+        const requestCount = await Request.countDocuments();
+        diagnostic.tests.push({
+            name: "Modèle Request",
+            status: "✅ OK",
+            details: `${requestCount} demandes en base`
+        });
+    } catch (e) {
+        diagnostic.errors.push({
+            test: "Modèle Request",
+            error: e.message
+        });
+        diagnostic.tests.push({
+            name: "Modèle Request",
+            status: "❌ Erreur",
+            details: "Le modèle Request n'existe pas ou est mal défini"
+        });
+    }
+    
+    // Test 3: Vérifier les routes API
+    const routesToTest = [
+        { method: 'POST', url: '/api/requests', name: 'Créer demande' },
+        { method: 'GET', url: '/api/requests/pending', name: 'Demandes en attente' },
+        { method: 'POST', url: '/api/requests/:id/accept', name: 'Accepter demande' },
+        { method: 'POST', url: '/api/requests/:id/ignore', name: 'Ignorer demande' }
+    ];
+    
+    diagnostic.tests.push({
+        name: "Routes API",
+        status: "ℹ️ À vérifier manuellement",
+        details: routesToTest.map(r => `${r.method} ${r.url}`).join(', ')
+    });
+    
+    // Test 4: Vérifier les messages récents
+    try {
+        if (req.session && req.session.userId) {
+            const recentMessages = await Message.find({
+                $or: [
+                    { senderId: req.session.userId },
+                    { receiverId: req.session.userId }
+                ]
+            }).sort({ timestamp: -1 }).limit(5);
+            
+            diagnostic.tests.push({
+                name: "Messages récents",
+                status: recentMessages.length > 0 ? "✅ OK" : "ℹ️ Aucun message",
+                details: `${recentMessages.length} messages trouvés`
+            });
+        }
+    } catch (e) {
+        diagnostic.errors.push({
+            test: "Messages",
+            error: e.message
+        });
+    }
+    
+    // Test 5: Informations navigateur (côté client)
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>🔍 Diagnostic Genlove</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: #f4e9da;
+                margin: 0;
+                padding: 20px;
+                display: flex;
+                justify-content: center;
+            }
+            .container {
+                max-width: 600px;
+                width: 100%;
+                background: white;
+                border-radius: 30px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #ff416c;
+                font-size: 2rem;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            h2 {
+                color: #1a2a44;
+                font-size: 1.4rem;
+                margin: 25px 0 15px;
+                border-bottom: 2px solid #ffdae0;
+                padding-bottom: 8px;
+            }
+            .test {
+                background: #f8f9fa;
+                border-radius: 15px;
+                padding: 15px;
+                margin: 10px 0;
+                border-left: 5px solid #ccc;
+            }
+            .test.success {
+                border-left-color: #4CAF50;
+                background: #f0fff4;
+            }
+            .test.warning {
+                border-left-color: #ff9800;
+                background: #fff3e0;
+            }
+            .test.error {
+                border-left-color: #f44336;
+                background: #ffebee;
+            }
+            .test-title {
+                font-weight: bold;
+                font-size: 1.1rem;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .test-details {
+                color: #666;
+                font-size: 0.95rem;
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px dashed #ddd;
+            }
+            .button {
+                background: #ff416c;
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 30px;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                margin: 10px 5px;
+                transition: all 0.3s;
+            }
+            .button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(255,65,108,0.3);
+            }
+            .button.secondary {
+                background: #1a2a44;
+            }
+            .log {
+                background: #1e1e1e;
+                color: #0f0;
+                font-family: monospace;
+                padding: 15px;
+                border-radius: 10px;
+                margin: 15px 0;
+                max-height: 200px;
+                overflow-y: auto;
+                font-size: 0.9rem;
+            }
+            .badge {
+                display: inline-block;
+                padding: 3px 10px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: bold;
+            }
+            .badge.success { background: #4CAF50; color: white; }
+            .badge.warning { background: #ff9800; color: white; }
+            .badge.error { background: #f44336; color: white; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🔍 DIAGNOSTIC GENLOVE</h1>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="button" onclick="runAllTests()">🔄 Lancer tous les tests</button>
+                <button class="button secondary" onclick="clearLogs()">🗑️ Effacer logs</button>
+            </div>
+            
+            <h2>📱 Tests navigateur</h2>
+            <div id="browserTests"></div>
+            
+            <h2>📊 Tests serveur</h2>
+            <div id="serverTests">
+                ${diagnostic.tests.map(t => `
+                <div class="test ${t.status.includes('✅') ? 'success' : t.status.includes('⚠️') ? 'warning' : t.status.includes('❌') ? 'error' : ''}">
+                    <div class="test-title">
+                        <span>${t.status}</span>
+                        <span>${t.name}</span>
+                    </div>
+                    <div class="test-details">${t.details}</div>
+                </div>
+                `).join('')}
+            </div>
+            
+            ${diagnostic.errors.length > 0 ? `
+            <h2>❌ Erreurs détectées</h2>
+            ${diagnostic.errors.map(e => `
+            <div class="test error">
+                <div class="test-title">${e.test}</div>
+                <div class="test-details">${e.error}</div>
+            </div>
+            `).join('')}
+            ` : ''}
+            
+            <h2>🎯 Tests interactifs</h2>
+            
+            <div class="test">
+                <div class="test-title">📳 Test vibration</div>
+                <button class="button secondary" onclick="testVibration()">Tester vibration</button>
+                <div id="vibrationResult" style="margin-top: 10px; font-size:0.9rem;"></div>
+            </div>
+            
+            <div class="test">
+                <div class="test-title">📬 Test popup</div>
+                <button class="button secondary" onclick="testPopup()">Simuler une demande</button>
+                <div id="popupResult" style="margin-top: 10px; font-size:0.9rem;"></div>
+            </div>
+            
+            <div class="test">
+                <div class="test-title">📨 Test envoi demande</div>
+                <input type="text" id="testMessage" class="input-box" placeholder="Votre message" value="Bonjour, test de diagnostic !" style="width:100%; margin:10px 0;">
+                <button class="button secondary" onclick="testSendRequest()">Envoyer demande test</button>
+                <div id="sendResult" style="margin-top: 10px; font-size:0.9rem;"></div>
+            </div>
+            
+            <h2>📋 Logs en direct</h2>
+            <div class="log" id="logContainer">
+                [System] Diagnostic démarré à ${new Date().toLocaleTimeString()}<br>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/profile" class="button" style="text-decoration: none;">← Retour au profil</a>
+            </div>
+        </div>
+        
+        <script>
+            function log(message, type = 'info') {
+                const logContainer = document.getElementById('logContainer');
+                const timestamp = new Date().toLocaleTimeString();
+                const color = type === 'success' ? '#0f0' : type === 'error' ? '#f00' : '#ff0';
+                logContainer.innerHTML += `[${timestamp}] <span style="color:${color}">${message}</span><br>`;
+                logContainer.scrollTop = logContainer.scrollHeight;
+                console.log(\`[Diagnostic] \${message}\`);
+            }
+            
+            function clearLogs() {
+                document.getElementById('logContainer').innerHTML = '[System] Logs effacés<br>';
+                log('Logs effacés');
+            }
+            
+            // Tests navigateur
+            function checkBrowserFeatures() {
+                const tests = document.getElementById('browserTests');
+                let html = '';
+                
+                // Test vibration
+                if ("vibrate" in navigator) {
+                    html += '<div class="test success"><div class="test-title">✅ Vibration API</div><div class="test-details">Supportée - Pattern possible: [200,100,200]</div></div>';
+                } else {
+                    html += '<div class="test warning"><div class="test-title">⚠️ Vibration API</div><div class="test-details">Non supportée sur ce navigateur</div></div>';
+                }
+                
+                // Test localStorage
+                try {
+                    localStorage.setItem('test', 'test');
+                    localStorage.removeItem('test');
+                    html += '<div class="test success"><div class="test-title">✅ localStorage</div><div class="test-details">Fonctionnel</div></div>';
+                } catch (e) {
+                    html += '<div class="test error"><div class="test-title">❌ localStorage</div><div class="test-details">Non disponible</div></div>';
+                }
+                
+                // Test fetch
+                if (window.fetch) {
+                    html += '<div class="test success"><div class="test-title">✅ Fetch API</div><div class="test-details">Disponible</div></div>';
+                } else {
+                    html += '<div class="test error"><div class="test-title">❌ Fetch API</div><div class="test-details">Non disponible</div></div>';
+                }
+                
+                tests.innerHTML = html;
+                log('Tests navigateur terminés');
+            }
+            
+            // Test vibration
+            function testVibration() {
+                log('Test vibration lancé...', 'info');
+                if ("vibrate" in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                    document.getElementById('vibrationResult').innerHTML = '✅ Vibration envoyée (pattern 200-100-200ms)';
+                    log('✅ Vibration exécutée avec succès', 'success');
+                } else {
+                    document.getElementById('vibrationResult').innerHTML = '❌ Vibration non supportée';
+                    log('❌ Vibration non supportée par ce navigateur', 'error');
+                }
+            }
+            
+            // Test popup
+            function testPopup() {
+                log('Test popup lancé...', 'info');
+                
+                // Créer un popup de test
+                const popup = document.createElement('div');
+                popup.id = 'test-popup';
+                popup.style.cssText = \`
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.9);
+                    z-index: 30000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                \`;
+                
+                popup.innerHTML = \`
+                    <div style="background:white; border-radius:30px; padding:35px; max-width:380px; width:100%; text-align:center; border:3px solid #ff416c;">
+                        <div style="font-size:4rem; margin-bottom:10px;">📬</div>
+                        <div style="color:#ff416c; font-size:1.8rem; font-weight:bold; margin-bottom:20px;">TEST RÉUSSI</div>
+                        <div style="font-size:1.6rem; font-weight:bold; color:#1a2a44; margin-bottom:5px;">Maria, 28 ans</div>
+                        <div style="font-size:1.2rem; color:#666; margin-bottom:15px;">Génotype: AA • Résidence: Luanda</div>
+                        <div style="background:#fff5f7; border-radius:15px; padding:20px; margin:20px 0; font-size:1.2rem; color:#1a2a44; font-style:italic; border:2px solid #ffdae0;">
+                            "Bonjour, je suis très intéressé par votre profil !"
+                        </div>
+                        <div style="font-size:1.3rem; color:#1a2a44; margin:20px 0; font-weight:600;">❓ Que souhaitez-vous faire ?</div>
+                        <div style="display:flex; gap:15px; margin:20px 0;">
+                            <button class="accept-btn" style="flex:1; background:#ff416c; color:white; padding:15px; border-radius:50px; border:none; font-weight:bold; cursor:pointer;" onclick="document.getElementById('test-popup').remove(); log('✅ Bouton Oui cliqué', 'success');">✅ Ouvrir la discussion</button>
+                            <button class="ignore-btn" style="flex:1; background:#1a2a44; color:white; padding:15px; border-radius:50px; border:none; font-weight:bold; cursor:pointer;" onclick="document.getElementById('test-popup').remove(); log('✅ Bouton Ignorer cliqué', 'info');">🌿 Ignorer</button>
+                        </div>
+                        <div style="font-size:0.95rem; color:#888;">ℹ️ Maria sera informée de votre choix.</div>
+                    </div>
+                \`;
+                
+                document.body.appendChild(popup);
+                document.getElementById('popupResult').innerHTML = '✅ Popup affiché avec succès';
+                log('✅ Popup de test affiché', 'success');
+                
+                // Tester la vibration en même temps
+                if ("vibrate" in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                    log('✅ Vibration avec popup', 'success');
+                }
+            }
+            
+            // Test envoi demande
+            async function testSendRequest() {
+                const message = document.getElementById('testMessage').value;
+                log('Envoi demande test...', 'info');
+                
+                try {
+                    const res = await fetch('/api/requests', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            receiverId: '${req.session?.userId || 'test'}', // À remplacer par un vrai ID si besoin
+                            message: message
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (res.ok) {
+                        document.getElementById('sendResult').innerHTML = '✅ Demande envoyée avec succès';
+                        log('✅ Demande envoyée: ' + JSON.stringify(data), 'success');
+                    } else {
+                        document.getElementById('sendResult').innerHTML = '❌ Erreur: ' + (data.error || 'Inconnue');
+                        log('❌ Erreur envoi: ' + JSON.stringify(data), 'error');
+                    }
+                } catch (e) {
+                    document.getElementById('sendResult').innerHTML = '❌ Erreur réseau: ' + e.message;
+                    log('❌ Erreur réseau: ' + e.message, 'error');
+                }
+            }
+            
+            // Vérifier les demandes en attente
+            async function checkPendingRequests() {
+                log('Vérification des demandes en attente...', 'info');
+                try {
+                    const res = await fetch('/api/requests/pending');
+                    const data = await res.json();
+                    
+                    if (data.length > 0) {
+                        log(\`✅ \${data.length} demande(s) en attente trouvée(s)\`, 'success');
+                    } else {
+                        log('ℹ️ Aucune demande en attente', 'info');
+                    }
+                } catch (e) {
+                    log('❌ Erreur vérification: ' + e.message, 'error');
+                }
+            }
+            
+            // Lancer tous les tests
+            function runAllTests() {
+                log('=== LANCEMENT DE TOUS LES TESTS ===', 'info');
+                checkBrowserFeatures();
+                testVibration();
+                checkPendingRequests();
+                log('=== TESTS TERMINÉS ===', 'info');
+            }
+            
+            // Initialisation
+            document.addEventListener('DOMContentLoaded', function() {
+                checkBrowserFeatures();
+                log('Diagnostic initialisé');
+            });
+        </script>
+    </body>
+    </html>
+    `;
+    
+    res.send(html);
+});
 app.listen(port, '0.0.0.0', () => {
     console.log('🚀 Genlove démarré sur http://localhost:' + port);
 });
