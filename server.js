@@ -64,7 +64,7 @@ const messageSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now },
     read: { type: Boolean, default: false },
     systemMessage: { type: Boolean, default: false },
-    visibleFor: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] // qui peut voir ce message
+    visibleFor: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -73,7 +73,7 @@ const requestSchema = new mongoose.Schema({
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     message: { type: String, required: true },
-    choiceIndex: { type: Number, required: true }, // 0,1,2 pour les trois messages
+    choiceIndex: { type: Number, required: true },
     status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
     createdAt: { type: Date, default: Date.now }
 });
@@ -97,7 +97,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ============================================
-// SYSTÈME DE TRADUCTION MULTILINGUE COMPLET (6 langues)
+// SYSTÈME DE TRADUCTION MULTILINGUE (6 langues)
 // ============================================
 const translations = {
     fr: {
@@ -962,7 +962,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============================================
-// STYLES CSS COMPLETS (identique à la version précédente)
+// STYLES CSS COMPLETS (design original)
 // ============================================
 const styles = `
 <style>
@@ -1943,7 +1943,7 @@ app.get('/sas-validation', async (req, res) => {
 </html>`);
 });
 
-// PROFIL
+// PROFIL (avec popup de demande)
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -2085,7 +2085,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING (avec popup SS/AS et exclusion des contacts existants)
+// MATCHING (avec popup SS/AS, exclusion contacts existants et boutons de contact)
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2665,7 +2665,7 @@ app.get('/logout-success', (req, res) => {
 });
 
 // ============================================
-// ROUTES API
+// ROUTES API (CORRIGÉES POUR LA MESSAGERIE)
 // ============================================
 
 app.post('/api/login', async (req, res) => {
@@ -2705,10 +2705,12 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
     }
 });
 
-// DEMANDES
+// DEMANDES - CORRIGÉ POUR QUE LE MESSAGE ARRIVE BIEN
 app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     try {
         const { receiverId, message, choiceIndex } = req.body;
+        console.log("📨 Nouvelle demande reçue:", { senderId: req.session.userId, receiverId, message, choiceIndex });
+
         // Vérifier si une conversation existe déjà
         const existing = await Message.findOne({
             $or: [
@@ -2716,6 +2718,7 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
                 { senderId: receiverId, receiverId: req.session.userId }
             ]
         });
+
         if (existing) {
             // Si conversation existe, créer directement le message visible pour les deux
             const msg = new Message({
@@ -2726,18 +2729,35 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
                 visibleFor: [req.session.userId, receiverId]
             });
             await msg.save();
+            console.log("✅ Message direct créé (conversation existante)");
             return res.json({ success: true, direct: true });
         }
-        // Sinon créer une demande
+
+        // Vérifier si une demande est déjà en attente pour éviter les doublons
+        const existingRequest = await Request.findOne({
+            senderId: req.session.userId,
+            receiverId,
+            status: 'pending'
+        });
+
+        if (existingRequest) {
+            console.log("⚠️ Demande déjà en attente");
+            return res.status(400).json({ error: "Une demande est déjà en attente pour cette personne" });
+        }
+
+        // Créer une nouvelle demande
         const request = new Request({
             senderId: req.session.userId,
             receiverId,
             message,
-            choiceIndex
+            choiceIndex,
+            status: 'pending'
         });
         await request.save();
-        res.json({ success: true });
+        console.log("✅ Nouvelle demande créée avec ID:", request._id);
+        res.json({ success: true, pending: true });
     } catch(e) {
+        console.error("❌ Erreur dans /api/requests:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2745,9 +2765,11 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
 app.get('/api/requests/pending', requireAuth, requireVerified, async (req, res) => {
     try {
         const requests = await Request.find({ receiverId: req.session.userId, status: 'pending' })
-            .populate('senderId', 'firstName gender dob');
+            .populate('senderId', 'firstName gender dob genotype residence');
+        console.log(`🔍 ${requests.length} demande(s) en attente pour l'utilisateur ${req.session.userId}`);
         res.json(requests);
     } catch(e) {
+        console.error("❌ Erreur dans /api/requests/pending:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2757,19 +2779,24 @@ app.post('/api/requests/:id/accept', requireAuth, requireVerified, async (req, r
         const request = await Request.findById(req.params.id).populate('senderId receiverId');
         if (!request) return res.status(404).json({ error: 'Demande non trouvée' });
         if (request.receiverId._id.toString() !== req.session.userId) return res.status(403).json({ error: 'Non autorisé' });
-        // Créer le message visible uniquement par le demandeur
+
+        // Créer le message visible uniquement par le demandeur (c'est le premier message de la conversation)
         const msg = new Message({
             senderId: request.senderId._id,
             receiverId: request.receiverId._id,
             text: request.message,
             read: false,
-            visibleFor: [request.senderId._id]
+            visibleFor: [request.senderId._id] // seul le demandeur voit ce message
         });
         await msg.save();
+
         request.status = 'accepted';
         await request.save();
+        console.log("✅ Demande acceptée, message créé pour le demandeur");
+
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans accept:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2779,6 +2806,8 @@ app.post('/api/requests/:id/ignore', requireAuth, requireVerified, async (req, r
         const request = await Request.findById(req.params.id).populate('senderId receiverId');
         if (!request) return res.status(404).json({ error: 'Demande non trouvée' });
         if (request.receiverId._id.toString() !== req.session.userId) return res.status(403).json({ error: 'Non autorisé' });
+
+        // Message de rejet bienveillant
         const systemMsg = new Message({
             senderId: request.receiverId._id,
             receiverId: request.senderId._id,
@@ -2788,10 +2817,14 @@ app.post('/api/requests/:id/ignore', requireAuth, requireVerified, async (req, r
             visibleFor: [request.senderId._id]
         });
         await systemMsg.save();
+
         request.status = 'rejected';
         await request.save();
+        console.log("✅ Demande ignorée, message de rejet envoyé");
+
         res.json({ success: true });
     } catch(e) {
+        console.error("❌ Erreur dans ignore:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2806,8 +2839,10 @@ app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
             visibleFor: [req.session.userId, req.body.receiverId]
         });
         await msg.save();
+        console.log("✅ Message normal envoyé");
         res.json(msg);
     } catch(e) {
+        console.error("❌ Erreur dans /api/messages:", e);
         res.status(500).json({ error: e.message });
     }
 });
