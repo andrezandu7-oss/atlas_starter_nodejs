@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const MongoDB = require('connect-mongodb-session')(session);
+const MongoDBStore = require('connect-mongodb-session')(session);
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -19,14 +19,20 @@ mongoose.connect(mongouRI)
 // ========================
 app.set('trust proxy', 1);
 
+const store = new MongoDBStore({
+    uri: mongouRI,
+    collection: 'sessions'
+});
+
+store.on('error', function(error) {
+    console.log('❌ Erreur de session:', error);
+});
+
 const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'genlove-secret-key-2026',
     resave: false,
     saveUninitialized: false,
-    store: new MongoDB({
-        uri: mongouRI,
-        collection: 'sessions'
-    }),
+    store: store,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 30,
         httpOnly: true,
@@ -979,7 +985,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==============================================
-// STYLES CSS COMPLETS (avec correction clavier mobile)
+// STYLES CSS COMPLETS
 // ==============================================
 const styles = `
 <style>
@@ -1328,7 +1334,6 @@ const styles = `
         background: rgba(255,65,108,0.1);
         border-radius: 40px;
     }
-    /* Styles améliorés pour le chat (comme WhatsApp) */
     .chat-header {
         background: #1a2a44;
         color: white;
@@ -1727,7 +1732,7 @@ app.get('/lang/:lang', async (req, res) => {
 // ROUTES PRINCIPALES
 // ============================================
 
-// ACCUEIL (avec sélecteur de langue compact)
+// ACCUEIL
 app.get('/', (req, res) => {
     const t = req.t;
     const currentLang = req.lang;
@@ -1869,7 +1874,7 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION AVEC CALENDRIER MULTILINGUE
+// INSCRIPTION
 app.get('/signup', (req, res) => {
     const t = req.t;
     const datePicker = generateDateOptions(req);
@@ -2025,7 +2030,6 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
 </head>
 <body>
     <div class="app-shell">
-        <!-- POPUP DE DEMANDE (pour l'intéressé) -->
         <div id="request-popup">
             <div class="popup-card">
                 <div class="popup-icon">💌</div>
@@ -2036,7 +2040,6 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
                 </div>
             </div>
         </div>
-        <!-- POPUP DE REJET (pour le demandeur) -->
         <div id="rejection-popup">
             <div class="popup-card">
                 <div class="popup-icon">😔</div>
@@ -2147,7 +2150,7 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING (avec exclusion bidirectionnelle)
+// MATCHING
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2170,7 +2173,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         });
         const conversationArray = Array.from(conversationIds);
 
-        // 🔥 Exclusion bidirectionnelle : ceux que j'ai bloqués ET ceux qui m'ont bloqué
         const rejectedArray = currentUser.rejectedRequests ? currentUser.rejectedRequests.map(id => id.toString()) : [];
         const blockedByMe = currentUser.blockedUsers ? currentUser.blockedUsers.map(id => id.toString()) : [];
         const blockedMe = await User.find({ blockedBy: currentUser._id }).distinct('_id');
@@ -2371,7 +2373,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// CHAT AVEC BLOCAGE BIDIRECTIONNEL
+// CHAT
 app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2752,7 +2754,7 @@ app.get('/logout-success', (req, res) => {
 });
 
 // ==============================================
-// ROUTES API (AVEC BLOCAGE BIDIRECTIONNEL)
+// ROUTES API
 // ==============================================
 
 app.post('/api/login', async (req, res) => {
@@ -2947,7 +2949,7 @@ app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// 🔥 BLOCAGE BIDIRECTIONNEL : messages cachés des deux côtés
+// BLOCAGE BIDIRECTIONNEL
 app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
@@ -2958,7 +2960,6 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
 
         if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
-        // Blocage mutuel
         if (!current.blockedUsers) current.blockedUsers = [];
         if (!current.blockedUsers.includes(targetUserId)) {
             current.blockedUsers.push(targetUserId);
@@ -2969,7 +2970,6 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
             target.blockedBy.push(currentUserId);
         }
 
-        // Masquer les messages pour LES DEUX utilisateurs
         await Message.updateMany(
             {
                 $or: [
@@ -2980,7 +2980,7 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
             {
                 $addToSet: { 
                     hiddenFor: { 
-                        $each: [currentUserId, targetUserId] // 👈 Les DEUX côtés
+                        $each: [currentUserId, targetUserId]
                     } 
                 }
             }
@@ -2996,7 +2996,7 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
     }
 });
 
-// 🔥 DÉBLOCAGE BIDIRECTIONNEL : messages réapparaissent des deux côtés
+// DÉBLOCAGE BIDIRECTIONNEL
 app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
@@ -3007,7 +3007,6 @@ app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) 
 
         if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
-        // Déblocage mutuel
         if (current.blockedUsers) {
             current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== targetUserId);
         }
@@ -3016,7 +3015,6 @@ app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) 
             target.blockedBy = target.blockedBy.filter(id => id.toString() !== currentUserId);
         }
 
-        // Réafficher les messages pour LES DEUX utilisateurs
         await Message.updateMany(
             {
                 $or: [
@@ -3027,7 +3025,7 @@ app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) 
             {
                 $pull: { 
                     hiddenFor: { 
-                        $in: [currentUserId, targetUserId] // 👈 Retirer LES DEUX
+                        $in: [currentUserId, targetUserId]
                     } 
                 }
             }
