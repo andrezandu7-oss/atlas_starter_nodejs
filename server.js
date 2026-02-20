@@ -1,29 +1,32 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const MongoDB = require('connect-mongodb-session')(session);
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ============================================
+// ========================
 // CONNEXION MONGODB
-// ============================================
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/genlove';
+// ========================
+const mongouRI = process.env.MONGODB_URI || 'mongodb://localhost:27017/genlove';
 
-mongoose.connect(mongoURI)
+mongoose.connect(mongouRI)
     .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
     .catch(err => console.error("❌ Erreur de connexion MongoDB:", err));
 
-// ============================================
+// ========================
 // CONFIGURATION SESSION
-// ============================================
+// ========================
 app.set('trust proxy', 1);
 
 const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'genlove-secret-key-2026',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: mongoURI }),
+    store: new MongoDB({
+        uri: mongouRI,
+        collection: 'sessions'
+    }),
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 30,
         httpOnly: true,
@@ -35,9 +38,9 @@ const sessionConfig = {
 
 app.use(session(sessionConfig));
 
-// ============================================
+// ========================
 // MODÈLES DE DONNÉES
-// ============================================
+// ========================
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -80,9 +83,9 @@ const requestSchema = new mongoose.Schema({
 
 const Request = mongoose.model('Request', requestSchema);
 
-// ============================================
+// ================================
 // MIDDLEWARE
-// ============================================
+// ================================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -96,9 +99,9 @@ const requireVerified = (req, res, next) => {
     next();
 };
 
-// ============================================
-// SYSTÈME DE TRADUCTION MULTILINGUE COMPLET (6 LANGUES)
-// ============================================
+// ==============================================
+// SYSTEME DE TRADUCTION MULTILINGUE COMPLET (6 LANGUES)
+// ==============================================
 const translations = {
     fr: {
         appName: 'Genlove',
@@ -111,7 +114,7 @@ const translations = {
         loginTitle: 'Connexion',
         enterName: 'Entrez votre prénom pour vous connecter',
         yourName: 'Votre prénom',
-        backHome: 'Retour à l\'accueil',
+        backHome: '← Retour à l\'accueil',
         nameNotFound: 'Prénom non trouvé. Veuillez créer un compte.',
         charterTitle: '📜 La Charte d\'Honneur',
         charterSubtitle: 'Lisez attentivement ces 5 engagements',
@@ -151,7 +154,7 @@ const translations = {
         backCharter: '← Retour à la charte',
         required: 'obligatoire',
         honorTitle: 'Serment d\'Honneur',
-        honorText: '"Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité."',
+        honorText: "Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité.",
         swear: 'Je le jure',
         accessProfile: 'Accéder à mon profil',
         myProfile: 'Mon Profil',
@@ -172,9 +175,9 @@ const translations = {
         contact: 'Contacter',
         backProfile: '← Mon profil',
         toMessages: 'Messages →',
-        healthCommitment: '🛡️ Votre engagement santé',
-        popupMessageAS: 'En tant que profil AS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑',
-        popupMessageSS: 'En tant que profil SS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑',
+        healthCommitment: '💚 Votre engagement santé',
+        popupMessageAS: 'En tant que profil AS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💚',
+        popupMessageSS: 'En tant que profil SS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💚',
         understood: 'J\'ai compris',
         inboxTitle: 'Boîte de réception',
         emptyInbox: '📭 Boîte vide',
@@ -184,7 +187,7 @@ const translations = {
         unblock: '🔓 Débloquer',
         yourMessage: 'Votre message...',
         send: 'Envoyer',
-        blockedByUser: '⛔ Conversation impossible',
+        blockedByUser: '🚫 Conversation impossible',
         blockedMessage: 'Cet utilisateur vous a bloqué. Vous ne pouvez pas lui envoyer de messages.',
         settingsTitle: 'Paramètres',
         visibility: 'Visibilité du profil',
@@ -215,13 +218,13 @@ const translations = {
         interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité et mêmes projets de vie. Pouvez-vous prendre quelques minutes pour échanger ?',
         acceptRequest: '✅ Accepter',
         rejectRequest: '❌ Refuser',
-        rejectionPopup: '🌸 Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches car vous êtes sur le point de trouver la bonne personne.',
-        gotIt: 'J\'ai compris',
-        returnProfile: '📋 Mon profil',
+        rejectionPopup: 'Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches car vous êtes sur le point de trouver la bonne personne.',
+        gottl: 'J\'ai compris',
+        returnProfile: '👤 Mon profil',
         newMatch: '🔍 Nouvelle recherche',
-        sendingRequest: '⏳ Votre demande est en cours d\'envoi...',
+        sendingRequest: 'Votre demande est en cours d\'envoi...',
         requestSent: '✅ Demande envoyée !',
-        blockConfirm: 'Bloquer cet utilisateur ? La conversation disparaîtra de votre vue.',
+        blockConfirm: 'Bloquer cet utilisateur ? La conversation disparaîtra des deux côtés.',
         unblockConfirm: 'Débloquer cet utilisateur ? Tous les messages réapparaîtront.',
         blockSuccess: 'Utilisateur bloqué',
         unblockSuccess: 'Utilisateur débloqué',
@@ -239,7 +242,7 @@ const translations = {
         september: 'Septembre',
         october: 'Octobre',
         november: 'Novembre',
-        december: 'Décembre'
+        december: 'Décembre',
     },
     en: {
         appName: 'Genlove',
@@ -292,7 +295,7 @@ const translations = {
         backCharter: '← Back to charter',
         required: 'required',
         honorTitle: 'Oath of Honor',
-        honorText: '"I confirm on my honor that my information is sincere and conforms to reality."',
+        honorText: "I confirm on my honor that my information is sincere and conforms to reality.",
         swear: 'I swear',
         accessProfile: 'Access my profile',
         myProfile: 'My Profile',
@@ -313,9 +316,9 @@ const translations = {
         contact: 'Contact',
         backProfile: '← My profile',
         toMessages: 'Messages →',
-        healthCommitment: '🛡️ Your health commitment',
-        popupMessageAS: 'As an AS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑',
-        popupMessageSS: 'As an SS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑',
+        healthCommitment: '💚 Your health commitment',
+        popupMessageAS: 'As an AS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💚',
+        popupMessageSS: 'As an SS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💚',
         understood: 'I understand',
         inboxTitle: 'Inbox',
         emptyInbox: '📭 Empty inbox',
@@ -325,7 +328,7 @@ const translations = {
         unblock: '🔓 Unblock',
         yourMessage: 'Your message...',
         send: 'Send',
-        blockedByUser: '⛔ Conversation impossible',
+        blockedByUser: '🚫 Conversation impossible',
         blockedMessage: 'This user has blocked you. You cannot send them messages.',
         settingsTitle: 'Settings',
         visibility: 'Profile visibility',
@@ -356,13 +359,13 @@ const translations = {
         interestPopup: '{name} is very attracted to your profile because you share good compatibility and same life projects. Can you take a few minutes to chat?',
         acceptRequest: '✅ Accept',
         rejectRequest: '❌ Decline',
-        rejectionPopup: '🌸 Sorry, {name} did not give a favorable response to your request. Start other searches because you are about to find the right person.',
-        gotIt: 'Got it',
-        returnProfile: '📋 My profile',
+        rejectionPopup: 'Sorry, {name} did not give a favorable response to your request. Start other searches because you are about to find the right person.',
+        gottl: 'Got it',
+        returnProfile: '👤 My profile',
         newMatch: '🔍 New search',
-        sendingRequest: '⏳ Your request is being sent...',
+        sendingRequest: 'Your request is being sent...',
         requestSent: '✅ Request sent!',
-        blockConfirm: 'Block this user? The conversation will disappear from your view.',
+        blockConfirm: 'Block this user? The conversation will disappear from both sides.',
         unblockConfirm: 'Unblock this user? All messages will reappear.',
         blockSuccess: 'User blocked',
         unblockSuccess: 'User unblocked',
@@ -433,7 +436,7 @@ const translations = {
         backCharter: '← Voltar à carta',
         required: 'obrigatório',
         honorTitle: 'Juramento de Honra',
-        honorText: '"Confirmo por minha honra que minhas informações são sinceras e conformes à realidade."',
+        honorText: "Confirmo por minha honra que minhas informações são sinceras e conformes à realidade.",
         swear: 'Eu juro',
         accessProfile: 'Acessar meu perfil',
         myProfile: 'Meu Perfil',
@@ -454,9 +457,9 @@ const translations = {
         contact: 'Contatar',
         backProfile: '← Meu perfil',
         toMessages: 'Mensagens →',
-        healthCommitment: '🛡️ Seu compromisso com a saúde',
-        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑',
-        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑',
+        healthCommitment: '💚 Seu compromisso com a saúde',
+        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💚',
+        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💚',
         understood: 'Entendi',
         inboxTitle: 'Caixa de entrada',
         emptyInbox: '📭 Caixa vazia',
@@ -466,7 +469,7 @@ const translations = {
         unblock: '🔓 Desbloquear',
         yourMessage: 'Sua mensagem...',
         send: 'Enviar',
-        blockedByUser: '⛔ Conversa impossível',
+        blockedByUser: '🚫 Conversa impossível',
         blockedMessage: 'Este usuário bloqueou você. Não é possível enviar mensagens.',
         settingsTitle: 'Configurações',
         visibility: 'Visibilidade do perfil',
@@ -497,13 +500,13 @@ const translations = {
         interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade e mesmos projetos de vida. Você pode alguns minutos para conversar?',
         acceptRequest: '✅ Aceitar',
         rejectRequest: '❌ Recusar',
-        rejectionPopup: '🌸 Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas porque você está prestes a encontrar a pessoa certa.',
-        gotIt: 'Entendi',
-        returnProfile: '📋 Meu perfil',
+        rejectionPopup: 'Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas porque você está prestes a encontrar a pessoa certa.',
+        gottl: 'Entendi',
+        returnProfile: '👤 Meu perfil',
         newMatch: '🔍 Nova pesquisa',
-        sendingRequest: '⏳ Seu pedido está sendo enviado...',
+        sendingRequest: 'Seu pedido está sendo enviado...',
         requestSent: '✅ Pedido enviado!',
-        blockConfirm: 'Bloquear este usuário? A conversa desaparecerá da sua vista.',
+        blockConfirm: 'Bloquear este usuário? A conversa desaparecerá dos dois lados.',
         unblockConfirm: 'Desbloquear este usuário? Todas as mensagens reaparecerão.',
         blockSuccess: 'Usuário bloqueado',
         unblockSuccess: 'Usuário desbloqueado',
@@ -574,7 +577,7 @@ const translations = {
         backCharter: '← Volver a la carta',
         required: 'obligatorio',
         honorTitle: 'Juramento de Honor',
-        honorText: '"Confirmo bajo mi honor que mi información es sincera y conforme a la realidad."',
+        honorText: "Confirmo bajo mi honor que mi información es sincera y conforme a la realidad.",
         swear: 'Lo juro',
         accessProfile: 'Acceder a mi perfil',
         myProfile: 'Mi Perfil',
@@ -595,9 +598,9 @@ const translations = {
         contact: 'Contactar',
         backProfile: '← Mi perfil',
         toMessages: 'Mensajes →',
-        healthCommitment: '🛡️ Su compromiso con la salud',
-        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑',
-        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑',
+        healthCommitment: '💚 Su compromiso con la salud',
+        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💚',
+        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💚',
         understood: 'Entiendo',
         inboxTitle: 'Bandeja de entrada',
         emptyInbox: '📭 Bandeja vacía',
@@ -607,7 +610,7 @@ const translations = {
         unblock: '🔓 Desbloquear',
         yourMessage: 'Su mensaje...',
         send: 'Enviar',
-        blockedByUser: '⛔ Conversación imposible',
+        blockedByUser: '🚫 Conversación imposible',
         blockedMessage: 'Este usuario le ha bloqueado. No puede enviarle mensajes.',
         settingsTitle: 'Configuración',
         visibility: 'Visibilidad del perfil',
@@ -638,13 +641,13 @@ const translations = {
         interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad y mismos proyectos de vida. ¿Puedes tomar unos minutos para conversar?',
         acceptRequest: '✅ Aceptar',
         rejectRequest: '❌ Rechazar',
-        rejectionPopup: '🌸 Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas porque estás a punto de encontrar a la persona adecuada.',
-        gotIt: 'Entiendo',
-        returnProfile: '📋 Mi perfil',
+        rejectionPopup: 'Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas porque estás a punto de encontrar a la persona adecuada.',
+        gotlt: 'Entiendo',
+        returnProfile: '👤 Mi perfil',
         newMatch: '🔍 Nueva búsqueda',
-        sendingRequest: '⏳ Tu solicitud está siendo enviada...',
+        sendingRequest: 'Tu solicitud está siendo enviada...',
         requestSent: '✅ ¡Solicitud enviada!',
-        blockConfirm: '¿Bloquear a este usuario? La conversación desaparecerá de tu vista.',
+        blockConfirm: '¿Bloquear a este usuario? La conversación desaparecerá de ambos lados.',
         unblockConfirm: '¿Desbloquear a este usuario? Todos los mensajes reaparecerán.',
         blockSuccess: 'Usuario bloqueado',
         unblockSuccess: 'Usuario desbloqueado',
@@ -711,13 +714,13 @@ const translations = {
         desireChild: 'الرغبة في الأطفال؟',
         yes: 'نعم',
         no: 'لا',
-        createProfile: 'إنشاء ملفي الشخصي',
+        createProfile: 'إنشاء الملف الشخصي',
         backCharter: '← العودة إلى الميثاق',
         required: 'إلزامي',
         honorTitle: 'قسم الشرف',
-        honorText: '"أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع."',
+        honorText: "أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع.",
         swear: 'أقسم',
-        accessProfile: 'الوصول إلى ملفي الشخصي',
+        accessProfile: 'الوصول إلى ملفي',
         myProfile: 'ملفي الشخصي',
         home: 'الرئيسية',
         messages: 'الرسائل',
@@ -726,41 +729,41 @@ const translations = {
         blood_label: 'الفصيلة',
         age_label: 'العمر',
         project_label: 'المشروع',
-        findPartner: '🔍 العثور على شريك',
-        editProfile: '✏️ تعديل الملف الشخصي',
-        compatiblePartners: 'الشركاء المتوافقون',
+        findPartner: '🔍 البحث عن شريك',
+        editProfile: '✏️ تعديل الملف',
+        compatiblePartners: 'شركاء متوافقون',
         noPartners: 'لم يتم العثور على شركاء في الوقت الحالي',
-        searchOngoing: 'البحث جار...',
+        searchOngoing: 'جاري البحث...',
         expandCommunity: 'نحن نوسع مجتمعنا. عد قريبًا!',
         details: 'التفاصيل',
         contact: 'اتصال',
-        backProfile: '← ملفي الشخصي',
-        toMessages: 'الرسائل →',
-        healthCommitment: '🛡️ التزامك الصحي',
-        popupMessageAS: 'كملف AS، نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑',
-        popupMessageSS: 'كملف SS، نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑',
+        backProfile: '← ملفي',
+        toMessages: '→ الرسائل',
+        healthCommitment: '💚 التزامك الصحي',
+        popupMessageAS: 'كملف AS، نعرض لك فقط شركاء AA. هذا الخيار المسؤول يضمن serenity منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💚',
+        popupMessageSS: 'كملف SS، نعرض لك فقط شركاء AA. هذا الخيار المسؤول يضمن serenity منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💚',
         understood: 'فهمت',
         inboxTitle: 'صندوق الوارد',
         emptyInbox: '📭 صندوق فارغ',
         startConversation: 'ابدأ محادثة!',
-        findPartners: 'العثور على شركاء',
+        findPartners: 'البحث عن شركاء',
         block: '🚫 حظر',
         unblock: '🔓 إلغاء الحظر',
         yourMessage: 'رسالتك...',
         send: 'إرسال',
-        blockedByUser: '⛔ محادثة مستحيلة',
-        blockedMessage: 'هذا المستخدم قام بحظرك. لا يمكنك إرسال رسائل له.',
+        blockedByUser: '🚫 محادثة مستحيلة',
+        blockedMessage: 'هذا المستخدم قام بحظرك. لا يمكنك إرسال رسائل إليه.',
         settingsTitle: 'الإعدادات',
         visibility: 'رؤية الملف الشخصي',
-        notifications: 'إشعارات',
+        notifications: 'إشعارات فورية',
         language: 'اللغة',
         blockedUsers: 'المستخدمون المحظورون',
         dangerZone: '⚠️ منطقة الخطر',
         deleteAccount: '🗑️ حذف حسابي',
         delete: 'حذف',
         logout: 'تسجيل الخروج',
-        confirmDelete: 'حذف نهائي؟',
-        noBlocked: 'لا يوجد مستخدمين محظورين',
+        confirmDelete: 'الحذف نهائيًا؟',
+        noBlocked: 'لا يوجد مستخدمون محظورون',
         thankYou: 'شكرًا لهذا التبادل',
         thanksMessage: 'Genlove يشكرك',
         newSearch: 'بحث جديد',
@@ -779,19 +782,19 @@ const translations = {
         interestPopup: '{name} منجذب جدًا لملفك الشخصي لأنكما تشاركان توافقًا جيدًا ونفس مشاريع الحياة. هل يمكنك تخصيص بضع دقائق للدردشة؟',
         acceptRequest: '✅ قبول',
         rejectRequest: '❌ رفض',
-        rejectionPopup: '🌸 عذرًا، {name} لم يعط ردًا إيجابيًا لطلبك. قم بإجراء عمليات بحث أخرى لأنك على وشك العثور على الشخص المناسب.',
-        gotIt: 'فهمت',
-        returnProfile: '📋 ملفي الشخصي',
+        rejectionPopup: 'عذرًا، {name} لم يستجب بشكل إيجابي لطلبك. ابدأ عمليات بحث أخرى لأنك على وشك العثور على الشخص المناسب.',
+        gottl: 'فهمت',
+        returnProfile: '👤 ملفي',
         newMatch: '🔍 بحث جديد',
-        sendingRequest: '⏳ جاري إرسال طلبك...',
+        sendingRequest: 'جاري إرسال طلبك...',
         requestSent: '✅ تم إرسال الطلب!',
-        blockConfirm: 'حظر هذا المستخدم؟ ستختفي المحادثة من عرضك.',
+        blockConfirm: 'حظر هذا المستخدم؟ ستختفي المحادثة من كلا الجانبين.',
         unblockConfirm: 'إلغاء حظر هذا المستخدم؟ ستظهر جميع الرسائل مرة أخرى.',
         blockSuccess: 'تم حظر المستخدم',
         unblockSuccess: 'تم إلغاء حظر المستخدم',
-        day: 'يوم',
-        month: 'شهر',
-        year: 'سنة',
+        day: 'اليوم',
+        month: 'الشهر',
+        year: 'السنة',
         january: 'يناير',
         february: 'فبراير',
         march: 'مارس',
@@ -809,32 +812,32 @@ const translations = {
         appName: 'Genlove',
         slogan: '结合心灵与健康，建立健康的伴侣关系 💑',
         security: '🛡️ 您的健康数据已加密',
-        welcome: '欢迎来到 Genlove',
-        haveAccount: '已有帐户？',
+        welcome: '欢迎来到Genlove',
+        haveAccount: '已有账号？',
         login: '登录',
-        createAccount: '创建帐户',
+        createAccount: '创建账号',
         loginTitle: '登录',
         enterName: '输入您的名字以登录',
         yourName: '您的名字',
         backHome: '← 返回首页',
-        nameNotFound: '未找到名字。请创建帐户。',
+        nameNotFound: '名字未找到。请创建账号。',
         charterTitle: '📜 荣誉宪章',
         charterSubtitle: '请仔细阅读这5项承诺',
-        scrollDown: '⬇️ 滚动到底部 ⬇️',
+        scrollDown: '⬇️ 向下滚动到底部 ⬇️',
         accept: '我接受并继续',
         oath1: '1. 真诚誓言',
         oath1Sub: '医疗真相',
         oath1Text: '我以荣誉保证提供关于我的基因型和健康数据的准确信息。',
-        oath2: '2. 保密契约',
+        oath2: '2. 保密协议',
         oath2Sub: '共享秘密',
         oath2Text: '我承诺对所有个人和医疗信息保密。',
-        oath3: '3. 非歧视原则',
-        oath3Sub: '尊重平等',
-        oath3Text: '我尊重每一位成员，无论其基因型如何。',
+        oath3: '3. 不歧视原则',
+        oath3Sub: '平等尊重',
+        oath3Text: '我以尊严对待每位成员，无论其基因型如何。',
         oath4: '4. 预防责任',
         oath4Sub: '健康导向',
         oath4Text: '我接受保护措施，如过滤风险兼容性。',
-        oath5: '5. 道德仁慈',
+        oath5: '5. 道德善意',
         oath5Sub: '礼貌',
         oath5Text: '我在信息中采取模范和尊重的行为。',
         signupTitle: '创建我的个人资料',
@@ -856,7 +859,7 @@ const translations = {
         backCharter: '← 返回宪章',
         required: '必填',
         honorTitle: '荣誉誓言',
-        honorText: '"我以荣誉确认我的信息是真实的，符合实际情况。"',
+        honorText: "我以荣誉确认我的信息是真实的，符合实际情况。",
         swear: '我发誓',
         accessProfile: '访问我的个人资料',
         myProfile: '我的个人资料',
@@ -877,9 +880,9 @@ const translations = {
         contact: '联系',
         backProfile: '← 我的个人资料',
         toMessages: '消息 →',
-        healthCommitment: '🛡️ 您的健康承诺',
-        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑',
-        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑',
+        healthCommitment: '💚 您的健康承诺',
+        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💚',
+        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💚',
         understood: '我明白',
         inboxTitle: '收件箱',
         emptyInbox: '📭 空收件箱',
@@ -889,7 +892,7 @@ const translations = {
         unblock: '🔓 解除屏蔽',
         yourMessage: '您的消息...',
         send: '发送',
-        blockedByUser: '⛔ 无法对话',
+        blockedByUser: '🚫 无法对话',
         blockedMessage: '此用户已屏蔽您。您无法向他发送消息。',
         settingsTitle: '设置',
         visibility: '个人资料可见性',
@@ -917,16 +920,16 @@ const translations = {
         pageNotFoundMessage: '您查找的页面不存在。',
         residence_label: '居住地',
         project_life: '人生计划',
-        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性和相同的人生规划。您能花几分钟聊聊吗？',
+        interestPopup: '{name}被您的个人资料深深吸引，因为你们有良好的兼容性和相同的人生规划。您能花几分钟聊聊吗？',
         acceptRequest: '✅ 接受',
         rejectRequest: '❌ 拒绝',
-        rejectionPopup: '🌸 抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧，您即将找到合适的人。',
-        gotIt: '明白了',
-        returnProfile: '📋 我的个人资料',
+        rejectionPopup: '抱歉，{name}没有对您的请求给予积极回应。继续搜索吧，您即将找到合适的人。',
+        gottl: '明白了',
+        returnProfile: '👤 我的个人资料',
         newMatch: '🔍 新搜索',
-        sendingRequest: '⏳ 您的请求正在发送中...',
+        sendingRequest: '您的请求正在发送中...',
         requestSent: '✅ 请求已发送！',
-        blockConfirm: '屏蔽此用户？对话将从您的视图中消失。',
+        blockConfirm: '屏蔽此用户？对话将从双方消失。',
         unblockConfirm: '解除屏蔽此用户？所有消息将重新出现。',
         blockSuccess: '用户已屏蔽',
         unblockSuccess: '用户已解除屏蔽',
@@ -953,7 +956,9 @@ app.use(async (req, res, next) => {
         try {
             const user = await User.findById(req.session.userId);
             req.lang = (user && user.language) ? user.language : 'fr';
-        } catch { req.lang = 'fr'; }
+        } catch {
+            req.lang = 'fr';
+        }
     } else {
         const acceptLanguage = req.headers['accept-language'] || '';
         if (acceptLanguage.includes('pt')) req.lang = 'pt';
@@ -973,82 +978,110 @@ app.use(async (req, res, next) => {
     next();
 });
 
-// ============================================
-// STYLES CSS COMPLETS
-// ============================================
+// ==============================================
+// STYLES CSS COMPLETS (avec correction clavier mobile)
+// ==============================================
 const styles = `
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-        font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif; 
-        margin: 0; 
-        background: #fdf2f2; 
-        display: flex; 
-        justify-content: center; 
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        margin: 0;
+        background: #fdf2f2;
+        display: flex;
+        justify-content: center;
         align-items: flex-start;
         min-height: 100vh;
         font-size: 16px;
     }
-    .app-shell { 
-        width: 100%; 
-        max-width: 420px; 
-        min-height: 100vh; 
-        background: #f4e9da; 
-        display: flex; 
-        flex-direction: column; 
-        box-shadow: 0 0 30px rgba(0,0,0,0.1); 
+    .app-shell {
+        width: 100%;
+        max-width: 420px;
+        min-height: 100vh;
+        background: #f4e9da;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 0 30px rgba(0,0,0,0.1);
         position: relative;
         margin: 0 auto;
     }
-    h1 { font-size: 2.4rem; margin: 10px 0; }
-    h2 { font-size: 2rem; margin-bottom: 20px; color: #1a2a44; }
-    h3 { font-size: 1.6rem; margin: 15px 0; }
-    p { font-size: 1.2rem; line-height: 1.6; }
-    .logo-text { 
-        font-size: 5rem; 
-        font-weight: 800; 
-        margin: 20px 0; 
+    h1 {
+        font-size: 2.4rem;
+        margin: 10px 0;
+    }
+    h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #1a2a44;
+    }
+    h3 {
+        font-size: 1.6rem;
+        margin: 15px 0;
+    }
+    p {
+        font-size: 1.2rem;
+        line-height: 1.6;
+    }
+    .logo-text {
+        font-size: 5rem;
+        font-weight: 800;
+        margin: 20px 0;
         letter-spacing: -2px;
         text-shadow: 4px 4px 0 rgba(255,65,108,0.1);
         text-align: center;
     }
-    .slogan { 
-        font-weight: 500; 
-        color: #1a2a44; 
-        margin: 20px 25px 40px; 
-        font-size: 1.3rem; 
+    .slogan {
+        font-weight: 500;
+        color: #1a2a44;
+        margin: 20px 25px 40px;
+        font-size: 1.3rem;
         line-height: 1.7;
         text-align: center;
     }
-    .home-screen { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center; 
-        padding: 30px; 
-        text-align: center; 
+    .home-screen {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
         background: linear-gradient(135deg, #fff5f7 0%, #f4e9da 100%);
     }
-    .page-white { 
-        background: white; 
-        min-height: 100vh; 
-        padding: 30px 25px; 
-        text-align: center; 
+    .page-white {
+        background: white;
+        min-height: 100vh;
+        padding: 30px 25px;
+        text-align: center;
         display: flex;
         flex-direction: column;
     }
     .language-selector-home {
         display: flex;
-        flex-wrap: wrap;
         justify-content: center;
-        gap: 8px;
         margin: 15px 0;
         padding: 10px;
-        max-height: 120px;
-        overflow-y: auto;
-        background: rgba(255,255,255,0.5);
-        border-radius: 20px;
+        width: 100%;
+    }
+    .language-selector-home select {
+        padding: 12px 20px;
+        border: 2px solid #ff416c;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background: white;
+        color: #1a2a44;
+        cursor: pointer;
+        outline: none;
+        width: 200px;
+        text-align: center;
+    }
+    .language-selector-home select:hover {
+        background: #fff5f7;
     }
     .language-selector-compact {
         background: white;
@@ -1080,35 +1113,13 @@ const styles = `
         color: #1a2a44;
         font-weight: 600;
     }
-    .lang-btn {
-        background: white;
-        border: 2px solid #ff416c;
-        color: #1a2a44;
-        padding: 8px 12px;
-        border-radius: 30px;
-        font-size: 0.9rem;
+    .btn-pink, .btn-dark {
+        padding: 20px 25px;
+        border-radius: 60px;
+        font-size: 1.3rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .lang-btn:hover {
-        background: #ff416c;
-        color: white;
-        transform: translateY(-2px);
-    }
-    .lang-btn.active {
-        background: #ff416c;
-        color: white;
-    }
-    .btn-pink, .btn-dark { 
-        padding: 20px 25px; 
-        border-radius: 60px; 
-        font-size: 1.3rem; 
-        font-weight: 600;
-        width: 90%; 
-        margin: 15px auto; 
+        width: 90%;
+        margin: 15px auto;
         display: block;
         text-align: center;
         text-decoration: none;
@@ -1116,24 +1127,24 @@ const styles = `
         cursor: pointer;
         transition: all 0.3s;
     }
-    .btn-pink { 
-        background: #ff416c; 
-        color: white; 
+    .btn-pink {
+        background: #ff416c;
+        color: white;
         box-shadow: 0 10px 20px rgba(255,65,108,0.3);
     }
-    .btn-dark { 
-        background: #1a2a44; 
-        color: white; 
+    .btn-dark {
+        background: #1a2a44;
+        color: white;
         box-shadow: 0 10px 20px rgba(26,42,68,0.3);
     }
     .btn-pink:hover, .btn-dark:hover {
         transform: translateY(-3px);
         box-shadow: 0 15px 30px rgba(255,65,108,0.4);
     }
-    .btn-action { 
-        padding: 15px 20px; 
-        font-size: 1.1rem; 
-        font-weight: 600; 
+    .btn-action {
+        padding: 15px 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
         border-radius: 30px;
         border: none;
         cursor: pointer;
@@ -1147,14 +1158,14 @@ const styles = `
     .btn-details { background: #1a2a44; color: white; }
     .btn-block { background: #dc3545; color: white; }
     .btn-unblock { background: #4CAF50; color: white; }
-    .input-box { 
-        width: 100%; 
-        padding: 18px; 
-        border: 2px solid #e2e8f0; 
-        border-radius: 15px; 
-        margin: 12px 0; 
-        font-size: 1.2rem; 
-        background: #f8f9fa; 
+    .input-box {
+        width: 100%;
+        padding: 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        margin: 12px 0;
+        font-size: 1.2rem;
+        background: #f8f9fa;
         transition: all 0.3s;
     }
     .input-box:focus {
@@ -1170,22 +1181,22 @@ const styles = `
         margin-bottom: -5px;
         font-weight: 600;
     }
-    .photo-circle { 
-        width: 160px; 
-        height: 160px; 
-        border: 4px solid #ff416c; 
-        border-radius: 50%; 
-        margin: 20px auto; 
-        background-size: cover; 
-        background-position: center; 
+    .photo-circle {
+        width: 160px;
+        height: 160px;
+        border: 4px solid #ff416c;
+        border-radius: 50%;
+        margin: 20px auto;
+        background-size: cover;
+        background-position: center;
         box-shadow: 0 10px 25px rgba(255,65,108,0.3);
     }
-    .match-card, .inbox-item, .st-group { 
-        background: white; 
-        border-radius: 25px; 
-        margin: 15px 0; 
-        padding: 20px; 
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+    .match-card, .inbox-item, .st-group {
+        background: white;
+        border-radius: 25px;
+        margin: 15px 0;
+        padding: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         font-size: 1.2rem;
     }
     .match-card {
@@ -1209,12 +1220,12 @@ const styles = `
     .match-actions .btn-action {
         flex: 1;
     }
-    .match-photo-blur { 
-        width: 70px; 
-        height: 70px; 
-        border-radius: 50%; 
-        background: #f0f0f0; 
-        filter: blur(5px); 
+    .match-photo-blur {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: #f0f0f0;
+        filter: blur(5px);
         flex-shrink: 0;
     }
     .inbox-item {
@@ -1266,12 +1277,12 @@ const styles = `
         margin-left: 5px;
         padding: 0 4px;
     }
-    .st-item { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        padding: 18px 20px; 
-        border-bottom: 1px solid #f0f0f0; 
+    .st-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 20px;
+        border-bottom: 1px solid #f0f0f0;
         font-size: 1.2rem;
     }
     .st-item:last-child { border-bottom: none; }
@@ -1317,48 +1328,60 @@ const styles = `
         background: rgba(255,65,108,0.1);
         border-radius: 40px;
     }
-    .chat-header { 
-        background: #1a2a44; 
-        color: white; 
-        padding: 18px 20px; 
+    /* Styles améliorés pour le chat (comme WhatsApp) */
+    .chat-header {
+        background: #1a2a44;
+        color: white;
+        padding: 18px 20px;
         font-size: 1.3rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
-    .chat-messages { 
+    .chat-messages {
         flex: 1;
-        padding: 20px; 
-        background: #f5f7fb; 
+        padding: 20px;
+        background: #e5ded8;
         min-height: 60vh;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        overflow-y: auto;
+        max-height: calc(100vh - 140px);
     }
-    .bubble { 
-        padding: 16px 22px; 
-        border-radius: 25px; 
-        max-width: 80%; 
-        font-size: 1.2rem; 
-        line-height: 1.5; 
+    .bubble {
+        padding: 12px 18px;
+        border-radius: 20px;
+        max-width: 80%;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        word-wrap: break-word;
     }
-    .received { 
-        background: white; 
-        align-self: flex-start; 
+    .received {
+        background: white;
+        align-self: flex-start;
         border-bottom-left-radius: 5px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
-    .sent { 
-        background: #ff416c; 
-        color: white; 
-        align-self: flex-end; 
+    .sent {
+        background: #dcf8c6;
+        color: #1a2a44;
+        align-self: flex-end;
         border-bottom-right-radius: 5px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
-    .input-area { 
-        padding: 15px 20px; 
-        background: white; 
-        border-top: 2px solid #eee; 
+    .input-area {
+        padding: 15px 20px;
+        background: white;
+        border-top: 2px solid #eee;
         display: flex;
         gap: 12px;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
     }
     .input-area input {
         flex: 1;
@@ -1380,6 +1403,10 @@ const styles = `
         border: none;
         cursor: pointer;
     }
+    .input-area button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
     .empty-message {
         text-align: center;
         padding: 50px 20px;
@@ -1399,24 +1426,24 @@ const styles = `
         background: #fff5f5;
         margin-top: 30px;
     }
-    #genlove-notify { 
-        position: fixed; 
-        top: -100px; 
-        left: 50%; 
+    #genlove-notify {
+        position: fixed;
+        top: -100px;
+        left: 50%;
         transform: translateX(-50%);
         width: 90%;
         max-width: 380px;
-        background: #1a2a44; 
-        color: white; 
-        padding: 18px 25px; 
-        border-radius: 60px; 
-        display: flex; 
-        align-items: center; 
-        gap: 12px; 
-        transition: 0.5s; 
-        z-index: 9999; 
-        box-shadow: 0 15px 30px rgba(0,0,0,0.3); 
-        border-left: 5px solid #ff416c; 
+        background: #1a2a44;
+        color: white;
+        padding: 18px 25px;
+        border-radius: 60px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: 0.5s;
+        z-index: 9999;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        border-left: 5px solid #ff416c;
         font-size: 1.1rem;
     }
     #genlove-notify.show { top: 20px; }
@@ -1490,57 +1517,28 @@ const styles = `
         font-size: 1.2rem;
         line-height: 1.6;
         margin-bottom: 25px;
-        padding: 0 10px;
     }
-    .popup-buttons {
+    .popup-buttons, .action-buttons {
         display: flex;
         gap: 15px;
-        margin: 20px 0;
+        justify-content: center;
+        margin-top: 10px;
     }
-    .popup-buttons button {
+    .popup-buttons button, .action-buttons button, .confirm-btn, .cancel-btn {
+        padding: 15px 25px;
+        border-radius: 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
         flex: 1;
-        padding: 15px;
-        border: none;
-        border-radius: 50px;
-        font-weight: bold;
-        cursor: pointer;
         transition: all 0.3s;
     }
-    .accept-btn {
-        background: #ff416c;
-        color: white;
-    }
-    .reject-btn {
-        background: #1a2a44;
-        color: white;
-    }
-    .confirm-btn {
-        background: #ff416c;
-        color: white;
-    }
-    .cancel-btn {
-        background: #1a2a44;
-        color: white;
-    }
-    .ok-btn {
-        background: #ff416c;
-        color: white;
-        padding: 15px 30px;
-        border: none;
-        border-radius: 50px;
-        font-weight: bold;
-        cursor: pointer;
-        width: 100%;
-        transition: all 0.3s;
-    }
-    .ok-btn:hover {
+    .accept-btn, .confirm-btn { background: #4CAF50; color: white; }
+    .reject-btn, .cancel-btn { background: #dc3545; color: white; }
+    .accept-btn:hover, .reject-btn:hover, .confirm-btn:hover, .cancel-btn:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(255,65,108,0.3);
-    }
-    .action-buttons {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
     .spinner {
         width: 50px;
@@ -1729,7 +1727,7 @@ app.get('/lang/:lang', async (req, res) => {
 // ROUTES PRINCIPALES
 // ============================================
 
-// ACCUEIL
+// ACCUEIL (avec sélecteur de langue compact)
 app.get('/', (req, res) => {
     const t = req.t;
     const currentLang = req.lang;
@@ -1746,12 +1744,14 @@ app.get('/', (req, res) => {
     <div class="app-shell">
         <div class="home-screen">
             <div class="language-selector-home">
-                <a href="/lang/fr" class="lang-btn ${currentLang === 'fr' ? 'active' : ''}">🇫🇷 ${t('french')}</a>
-                <a href="/lang/en" class="lang-btn ${currentLang === 'en' ? 'active' : ''}">🇬🇧 ${t('english')}</a>
-                <a href="/lang/pt" class="lang-btn ${currentLang === 'pt' ? 'active' : ''}">🇵🇹 ${t('portuguese')}</a>
-                <a href="/lang/es" class="lang-btn ${currentLang === 'es' ? 'active' : ''}">🇪🇸 ${t('spanish')}</a>
-                <a href="/lang/ar" class="lang-btn ${currentLang === 'ar' ? 'active' : ''}">🇸🇦 ${t('arabic')}</a>
-                <a href="/lang/zh" class="lang-btn ${currentLang === 'zh' ? 'active' : ''}">🇨🇳 ${t('chinese')}</a>
+                <select onchange="window.location.href='/lang/'+this.value">
+                    <option value="fr" ${currentLang === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
+                    <option value="en" ${currentLang === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
+                    <option value="pt" ${currentLang === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
+                    <option value="es" ${currentLang === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
+                    <option value="ar" ${currentLang === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
+                    <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
+                </select>
             </div>
             <div class="logo-text">
                 <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
@@ -1795,7 +1795,7 @@ app.get('/login', (req, res) => {
         document.getElementById("loginForm").addEventListener("submit", async function(e){
             e.preventDefault();
             const firstName = document.getElementById("firstName").value;
-            const res = await fetch("/api/login", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({firstName}) });
+            const res = await fetch("/api/login", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ firstName }) });
             if(res.ok) window.location.href = "/profile";
             else alert("${t('nameNotFound')}");
         });
@@ -1804,7 +1804,7 @@ app.get('/login', (req, res) => {
 </html>`);
 });
 
-// CHARTE
+// CHARTER
 app.get('/charte-engagement', (req, res) => {
     const t = req.t;
     res.send(`<!DOCTYPE html>
@@ -1894,11 +1894,11 @@ app.get('/signup', (req, res) => {
                 <input type="text" name="lastName" class="input-box" placeholder="${t('lastName')}" required>
                 <div class="input-label">${t('gender')}</div>
                 <select name="gender" class="input-box" required>
-                    <option value="">${t('gender')}</option>
+                    <option value=""></option>
                     <option value="Homme">${t('male')}</option>
                     <option value="Femme">${t('female')}</option>
                 </select>
-                <div class="input-label">${t('dob')} (${t('dobPlaceholder')})</div>
+                <div class="input-label">${t('dob')}</div>
                 ${datePicker}
                 <div class="input-label">${t('city')}</div>
                 <input type="text" name="residence" class="input-box" placeholder="${t('city')}" required>
@@ -1943,13 +1943,13 @@ app.get('/signup', (req, res) => {
                 alert("${t('dob')} ${t('required')}");
                 return;
             }
-            const dob = year + '-' + month.padStart(2,'0') + '-' + day.padStart(2,'0');
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
             data.dob = dob;
             const res = await fetch("/api/register", {
                 method: "POST",
-                headers: {"Content-Type":"application/json"},
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(data)
             });
             if(res.ok) window.location.href = "/sas-validation";
@@ -1961,8 +1961,8 @@ app.get('/signup', (req, res) => {
 });
 
 // SAS DE VALIDATION
-app.get('/sas-validation', async (req, res) => {
-    if (!req.session.userId) return res.redirect('/');
+app.get("/sas-validation", requireAuth, async (req, res) => {
+    if (!req.session.userId) return res.redirect("/");
     const t = req.t;
     res.send(`<!DOCTYPE html>
 <html>
@@ -1978,11 +1978,12 @@ app.get('/sas-validation', async (req, res) => {
         <div class="page-white">
             <div style="font-size:5rem; margin:20px 0;">⚖️</div>
             <h2>${t('honorTitle')}</h2>
-            <div style="background:#fff5f7; border-radius:25px; padding:30px; margin:20px 0; border:2px solid #ffdae0; text-align:left; font-size:1.2rem;">
+            <div style="background:#ffffff; border-radius:25px; padding:30px; margin:20px 0; border:2px solid #ffdae0; text-align:left; font-size:1.2rem;">
                 <p><strong>${t('honorText')}</strong></p>
             </div>
             <label style="display:flex; align-items:center; justify-content:center; gap:15px; padding:20px; background:#f8f9fa; border-radius:15px; margin:20px 0; font-size:1.2rem;">
-                <input type="checkbox" id="honorCheck" style="width:25px; height:25px;"> ${t('swear')}
+                <input type="checkbox" id="honorCheck" style="width:25px; height:25px;">
+                ${t('swear')}
             </label>
             <button id="validateBtn" class="btn-pink" onclick="validateHonor()" disabled>${t('accessProfile')}</button>
         </div>
@@ -2001,19 +2002,18 @@ app.get('/sas-validation', async (req, res) => {
 });
 
 // PROFIL
-app.get('/profile', requireAuth, requireVerified, async (req, res) => {
+app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
-        if (!user) return res.redirect('/');
+        if (!user) return res.redirect("/");
         const t = req.t;
-        const unreadCount = await Message.countDocuments({ 
-            receiverId: user._id, 
+        const unreadCount = await Message.countDocuments({
+            receiverId: user._id,
             read: false,
             hiddenFor: { $ne: user._id }
         });
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
-        const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
-
+        const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : "";
         res.send(`<!DOCTYPE html>
 <html>
 <head>
@@ -2036,11 +2036,10 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 </div>
             </div>
         </div>
-
         <!-- POPUP DE REJET (pour le demandeur) -->
         <div id="rejection-popup">
             <div class="popup-card">
-                <div class="popup-icon">🌸</div>
+                <div class="popup-icon">😔</div>
                 <div class="popup-message" id="rejection-message"></div>
                 <div class="action-buttons">
                     <button class="btn-pink" onclick="goToProfile()" style="flex:1;">${t('returnProfile')}</button>
@@ -2048,16 +2047,14 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 </div>
             </div>
         </div>
-
         <div class="page-white">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <a href="/" class="btn-dark" style="padding:12px 20px;">🏠 ${t('home')}</a>
-                <a href="/inbox" class="btn-pink" style="padding:12px 20px;">📬 ${unreadBadge}</a>
+                <a href="/inbox" class="btn-pink" style="padding:12px 20px;">✉️ ${t('messages')} ${unreadBadge}</a>
                 <a href="/settings" style="font-size:2rem;">⚙️</a>
             </div>
-            
             <div class="language-selector-compact">
-                <span class="language-label">${t('language')} :</span>
+                <span class="language-label">${t('language')}</span>
                 <select onchange="window.location.href='/lang/'+this.value">
                     <option value="fr" ${user.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
                     <option value="en" ${user.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
@@ -2067,23 +2064,20 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                     <option value="zh" ${user.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
                 </select>
             </div>
-            
             <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
             <h2>${user.firstName} ${user.lastName}</h2>
-            <p style="font-size:1.2rem;">📍 ${user.residence || ''} • ${genderDisplay}</p>
+            <p style="font-size:1.2rem;">${user.residence || ''} • ${genderDisplay}</p>
             <div class="st-group">
-                <div class="st-item"><span>🧬 ${t('genotype_label')}</span><b>${user.genotype}</b></div>
-                <div class="st-item"><span>🩸 ${t('blood_label')}</span><b>${user.bloodGroup}</b></div>
-                <div class="st-item"><span>📅 ${t('age_label')}</span><b>${calculerAge(user.dob)} ${t('age_label')}</b></div>
+                <div class="st-item"><span>🧬 ${t('genotype_label')}</span><b>${user.genotype || '?'}</b></div>
+                <div class="st-item"><span>🩸 ${t('blood_label')}</span><b>${user.bloodGroup || '?'}</b></div>
+                <div class="st-item"><span>🎂 ${t('age_label')}</span><b>${calculerAge(user.dob)} ans</b></div>
                 <div class="st-item"><span>👶 ${t('project_label')}</span><b>${user.desireChild === 'Oui' ? t('yes') : t('no')}</b></div>
             </div>
             <a href="/matching" class="btn-pink">${t('findPartner')}</a>
         </div>
     </div>
-
     <script>
         let currentRequestId = null;
-
         async function checkRequests() {
             try {
                 const res = await fetch('/api/requests/pending');
@@ -2093,16 +2087,14 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 }
             } catch(e) {}
         }
-
         function showRequestPopup(r) {
             currentRequestId = r._id;
             const prenom = r.senderId.firstName;
-            const msg = \`${t('interestPopup')}\`.replace('{name}', prenom);
+            const msg = '${t('interestPopup')}'.replace('{name}', prenom);
             document.getElementById('request-message').innerText = msg;
             document.getElementById('request-popup').style.display = 'flex';
             vibrate([200,100,200]);
         }
-
         async function acceptRequest() {
             if (!currentRequestId) return;
             const res = await fetch('/api/requests/' + currentRequestId + '/accept', { method: 'POST' });
@@ -2111,7 +2103,6 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 window.location.href = '/inbox';
             }
         }
-
         async function rejectRequest() {
             if (!currentRequestId) return;
             const res = await fetch('/api/requests/' + currentRequestId + '/reject', { method: 'POST' });
@@ -2119,7 +2110,6 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 document.getElementById('request-popup').style.display = 'none';
             }
         }
-
         async function checkRejections() {
             try {
                 const res = await fetch('/api/rejections/unread');
@@ -2129,25 +2119,21 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
                 }
             } catch(e) {}
         }
-
         function showRejectionPopup(r) {
             const prenom = r.senderFirstName;
-            const msg = \`${t('rejectionPopup')}\`.replace('{name}', prenom);
+            const msg = '${t('rejectionPopup')}'.replace('{name}', prenom);
             document.getElementById('rejection-message').innerText = msg;
             document.getElementById('rejection-popup').style.display = 'flex';
             fetch('/api/rejections/' + r.requestId + '/view', { method: 'POST' });
         }
-
         function goToProfile() {
             document.getElementById('rejection-popup').style.display = 'none';
             window.location.href = '/profile';
         }
-
         function goToMatching() {
             document.getElementById('rejection-popup').style.display = 'none';
             window.location.href = '/matching';
         }
-
         setInterval(checkRequests, 5000);
         setInterval(checkRejections, 5000);
         checkRequests();
@@ -2161,7 +2147,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING
+// MATCHING (avec exclusion bidirectionnelle)
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2176,7 +2162,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             ],
             hiddenFor: { $ne: currentUser._id }
         }).lean();
-        
+
         const conversationIds = new Set();
         conversationMessages.forEach(msg => {
             if (msg.senderId.toString() !== currentUser._id.toString()) conversationIds.add(msg.senderId.toString());
@@ -2184,20 +2170,24 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         });
         const conversationArray = Array.from(conversationIds);
 
+        // 🔥 Exclusion bidirectionnelle : ceux que j'ai bloqués ET ceux qui m'ont bloqué
         const rejectedArray = currentUser.rejectedRequests ? currentUser.rejectedRequests.map(id => id.toString()) : [];
-        const blockedArray = currentUser.blockedUsers ? currentUser.blockedUsers.map(id => id.toString()) : [];
-        const excludedIds = [...new Set([...blockedArray, ...conversationArray, ...rejectedArray])];
+        const blockedByMe = currentUser.blockedUsers ? currentUser.blockedUsers.map(id => id.toString()) : [];
+        const blockedMe = await User.find({ blockedBy: currentUser._id }).distinct('_id');
+        const blockedMeArray = blockedMe.map(id => id.toString());
+
+        const excludedIds = [...new Set([
+            ...blockedByMe,
+            ...blockedMeArray,
+            ...conversationArray,
+            ...rejectedArray
+        ])];
 
         let query = { _id: { $ne: currentUser._id } };
         if (excludedIds.length > 0) query._id.$nin = excludedIds;
-
+        
         if (currentUser.gender === 'Homme') query.gender = 'Femme';
         else if (currentUser.gender === 'Femme') query.gender = 'Homme';
-
-        const blockedByOthers = await User.find({ blockedBy: currentUser._id }).distinct('_id');
-        if (blockedByOthers.length) {
-            query._id.$nin = query._id.$nin ? [...query._id.$nin, ...blockedByOthers.map(id => id.toString())] : blockedByOthers.map(id => id.toString());
-        }
 
         let partners = await User.find(query);
         
@@ -2220,11 +2210,23 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                         </div>
                     </div>
                     <div class="match-actions">
-                        <button class="btn-action btn-contact small" onclick="sendInterest('${p._id}', '${p.firstName}')">💬 ${t('contact')}</button>
+                        <button class="btn-action btn-contact small" onclick="sendInterest('${p._id}', '${p.firstName}')">${t('contact')}</button>
                     </div>
                 </div>`;
             });
         }
+
+        const ssasPopup = currentUser.genotype === 'AS' || currentUser.genotype === 'SS' ? `
+        <div id="genlove-popup">
+            <div class="popup-card">
+                <div class="popup-icon">💚</div>
+                <div class="popup-title">${t('healthCommitment')}</div>
+                <div class="popup-message">
+                    ${currentUser.genotype === 'AS' ? t('popupMessageAS') : t('popupMessageSS')}
+                </div>
+                <button class="btn-pink" onclick="document.getElementById('genlove-popup').style.display='none';">${t('understood')}</button>
+            </div>
+        </div>` : '';
 
         const loadingPopup = `
         <div id="loading-popup">
@@ -2232,21 +2234,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                 <div class="spinner"></div>
                 <div class="popup-message" id="loading-message">${t('sendingRequest')}</div>
             </div>
-        </div>
-        `;
-
-        const ssasPopup = isSSorAS ? `
-        <div id="genlove-popup" style="display:flex;">
-            <div class="popup-card">
-                <div class="popup-icon">🛡️</div>
-                <div class="popup-title">${t('healthCommitment')}</div>
-                <div class="popup-message">
-                    ${currentUser.genotype === 'AS' ? t('popupMessageAS') : t('popupMessageSS')}
-                </div>
-                <button class="btn-pink" onclick="document.getElementById('genlove-popup').style.display='none';">${t('understood')}</button>
-            </div>
-        </div>
-        ` : '';
+        </div>`;
 
         res.send(`<!DOCTYPE html>
 <html>
@@ -2256,10 +2244,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     <title>${t('appName')} - ${t('compatiblePartners')}</title>
     ${styles}
     ${notifyScript}
-    <style>
-        #genlove-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px; }
-        #loading-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:20000; align-items:center; justify-content:center; padding:20px; }
-    </style>
 </head>
 <body>
     <div class="app-shell">
@@ -2274,12 +2258,11 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             </div>
         </div>
     </div>
-
     <script>
         function sendInterest(receiverId, receiverName) {
             document.getElementById('loading-popup').style.display = 'flex';
             document.getElementById('loading-message').innerText = '${t('sendingRequest')}';
-            
+
             setTimeout(() => {
                 fetch('/api/requests', {
                     method: 'POST',
@@ -2289,7 +2272,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('loading-message').innerText = '${t('requestSent')}';
-                    
+
                     setTimeout(() => {
                         document.getElementById('loading-popup').style.display = 'none';
                         if (data.success) {
@@ -2367,6 +2350,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('inboxTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2387,7 +2371,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// CHAT AVEC BLOCAGE INTELLIGENT
+// CHAT AVEC BLOCAGE BIDIRECTIONNEL
 app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2397,13 +2381,13 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         if (!partner) return res.redirect('/inbox');
         const t = req.t;
 
-        const isBlockedByPartner = partner.blockedBy && partner.blockedBy.includes(currentUser._id);
-        const hasBlockedPartner = currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId);
+        const isBlockedByPartner = partner.blockedBy && partner.blockedBy.some(id => id.toString() === currentUser._id.toString());
+        const hasBlockedPartner = currentUser.blockedUsers && currentUser.blockedUsers.some(id => id.toString() === partnerId);
 
         if (isBlockedByPartner) {
             return res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Bloqué</title>${styles}${notifyScript}</head>
-<body><div class="app-shell"><div class="page-white"><h2>${t('blockedByUser')}</h2><p>${t('blockedMessage')}</p><a href="/inbox" class="btn-pink">Retour</a></div></div></body></html>`);
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"><title>Bloqué</title>${styles}</head>
+<body><div class="app-shell"><div class="page-white"><h2>🚫 ${t('blockedByUser')}</h2><p>${t('blockedMessage')}</p><a href="/inbox" class="btn-pink">Retour</a></div></div></body></html>`);
         }
 
         await Message.updateMany(
@@ -2419,28 +2403,27 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
             hiddenFor: { $ne: currentUser._id }
         }).sort({ timestamp: 1 });
 
-        let msgs = '';
+        let msgs = "";
         messages.forEach(m => {
             const cls = m.senderId.equals(currentUser._id) ? 'sent' : 'received';
             msgs += `<div class="bubble ${cls}">${m.text}</div>`;
         });
 
-        const blockButton = hasBlockedPartner 
+        const blockButton = hasBlockedPartner
             ? `<button class="btn-action btn-unblock" onclick="unblockUser('${partnerId}')">${t('unblock')}</button>`
             : `<button class="btn-action btn-block" onclick="blockUser('${partnerId}')">${t('block')}</button>`;
 
         const blockPopup = `
         <div id="block-popup">
             <div class="popup-card">
-                <div class="popup-icon">🚫</div>
+                <div class="popup-icon">⚠️</div>
                 <div class="popup-message" id="block-message"></div>
                 <div class="popup-buttons">
                     <button class="confirm-btn" id="confirm-block">Confirmer</button>
                     <button class="cancel-btn" onclick="closeBlockPopup()">Annuler</button>
                 </div>
             </div>
-        </div>
-        `;
+        </div>`;
 
         res.send(`<!DOCTYPE html>
 <html>
@@ -2448,11 +2431,6 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - Chat</title>
-    <style>
-        .bubble { padding:10px; margin:5px; border-radius:10px; max-width:80%; }
-        .sent { background:#ff416c; color:white; margin-left:auto; }
-        .received { background:white; }
-    </style>
     ${styles}
     ${notifyScript}
 </head>
@@ -2462,7 +2440,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         <div class="chat-header">
             <span><b>${partner.firstName}</b></span>
             ${blockButton}
-            <button onclick="window.location.href='/inbox'" style="background:none; border:none; color:white; font-size:1.5rem;">❌</button>
+            <button onclick="window.location.href='/inbox'" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
         </div>
         <div class="chat-messages" id="messages">
             ${msgs}
@@ -2480,13 +2458,13 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
             document.getElementById('block-popup').style.display = 'flex';
             pendingAction = () => {
                 fetch('/api/block/' + id, { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotify('${t('blockSuccess')}', 'info');
-                        setTimeout(() => location.reload(), 1500);
-                    }
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotify('${t('blockSuccess')}', 'info');
+                            setTimeout(() => location.reload(), 1500);
+                        }
+                    });
             };
         }
 
@@ -2495,13 +2473,13 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
             document.getElementById('block-popup').style.display = 'flex';
             pendingAction = () => {
                 fetch('/api/unblock/' + id, { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotify('${t('unblockSuccess')}', 'success');
-                        setTimeout(() => location.reload(), 1500);
-                    }
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotify('${t('unblockSuccess')}', 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        }
+                    });
             };
         }
 
@@ -2537,7 +2515,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// PARAMÈTRES
+// PARAMETRES
 app.get('/settings', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2631,8 +2609,8 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
                 <input type="text" name="lastName" class="input-box" value="${user.lastName}" required>
                 <div class="input-label">${t('gender')}</div>
                 <select name="gender" class="input-box">
-                    <option value="Homme" ${user.gender==='Homme'?'selected':''}>${t('male')}</option>
-                    <option value="Femme" ${user.gender==='Femme'?'selected':''}>${t('female')}</option>
+                    <option value="Homme" ${user.gender === 'Homme'?'selected':''}>${t('male')}</option>
+                    <option value="Femme" ${user.gender === 'Femme'?'selected':''}>${t('female')}</option>
                 </select>
                 <div class="input-label">${t('dob')}</div>
                 ${datePicker}
@@ -2640,16 +2618,16 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
                 <input type="text" name="residence" class="input-box" value="${user.residence}" required>
                 <div class="input-label">${t('genotype')}</div>
                 <select name="genotype" class="input-box">
-                    <option value="AA" ${user.genotype==='AA'?'selected':''}>AA</option>
-                    <option value="AS" ${user.genotype==='AS'?'selected':''}>AS</option>
-                    <option value="SS" ${user.genotype==='SS'?'selected':''}>SS</option>
+                    <option value="AA" ${user.genotype === 'AA'?'selected':''}>AA</option>
+                    <option value="AS" ${user.genotype === 'AS'?'selected':''}>AS</option>
+                    <option value="SS" ${user.genotype === 'SS'?'selected':''}>SS</option>
                 </select>
                 <div class="input-label">${t('bloodGroup')}</div>
                 <select name="bloodGroup" class="input-box">${bloodOptions}</select>
                 <div class="input-label">${t('desireChild')}</div>
                 <select name="desireChild" class="input-box">
-                    <option value="Oui" ${user.desireChild==='Oui'?'selected':''}>${t('yes')}</option>
-                    <option value="Non" ${user.desireChild==='Non'?'selected':''}>${t('no')}</option>
+                    <option value="Oui" ${user.desireChild === 'Oui'?'selected':''}>${t('yes')}</option>
+                    <option value="Non" ${user.desireChild === 'Non'?'selected':''}>${t('no')}</option>
                 </select>
                 <button type="submit" class="btn-pink">${t('editProfile')}</button>
             </form>
@@ -2663,7 +2641,7 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
             const month = document.querySelector('select[name="month"]').value;
             const year = document.querySelector('select[name="year"]').value;
             if (!day || !month || !year) { alert("${t('dob')} ${t('required')}"); return; }
-            const dob = year + '-' + month.padStart(2,'0') + '-' + day.padStart(2,'0');
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
             data.dob = dob;
@@ -2672,15 +2650,14 @@ app.get('/edit-profile', requireAuth, requireVerified, async (req, res) => {
                 headers:{"Content-Type":"application/json"},
                 body:JSON.stringify(data)
             });
-            if(res.ok) window.location.href = "/profile";
-            else alert("Erreur");
+            if(res.ok) window.location.href = "/profile"; else alert("Erreur");
         });
     </script>
 </body>
 </html>`);
     } catch(error) {
         console.error(error);
-        res.status(500).send('Erreur édition');
+        res.status(500).send('Erreur edition');
     }
 });
 
@@ -2713,7 +2690,7 @@ app.get('/blocked-list', requireAuth, requireVerified, async (req, res) => {
         <div class="page-white">
             <h2>${t('blockedUsers')}</h2>
             ${blockedHTML}
-            <a href="/settings" class="back-link">← ${t('backHome')}</a>
+            <a href="/settings" class="back-link">← ${t('backProfile')}</a>
         </div>
     </div>
     <script>
@@ -2774,9 +2751,9 @@ app.get('/logout-success', (req, res) => {
 </html>`);
 });
 
-// ============================================
-// ROUTES API
-// ============================================
+// ==============================================
+// ROUTES API (AVEC BLOCAGE BIDIRECTIONNEL)
+// ==============================================
 
 app.post('/api/login', async (req, res) => {
     try {
@@ -2818,7 +2795,6 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
 app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     try {
         const { receiverId } = req.body;
-        
         const receiver = await User.findById(receiverId);
         if (!receiver) {
             return res.status(404).json({ error: "Destinataire non trouvé" });
@@ -2829,7 +2805,6 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             receiverId,
             status: 'pending'
         });
-
         if (existingRequest) {
             return res.status(400).json({ error: "Demande déjà envoyée" });
         }
@@ -2852,10 +2827,9 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             status: 'pending'
         });
         await request.save();
-
         res.json({ success: true });
     } catch(e) {
-        console.error("❌ Erreur dans /api/requests:", e);
+        console.error("❌ Error dans /api/requests:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2867,10 +2841,9 @@ app.get('/api/requests/pending', requireAuth, requireVerified, async (req, res) 
             status: 'pending',
             viewed: false
         }).populate('senderId', 'firstName');
-        
         res.json(requests);
     } catch(e) {
-        console.error("❌ Erreur dans /api/requests/pending:", e);
+        console.error("❌ Error dans /api/requests/pending:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2896,7 +2869,7 @@ app.post('/api/requests/:id/accept', requireAuth, requireVerified, async (req, r
 
         res.json({ success: true });
     } catch(e) {
-        console.error("❌ Erreur dans accept:", e);
+        console.error("❌ Error dans accept:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2917,7 +2890,7 @@ app.post('/api/requests/:id/reject', requireAuth, requireVerified, async (req, r
 
         res.json({ success: true });
     } catch(e) {
-        console.error("❌ Erreur dans reject:", e);
+        console.error("❌ Error dans reject:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2929,15 +2902,14 @@ app.get('/api/rejections/unread', requireAuth, requireVerified, async (req, res)
             status: 'rejected',
             viewed: false
         }).populate('receiverId', 'firstName');
-        
+
         const result = requests.map(r => ({
             requestId: r._id,
             senderFirstName: r.receiverId.firstName
         }));
-        
         res.json(result);
     } catch(e) {
-        console.error("❌ Erreur dans /api/rejections/unread:", e);
+        console.error("❌ Error dans /api/rejections/unread:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2947,7 +2919,7 @@ app.post('/api/rejections/:id/view', requireAuth, requireVerified, async (req, r
         await Request.findByIdAndUpdate(req.params.id, { viewed: true });
         res.json({ success: true });
     } catch(e) {
-        console.error("❌ Erreur dans /api/rejections/view:", e);
+        console.error("❌ Error dans /api/rejections/view:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2955,9 +2927,8 @@ app.post('/api/rejections/:id/view', requireAuth, requireVerified, async (req, r
 app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     try {
         const { receiverId, text } = req.body;
-        
         const receiver = await User.findById(receiverId);
-        if (receiver.blockedBy && receiver.blockedBy.includes(req.session.userId)) {
+        if (receiver.blockedBy && receiver.blockedBy.some(id => id.toString() === req.session.userId)) {
             return res.status(403).json({ error: "Vous êtes bloqué par cet utilisateur" });
         }
 
@@ -2971,11 +2942,12 @@ app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
         await msg.save();
         res.json(msg);
     } catch(e) {
-        console.error("❌ Erreur dans /api/messages:", e);
+        console.error("❌ Error dans /api/messages:", e);
         res.status(500).json({ error: e.message });
     }
 });
 
+// 🔥 BLOCAGE BIDIRECTIONNEL : messages cachés des deux côtés
 app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
@@ -2983,19 +2955,21 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
 
         const current = await User.findById(currentUserId);
         const target = await User.findById(targetUserId);
-        
+
         if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
+        // Blocage mutuel
         if (!current.blockedUsers) current.blockedUsers = [];
         if (!current.blockedUsers.includes(targetUserId)) {
             current.blockedUsers.push(targetUserId);
         }
-        
+
         if (!target.blockedBy) target.blockedBy = [];
         if (!target.blockedBy.includes(currentUserId)) {
             target.blockedBy.push(currentUserId);
         }
 
+        // Masquer les messages pour LES DEUX utilisateurs
         await Message.updateMany(
             {
                 $or: [
@@ -3004,7 +2978,11 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
                 ]
             },
             {
-                $addToSet: { hiddenFor: currentUserId }
+                $addToSet: { 
+                    hiddenFor: { 
+                        $each: [currentUserId, targetUserId] // 👈 Les DEUX côtés
+                    } 
+                }
             }
         );
 
@@ -3013,11 +2991,12 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
 
         res.json({ success: true });
     } catch(e) {
-        console.error("❌ Erreur dans /api/block:", e);
+        console.error("❌ Error dans /api/block:", e);
         res.status(500).json({ error: e.message });
     }
 });
 
+// 🔥 DÉBLOCAGE BIDIRECTIONNEL : messages réapparaissent des deux côtés
 app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
@@ -3025,17 +3004,19 @@ app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) 
 
         const current = await User.findById(currentUserId);
         const target = await User.findById(targetUserId);
-        
+
         if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
+        // Déblocage mutuel
         if (current.blockedUsers) {
             current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== targetUserId);
         }
-        
+
         if (target.blockedBy) {
             target.blockedBy = target.blockedBy.filter(id => id.toString() !== currentUserId);
         }
 
+        // Réafficher les messages pour LES DEUX utilisateurs
         await Message.updateMany(
             {
                 $or: [
@@ -3044,7 +3025,11 @@ app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) 
                 ]
             },
             {
-                $pull: { hiddenFor: currentUserId }
+                $pull: { 
+                    hiddenFor: { 
+                        $in: [currentUserId, targetUserId] // 👈 Retirer LES DEUX
+                    } 
+                }
             }
         );
 
@@ -3053,7 +3038,7 @@ app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) 
 
         res.json({ success: true });
     } catch(e) {
-        console.error("❌ Erreur dans /api/unblock:", e);
+        console.error("❌ Error dans /api/unblock:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -3092,6 +3077,7 @@ app.use((req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>404 - ${t('appName')}</title>
     ${styles}
     ${notifyScript}
@@ -3107,12 +3093,12 @@ app.use((req, res) => {
 });
 
 app.listen(port, '0.0.0.0', () => {
-    console.log('🚀 Genlove démarré sur http://localhost:' + port);
+    console.log('✅ Genlove démarré sur http://localhost:' + port);
 });
 
 process.on('SIGINT', () => {
     mongoose.connection.close(() => {
-        console.log('✅ Déconnexion MongoDB');
+        console.log('🔌 Déconnexion MongoDB');
         process.exit(0);
     });
 });
