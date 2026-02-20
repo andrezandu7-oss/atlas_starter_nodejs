@@ -97,7 +97,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ============================================
-// SYSTÈME DE TRADUCTION MULTILINGUE (6 langues)
+// SYSTÈME DE TRADUCTION MULTILINGUE COMPLET (6 langues)
 // ============================================
 const translations = {
     fr: {
@@ -173,8 +173,8 @@ const translations = {
         backProfile: '← Mon profil',
         toMessages: 'Messages →',
         healthCommitment: '🛡️ Votre engagement santé',
-        popupMessageAS: '"En tant que profil AS, nous ne vous présentons que des partenaires AA.<br><br>Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑"',
-        popupMessageSS: '"En tant que profil SS, nous ne vous présentons que des partenaires AA.<br><br>Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑"',
+        popupMessageAS: 'En tant que profil AS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑',
+        popupMessageSS: 'En tant que profil SS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable. 💑',
         understood: 'J\'ai compris',
         inboxTitle: 'Boîte de réception',
         emptyInbox: '📭 Boîte vide',
@@ -213,12 +213,10 @@ const translations = {
         residence_label: 'Résidence',
         project_life: 'Projet de vie',
         newRequest: 'Nouvelle demande',
-        interested: 's\'intéresse à votre profil.',
         whatToDo: 'Que souhaitez-vous faire ?',
         openChat: 'Ouvrir la discussion',
         ignore: 'Ignorer',
         willBeInformed: 'sera informé(e) de votre choix.',
-        requestAccepted: 'Votre demande a été acceptée ! Vous pouvez maintenant échanger avec cette personne.',
         requestRejected: '🌸 Merci pour votre message. Cette personne préfère ne pas donner suite pour le moment. Continuez votre chemin, la bonne personne vous attend ailleurs.',
         day: 'Jour',
         month: 'Mois',
@@ -314,8 +312,8 @@ const translations = {
         backProfile: '← My profile',
         toMessages: 'Messages →',
         healthCommitment: '🛡️ Your health commitment',
-        popupMessageAS: '"As an AS profile, we only show you AA partners.<br><br>This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑"',
-        popupMessageSS: '"As an SS profile, we only show you AA partners.<br><br>This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑"',
+        popupMessageAS: 'As an AS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑',
+        popupMessageSS: 'As an SS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together. 💑',
         understood: 'I understand',
         inboxTitle: 'Inbox',
         emptyInbox: '📭 Empty inbox',
@@ -354,12 +352,10 @@ const translations = {
         residence_label: 'Residence',
         project_life: 'Life project',
         newRequest: 'New request',
-        interested: 'is interested in your profile.',
         whatToDo: 'What would you like to do?',
         openChat: 'Open chat',
         ignore: 'Ignore',
         willBeInformed: 'will be informed of your choice.',
-        requestAccepted: 'Your request has been accepted! You can now chat with this person.',
         requestRejected: '🌸 Thank you for your message. This person prefers not to respond at this time. Continue your journey, the right person is waiting for you elsewhere.',
         day: 'Day',
         month: 'Month',
@@ -455,8 +451,8 @@ const translations = {
         backProfile: '← Meu perfil',
         toMessages: 'Mensagens →',
         healthCommitment: '🛡️ Seu compromisso com a saúde',
-        popupMessageAS: '"Como perfil AS, mostramos apenas parceiros AA.<br><br>Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑"',
-        popupMessageSS: '"Como perfil SS, mostramos apenas parceiros AA.<br><br>Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑"',
+        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑',
+        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑',
         understood: 'Entendi',
         inboxTitle: 'Caixa de entrada',
         emptyInbox: '📭 Caixa vazia',
@@ -495,12 +491,10 @@ const translations = {
         residence_label: 'Residência',
         project_life: 'Projeto de vida',
         newRequest: 'Nova solicitação',
-        interested: 'está interessado(a) no seu perfil.',
         whatToDo: 'O que você deseja fazer?',
         openChat: 'Abrir chat',
         ignore: 'Ignorar',
         willBeInformed: 'será informado(a) da sua escolha.',
-        requestAccepted: 'Sua solicitação foi aceita! Agora você pode conversar com esta pessoa.',
         requestRejected: '🌸 Obrigado pela sua mensagem. Esta pessoa prefere não responder no momento. Continue seu caminho, a pessoa certa está esperando por você em outro lugar.',
         day: 'Dia',
         month: 'Mês',
@@ -596,8 +590,8 @@ const translations = {
         backProfile: '← Mi perfil',
         toMessages: 'Mensajes →',
         healthCommitment: '🛡️ Su compromiso con la salud',
-        popupMessageAS: '"Como perfil AS, solo le mostramos parejas AA.<br><br>Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑"',
-        popupMessageSS: '"Como perfil SS, solo le mostramos parejas AA.<br><br>Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑"',
+        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑',
+        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑',
         understood: 'Entiendo',
         inboxTitle: 'Bandeja de entrada',
         emptyInbox: '📭 Bandeja vacía',
@@ -636,12 +630,10 @@ const translations = {
         residence_label: 'Residencia',
         project_life: 'Proyecto de vida',
         newRequest: 'Nueva solicitud',
-        interested: 'está interesado(a) en tu perfil.',
         whatToDo: '¿Qué deseas hacer?',
         openChat: 'Abrir chat',
         ignore: 'Ignorar',
         willBeInformed: 'será informado(a) de tu elección.',
-        requestAccepted: '¡Tu solicitud ha sido aceptada! Ahora puedes conversar con esta persona.',
         requestRejected: '🌸 Gracias por tu mensaje. Esta persona prefiere no responder por ahora. Continúa tu camino, la persona adecuada te espera en otro lugar.',
         day: 'Día',
         month: 'Mes',
@@ -665,7 +657,6 @@ const translations = {
         cancel: 'Cancelar'
     },
     ar: {
-        // (traductions arabes similaires, omises pour la lisibilité mais à inclure)
         appName: 'Genlove',
         slogan: 'وحدوا القلب والصحة لبناء أزواج أصحاء 💑',
         security: '🛡️ بياناتك الصحية مشفرة',
@@ -738,8 +729,8 @@ const translations = {
         backProfile: '← ملفي الشخصي',
         toMessages: 'الرسائل →',
         healthCommitment: '🛡️ التزامك الصحي',
-        popupMessageAS: '"كملف AS، نعرض لك فقط شركاء AA.<br><br>هذا الاختيار المسؤول يضمن سيرينيتي منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑"',
-        popupMessageSS: '"كملف SS، نعرض لك فقط شركاء AA.<br><br>هذا الاختيار المسؤول يضمن سيرينيتي منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑"',
+        popupMessageAS: 'كملف AS، نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑',
+        popupMessageSS: 'كملف SS، نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑',
         understood: 'فهمت',
         inboxTitle: 'صندوق الوارد',
         emptyInbox: '📭 صندوق فارغ',
@@ -778,12 +769,10 @@ const translations = {
         residence_label: 'الإقامة',
         project_life: 'مشروع الحياة',
         newRequest: 'طلب جديد',
-        interested: 'مهتم بملفك الشخصي.',
         whatToDo: 'ماذا تريد أن تفعل؟',
         openChat: 'فتح المحادثة',
         ignore: 'تجاهل',
         willBeInformed: 'سيتم إعلامه باختيارك.',
-        requestAccepted: 'تم قبول طلبك! يمكنك الآن الدردشة مع هذا الشخص.',
         requestRejected: '🌸 شكرًا على رسالتك. هذا الشخص يفضل عدم الرد في الوقت الحالي. استمر في طريقك، الشخص المناسب ينتظرك في مكان آخر.',
         day: 'يوم',
         month: 'شهر',
@@ -807,7 +796,6 @@ const translations = {
         cancel: 'إلغاء'
     },
     zh: {
-        // (traductions chinoises, à compléter)
         appName: 'Genlove',
         slogan: '结合心灵与健康，建立健康的伴侣关系 💑',
         security: '🛡️ 您的健康数据已加密',
@@ -880,8 +868,8 @@ const translations = {
         backProfile: '← 我的个人资料',
         toMessages: '消息 →',
         healthCommitment: '🛡️ 您的健康承诺',
-        popupMessageAS: '"作为AS档案，我们只向您展示AA伴侣。<br><br>这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑"',
-        popupMessageSS: '"作为SS档案，我们只向您展示AA伴侣。<br><br>这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑"',
+        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑',
+        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑',
         understood: '我明白',
         inboxTitle: '收件箱',
         emptyInbox: '📭 空收件箱',
@@ -920,12 +908,10 @@ const translations = {
         residence_label: '居住地',
         project_life: '人生计划',
         newRequest: '新请求',
-        interested: '对你的个人资料感兴趣。',
         whatToDo: '你想做什么？',
         openChat: '打开聊天',
         ignore: '忽略',
         willBeInformed: '将被告知你的选择。',
-        requestAccepted: '你的请求已被接受！你现在可以和这个人聊天了。',
         requestRejected: '🌸 谢谢你的留言。这个人目前不想回应。继续你的旅程，合适的人在别处等你。',
         day: '日',
         month: '月',
@@ -976,7 +962,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============================================
-// STYLES CSS COMPLETS (design original)
+// STYLES CSS COMPLETS (identique à la version précédente)
 // ============================================
 const styles = `
 <style>
@@ -1440,14 +1426,15 @@ const styles = `
         color: #1a2a44;
         margin: 20px 0 10px;
     }
-    #genlove-popup {
+    /* Popups */
+    #genlove-popup, #request-popup, #system-popup, #message-choice-popup {
         display: none;
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0,0,0,0.8);
+        background: rgba(0,0,0,0.9);
         z-index: 10000;
         align-items: center;
         justify-content: center;
@@ -1482,22 +1469,34 @@ const styles = `
         margin-bottom: 25px;
         padding: 0 10px;
     }
-    .popup-button {
+    .popup-button, .popup-buttons button {
         background: #ff416c;
         color: white;
         border: none;
-        padding: 18px 30px;
+        padding: 15px 25px;
         border-radius: 60px;
         font-size: 1.2rem;
         font-weight: bold;
         cursor: pointer;
-        width: 100%;
         transition: all 0.3s;
         box-shadow: 0 10px 20px rgba(255,65,108,0.3);
+        margin: 5px;
     }
-    .popup-button:hover {
+    .popup-button:hover, .popup-buttons button:hover {
         transform: translateY(-3px);
         box-shadow: 0 15px 30px rgba(255,65,108,0.4);
+    }
+    .popup-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .ignore-btn {
+        background: #1a2a44 !important;
+    }
+    .accept-btn {
+        background: #ff416c !important;
     }
     @keyframes popupAppear {
         from {
@@ -1508,19 +1507,6 @@ const styles = `
             opacity: 1;
             transform: translateY(0) scale(1);
         }
-    }
-    #request-popup, #system-popup, #message-choice-popup {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.9);
-        z-index: 10000;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
     }
     .custom-date-picker {
         display: flex;
@@ -1998,7 +1984,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
         <div id="system-popup">
             <div class="popup-card">
                 <div class="popup-icon">🌸</div>
-                <h3 style="color:#ff416c;">${t('requestRejected').split('.')[0]}</h3>
+                <h3 style="color:#ff416c;">Réponse à votre demande</h3>
                 <div id="system-message" style="margin:20px 0;"></div>
                 <button class="btn-pink" onclick="closeSystemPopup()">OK</button>
             </div>
@@ -2099,25 +2085,44 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING
+// MATCHING (avec popup SS/AS et exclusion des contacts existants)
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
         if (!currentUser) return res.redirect('/');
         const t = req.t;
 
+        // Récupérer les IDs des personnes avec qui une conversation existe
+        const existingMessages = await Message.find({
+            $or: [
+                { senderId: currentUser._id },
+                { receiverId: currentUser._id }
+            ]
+        }).lean();
+        const conversationIds = new Set();
+        existingMessages.forEach(msg => {
+            if (msg.senderId.toString() !== currentUser._id.toString()) conversationIds.add(msg.senderId.toString());
+            if (msg.receiverId.toString() !== currentUser._id.toString()) conversationIds.add(msg.receiverId.toString());
+        });
+        const conversationArray = Array.from(conversationIds);
+
         let query = { _id: { $ne: currentUser._id } };
-        if (currentUser.blockedUsers && currentUser.blockedUsers.length) query._id.$nin = currentUser.blockedUsers;
+        if (currentUser.blockedUsers && currentUser.blockedUsers.length) {
+            query._id.$nin = currentUser.blockedUsers.map(id => id.toString());
+        }
+        if (conversationArray.length > 0) {
+            query._id.$nin = query._id.$nin ? [...query._id.$nin, ...conversationArray] : conversationArray;
+        }
         const blockedByOthers = await User.find({ blockedBy: currentUser._id }).distinct('_id');
         if (blockedByOthers.length) {
-            if (query._id.$nin) query._id.$nin = [...query._id.$nin, ...blockedByOthers];
-            else query._id.$nin = blockedByOthers;
+            query._id.$nin = query._id.$nin ? [...query._id.$nin, ...blockedByOthers.map(id => id.toString())] : blockedByOthers.map(id => id.toString());
         }
         if (currentUser.gender === 'Homme') query.gender = 'Femme';
         else if (currentUser.gender === 'Femme') query.gender = 'Homme';
 
         let partners = await User.find(query);
-        if (currentUser.genotype === 'SS' || currentUser.genotype === 'AS') {
+        const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
+        if (isSSorAS) {
             partners = partners.filter(p => p.genotype === 'AA');
         }
 
@@ -2149,7 +2154,19 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             });
         }
 
-        // Popup pour les détails
+        const ssasPopup = isSSorAS ? `
+        <div id="genlove-popup" style="display:flex;">
+            <div class="popup-card">
+                <div class="popup-icon">🛡️</div>
+                <div class="popup-title">${t('healthCommitment')}</div>
+                <div class="popup-message">
+                    ${currentUser.genotype === 'AS' ? t('popupMessageAS') : t('popupMessageSS')}
+                </div>
+                <button class="popup-button" onclick="document.getElementById('genlove-popup').style.display='none';">${t('understood')}</button>
+            </div>
+        </div>
+        ` : '';
+
         const detailsPopup = `
         <div id="details-popup" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center; padding:20px;">
             <div style="background:white; border-radius:30px; padding:30px; max-width:380px; width:100%;">
@@ -2176,6 +2193,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
 </head>
 <body>
     <div class="app-shell">
+        ${ssasPopup}
         ${detailsPopup}
         <div class="page-white">
             <h2>${t('compatiblePartners')}</h2>
@@ -2187,7 +2205,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         </div>
     </div>
 
-    <!-- Popup de choix des messages -->
     <div id="message-choice-popup">
         <div class="popup-card">
             <h3 style="color:#ff416c;">${t('chooseMessage')}</h3>
@@ -2213,14 +2230,15 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         }
         function sendMessageChoice(index) {
             if (!currentReceiverId) return;
+            const message = messages[index];
             fetch('/api/requests', {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ receiverId: currentReceiverId, message: messages[index], choiceIndex: index })
+                body: JSON.stringify({ receiverId: currentReceiverId, message: message, choiceIndex: index })
             })
             .then(res => res.json())
             .then(data => {
-                if (data.success) showNotify('✅ ' + currentReceiverName, 'success');
+                if (data.success) showNotify('✅ Demande envoyée à ' + currentReceiverName, 'success');
                 else showNotify('❌ ' + (data.error || 'Erreur'), 'error');
             })
             .catch(() => showNotify('❌ Erreur réseau', 'error'));
@@ -2331,6 +2349,15 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         if (!partner) return res.redirect('/inbox');
         const t = req.t;
 
+        if (partner.blockedBy && partner.blockedBy.includes(currentUser._id)) {
+            return res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Bloqué</title>${styles}${notifyScript}</head>
+<body><div class="app-shell"><div class="page-white"><h2>${t('blockedByUser')}</h2><p>${t('blockedMessage')}</p><a href="/inbox" class="btn-pink">Retour</a></div></div></body></html>`);
+        }
+        if (currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId)) {
+            return res.redirect('/inbox');
+        }
+
         await Message.updateMany(
             { senderId: partnerId, receiverId: currentUser._id, read: false },
             { read: true }
@@ -2400,7 +2427,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// PARAMÈTRES (simplifiés mais complets)
+// PARAMÈTRES
 app.get('/settings', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2682,7 +2709,7 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
 app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     try {
         const { receiverId, message, choiceIndex } = req.body;
-        // Vérifier si conversation existe déjà
+        // Vérifier si une conversation existe déjà
         const existing = await Message.findOne({
             $or: [
                 { senderId: req.session.userId, receiverId },
@@ -2690,6 +2717,7 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             ]
         });
         if (existing) {
+            // Si conversation existe, créer directement le message visible pour les deux
             const msg = new Message({
                 senderId: req.session.userId,
                 receiverId,
@@ -2700,6 +2728,7 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             await msg.save();
             return res.json({ success: true, direct: true });
         }
+        // Sinon créer une demande
         const request = new Request({
             senderId: req.session.userId,
             receiverId,
