@@ -560,6 +560,57 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
 });
 
 // ... (reste des routes API identiques au fichier original)
+// PROFIL - Page principale après connexion
+app.get('/profile', requireAuth, requireVerified, async (req, res) => {
+    const t = req.t;
+    const currentUser = await User.findById(req.session.userId).lean();
+    
+    if (!currentUser) return res.redirect('/');
+    
+    const age = Math.floor((new Date() - new Date(currentUser.dob)) / (365.25 * 24 * 60 * 60 * 1000));
+    
+    res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${t('appName')} - ${t('myProfile')}</title>
+    ${styles}
+</head>
+<body>
+<div class="app-shell">
+    <div class="page-white">
+        <h2>${t('myProfile')}</h2>
+        
+        <!-- Infos profil -->
+        <div style="text-align: left; margin: 30px 0;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                <div class="photo-circle" style="background: #f0f0f0;"></div>
+                <div>
+                    <h3>${currentUser.firstName} ${currentUser.lastName}</h3>
+                    <p>${t('genotype_label')}: ${currentUser.genotype} | ${t('blood_label')}: ${currentUser.bloodGroup}</p>
+                    <p>${t('age_label')}: ${age} ${t('age_label')} | ${t('residencelabel')}: ${currentUser.residence}</p>
+                </div>
+            </div>
+            <p><strong>${t('projectlabel')}:</strong> ${currentUser.desireChild === 'Oui' ? t('yes') : t('no')}</p>
+        </div>
+        
+        <div class="navigation">
+            <a href="/matching" class="nav-link">${t('findPartner')}</a>
+            <a href="/inbox" class="nav-link">${t('messages')}</a>
+            <a href="/settings" class="nav-link">${t('settings')}</a>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="/edit-profile" class="btn-pink">${t('editProfile')}</a>
+            ${t('healthCommitment')}
+        </div>
+    </div>
+</div>
+</body>
+</html>`);
+});
 
 app.listen(port, '0.0.0.0', () => {
     console.log('🚀 Genlove démarré sur http://localhost:' + port);
