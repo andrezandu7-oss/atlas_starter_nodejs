@@ -2387,158 +2387,154 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// ==============================================
-// ROUTES API (PARTIES À MODIFIER)
-// ==============================================
-
-// BLOCAGE - MODIFIER CETTE ROUTE
-app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) => {
-    try {
-        const currentUserId = req.session.userId;
-        const targetUserId = req.params.userId;
-
-        const current = await User.findById(currentUserId);
-        const target = await User.findById(targetUserId);
-
-        if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
-
-        // Blocage bidirectionnel
-        if (!current.blockedUsers) current.blockedUsers = [];
-        if (!current.blockedUsers.includes(targetUserId)) {
-            current.blockedUsers.push(targetUserId);
-        }
-
-        if (!target.blockedBy) target.blockedBy = [];
-        if (!target.blockedBy.includes(currentUserId)) {
-            target.blockedBy.push(currentUserId);
-        }
-
-        // 🔥 NOUVEAU : Masquer les messages pour LES DEUX utilisateurs
-        await Message.updateMany(
-            {
-                $or: [
-                    { senderId: currentUserId, receiverId: targetUserId },
-                    { senderId: targetUserId, receiverId: currentUserId }
-                ]
-            },
-            {
-                $addToSet: { 
-                    hiddenFor: { 
-                        $each: [currentUserId, targetUserId] // 👈 Les DEUX côtés
-                    } 
-                }
-            }
-        );
-
-        await current.save();
-        await target.save();
-
-        res.json({ success: true });
-    } catch(e) {
-        console.error("❌ Error dans /api/block:", e);
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// DÉBLOCAGE - MODIFIER CETTE ROUTE
-app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) => {
-    try {
-        const currentUserId = req.session.userId;
-        const targetUserId = req.params.userId;
-
-        const current = await User.findById(currentUserId);
-        const target = await User.findById(targetUserId);
-
-        if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
-
-        // Déblocage bidirectionnel
-        if (current.blockedUsers) {
-            current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== targetUserId);
-        }
-
-        if (target.blockedBy) {
-            target.blockedBy = target.blockedBy.filter(id => id.toString() !== currentUserId);
-        }
-
-        // 🔥 NOUVEAU : Réafficher les messages pour LES DEUX utilisateurs
-        await Message.updateMany(
-            {
-                $or: [
-                    { senderId: currentUserId, receiverId: targetUserId },
-                    { senderId: targetUserId, receiverId: currentUserId }
-                ]
-            },
-            {
-                $pull: { 
-                    hiddenFor: { 
-                        $in: [currentUserId, targetUserId] // 👈 Retirer LES DEUX
-                    } 
-                }
-            }
-        );
-
-        await current.save();
-        await target.save();
-
-        res.json({ success: true });
-    } catch(e) {
-        console.error("❌ Error dans /api/unblock:", e);
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// AUSSI À MODIFIER : La requête MATCHING pour exclure les bloqués des deux côtés
-// Dans app.get('/matching', ...), remplacer la partie des exclus par :
-app.get('/matching', requireAuth, requireVerified, async (req, res) => {
+// CHAT AVEC BLOCAGE INTELLIGENT
+app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
-        if (!currentUser) return res.redirect('/');
+        const partnerId = req.query.partnerId;
+        if (!partnerId) return res.redirect('/inbox');
+        const partner = await User.findById(partnerId);
+        if (!partner) return res.redirect('/inbox');
         const t = req.t;
-        const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
 
-        // Conversations existantes
-        const conversationMessages = await Message.find({
-            $or: [
-                { senderId: currentUser._id },
-                { receiverId: currentUser._id }
-            ],
-            hiddenFor: { $ne: currentUser._id }
-        }).lean();
+        const isBlockedByPartner = partner.blockedBy && partner.blockedBy.includes(currentUser._id);
+        const hasBlockedPartner = currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId);
 
-        const conversationIds = new Set();
-        conversationMessages.forEach(msg => {
-            if (msg.senderId.toString() !== currentUser._id.toString()) conversationIds.add(msg.senderId.toString());
-            if (msg.receiverId.toString() !== currentUser._id.toString()) conversationIds.add(msg.receiverId.toString());
-        });
-        const conversationArray = Array.from(conversationIds);
-
-        // 🔥 NOUVEAU : Exclure les utilisateurs bloqués DES DEUX CÔTÉS
-        const rejectedArray = currentUser.rejectedRequests ? currentUser.rejectedRequests.map(id => id.toString()) : [];
-        const blockedByMe = currentUser.blockedUsers ? currentUser.blockedUsers.map(id => id.toString()) : [];
-        const blockedMe = await User.find({ blockedBy: currentUser._id }).distinct('_id');
-        const blockedMeArray = blockedMe.map(id => id.toString());
-
-        // Combiner tous les exclus
-        const excludedIds = [...new Set([
-            ...blockedByMe,           // Ceux que j'ai bloqués
-            ...blockedMeArray,         // Ceux qui m'ont bloqué
-            ...conversationArray,      // Déjà en conversation
-            ...rejectedArray           // Demandes rejetées
-        ])];
-        
-        let query = { _id: { $ne: currentUser._id } };
-        if (excludedIds.length > 0) query._id.$nin = excludedIds;
-        
-        if (currentUser.gender === 'Homme') query.gender = 'Femme';
-        else if (currentUser.gender === 'Femme') query.gender = 'Homme';
-
-        let partners = await User.find(query);
-        
-        if (isSSorAS) {
-            partners = partners.filter(p => p.genotype === 'AA');
+        if (isBlockedByPartner) {
+            return res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Bloqué</title>${styles}${notifyScript}</head>
+<body><div class="app-shell"><div class="page-white"><h2>${t('blockedByUser')}</h2><p>${t('blockedMessage')}</p><a href="/inbox" class="btn-pink">Retour</a></div></div></body></html>`);
         }
 
-        // ... suite du code existant
+        await Message.updateMany(
+            { senderId: partnerId, receiverId: currentUser._id, read: false },
+            { read: true }
+        );
+
+        const messages = await Message.find({
+            $or: [
+                { senderId: currentUser._id, receiverId: partnerId },
+                { senderId: partnerId, receiverId: currentUser._id }
+            ],
+            hiddenFor: { $ne: currentUser._id }
+        }).sort({ timestamp: 1 });
+
+        let msgs = '';
+        messages.forEach(m => {
+            const cls = m.senderId.equals(currentUser._id) ? 'sent' : 'received';
+            msgs += `<div class="bubble ${cls}">${m.text}</div>`;
+        });
+
+        const blockButton = hasBlockedPartner 
+            ? `<button class="btn-action btn-unblock" onclick="unblockUser('${partnerId}')">${t('unblock')}</button>`
+            : `<button class="btn-action btn-block" onclick="blockUser('${partnerId}')">${t('block')}</button>`;
+
+        const blockPopup = `
+        <div id="block-popup">
+            <div class="popup-card">
+                <div class="popup-icon">🚫</div>
+                <div class="popup-message" id="block-message"></div>
+                <div class="popup-buttons">
+                    <button class="confirm-btn" id="confirm-block">Confirmer</button>
+                    <button class="cancel-btn" onclick="closeBlockPopup()">Annuler</button>
+                </div>
+            </div>
+        </div>
+        `;
+
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - Chat</title>
+    <style>
+        .bubble { padding:10px; margin:5px; border-radius:10px; max-width:80%; }
+        .sent { background:#ff416c; color:white; margin-left:auto; }
+        .received { background:white; }
+    </style>
+    ${styles}
+    ${notifyScript}
+</head>
+<body>
+    <div class="app-shell">
+        ${blockPopup}
+        <div class="chat-header">
+            <span><b>${partner.firstName}</b></span>
+            ${blockButton}
+            <button onclick="window.location.href='/inbox'" style="background:none; border:none; color:white; font-size:1.5rem;">❌</button>
+        </div>
+        <div class="chat-messages" id="messages">
+            ${msgs}
+        </div>
+        <div class="input-area">
+            <input id="msgInput" placeholder="${t('yourMessage')}" ${hasBlockedPartner ? 'disabled' : ''}>
+            <button onclick="sendMessage('${partnerId}')" ${hasBlockedPartner ? 'disabled' : ''}>${t('send')}</button>
+        </div>
+    </div>
+    <script>
+        let pendingAction = null;
+
+        function blockUser(id) {
+            document.getElementById('block-message').innerText = '${t('blockConfirm')}';
+            document.getElementById('block-popup').style.display = 'flex';
+            pendingAction = () => {
+                fetch('/api/block/' + id, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotify('${t('blockSuccess')}', 'info');
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                });
+            };
+        }
+
+        function unblockUser(id) {
+            document.getElementById('block-message').innerText = '${t('unblockConfirm')}';
+            document.getElementById('block-popup').style.display = 'flex';
+            pendingAction = () => {
+                fetch('/api/unblock/' + id, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotify('${t('unblockSuccess')}', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                });
+            };
+        }
+
+        document.getElementById('confirm-block').onclick = function() {
+            if (pendingAction) {
+                pendingAction();
+                document.getElementById('block-popup').style.display = 'none';
+            }
+        };
+
+        function closeBlockPopup() {
+            document.getElementById('block-popup').style.display = 'none';
+            pendingAction = null;
+        }
+
+        async function sendMessage(id) {
+            const msg = document.getElementById('msgInput');
+            if(msg.value.trim()) {
+                await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({receiverId:id, text:msg.value})
+                });
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>`);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur chat');
+    }
 });
 
 // PARAMÈTRES
@@ -3120,4 +3116,3 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
-
