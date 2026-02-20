@@ -1,16 +1,18 @@
 {
-  "name": "genlove-app",
+  "name": "genlove",
   "version": "1.0.0",
-  "description": "Application de rencontres avec compatibilité génétique",
+  "description": "Application de rencontre avec compatibilité génétique",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "mongoose": "^7.6.3",
+    "mongoose": "^7.5.0",
     "express-session": "^1.17.3",
-    "connect-mongo": "^5.1.0",
-    "mongodb": "^5.9.0"
+    "connect-mongodb-session": "^3.1.1"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
