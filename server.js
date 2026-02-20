@@ -63,7 +63,9 @@ const messageSchema = new mongoose.Schema({
     receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     text: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    read: { type: Boolean, default: false }
+    read: { type: Boolean, default: false },
+    hiddenFor: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    isDeleted: { type: Boolean, default: false }
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -179,6 +181,7 @@ const translations = {
         startConversation: 'Commencez une conversation !',
         findPartners: 'Trouver des partenaires',
         block: '🚫 Bloquer',
+        unblock: '🔓 Débloquer',
         yourMessage: 'Votre message...',
         send: 'Envoyer',
         blockedByUser: '⛔ Conversation impossible',
@@ -194,7 +197,6 @@ const translations = {
         logout: 'Déconnexion',
         confirmDelete: 'Supprimer définitivement ?',
         noBlocked: 'Aucun utilisateur bloqué',
-        unblock: 'Débloquer',
         thankYou: 'Merci pour cet échange',
         thanksMessage: 'Genlove vous remercie',
         newSearch: 'Nouvelle recherche',
@@ -210,7 +212,6 @@ const translations = {
         pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.',
         residence_label: 'Résidence',
         project_life: 'Projet de vie',
-        // Nouveaux messages pour les popups
         interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité et mêmes projets de vie. Pouvez-vous prendre quelques minutes pour échanger ?',
         acceptRequest: '✅ Accepter',
         rejectRequest: '❌ Refuser',
@@ -218,9 +219,27 @@ const translations = {
         gotIt: 'J\'ai compris',
         returnProfile: '📋 Mon profil',
         newMatch: '🔍 Nouvelle recherche',
-        // Messages pour le loading
         sendingRequest: '⏳ Votre demande est en cours d\'envoi...',
-        requestSent: '✅ Demande envoyée !'
+        requestSent: '✅ Demande envoyée !',
+        blockConfirm: 'Bloquer cet utilisateur ? La conversation disparaîtra de votre vue.',
+        unblockConfirm: 'Débloquer cet utilisateur ? Tous les messages réapparaîtront.',
+        blockSuccess: 'Utilisateur bloqué',
+        unblockSuccess: 'Utilisateur débloqué',
+        day: 'Jour',
+        month: 'Mois',
+        year: 'Année',
+        january: 'Janvier',
+        february: 'Février',
+        march: 'Mars',
+        april: 'Avril',
+        may: 'Mai',
+        june: 'Juin',
+        july: 'Juillet',
+        august: 'Août',
+        september: 'Septembre',
+        october: 'Octobre',
+        november: 'Novembre',
+        december: 'Décembre'
     },
     en: {
         appName: 'Genlove',
@@ -303,6 +322,7 @@ const translations = {
         startConversation: 'Start a conversation!',
         findPartners: 'Find partners',
         block: '🚫 Block',
+        unblock: '🔓 Unblock',
         yourMessage: 'Your message...',
         send: 'Send',
         blockedByUser: '⛔ Conversation impossible',
@@ -318,7 +338,6 @@ const translations = {
         logout: 'Logout',
         confirmDelete: 'Delete permanently?',
         noBlocked: 'No blocked users',
-        unblock: 'Unblock',
         thankYou: 'Thank you for this exchange',
         thanksMessage: 'Genlove thanks you',
         newSearch: 'New search',
@@ -342,7 +361,26 @@ const translations = {
         returnProfile: '📋 My profile',
         newMatch: '🔍 New search',
         sendingRequest: '⏳ Your request is being sent...',
-        requestSent: '✅ Request sent!'
+        requestSent: '✅ Request sent!',
+        blockConfirm: 'Block this user? The conversation will disappear from your view.',
+        unblockConfirm: 'Unblock this user? All messages will reappear.',
+        blockSuccess: 'User blocked',
+        unblockSuccess: 'User unblocked',
+        day: 'Day',
+        month: 'Month',
+        year: 'Year',
+        january: 'January',
+        february: 'February',
+        march: 'March',
+        april: 'April',
+        may: 'May',
+        june: 'June',
+        july: 'July',
+        august: 'August',
+        september: 'September',
+        october: 'October',
+        november: 'November',
+        december: 'December'
     },
     pt: {
         appName: 'Genlove',
@@ -425,6 +463,7 @@ const translations = {
         startConversation: 'Comece uma conversa!',
         findPartners: 'Encontrar parceiros',
         block: '🚫 Bloquear',
+        unblock: '🔓 Desbloquear',
         yourMessage: 'Sua mensagem...',
         send: 'Enviar',
         blockedByUser: '⛔ Conversa impossível',
@@ -440,7 +479,6 @@ const translations = {
         logout: 'Sair',
         confirmDelete: 'Excluir permanentemente?',
         noBlocked: 'Nenhum usuário bloqueado',
-        unblock: 'Desbloquear',
         thankYou: 'Obrigado por este encontro',
         thanksMessage: 'Genlove agradece',
         newSearch: 'Nova pesquisa',
@@ -464,7 +502,26 @@ const translations = {
         returnProfile: '📋 Meu perfil',
         newMatch: '🔍 Nova pesquisa',
         sendingRequest: '⏳ Seu pedido está sendo enviado...',
-        requestSent: '✅ Pedido enviado!'
+        requestSent: '✅ Pedido enviado!',
+        blockConfirm: 'Bloquear este usuário? A conversa desaparecerá da sua vista.',
+        unblockConfirm: 'Desbloquear este usuário? Todas as mensagens reaparecerão.',
+        blockSuccess: 'Usuário bloqueado',
+        unblockSuccess: 'Usuário desbloqueado',
+        day: 'Dia',
+        month: 'Mês',
+        year: 'Ano',
+        january: 'Janeiro',
+        february: 'Fevereiro',
+        march: 'Março',
+        april: 'Abril',
+        may: 'Maio',
+        june: 'Junho',
+        july: 'Julho',
+        august: 'Agosto',
+        september: 'Setembro',
+        october: 'Outubro',
+        november: 'Novembro',
+        december: 'Dezembro'
     },
     es: {
         appName: 'Genlove',
@@ -547,6 +604,7 @@ const translations = {
         startConversation: '¡Comience una conversación!',
         findPartners: 'Encontrar parejas',
         block: '🚫 Bloquear',
+        unblock: '🔓 Desbloquear',
         yourMessage: 'Su mensaje...',
         send: 'Enviar',
         blockedByUser: '⛔ Conversación imposible',
@@ -562,7 +620,6 @@ const translations = {
         logout: 'Cerrar sesión',
         confirmDelete: '¿Eliminar permanentemente?',
         noBlocked: 'No hay usuarios bloqueados',
-        unblock: 'Desbloquear',
         thankYou: 'Gracias por este intercambio',
         thanksMessage: 'Genlove le agradece',
         newSearch: 'Nueva búsqueda',
@@ -586,7 +643,26 @@ const translations = {
         returnProfile: '📋 Mi perfil',
         newMatch: '🔍 Nueva búsqueda',
         sendingRequest: '⏳ Tu solicitud está siendo enviada...',
-        requestSent: '✅ ¡Solicitud enviada!'
+        requestSent: '✅ ¡Solicitud enviada!',
+        blockConfirm: '¿Bloquear a este usuario? La conversación desaparecerá de tu vista.',
+        unblockConfirm: '¿Desbloquear a este usuario? Todos los mensajes reaparecerán.',
+        blockSuccess: 'Usuario bloqueado',
+        unblockSuccess: 'Usuario desbloqueado',
+        day: 'Día',
+        month: 'Mes',
+        year: 'Año',
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre'
     },
     ar: {
         appName: 'Genlove',
@@ -669,6 +745,7 @@ const translations = {
         startConversation: 'ابدأ محادثة!',
         findPartners: 'العثور على شركاء',
         block: '🚫 حظر',
+        unblock: '🔓 إلغاء الحظر',
         yourMessage: 'رسالتك...',
         send: 'إرسال',
         blockedByUser: '⛔ محادثة مستحيلة',
@@ -684,7 +761,6 @@ const translations = {
         logout: 'تسجيل الخروج',
         confirmDelete: 'حذف نهائي؟',
         noBlocked: 'لا يوجد مستخدمين محظورين',
-        unblock: 'إلغاء الحظر',
         thankYou: 'شكرًا لهذا التبادل',
         thanksMessage: 'Genlove يشكرك',
         newSearch: 'بحث جديد',
@@ -708,7 +784,26 @@ const translations = {
         returnProfile: '📋 ملفي الشخصي',
         newMatch: '🔍 بحث جديد',
         sendingRequest: '⏳ جاري إرسال طلبك...',
-        requestSent: '✅ تم إرسال الطلب!'
+        requestSent: '✅ تم إرسال الطلب!',
+        blockConfirm: 'حظر هذا المستخدم؟ ستختفي المحادثة من عرضك.',
+        unblockConfirm: 'إلغاء حظر هذا المستخدم؟ ستظهر جميع الرسائل مرة أخرى.',
+        blockSuccess: 'تم حظر المستخدم',
+        unblockSuccess: 'تم إلغاء حظر المستخدم',
+        day: 'يوم',
+        month: 'شهر',
+        year: 'سنة',
+        january: 'يناير',
+        february: 'فبراير',
+        march: 'مارس',
+        april: 'أبريل',
+        may: 'مايو',
+        june: 'يونيو',
+        july: 'يوليو',
+        august: 'أغسطس',
+        september: 'سبتمبر',
+        october: 'أكتوبر',
+        november: 'نوفمبر',
+        december: 'ديسمبر'
     },
     zh: {
         appName: 'Genlove',
@@ -791,6 +886,7 @@ const translations = {
         startConversation: '开始对话！',
         findPartners: '寻找伴侣',
         block: '🚫 屏蔽',
+        unblock: '🔓 解除屏蔽',
         yourMessage: '您的消息...',
         send: '发送',
         blockedByUser: '⛔ 无法对话',
@@ -806,7 +902,6 @@ const translations = {
         logout: '退出',
         confirmDelete: '永久删除？',
         noBlocked: '没有已屏蔽的用户',
-        unblock: '解除屏蔽',
         thankYou: '感谢您的交流',
         thanksMessage: 'Genlove感谢您',
         newSearch: '新搜索',
@@ -830,7 +925,26 @@ const translations = {
         returnProfile: '📋 我的个人资料',
         newMatch: '🔍 新搜索',
         sendingRequest: '⏳ 您的请求正在发送中...',
-        requestSent: '✅ 请求已发送！'
+        requestSent: '✅ 请求已发送！',
+        blockConfirm: '屏蔽此用户？对话将从您的视图中消失。',
+        unblockConfirm: '解除屏蔽此用户？所有消息将重新出现。',
+        blockSuccess: '用户已屏蔽',
+        unblockSuccess: '用户已解除屏蔽',
+        day: '日',
+        month: '月',
+        year: '年',
+        january: '一月',
+        february: '二月',
+        march: '三月',
+        april: '四月',
+        may: '五月',
+        june: '六月',
+        july: '七月',
+        august: '八月',
+        september: '九月',
+        october: '十月',
+        november: '十一月',
+        december: '十二月'
     }
 };
 
@@ -1032,6 +1146,7 @@ const styles = `
     .btn-contact { background: #ff416c; color: white; }
     .btn-details { background: #1a2a44; color: white; }
     .btn-block { background: #dc3545; color: white; }
+    .btn-unblock { background: #4CAF50; color: white; }
     .input-box { 
         width: 100%; 
         padding: 18px; 
@@ -1335,8 +1450,7 @@ const styles = `
         color: #1a2a44;
         margin: 20px 0 10px;
     }
-    /* Popups */
-    #genlove-popup, #request-popup, #rejection-popup, #loading-popup {
+    #genlove-popup, #request-popup, #rejection-popup, #loading-popup, #block-popup {
         display: none;
         position: fixed;
         top: 0;
@@ -1397,6 +1511,14 @@ const styles = `
         color: white;
     }
     .reject-btn {
+        background: #1a2a44;
+        color: white;
+    }
+    .confirm-btn {
+        background: #ff416c;
+        color: white;
+    }
+    .cancel-btn {
         background: #1a2a44;
         color: white;
     }
@@ -1747,7 +1869,7 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION
+// INSCRIPTION AVEC CALENDRIER MULTILINGUE
 app.get('/signup', (req, res) => {
     const t = req.t;
     const datePicker = generateDateOptions(req);
@@ -1878,13 +2000,17 @@ app.get('/sas-validation', async (req, res) => {
 </html>`);
 });
 
-// PROFIL AVEC POPUPS
+// PROFIL
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
         if (!user) return res.redirect('/');
         const t = req.t;
-        const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false });
+        const unreadCount = await Message.countDocuments({ 
+            receiverId: user._id, 
+            read: false,
+            hiddenFor: { $ne: user._id }
+        });
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
 
@@ -2035,7 +2161,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING AVEC AMENDEMENTS (prénom, génotype, âge + loading)
+// MATCHING
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2043,12 +2169,12 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         const t = req.t;
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
 
-        // 1. Récupérer les IDs des personnes avec qui une conversation existe
         const conversationMessages = await Message.find({
             $or: [
                 { senderId: currentUser._id },
                 { receiverId: currentUser._id }
-            ]
+            ],
+            hiddenFor: { $ne: currentUser._id }
         }).lean();
         
         const conversationIds = new Set();
@@ -2058,26 +2184,16 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
         });
         const conversationArray = Array.from(conversationIds);
 
-        // 2. Récupérer les IDs des personnes rejetées
         const rejectedArray = currentUser.rejectedRequests ? currentUser.rejectedRequests.map(id => id.toString()) : [];
-
-        // 3. Récupérer les IDs des personnes bloquées
         const blockedArray = currentUser.blockedUsers ? currentUser.blockedUsers.map(id => id.toString()) : [];
-
-        // 4. Fusionner toutes les exclusions
         const excludedIds = [...new Set([...blockedArray, ...conversationArray, ...rejectedArray])];
 
-        // 5. Construire la requête
         let query = { _id: { $ne: currentUser._id } };
-        if (excludedIds.length > 0) {
-            query._id.$nin = excludedIds;
-        }
+        if (excludedIds.length > 0) query._id.$nin = excludedIds;
 
-        // 6. Filtrer par genre opposé
         if (currentUser.gender === 'Homme') query.gender = 'Femme';
         else if (currentUser.gender === 'Femme') query.gender = 'Homme';
 
-        // 7. Exclure ceux qui nous ont bloqués
         const blockedByOthers = await User.find({ blockedBy: currentUser._id }).distinct('_id');
         if (blockedByOthers.length) {
             query._id.$nin = query._id.$nin ? [...query._id.$nin, ...blockedByOthers.map(id => id.toString())] : blockedByOthers.map(id => id.toString());
@@ -2085,7 +2201,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
 
         let partners = await User.find(query);
         
-        // 8. Filtre génétique SS/AS
         if (isSSorAS) {
             partners = partners.filter(p => p.genotype === 'AA');
         }
@@ -2111,7 +2226,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             });
         }
 
-        // POPUP DE LOADING
         const loadingPopup = `
         <div id="loading-popup">
             <div class="popup-card">
@@ -2163,11 +2277,9 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
 
     <script>
         function sendInterest(receiverId, receiverName) {
-            // Afficher le popup de loading
             document.getElementById('loading-popup').style.display = 'flex';
             document.getElementById('loading-message').innerText = '${t('sendingRequest')}';
             
-            // Simuler un loading de 5 secondes
             setTimeout(() => {
                 fetch('/api/requests', {
                     method: 'POST',
@@ -2176,10 +2288,8 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                 })
                 .then(res => res.json())
                 .then(data => {
-                    // Changer le message
                     document.getElementById('loading-message').innerText = '${t('requestSent')}';
                     
-                    // Attendre 1 seconde puis fermer
                     setTimeout(() => {
                         document.getElementById('loading-popup').style.display = 'none';
                         if (data.success) {
@@ -2193,7 +2303,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                     document.getElementById('loading-popup').style.display = 'none';
                     showNotify('❌ Erreur réseau', 'error');
                 });
-            }, 5000); // 5 secondes de loading
+            }, 5000);
         }
     </script>
 </body>
@@ -2212,7 +2322,11 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
         const t = req.t;
 
         const messages = await Message.find({
-            $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }]
+            $or: [
+                { senderId: currentUser._id },
+                { receiverId: currentUser._id }
+            ],
+            hiddenFor: { $ne: currentUser._id }
         }).populate('senderId receiverId').sort({ timestamp: -1 });
 
         const conversations = new Map();
@@ -2222,7 +2336,8 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
                 const unread = await Message.countDocuments({
                     senderId: other._id,
                     receiverId: currentUser._id,
-                    read: false
+                    read: false,
+                    hiddenFor: { $ne: currentUser._id }
                 });
                 conversations.set(other._id.toString(), { user: other, last: m, unread });
             }
@@ -2272,7 +2387,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// CHAT
+// CHAT AVEC BLOCAGE INTELLIGENT
 app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2282,13 +2397,13 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         if (!partner) return res.redirect('/inbox');
         const t = req.t;
 
-        if (partner.blockedBy && partner.blockedBy.includes(currentUser._id)) {
+        const isBlockedByPartner = partner.blockedBy && partner.blockedBy.includes(currentUser._id);
+        const hasBlockedPartner = currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId);
+
+        if (isBlockedByPartner) {
             return res.send(`<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Bloqué</title>${styles}${notifyScript}</head>
 <body><div class="app-shell"><div class="page-white"><h2>${t('blockedByUser')}</h2><p>${t('blockedMessage')}</p><a href="/inbox" class="btn-pink">Retour</a></div></div></body></html>`);
-        }
-        if (currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId)) {
-            return res.redirect('/inbox');
         }
 
         await Message.updateMany(
@@ -2300,7 +2415,8 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
             $or: [
                 { senderId: currentUser._id, receiverId: partnerId },
                 { senderId: partnerId, receiverId: currentUser._id }
-            ]
+            ],
+            hiddenFor: { $ne: currentUser._id }
         }).sort({ timestamp: 1 });
 
         let msgs = '';
@@ -2308,6 +2424,23 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
             const cls = m.senderId.equals(currentUser._id) ? 'sent' : 'received';
             msgs += `<div class="bubble ${cls}">${m.text}</div>`;
         });
+
+        const blockButton = hasBlockedPartner 
+            ? `<button class="btn-action btn-unblock" onclick="unblockUser('${partnerId}')">${t('unblock')}</button>`
+            : `<button class="btn-action btn-block" onclick="blockUser('${partnerId}')">${t('block')}</button>`;
+
+        const blockPopup = `
+        <div id="block-popup">
+            <div class="popup-card">
+                <div class="popup-icon">🚫</div>
+                <div class="popup-message" id="block-message"></div>
+                <div class="popup-buttons">
+                    <button class="confirm-btn" id="confirm-block">Confirmer</button>
+                    <button class="cancel-btn" onclick="closeBlockPopup()">Annuler</button>
+                </div>
+            </div>
+        </div>
+        `;
 
         res.send(`<!DOCTYPE html>
 <html>
@@ -2321,23 +2454,69 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
         .received { background:white; }
     </style>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
+        ${blockPopup}
         <div class="chat-header">
             <span><b>${partner.firstName}</b></span>
-            <button class="btn-action btn-block" onclick="blockUser('${partnerId}')" style="padding:10px 15px;">${t('block')}</button>
+            ${blockButton}
             <button onclick="window.location.href='/inbox'" style="background:none; border:none; color:white; font-size:1.5rem;">❌</button>
         </div>
         <div class="chat-messages" id="messages">
             ${msgs}
         </div>
         <div class="input-area">
-            <input id="msgInput" placeholder="${t('yourMessage')}">
-            <button onclick="sendMessage('${partnerId}')">${t('send')}</button>
+            <input id="msgInput" placeholder="${t('yourMessage')}" ${hasBlockedPartner ? 'disabled' : ''}>
+            <button onclick="sendMessage('${partnerId}')" ${hasBlockedPartner ? 'disabled' : ''}>${t('send')}</button>
         </div>
     </div>
     <script>
+        let pendingAction = null;
+
+        function blockUser(id) {
+            document.getElementById('block-message').innerText = '${t('blockConfirm')}';
+            document.getElementById('block-popup').style.display = 'flex';
+            pendingAction = () => {
+                fetch('/api/block/' + id, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotify('${t('blockSuccess')}', 'info');
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                });
+            };
+        }
+
+        function unblockUser(id) {
+            document.getElementById('block-message').innerText = '${t('unblockConfirm')}';
+            document.getElementById('block-popup').style.display = 'flex';
+            pendingAction = () => {
+                fetch('/api/unblock/' + id, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotify('${t('unblockSuccess')}', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                });
+            };
+        }
+
+        document.getElementById('confirm-block').onclick = function() {
+            if (pendingAction) {
+                pendingAction();
+                document.getElementById('block-popup').style.display = 'none';
+            }
+        };
+
+        function closeBlockPopup() {
+            document.getElementById('block-popup').style.display = 'none';
+            pendingAction = null;
+        }
+
         async function sendMessage(id) {
             const msg = document.getElementById('msgInput');
             if(msg.value.trim()) {
@@ -2347,12 +2526,6 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
                     body: JSON.stringify({receiverId:id, text:msg.value})
                 });
                 location.reload();
-            }
-        }
-        async function blockUser(id) {
-            if(confirm('${t('block')} ?')) {
-                await fetch('/api/block/'+id, {method:'POST'});
-                window.location.href = '/inbox';
             }
         }
     </script>
@@ -2642,7 +2815,6 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
     }
 });
 
-// Envoyer un intérêt
 app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     try {
         const { receiverId } = req.body;
@@ -2666,7 +2838,8 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             $or: [
                 { senderId: req.session.userId, receiverId },
                 { senderId: receiverId, receiverId: req.session.userId }
-            ]
+            ],
+            hiddenFor: { $ne: req.session.userId }
         });
 
         if (existingConversation) {
@@ -2687,7 +2860,6 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// Récupérer les demandes en attente
 app.get('/api/requests/pending', requireAuth, requireVerified, async (req, res) => {
     try {
         const requests = await Request.find({
@@ -2703,7 +2875,6 @@ app.get('/api/requests/pending', requireAuth, requireVerified, async (req, res) 
     }
 });
 
-// Accepter une demande
 app.post('/api/requests/:id/accept', requireAuth, requireVerified, async (req, res) => {
     try {
         const request = await Request.findById(req.params.id).populate('senderId receiverId');
@@ -2714,7 +2885,8 @@ app.post('/api/requests/:id/accept', requireAuth, requireVerified, async (req, r
             senderId: request.senderId._id,
             receiverId: request.receiverId._id,
             text: "Bonjour ! J'aimerais échanger avec vous.",
-            read: false
+            read: false,
+            hiddenFor: []
         });
         await welcomeMsg.save();
 
@@ -2729,7 +2901,6 @@ app.post('/api/requests/:id/accept', requireAuth, requireVerified, async (req, r
     }
 });
 
-// Rejeter une demande
 app.post('/api/requests/:id/reject', requireAuth, requireVerified, async (req, res) => {
     try {
         const request = await Request.findById(req.params.id).populate('senderId receiverId');
@@ -2751,7 +2922,6 @@ app.post('/api/requests/:id/reject', requireAuth, requireVerified, async (req, r
     }
 });
 
-// Récupérer les rejets non vus
 app.get('/api/rejections/unread', requireAuth, requireVerified, async (req, res) => {
     try {
         const requests = await Request.find({
@@ -2772,7 +2942,6 @@ app.get('/api/rejections/unread', requireAuth, requireVerified, async (req, res)
     }
 });
 
-// Marquer un rejet comme vu
 app.post('/api/rejections/:id/view', requireAuth, requireVerified, async (req, res) => {
     try {
         await Request.findByIdAndUpdate(req.params.id, { viewed: true });
@@ -2783,14 +2952,21 @@ app.post('/api/rejections/:id/view', requireAuth, requireVerified, async (req, r
     }
 });
 
-// Envoyer un message
 app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     try {
+        const { receiverId, text } = req.body;
+        
+        const receiver = await User.findById(receiverId);
+        if (receiver.blockedBy && receiver.blockedBy.includes(req.session.userId)) {
+            return res.status(403).json({ error: "Vous êtes bloqué par cet utilisateur" });
+        }
+
         const msg = new Message({
             senderId: req.session.userId,
-            receiverId: req.body.receiverId,
-            text: req.body.text,
-            read: false
+            receiverId,
+            text,
+            read: false,
+            hiddenFor: []
         });
         await msg.save();
         res.json(msg);
@@ -2800,23 +2976,41 @@ app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// Bloquer
 app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
-        const current = await User.findById(req.session.userId);
-        const target = await User.findById(req.params.userId);
+        const currentUserId = req.session.userId;
+        const targetUserId = req.params.userId;
+
+        const current = await User.findById(currentUserId);
+        const target = await User.findById(targetUserId);
+        
         if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
         if (!current.blockedUsers) current.blockedUsers = [];
-        if (!current.blockedUsers.includes(req.params.userId)) {
-            current.blockedUsers.push(req.params.userId);
+        if (!current.blockedUsers.includes(targetUserId)) {
+            current.blockedUsers.push(targetUserId);
         }
+        
         if (!target.blockedBy) target.blockedBy = [];
-        if (!target.blockedBy.includes(req.session.userId)) {
-            target.blockedBy.push(req.session.userId);
+        if (!target.blockedBy.includes(currentUserId)) {
+            target.blockedBy.push(currentUserId);
         }
+
+        await Message.updateMany(
+            {
+                $or: [
+                    { senderId: currentUserId, receiverId: targetUserId },
+                    { senderId: targetUserId, receiverId: currentUserId }
+                ]
+            },
+            {
+                $addToSet: { hiddenFor: currentUserId }
+            }
+        );
+
         await current.save();
         await target.save();
+
         res.json({ success: true });
     } catch(e) {
         console.error("❌ Erreur dans /api/block:", e);
@@ -2824,14 +3018,39 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
     }
 });
 
-// Débloquer
 app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
-        const current = await User.findById(req.session.userId);
+        const currentUserId = req.session.userId;
+        const targetUserId = req.params.userId;
+
+        const current = await User.findById(currentUserId);
+        const target = await User.findById(targetUserId);
+        
+        if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
         if (current.blockedUsers) {
-            current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== req.params.userId);
-            await current.save();
+            current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== targetUserId);
         }
+        
+        if (target.blockedBy) {
+            target.blockedBy = target.blockedBy.filter(id => id.toString() !== currentUserId);
+        }
+
+        await Message.updateMany(
+            {
+                $or: [
+                    { senderId: currentUserId, receiverId: targetUserId },
+                    { senderId: targetUserId, receiverId: currentUserId }
+                ]
+            },
+            {
+                $pull: { hiddenFor: currentUserId }
+            }
+        );
+
+        await current.save();
+        await target.save();
+
         res.json({ success: true });
     } catch(e) {
         console.error("❌ Erreur dans /api/unblock:", e);
@@ -2867,7 +3086,6 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
-// 404
 app.use((req, res) => {
     const t = req.t;
     res.status(404).send(`<!DOCTYPE html>
@@ -2888,9 +3106,6 @@ app.use((req, res) => {
 </html>`);
 });
 
-// ============================================
-// DÉMARRAGE
-// ============================================
 app.listen(port, '0.0.0.0', () => {
     console.log('🚀 Genlove démarré sur http://localhost:' + port);
 });
