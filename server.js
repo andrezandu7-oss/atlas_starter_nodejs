@@ -561,6 +561,13 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
 
 // ... (reste des routes API identiques au fichier original)
 
-app.listen(port, () => {
-    console.log(`🚀 Genlove server running on port ${port}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log('🚀 Genlove démarré sur http://localhost:' + port);
+});
+
+process.on('SIGINT', () => {
+    mongoose.connection.close(() => {
+        console.log('✅ Déconnexion MongoDB');
+        process.exit(0);
+    });
 });
