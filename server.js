@@ -36,7 +36,7 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 
 // ============================================
-// MODÈLES DE DONNÉES (AMENDÉS)
+// MODÈLES DE DONNÉES
 // ============================================
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema({
     isVerified: { type: Boolean, default: false },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // NOUVEAU
+    rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -72,7 +72,7 @@ const requestSchema = new mongoose.Schema({
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
-    viewed: { type: Boolean, default: false }, // NOUVEAU
+    viewed: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -95,7 +95,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ============================================
-// SYSTÈME DE TRADUCTION MULTILINGUE COMPLET
+// SYSTÈME DE TRADUCTION MULTILINGUE COMPLET (6 LANGUES)
 // ============================================
 const translations = {
     fr: {
@@ -210,14 +210,17 @@ const translations = {
         pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.',
         residence_label: 'Résidence',
         project_life: 'Projet de vie',
-        // NOUVEAUX MESSAGES
+        // Nouveaux messages pour les popups
         interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité et mêmes projets de vie. Pouvez-vous prendre quelques minutes pour échanger ?',
         acceptRequest: '✅ Accepter',
         rejectRequest: '❌ Refuser',
-        rejectionPopup: 'Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches car vous êtes sur le point de trouver la bonne personne.',
+        rejectionPopup: '🌸 Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches car vous êtes sur le point de trouver la bonne personne.',
         gotIt: 'J\'ai compris',
         returnProfile: '📋 Mon profil',
-        newMatch: '🔍 Nouvelle recherche'
+        newMatch: '🔍 Nouvelle recherche',
+        // Messages pour le loading
+        sendingRequest: '⏳ Votre demande est en cours d\'envoi...',
+        requestSent: '✅ Demande envoyée !'
     },
     en: {
         appName: 'Genlove',
@@ -334,12 +337,501 @@ const translations = {
         interestPopup: '{name} is very attracted to your profile because you share good compatibility and same life projects. Can you take a few minutes to chat?',
         acceptRequest: '✅ Accept',
         rejectRequest: '❌ Decline',
-        rejectionPopup: 'Sorry, {name} did not give a favorable response to your request. Start other searches because you are about to find the right person.',
+        rejectionPopup: '🌸 Sorry, {name} did not give a favorable response to your request. Start other searches because you are about to find the right person.',
         gotIt: 'Got it',
         returnProfile: '📋 My profile',
-        newMatch: '🔍 New search'
+        newMatch: '🔍 New search',
+        sendingRequest: '⏳ Your request is being sent...',
+        requestSent: '✅ Request sent!'
+    },
+    pt: {
+        appName: 'Genlove',
+        slogan: 'Una coração e saúde para construir casais saudáveis 💑',
+        security: '🛡️ Seus dados de saúde estão criptografados',
+        welcome: 'Bem-vindo ao Genlove',
+        haveAccount: 'Já tem uma conta?',
+        login: 'Entrar',
+        createAccount: 'Criar conta',
+        loginTitle: 'Entrar',
+        enterName: 'Digite seu primeiro nome para entrar',
+        yourName: 'Seu primeiro nome',
+        backHome: '← Voltar ao início',
+        nameNotFound: 'Nome não encontrado. Por favor, crie uma conta.',
+        charterTitle: '📜 A Carta de Honra',
+        charterSubtitle: 'Leia estes 5 compromissos atentamente',
+        scrollDown: '⬇️ Role até o final ⬇️',
+        accept: 'Aceito e continuo',
+        oath1: '1. O Juramento de Sinceridade',
+        oath1Sub: 'Verdade Médica',
+        oath1Text: 'Comprometo-me, sob minha honra, a fornecer informações precisas sobre meu genótipo e dados de saúde.',
+        oath2: '2. O Pacto de Confidencialidade',
+        oath2Sub: 'Segredo Compartilhado',
+        oath2Text: 'Comprometo-me a manter todas as informações pessoais e médicas confidenciais.',
+        oath3: '3. O Princípio da Não-Discriminação',
+        oath3Sub: 'Igualdade de Respeito',
+        oath3Text: 'Trato cada membro com dignidade, independentemente do seu genótipo.',
+        oath4: '4. Responsabilidade Preventiva',
+        oath4Sub: 'Orientação para a Saúde',
+        oath4Text: 'Aceito medidas de proteção como a filtragem de compatibilidades de risco.',
+        oath5: '5. Benevolência Ética',
+        oath5Sub: 'Cortesia',
+        oath5Text: 'Adoto uma conduta exemplar e respeitosa em minhas mensagens.',
+        signupTitle: 'Criar meu perfil',
+        signupSub: 'Todas as informações são confidenciais',
+        firstName: 'Primeiro nome',
+        lastName: 'Sobrenome',
+        gender: 'Gênero',
+        male: 'Homem',
+        female: 'Mulher',
+        dob: 'Data de nascimento',
+        dobPlaceholder: 'dd/mm/aaaa',
+        city: 'Cidade de residência',
+        genotype: 'Genótipo',
+        bloodGroup: 'Grupo sanguíneo',
+        desireChild: 'Desejo de ter filhos?',
+        yes: 'Sim',
+        no: 'Não',
+        createProfile: 'Criar meu perfil',
+        backCharter: '← Voltar à carta',
+        required: 'obrigatório',
+        honorTitle: 'Juramento de Honra',
+        honorText: '"Confirmo por minha honra que minhas informações são sinceras e conformes à realidade."',
+        swear: 'Eu juro',
+        accessProfile: 'Acessar meu perfil',
+        myProfile: 'Meu Perfil',
+        home: 'Início',
+        messages: 'Mensagens',
+        settings: 'Configurações',
+        genotype_label: 'Genótipo',
+        blood_label: 'Grupo',
+        age_label: 'Idade',
+        project_label: 'Projeto',
+        findPartner: '🔍 Encontrar parceiro(a)',
+        editProfile: '✏️ Editar perfil',
+        compatiblePartners: 'Parceiros compatíveis',
+        noPartners: 'Nenhum parceiro encontrado no momento',
+        searchOngoing: 'Pesquisa em andamento...',
+        expandCommunity: 'Estamos expandindo nossa comunidade. Volte em breve!',
+        details: 'Detalhes',
+        contact: 'Contatar',
+        backProfile: '← Meu perfil',
+        toMessages: 'Mensagens →',
+        healthCommitment: '🛡️ Seu compromisso com a saúde',
+        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑',
+        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro. 💑',
+        understood: 'Entendi',
+        inboxTitle: 'Caixa de entrada',
+        emptyInbox: '📭 Caixa vazia',
+        startConversation: 'Comece uma conversa!',
+        findPartners: 'Encontrar parceiros',
+        block: '🚫 Bloquear',
+        yourMessage: 'Sua mensagem...',
+        send: 'Enviar',
+        blockedByUser: '⛔ Conversa impossível',
+        blockedMessage: 'Este usuário bloqueou você. Não é possível enviar mensagens.',
+        settingsTitle: 'Configurações',
+        visibility: 'Visibilidade do perfil',
+        notifications: 'Notificações push',
+        language: 'Idioma',
+        blockedUsers: 'Usuários bloqueados',
+        dangerZone: '⚠️ ZONA DE PERIGO',
+        deleteAccount: '🗑️ Excluir minha conta',
+        delete: 'Excluir',
+        logout: 'Sair',
+        confirmDelete: 'Excluir permanentemente?',
+        noBlocked: 'Nenhum usuário bloqueado',
+        unblock: 'Desbloquear',
+        thankYou: 'Obrigado por este encontro',
+        thanksMessage: 'Genlove agradece',
+        newSearch: 'Nova pesquisa',
+        logoutSuccess: 'Saída bem-sucedida',
+        seeYouSoon: 'Até breve!',
+        french: 'Francês',
+        english: 'Inglês',
+        portuguese: 'Português',
+        spanish: 'Espanhol',
+        arabic: 'Árabe',
+        chinese: 'Chinês',
+        pageNotFound: 'Página não encontrada',
+        pageNotFoundMessage: 'A página que você procura não existe.',
+        residence_label: 'Residência',
+        project_life: 'Projeto de vida',
+        interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade e mesmos projetos de vida. Você pode alguns minutos para conversar?',
+        acceptRequest: '✅ Aceitar',
+        rejectRequest: '❌ Recusar',
+        rejectionPopup: '🌸 Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas porque você está prestes a encontrar a pessoa certa.',
+        gotIt: 'Entendi',
+        returnProfile: '📋 Meu perfil',
+        newMatch: '🔍 Nova pesquisa',
+        sendingRequest: '⏳ Seu pedido está sendo enviado...',
+        requestSent: '✅ Pedido enviado!'
+    },
+    es: {
+        appName: 'Genlove',
+        slogan: 'Une corazón y salud para construir parejas saludables 💑',
+        security: '🛡️ Sus datos de salud están encriptados',
+        welcome: 'Bienvenido a Genlove',
+        haveAccount: '¿Ya tienes una cuenta?',
+        login: 'Iniciar sesión',
+        createAccount: 'Crear cuenta',
+        loginTitle: 'Iniciar sesión',
+        enterName: 'Ingrese su nombre para iniciar sesión',
+        yourName: 'Su nombre',
+        backHome: '← Volver al inicio',
+        nameNotFound: 'Nombre no encontrado. Por favor, cree una cuenta.',
+        charterTitle: '📜 La Carta de Honor',
+        charterSubtitle: 'Lea estos 5 compromisos atentamente',
+        scrollDown: '⬇️ Desplácese hasta el final ⬇️',
+        accept: 'Acepto y continúo',
+        oath1: '1. El Juramento de Sinceridad',
+        oath1Sub: 'Verdad Médica',
+        oath1Text: 'Me comprometo bajo mi honor a proporcionar información precisa sobre mi genotipo y datos de salud.',
+        oath2: '2. El Pacto de Confidencialidad',
+        oath2Sub: 'Secreto Compartido',
+        oath2Text: 'Me comprometo a mantener toda la información personal y médica confidencial.',
+        oath3: '3. El Principio de No Discriminación',
+        oath3Sub: 'Igualdad de Respeto',
+        oath3Text: 'Trato a cada miembro con dignidad, independientemente de su genotipo.',
+        oath4: '4. Responsabilidad Preventiva',
+        oath4Sub: 'Orientación para la Salud',
+        oath4Text: 'Acepto medidas de protección como el filtrado de compatibilidades de riesgo.',
+        oath5: '5. Benevolencia Ética',
+        oath5Sub: 'Cortesía',
+        oath5Text: 'Adopto una conducta ejemplar y respetuosa en mis mensajes.',
+        signupTitle: 'Crear mi perfil',
+        signupSub: 'Toda la información es confidencial',
+        firstName: 'Nombre',
+        lastName: 'Apellido',
+        gender: 'Género',
+        male: 'Hombre',
+        female: 'Mujer',
+        dob: 'Fecha de nacimiento',
+        dobPlaceholder: 'dd/mm/aaaa',
+        city: 'Ciudad de residencia',
+        genotype: 'Genotipo',
+        bloodGroup: 'Grupo sanguíneo',
+        desireChild: '¿Deseo de tener hijos?',
+        yes: 'Sí',
+        no: 'No',
+        createProfile: 'Crear mi perfil',
+        backCharter: '← Volver a la carta',
+        required: 'obligatorio',
+        honorTitle: 'Juramento de Honor',
+        honorText: '"Confirmo bajo mi honor que mi información es sincera y conforme a la realidad."',
+        swear: 'Lo juro',
+        accessProfile: 'Acceder a mi perfil',
+        myProfile: 'Mi Perfil',
+        home: 'Inicio',
+        messages: 'Mensajes',
+        settings: 'Configuración',
+        genotype_label: 'Genotipo',
+        blood_label: 'Grupo',
+        age_label: 'Edad',
+        project_label: 'Proyecto',
+        findPartner: '🔍 Encontrar pareja',
+        editProfile: '✏️ Editar perfil',
+        compatiblePartners: 'Parejas compatibles',
+        noPartners: 'No se encontraron parejas por el momento',
+        searchOngoing: 'Búsqueda en curso...',
+        expandCommunity: 'Estamos expandiendo nuestra comunidad. ¡Vuelva pronto!',
+        details: 'Detalles',
+        contact: 'Contactar',
+        backProfile: '← Mi perfil',
+        toMessages: 'Mensajes →',
+        healthCommitment: '🛡️ Su compromiso con la salud',
+        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑',
+        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero. 💑',
+        understood: 'Entiendo',
+        inboxTitle: 'Bandeja de entrada',
+        emptyInbox: '📭 Bandeja vacía',
+        startConversation: '¡Comience una conversación!',
+        findPartners: 'Encontrar parejas',
+        block: '🚫 Bloquear',
+        yourMessage: 'Su mensaje...',
+        send: 'Enviar',
+        blockedByUser: '⛔ Conversación imposible',
+        blockedMessage: 'Este usuario le ha bloqueado. No puede enviarle mensajes.',
+        settingsTitle: 'Configuración',
+        visibility: 'Visibilidad del perfil',
+        notifications: 'Notificaciones push',
+        language: 'Idioma',
+        blockedUsers: 'Usuarios bloqueados',
+        dangerZone: '⚠️ ZONA DE PELIGRO',
+        deleteAccount: '🗑️ Eliminar mi cuenta',
+        delete: 'Eliminar',
+        logout: 'Cerrar sesión',
+        confirmDelete: '¿Eliminar permanentemente?',
+        noBlocked: 'No hay usuarios bloqueados',
+        unblock: 'Desbloquear',
+        thankYou: 'Gracias por este intercambio',
+        thanksMessage: 'Genlove le agradece',
+        newSearch: 'Nueva búsqueda',
+        logoutSuccess: 'Sesión cerrada',
+        seeYouSoon: '¡Hasta pronto!',
+        french: 'Francés',
+        english: 'Inglés',
+        portuguese: 'Portugués',
+        spanish: 'Español',
+        arabic: 'Árabe',
+        chinese: 'Chino',
+        pageNotFound: 'Página no encontrada',
+        pageNotFoundMessage: 'La página que busca no existe.',
+        residence_label: 'Residencia',
+        project_life: 'Proyecto de vida',
+        interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad y mismos proyectos de vida. ¿Puedes tomar unos minutos para conversar?',
+        acceptRequest: '✅ Aceptar',
+        rejectRequest: '❌ Rechazar',
+        rejectionPopup: '🌸 Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas porque estás a punto de encontrar a la persona adecuada.',
+        gotIt: 'Entiendo',
+        returnProfile: '📋 Mi perfil',
+        newMatch: '🔍 Nueva búsqueda',
+        sendingRequest: '⏳ Tu solicitud está siendo enviada...',
+        requestSent: '✅ ¡Solicitud enviada!'
+    },
+    ar: {
+        appName: 'Genlove',
+        slogan: 'وحدوا القلب والصحة لبناء أزواج أصحاء 💑',
+        security: '🛡️ بياناتك الصحية مشفرة',
+        welcome: 'مرحبًا بكم في Genlove',
+        haveAccount: 'هل لديك حساب بالفعل؟',
+        login: 'تسجيل الدخول',
+        createAccount: 'إنشاء حساب',
+        loginTitle: 'تسجيل الدخول',
+        enterName: 'أدخل اسمك الأول لتسجيل الدخول',
+        yourName: 'اسمك الأول',
+        backHome: '← العودة إلى الرئيسية',
+        nameNotFound: 'الاسم غير موجود. يرجى إنشاء حساب.',
+        charterTitle: '📜 ميثاق الشرف',
+        charterSubtitle: 'اقرأ هذه الالتزامات الخمسة بعناية',
+        scrollDown: '⬇️ انتقل إلى الأسفل ⬇️',
+        accept: 'أوافق وأواصل',
+        oath1: '١. قسم الإخلاص',
+        oath1Sub: 'الحقيقة الطبية',
+        oath1Text: 'أتعهد بشرفي بتقديم معلومات دقيقة عن نمطي الوراثي وبياناتي الصحية.',
+        oath2: '٢. ميثاق السرية',
+        oath2Sub: 'السر المشترك',
+        oath2Text: 'أتعهد بالحفاظ على سرية جميع المعلومات الشخصية والطبية.',
+        oath3: '٣. مبدأ عدم التمييز',
+        oath3Sub: 'المساواة في الاحترام',
+        oath3Text: 'أعامل كل عضو بكرامة، بغض النظر عن نمطه الوراثي.',
+        oath4: '٤. المسؤولية الوقائية',
+        oath4Sub: 'التوجيه الصحي',
+        oath4Text: 'أقبل التدابير الوقائية مثل تصفية التوافقات الخطرة.',
+        oath5: '٥. الإحسان الأخلاقي',
+        oath5Sub: 'المجاملة',
+        oath5Text: 'أتبنى سلوكًا مثاليًا ومحترمًا في رسائلي.',
+        signupTitle: 'إنشاء ملفي الشخصي',
+        signupSub: 'جميع المعلومات سرية',
+        firstName: 'الاسم الأول',
+        lastName: 'اسم العائلة',
+        gender: 'الجنس',
+        male: 'ذكر',
+        female: 'أنثى',
+        dob: 'تاريخ الميلاد',
+        dobPlaceholder: 'yyyy/mm/dd',
+        city: 'مدينة الإقامة',
+        genotype: 'النمط الوراثي',
+        bloodGroup: 'فصيلة الدم',
+        desireChild: 'الرغبة في الأطفال؟',
+        yes: 'نعم',
+        no: 'لا',
+        createProfile: 'إنشاء ملفي الشخصي',
+        backCharter: '← العودة إلى الميثاق',
+        required: 'إلزامي',
+        honorTitle: 'قسم الشرف',
+        honorText: '"أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع."',
+        swear: 'أقسم',
+        accessProfile: 'الوصول إلى ملفي الشخصي',
+        myProfile: 'ملفي الشخصي',
+        home: 'الرئيسية',
+        messages: 'الرسائل',
+        settings: 'الإعدادات',
+        genotype_label: 'النمط الوراثي',
+        blood_label: 'الفصيلة',
+        age_label: 'العمر',
+        project_label: 'المشروع',
+        findPartner: '🔍 العثور على شريك',
+        editProfile: '✏️ تعديل الملف الشخصي',
+        compatiblePartners: 'الشركاء المتوافقون',
+        noPartners: 'لم يتم العثور على شركاء في الوقت الحالي',
+        searchOngoing: 'البحث جار...',
+        expandCommunity: 'نحن نوسع مجتمعنا. عد قريبًا!',
+        details: 'التفاصيل',
+        contact: 'اتصال',
+        backProfile: '← ملفي الشخصي',
+        toMessages: 'الرسائل →',
+        healthCommitment: '🛡️ التزامك الصحي',
+        popupMessageAS: 'كملف AS، نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑',
+        popupMessageSS: 'كملف SS، نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا. 💑',
+        understood: 'فهمت',
+        inboxTitle: 'صندوق الوارد',
+        emptyInbox: '📭 صندوق فارغ',
+        startConversation: 'ابدأ محادثة!',
+        findPartners: 'العثور على شركاء',
+        block: '🚫 حظر',
+        yourMessage: 'رسالتك...',
+        send: 'إرسال',
+        blockedByUser: '⛔ محادثة مستحيلة',
+        blockedMessage: 'هذا المستخدم قام بحظرك. لا يمكنك إرسال رسائل له.',
+        settingsTitle: 'الإعدادات',
+        visibility: 'رؤية الملف الشخصي',
+        notifications: 'إشعارات',
+        language: 'اللغة',
+        blockedUsers: 'المستخدمون المحظورون',
+        dangerZone: '⚠️ منطقة الخطر',
+        deleteAccount: '🗑️ حذف حسابي',
+        delete: 'حذف',
+        logout: 'تسجيل الخروج',
+        confirmDelete: 'حذف نهائي؟',
+        noBlocked: 'لا يوجد مستخدمين محظورين',
+        unblock: 'إلغاء الحظر',
+        thankYou: 'شكرًا لهذا التبادل',
+        thanksMessage: 'Genlove يشكرك',
+        newSearch: 'بحث جديد',
+        logoutSuccess: 'تم تسجيل الخروج بنجاح',
+        seeYouSoon: 'أراك قريبًا!',
+        french: 'الفرنسية',
+        english: 'الإنجليزية',
+        portuguese: 'البرتغالية',
+        spanish: 'الإسبانية',
+        arabic: 'العربية',
+        chinese: 'الصينية',
+        pageNotFound: 'الصفحة غير موجودة',
+        pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
+        residence_label: 'الإقامة',
+        project_life: 'مشروع الحياة',
+        interestPopup: '{name} منجذب جدًا لملفك الشخصي لأنكما تشاركان توافقًا جيدًا ونفس مشاريع الحياة. هل يمكنك تخصيص بضع دقائق للدردشة؟',
+        acceptRequest: '✅ قبول',
+        rejectRequest: '❌ رفض',
+        rejectionPopup: '🌸 عذرًا، {name} لم يعط ردًا إيجابيًا لطلبك. قم بإجراء عمليات بحث أخرى لأنك على وشك العثور على الشخص المناسب.',
+        gotIt: 'فهمت',
+        returnProfile: '📋 ملفي الشخصي',
+        newMatch: '🔍 بحث جديد',
+        sendingRequest: '⏳ جاري إرسال طلبك...',
+        requestSent: '✅ تم إرسال الطلب!'
+    },
+    zh: {
+        appName: 'Genlove',
+        slogan: '结合心灵与健康，建立健康的伴侣关系 💑',
+        security: '🛡️ 您的健康数据已加密',
+        welcome: '欢迎来到 Genlove',
+        haveAccount: '已有帐户？',
+        login: '登录',
+        createAccount: '创建帐户',
+        loginTitle: '登录',
+        enterName: '输入您的名字以登录',
+        yourName: '您的名字',
+        backHome: '← 返回首页',
+        nameNotFound: '未找到名字。请创建帐户。',
+        charterTitle: '📜 荣誉宪章',
+        charterSubtitle: '请仔细阅读这5项承诺',
+        scrollDown: '⬇️ 滚动到底部 ⬇️',
+        accept: '我接受并继续',
+        oath1: '1. 真诚誓言',
+        oath1Sub: '医疗真相',
+        oath1Text: '我以荣誉保证提供关于我的基因型和健康数据的准确信息。',
+        oath2: '2. 保密契约',
+        oath2Sub: '共享秘密',
+        oath2Text: '我承诺对所有个人和医疗信息保密。',
+        oath3: '3. 非歧视原则',
+        oath3Sub: '尊重平等',
+        oath3Text: '我尊重每一位成员，无论其基因型如何。',
+        oath4: '4. 预防责任',
+        oath4Sub: '健康导向',
+        oath4Text: '我接受保护措施，如过滤风险兼容性。',
+        oath5: '5. 道德仁慈',
+        oath5Sub: '礼貌',
+        oath5Text: '我在信息中采取模范和尊重的行为。',
+        signupTitle: '创建我的个人资料',
+        signupSub: '所有信息都是保密的',
+        firstName: '名字',
+        lastName: '姓氏',
+        gender: '性别',
+        male: '男',
+        female: '女',
+        dob: '出生日期',
+        dobPlaceholder: 'yyyy/mm/dd',
+        city: '居住城市',
+        genotype: '基因型',
+        bloodGroup: '血型',
+        desireChild: '想要孩子吗？',
+        yes: '是',
+        no: '否',
+        createProfile: '创建个人资料',
+        backCharter: '← 返回宪章',
+        required: '必填',
+        honorTitle: '荣誉誓言',
+        honorText: '"我以荣誉确认我的信息是真实的，符合实际情况。"',
+        swear: '我发誓',
+        accessProfile: '访问我的个人资料',
+        myProfile: '我的个人资料',
+        home: '首页',
+        messages: '消息',
+        settings: '设置',
+        genotype_label: '基因型',
+        blood_label: '血型',
+        age_label: '年龄',
+        project_label: '项目',
+        findPartner: '🔍 寻找伴侣',
+        editProfile: '✏️ 编辑个人资料',
+        compatiblePartners: '兼容的伴侣',
+        noPartners: '目前未找到伴侣',
+        searchOngoing: '搜索中...',
+        expandCommunity: '我们正在扩大社区。请稍后再来！',
+        details: '详情',
+        contact: '联系',
+        backProfile: '← 我的个人资料',
+        toMessages: '消息 →',
+        healthCommitment: '🛡️ 您的健康承诺',
+        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑',
+        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。💑',
+        understood: '我明白',
+        inboxTitle: '收件箱',
+        emptyInbox: '📭 空收件箱',
+        startConversation: '开始对话！',
+        findPartners: '寻找伴侣',
+        block: '🚫 屏蔽',
+        yourMessage: '您的消息...',
+        send: '发送',
+        blockedByUser: '⛔ 无法对话',
+        blockedMessage: '此用户已屏蔽您。您无法向他发送消息。',
+        settingsTitle: '设置',
+        visibility: '个人资料可见性',
+        notifications: '推送通知',
+        language: '语言',
+        blockedUsers: '已屏蔽用户',
+        dangerZone: '⚠️ 危险区域',
+        deleteAccount: '🗑️ 删除我的帐户',
+        delete: '删除',
+        logout: '退出',
+        confirmDelete: '永久删除？',
+        noBlocked: '没有已屏蔽的用户',
+        unblock: '解除屏蔽',
+        thankYou: '感谢您的交流',
+        thanksMessage: 'Genlove感谢您',
+        newSearch: '新搜索',
+        logoutSuccess: '退出成功',
+        seeYouSoon: '再见！',
+        french: '法语',
+        english: '英语',
+        portuguese: '葡萄牙语',
+        spanish: '西班牙语',
+        arabic: '阿拉伯语',
+        chinese: '中文',
+        pageNotFound: '页面未找到',
+        pageNotFoundMessage: '您查找的页面不存在。',
+        residence_label: '居住地',
+        project_life: '人生计划',
+        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性和相同的人生规划。您能花几分钟聊聊吗？',
+        acceptRequest: '✅ 接受',
+        rejectRequest: '❌ 拒绝',
+        rejectionPopup: '🌸 抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧，您即将找到合适的人。',
+        gotIt: '明白了',
+        returnProfile: '📋 我的个人资料',
+        newMatch: '🔍 新搜索',
+        sendingRequest: '⏳ 您的请求正在发送中...',
+        requestSent: '✅ 请求已发送！'
     }
-    // ... autres langues (pt, es, ar, zh) conservées mais non réécrites pour la concision
 };
 
 app.use(async (req, res, next) => {
@@ -368,7 +860,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============================================
-// STYLES CSS COMPLETS (identique à votre code fonctionnel)
+// STYLES CSS COMPLETS
 // ============================================
 const styles = `
 <style>
@@ -591,6 +1083,9 @@ const styles = `
         align-items: center;
         gap: 20px;
     }
+    .match-header .match-info {
+        flex: 1;
+    }
     .match-actions {
         display: flex;
         gap: 10px;
@@ -598,6 +1093,14 @@ const styles = `
     }
     .match-actions .btn-action {
         flex: 1;
+    }
+    .match-photo-blur { 
+        width: 70px; 
+        height: 70px; 
+        border-radius: 50%; 
+        background: #f0f0f0; 
+        filter: blur(5px); 
+        flex-shrink: 0;
     }
     .inbox-item {
         cursor: pointer;
@@ -832,8 +1335,8 @@ const styles = `
         color: #1a2a44;
         margin: 20px 0 10px;
     }
-    /* POPUPS AMENDÉS */
-    #genlove-popup, #request-popup, #rejection-popup {
+    /* Popups */
+    #genlove-popup, #request-popup, #rejection-popup, #loading-popup {
         display: none;
         position: fixed;
         top: 0;
@@ -916,6 +1419,19 @@ const styles = `
         display: flex;
         gap: 10px;
         margin-top: 20px;
+    }
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #ff416c;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
     @keyframes popupAppear {
         from {
@@ -1088,7 +1604,7 @@ app.get('/lang/:lang', async (req, res) => {
 });
 
 // ============================================
-// ROUTES PRINCIPALES (inchangées - votre code existant)
+// ROUTES PRINCIPALES
 // ============================================
 
 // ACCUEIL
@@ -1362,9 +1878,7 @@ app.get('/sas-validation', async (req, res) => {
 </html>`);
 });
 
-// ============================================
-// PROFIL AVEC POPUPS AMENDÉS
-// ============================================
+// PROFIL AVEC POPUPS
 app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -1457,7 +1971,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
         function showRequestPopup(r) {
             currentRequestId = r._id;
             const prenom = r.senderId.firstName;
-            const msg = \`${t('interestPopup').replace('{name}', '${prenom}')}\`;
+            const msg = \`${t('interestPopup')}\`.replace('{name}', prenom);
             document.getElementById('request-message').innerText = msg;
             document.getElementById('request-popup').style.display = 'flex';
             vibrate([200,100,200]);
@@ -1492,7 +2006,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
 
         function showRejectionPopup(r) {
             const prenom = r.senderFirstName;
-            const msg = \`${t('rejectionPopup').replace('{name}', '${prenom}')}\`;
+            const msg = \`${t('rejectionPopup')}\`.replace('{name}', prenom);
             document.getElementById('rejection-message').innerText = msg;
             document.getElementById('rejection-popup').style.display = 'flex';
             fetch('/api/rejections/' + r.requestId + '/view', { method: 'POST' });
@@ -1521,9 +2035,7 @@ app.get('/profile', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// ============================================
-// MATCHING AVEC EXCLUSIONS (bloqués, conversations, rejetés)
-// ============================================
+// MATCHING AVEC AMENDEMENTS (prénom, génotype, âge + loading)
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -1583,12 +2095,13 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             partnersHTML = `<div class="empty-message"><span>🔍</span><h3>${t('searchOngoing')}</h3><p>${t('expandCommunity')}</p></div>`;
         } else {
             partners.forEach(p => {
+                const age = calculerAge(p.dob);
                 partnersHTML += `<div class="match-card">
                     <div class="match-header">
                         <div class="match-photo-blur"></div>
-                        <div style="flex:1">
+                        <div class="match-info">
                             <b style="font-size:1.3rem;">${p.firstName}</b>
-                            <br><span style="font-size:1.1rem;">${p.genotype} • ${p.residence}</span>
+                            <br><span style="font-size:1.1rem;">${p.genotype} • ${age} ans</span>
                         </div>
                     </div>
                     <div class="match-actions">
@@ -1597,6 +2110,16 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
                 </div>`;
             });
         }
+
+        // POPUP DE LOADING
+        const loadingPopup = `
+        <div id="loading-popup">
+            <div class="popup-card">
+                <div class="spinner"></div>
+                <div class="popup-message" id="loading-message">${t('sendingRequest')}</div>
+            </div>
+        </div>
+        `;
 
         const ssasPopup = isSSorAS ? `
         <div id="genlove-popup" style="display:flex;">
@@ -1621,11 +2144,13 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     ${notifyScript}
     <style>
         #genlove-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px; }
+        #loading-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:20000; align-items:center; justify-content:center; padding:20px; }
     </style>
 </head>
 <body>
     <div class="app-shell">
         ${ssasPopup}
+        ${loadingPopup}
         <div class="page-white">
             <h2>${t('compatiblePartners')}</h2>
             ${partnersHTML}
@@ -1638,20 +2163,37 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
 
     <script>
         function sendInterest(receiverId, receiverName) {
-            fetch('/api/requests', {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ receiverId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showNotify('✅ Intérêt envoyé à ' + receiverName, 'success');
-                } else {
-                    showNotify('❌ ' + (data.error || 'Erreur'), 'error');
-                }
-            })
-            .catch(() => showNotify('❌ Erreur réseau', 'error'));
+            // Afficher le popup de loading
+            document.getElementById('loading-popup').style.display = 'flex';
+            document.getElementById('loading-message').innerText = '${t('sendingRequest')}';
+            
+            // Simuler un loading de 5 secondes
+            setTimeout(() => {
+                fetch('/api/requests', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ receiverId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // Changer le message
+                    document.getElementById('loading-message').innerText = '${t('requestSent')}';
+                    
+                    // Attendre 1 seconde puis fermer
+                    setTimeout(() => {
+                        document.getElementById('loading-popup').style.display = 'none';
+                        if (data.success) {
+                            showNotify('✅ Intérêt envoyé à ' + receiverName, 'success');
+                        } else {
+                            showNotify('❌ ' + (data.error || 'Erreur'), 'error');
+                        }
+                    }, 1000);
+                })
+                .catch(() => {
+                    document.getElementById('loading-popup').style.display = 'none';
+                    showNotify('❌ Erreur réseau', 'error');
+                });
+            }, 5000); // 5 secondes de loading
         }
     </script>
 </body>
@@ -1662,9 +2204,7 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// ============================================
-// INBOX (inchangée)
-// ============================================
+// INBOX
 app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -1732,9 +2272,7 @@ app.get('/inbox', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// ============================================
-// CHAT (inchangé)
-// ============================================
+// CHAT
 app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -1826,9 +2364,7 @@ app.get('/chat', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// ============================================
-// PARAMÈTRES (inchangés)
-// ============================================
+// PARAMÈTRES
 app.get('/settings', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2066,7 +2602,7 @@ app.get('/logout-success', (req, res) => {
 });
 
 // ============================================
-// ROUTES API AMENDÉES
+// ROUTES API
 // ============================================
 
 app.post('/api/login', async (req, res) => {
@@ -2106,18 +2642,16 @@ app.post('/api/validate-honor', requireAuth, async (req, res) => {
     }
 });
 
-// NOUVELLE ROUTE - Envoyer un intérêt (sans message)
+// Envoyer un intérêt
 app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     try {
         const { receiverId } = req.body;
         
-        // Vérifier que le destinataire existe
         const receiver = await User.findById(receiverId);
         if (!receiver) {
             return res.status(404).json({ error: "Destinataire non trouvé" });
         }
 
-        // Vérifier si une demande est déjà en attente
         const existingRequest = await Request.findOne({
             senderId: req.session.userId,
             receiverId,
@@ -2128,7 +2662,6 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             return res.status(400).json({ error: "Demande déjà envoyée" });
         }
 
-        // Vérifier si une conversation existe déjà
         const existingConversation = await Message.findOne({
             $or: [
                 { senderId: req.session.userId, receiverId },
@@ -2140,7 +2673,6 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
             return res.status(400).json({ error: "Vous avez déjà une conversation avec cette personne" });
         }
 
-        // Créer la demande
         const request = new Request({
             senderId: req.session.userId,
             receiverId,
@@ -2155,7 +2687,7 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// Récupérer les demandes en attente (non vues)
+// Récupérer les demandes en attente
 app.get('/api/requests/pending', requireAuth, requireVerified, async (req, res) => {
     try {
         const requests = await Request.find({
@@ -2178,7 +2710,6 @@ app.post('/api/requests/:id/accept', requireAuth, requireVerified, async (req, r
         if (!request) return res.status(404).json({ error: 'Demande non trouvée' });
         if (request.receiverId._id.toString() !== req.session.userId) return res.status(403).json({ error: 'Non autorisé' });
 
-        // Créer un message de bienvenue (premier message)
         const welcomeMsg = new Message({
             senderId: request.senderId._id,
             receiverId: request.receiverId._id,
@@ -2205,7 +2736,6 @@ app.post('/api/requests/:id/reject', requireAuth, requireVerified, async (req, r
         if (!request) return res.status(404).json({ error: 'Demande non trouvée' });
         if (request.receiverId._id.toString() !== req.session.userId) return res.status(403).json({ error: 'Non autorisé' });
 
-        // Ajouter le sender aux rejets du receiver (pour l'exclure du matching)
         await User.findByIdAndUpdate(req.session.userId, {
             $addToSet: { rejectedRequests: request.senderId._id }
         });
@@ -2253,7 +2783,7 @@ app.post('/api/rejections/:id/view', requireAuth, requireVerified, async (req, r
     }
 });
 
-// Envoyer un message normal
+// Envoyer un message
 app.post('/api/messages', requireAuth, requireVerified, async (req, res) => {
     try {
         const msg = new Message({
@@ -2298,17 +2828,10 @@ app.post('/api/block/:userId', requireAuth, requireVerified, async (req, res) =>
 app.post('/api/unblock/:userId', requireAuth, requireVerified, async (req, res) => {
     try {
         const current = await User.findById(req.session.userId);
-        const target = await User.findById(req.params.userId);
-        if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
-
         if (current.blockedUsers) {
             current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== req.params.userId);
+            await current.save();
         }
-        if (target.blockedBy) {
-            target.blockedBy = target.blockedBy.filter(id => id.toString() !== req.session.userId);
-        }
-        await current.save();
-        await target.save();
         res.json({ success: true });
     } catch(e) {
         console.error("❌ Erreur dans /api/unblock:", e);
