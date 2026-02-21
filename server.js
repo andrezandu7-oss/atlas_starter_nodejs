@@ -2155,8 +2155,8 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
             window.location.href = '/matching';
         }
 
-        setInterval(checkRequests, 5000);
-        setInterval(checkRejections, 5000);
+        setInterval(checkRequests, 3000);
+        setInterval(checkRejections, 3000);
         checkRequests();
         checkRejections();
     </script>
@@ -2168,7 +2168,7 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING - VERSION CORRIGÉE AVEC POPUP AS/SS
+// MATCHING - VERSION CORRIGÉE
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2236,7 +2236,6 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             });
         }
 
-        // POPUP AS/SS - S'AFFICHE AUTOMATIQUEMENT
         const ssasPopup = currentUser.genotype === 'AS' || currentUser.genotype === 'SS' ? `
         <div id="genlove-popup" style="display: flex;">
             <div class="popup-card">
