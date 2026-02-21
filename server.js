@@ -2006,7 +2006,7 @@ app.get("/sas-validation", requireAuth, async (req, res) => {
 </html>`);
 });
 
-// PROFIL - VERSION CORRIGÉE AVEC BOUTONS FONCTIONNELS
+// PROFIL - VERSION CORRIGÉE
 app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -2168,7 +2168,7 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING
+// MATCHING - VERSION CORRIGÉE AVEC POPUP AS/SS
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2236,8 +2236,9 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             });
         }
 
+        // POPUP AS/SS - S'AFFICHE AUTOMATIQUEMENT
         const ssasPopup = currentUser.genotype === 'AS' || currentUser.genotype === 'SS' ? `
-        <div id="genlove-popup">
+        <div id="genlove-popup" style="display: flex;">
             <div class="popup-card">
                 <div class="popup-icon">💚</div>
                 <div class="popup-title">${t('healthCommitment')}</div>
@@ -2283,30 +2284,24 @@ app.get('/matching', requireAuth, requireVerified, async (req, res) => {
             document.getElementById('loading-popup').style.display = 'flex';
             document.getElementById('loading-message').innerText = '${t('sendingRequest')}';
 
-            setTimeout(() => {
-                fetch('/api/requests', {
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ receiverId })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('loading-message').innerText = '${t('requestSent')}';
-
-                    setTimeout(() => {
-                        document.getElementById('loading-popup').style.display = 'none';
-                        if (data.success) {
-                            showNotify('✅ Intérêt envoyé à ' + receiverName, 'success');
-                        } else {
-                            showNotify('❌ ' + (data.error || 'Erreur'), 'error');
-                        }
-                    }, 1000);
-                })
-                .catch(() => {
-                    document.getElementById('loading-popup').style.display = 'none';
-                    showNotify('❌ Erreur réseau', 'error');
-                });
-            }, 5000);
+            fetch('/api/requests', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ receiverId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading-popup').style.display = 'none';
+                if (data.success) {
+                    showNotify('✅ Intérêt envoyé à ' + receiverName, 'success');
+                } else {
+                    showNotify('❌ ' + (data.error || 'Erreur'), 'error');
+                }
+            })
+            .catch(() => {
+                document.getElementById('loading-popup').style.display = 'none';
+                showNotify('❌ Erreur réseau', 'error');
+            });
         }
     </script>
 </body>
