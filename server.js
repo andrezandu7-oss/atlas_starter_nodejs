@@ -45,7 +45,7 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 
 // ========================
-// MODÈLES DE DONNÉES
+// MODÈLES DE DONNÉES (avec tableaux [] comme dans l'original)
 // ========================
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
@@ -2006,7 +2006,7 @@ app.get("/sas-validation", requireAuth, async (req, res) => {
 </html>`);
 });
 
-// PROFIL - VERSION CORRIGÉE
+// PROFIL
 app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -2168,7 +2168,7 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     }
 });
 
-// MATCHING - VERSION CORRIGÉE
+// MATCHING
 app.get('/matching', requireAuth, requireVerified, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2848,12 +2848,13 @@ app.post('/api/requests', requireAuth, requireVerified, async (req, res) => {
     }
 });
 
+// ⚠️ CORRECTION CRUCIALE : AJOUT DE "viewed: false"
 app.get('/api/requests/pending', requireAuth, requireVerified, async (req, res) => {
     try {
         const requests = await Request.find({
             receiverId: req.session.userId,
             status: 'pending',
-            viewed: false
+            viewed: false  // ← Ce filtre est ESSENTIEL pour que les popups apparaissent
         }).populate('senderId', 'firstName');
         res.json(requests);
     } catch(e) {
@@ -2899,7 +2900,7 @@ app.post('/api/requests/:id/reject', requireAuth, requireVerified, async (req, r
         });
 
         request.status = 'rejected';
-        request.viewed = true;
+        request.viewed = true;  // ← Marqué comme vu pour ne plus réapparaître
         await request.save();
 
         res.json({ success: true });
