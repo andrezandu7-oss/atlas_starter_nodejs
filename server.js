@@ -8,10 +8,10 @@ const port = process.env.PORT || 3000;
 // ========================
 // CONNEXION MONGODB
 // ========================
-const mongouRI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rencontre';
+const mongouRI = process.env.MONGODB_URI || 'mongodb://localhost:27017/genlove';
 
 mongoose.connect(mongouRI)
-    .then(() => console.log("✅ Connecté à MongoDB"))
+    .then(() => console.log("✅ Connecté à MongoDB pour Genlove !"))
     .catch(err => console.error("❌ Erreur de connexion MongoDB:", err));
 
 // ========================
@@ -20,7 +20,7 @@ mongoose.connect(mongouRI)
 app.set('trust proxy', 1);
 
 const sessionConfig = {
-    secret: process.env.SESSION_SECRET || 'secret-key-2026',
+    secret: process.env.SESSION_SECRET || 'genlove-secret-key-2026',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: mongouRI }),
@@ -63,7 +63,8 @@ const messageSchema = new mongoose.Schema({
     receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     text: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    read: { type: Boolean, default: false }
+    read: { type: Boolean, default: false },
+    isBlocked: { type: Boolean, default: false } // Pour masquer les messages lors du blocage
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -99,10 +100,10 @@ const requireVerified = (req, res, next) => {
 // ==============================================
 const translations = {
     fr: {
-        appName: 'Rencontre',
+        appName: 'Genlove',
         slogan: 'Unissez cœur et santé pour bâtir des couples sains 💑',
         security: '🛡️ Vos données de santé sont cryptées',
-        welcome: 'Bienvenue',
+        welcome: 'Bienvenue sur Genlove',
         haveAccount: 'Avez-vous déjà un compte ?',
         login: 'Se connecter',
         createAccount: 'Créer un compte',
@@ -111,6 +112,25 @@ const translations = {
         yourName: 'Votre prénom',
         backHome: 'Retour à l\'accueil',
         nameNotFound: 'Prénom non trouvé. Veuillez créer un compte.',
+        charterTitle: '📜 La Charte d\'Honneur',
+        charterSubtitle: 'Lisez attentivement ces 5 engagements',
+        scrollDown: '⬇️ Faites défiler jusqu\'en bas ⬇️',
+        accept: 'J\'accepte et je continue',
+        oath1: '1. Le Serment de Sincérité',
+        oath1Sub: 'Vérité Médicale',
+        oath1Text: 'Je m\'engage sur l\'honneur à fournir des informations exactes concernant mon génotype et mes données de santé.',
+        oath2: '2. Le Pacte de Confidentialité',
+        oath2Sub: 'Secret Partagé',
+        oath2Text: 'Je m\'engage à garder confidentielles toutes les informations personnelles et médicales.',
+        oath3: '3. Le Principe de Non-Discrimination',
+        oath3Sub: 'Égalité de Respect',
+        oath3Text: 'Je traite chaque membre avec dignité, quel que soit son génotype.',
+        oath4: '4. La Responsabilité Préventive',
+        oath4Sub: 'Orientation Santé',
+        oath4Text: 'J\'accepte les mesures de protection comme le filtrage des compatibilités à risque.',
+        oath5: '5. La Bienveillance Éthique',
+        oath5Sub: 'Courtoisie',
+        oath5Text: 'J\'adopte une conduite exemplaire et respectueuse dans mes messages.',
         signupTitle: 'Créer mon profil',
         signupSub: 'Toutes les informations sont confidentielles',
         firstName: 'Prénom',
@@ -119,6 +139,7 @@ const translations = {
         male: 'Homme',
         female: 'Femme',
         dob: 'Date de naissance',
+        dobPlaceholder: 'jj/mm/aaaa',
         city: 'Ville de résidence',
         genotype: 'Génotype',
         bloodGroup: 'Groupe sanguin',
@@ -126,8 +147,12 @@ const translations = {
         yes: 'Oui',
         no: 'Non',
         createProfile: 'Créer mon profil',
-        backCharter: '← Retour',
+        backCharter: '← Retour à la charte',
         required: 'obligatoire',
+        honorTitle: 'Serment d\'Honneur',
+        honorText: 'Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité.',
+        swear: 'Je le jure',
+        accessProfile: 'Accéder à mon profil',
         myProfile: 'Mon Profil',
         home: 'Accueil',
         messages: 'Messages',
@@ -147,8 +172,8 @@ const translations = {
         backProfile: '← Mon profil',
         toMessages: 'Messages →',
         healthCommitment: 'Votre engagement santé',
-        popupMessageAS: 'En tant que profil AS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose.',
-        popupMessageSS: 'En tant que profil SS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose.',
+        popupMessageAS: 'En tant que profil AS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable.',
+        popupMessageSS: 'En tant que profil SS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable.',
         understood: 'J\'ai compris',
         inboxTitle: 'Boîte de réception',
         emptyInbox: 'Boîte vide',
@@ -172,7 +197,7 @@ const translations = {
         confirmDelete: 'Supprimer définitivement ?',
         noBlocked: 'Aucun utilisateur bloqué',
         thankYou: 'Merci pour cet échange',
-        thanksMessage: 'Rencontre vous remercie',
+        thanksMessage: 'Genlove vous remercie',
         newSearch: 'Nouvelle recherche',
         logoutSuccess: 'Déconnexion réussie',
         seeYouSoon: 'À bientôt !',
@@ -186,10 +211,10 @@ const translations = {
         pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.',
         residence_label: 'Résidence',
         project_life: 'Projet de vie',
-        interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité. Pouvez-vous prendre quelques minutes pour échanger ?',
+        interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité et mêmes projets de vie. Pouvez-vous prendre quelques minutes pour échanger ?',
         acceptRequest: '✓ Accepter',
         rejectRequest: '✗ Refuser',
-        rejectionPopup: 'Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches.',
+        rejectionPopup: 'Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches car vous êtes sur le point de trouver la bonne personne.',
         gotIt: 'J\'ai compris',
         returnProfile: '📋 Mon profil',
         newMatch: '🔍 Nouvelle recherche',
@@ -212,10 +237,10 @@ const translations = {
         year: 'Année'
     },
     en: {
-        appName: 'Rencontre',
+        appName: 'Genlove',
         slogan: 'Unite heart and health to build healthy couples 💑',
         security: '🛡️ Your health data is encrypted',
-        welcome: 'Welcome',
+        welcome: 'Welcome to Genlove',
         haveAccount: 'Already have an account?',
         login: 'Login',
         createAccount: 'Create account',
@@ -224,6 +249,25 @@ const translations = {
         yourName: 'Your first name',
         backHome: '← Back to home',
         nameNotFound: 'Name not found. Please create an account.',
+        charterTitle: '📜 The Honor Charter',
+        charterSubtitle: 'Read these 5 commitments carefully',
+        scrollDown: '⬇️ Scroll to the bottom ⬇️',
+        accept: 'I accept and continue',
+        oath1: '1. The Oath of Sincerity',
+        oath1Sub: 'Medical Truth',
+        oath1Text: 'I pledge on my honor to provide accurate information about my genotype and health data.',
+        oath2: '2. The Pact of Confidentiality',
+        oath2Sub: 'Shared Secret',
+        oath2Text: 'I commit to keeping all personal and medical information confidential.',
+        oath3: '3. The Principle of Non-Discrimination',
+        oath3Sub: 'Equality of Respect',
+        oath3Text: 'I treat every member with dignity, regardless of their genotype.',
+        oath4: '4. Preventive Responsibility',
+        oath4Sub: 'Health Orientation',
+        oath4Text: 'I accept protective measures such as filtering risky compatibilities.',
+        oath5: '5. Ethical Benevolence',
+        oath5Sub: 'Courtesy',
+        oath5Text: 'I adopt exemplary and respectful conduct in my messages.',
         signupTitle: 'Create my profile',
         signupSub: 'All information is confidential',
         firstName: 'First name',
@@ -232,6 +276,7 @@ const translations = {
         male: 'Male',
         female: 'Female',
         dob: 'Date of birth',
+        dobPlaceholder: 'dd/mm/yyyy',
         city: 'City of residence',
         genotype: 'Genotype',
         bloodGroup: 'Blood group',
@@ -239,8 +284,12 @@ const translations = {
         yes: 'Yes',
         no: 'No',
         createProfile: 'Create my profile',
-        backCharter: '← Back',
+        backCharter: '← Back to charter',
         required: 'required',
+        honorTitle: 'Oath of Honor',
+        honorText: 'I confirm on my honor that my information is sincere and conforms to reality.',
+        swear: 'I swear',
+        accessProfile: 'Access my profile',
         myProfile: 'My Profile',
         home: 'Home',
         messages: 'Messages',
@@ -260,8 +309,8 @@ const translations = {
         backProfile: '← My profile',
         toMessages: 'Messages →',
         healthCommitment: 'Your health commitment',
-        popupMessageAS: 'As an AS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease.',
-        popupMessageSS: 'As an SS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease.',
+        popupMessageAS: 'As an AS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together.',
+        popupMessageSS: 'As an SS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together.',
         understood: 'I understand',
         inboxTitle: 'Inbox',
         emptyInbox: 'Empty inbox',
@@ -285,7 +334,7 @@ const translations = {
         confirmDelete: 'Delete permanently?',
         noBlocked: 'No blocked users',
         thankYou: 'Thank you for this exchange',
-        thanksMessage: 'Rencontre thanks you',
+        thanksMessage: 'Genlove thanks you',
         newSearch: 'New search',
         logoutSuccess: 'Logout successful',
         seeYouSoon: 'See you soon!',
@@ -299,10 +348,10 @@ const translations = {
         pageNotFoundMessage: 'The page you are looking for does not exist.',
         residence_label: 'Residence',
         project_life: 'Life project',
-        interestPopup: '{name} is very attracted to your profile because you share good compatibility. Can you take a few minutes to chat?',
+        interestPopup: '{name} is very attracted to your profile because you share good compatibility and same life projects. Can you take a few minutes to chat?',
         acceptRequest: '✓ Accept',
         rejectRequest: '✗ Reject',
-        rejectionPopup: 'Sorry, {name} did not give a favorable response to your request. Start other searches.',
+        rejectionPopup: 'Sorry, {name} did not give a favorable response to your request. Start other searches because you are about to find the right person.',
         gotIt: 'Got it',
         returnProfile: '📋 My profile',
         newMatch: '🔍 New search',
@@ -325,10 +374,10 @@ const translations = {
         year: 'Year'
     },
     pt: {
-        appName: 'Rencontre',
+        appName: 'Genlove',
         slogan: 'Una coração e saúde para construir casais saudáveis 💑',
         security: '🛡️ Seus dados de saúde estão criptografados',
-        welcome: 'Bem-vindo',
+        welcome: 'Bem-vindo ao Genlove',
         haveAccount: 'Já tem uma conta?',
         login: 'Entrar',
         createAccount: 'Criar conta',
@@ -337,6 +386,25 @@ const translations = {
         yourName: 'Seu primeiro nome',
         backHome: '← Voltar ao início',
         nameNotFound: 'Nome não encontrado. Por favor, crie uma conta.',
+        charterTitle: '📜 A Carta de Honra',
+        charterSubtitle: 'Leia estes 5 compromissos atentamente',
+        scrollDown: '⬇️ Role até o final ⬇️',
+        accept: 'Aceito e continuo',
+        oath1: '1. O Juramento de Sinceridade',
+        oath1Sub: 'Verdade Médica',
+        oath1Text: 'Comprometo-me, sob minha honra, a fornecer informações precisas sobre meu genótipo e dados de saúde.',
+        oath2: '2. O Pacto de Confidencialidade',
+        oath2Sub: 'Segredo Compartilhado',
+        oath2Text: 'Comprometo-me a manter todas as informações pessoais e médicas confidenciais.',
+        oath3: '3. O Princípio da Não-Discriminação',
+        oath3Sub: 'Igualdade de Respeito',
+        oath3Text: 'Trato cada membro com dignidade, independentemente do seu genótipo.',
+        oath4: '4. Responsabilidade Preventiva',
+        oath4Sub: 'Orientação para a Saúde',
+        oath4Text: 'Aceito medidas de proteção como a filtragem de compatibilidades de risco.',
+        oath5: '5. Benevolência Ética',
+        oath5Sub: 'Cortesia',
+        oath5Text: 'Adoto uma conduta exemplar e respeitosa em minhas mensagens.',
         signupTitle: 'Criar meu perfil',
         signupSub: 'Todas as informações são confidenciais',
         firstName: 'Primeiro nome',
@@ -345,6 +413,7 @@ const translations = {
         male: 'Homem',
         female: 'Mulher',
         dob: 'Data de nascimento',
+        dobPlaceholder: 'dd/mm/aaaa',
         city: 'Cidade de residência',
         genotype: 'Genótipo',
         bloodGroup: 'Grupo sanguíneo',
@@ -352,8 +421,12 @@ const translations = {
         yes: 'Sim',
         no: 'Não',
         createProfile: 'Criar meu perfil',
-        backCharter: '← Voltar',
+        backCharter: '← Voltar à carta',
         required: 'obrigatório',
+        honorTitle: 'Juramento de Honra',
+        honorText: 'Confirmo por minha honra que minhas informações são sinceras e conformes à realidade.',
+        swear: 'Eu juro',
+        accessProfile: 'Acessar meu perfil',
         myProfile: 'Meu Perfil',
         home: 'Início',
         messages: 'Mensagens',
@@ -373,8 +446,8 @@ const translations = {
         backProfile: '← Meu perfil',
         toMessages: 'Mensagens →',
         healthCommitment: 'Seu compromisso com a saúde',
-        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
-        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
+        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro.',
+        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro.',
         understood: 'Entendi',
         inboxTitle: 'Caixa de entrada',
         emptyInbox: 'Caixa vazia',
@@ -398,7 +471,7 @@ const translations = {
         confirmDelete: 'Excluir permanentemente?',
         noBlocked: 'Nenhum usuário bloqueado',
         thankYou: 'Obrigado por este encontro',
-        thanksMessage: 'Rencontre agradece',
+        thanksMessage: 'Genlove agradece',
         newSearch: 'Nova pesquisa',
         logoutSuccess: 'Saída bem-sucedida',
         seeYouSoon: 'Até breve!',
@@ -412,10 +485,10 @@ const translations = {
         pageNotFoundMessage: 'A página que você procura não existe.',
         residence_label: 'Residência',
         project_life: 'Projeto de vida',
-        interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade. Você pode alguns minutos para conversar?',
+        interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade e mesmos projetos de vida. Você pode alguns minutos para conversar?',
         acceptRequest: '✓ Aceitar',
         rejectRequest: '✗ Recusar',
-        rejectionPopup: 'Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas.',
+        rejectionPopup: 'Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas porque você está prestes a encontrar a pessoa certa.',
         gotIt: 'Entendi',
         returnProfile: '📋 Meu perfil',
         newMatch: '🔍 Nova pesquisa',
@@ -438,10 +511,10 @@ const translations = {
         year: 'Ano'
     },
     es: {
-        appName: 'Rencontre',
+        appName: 'Genlove',
         slogan: 'Une corazón y salud para construir parejas saludables 💑',
         security: '🛡️ Sus datos de salud están encriptados',
-        welcome: 'Bienvenido',
+        welcome: 'Bienvenido a Genlove',
         haveAccount: '¿Ya tienes una cuenta?',
         login: 'Iniciar sesión',
         createAccount: 'Crear cuenta',
@@ -450,6 +523,25 @@ const translations = {
         yourName: 'Su nombre',
         backHome: '← Volver al inicio',
         nameNotFound: 'Nombre no encontrado. Por favor, cree una cuenta.',
+        charterTitle: '📜 La Carta de Honor',
+        charterSubtitle: 'Lea estos 5 compromisos atentamente',
+        scrollDown: '⬇️ Desplácese hasta el final ⬇️',
+        accept: 'Acepto y continúo',
+        oath1: '1. El Juramento de Sinceridad',
+        oath1Sub: 'Verdad Médica',
+        oath1Text: 'Me comprometo bajo mi honor a proporcionar información precisa sobre mi genotipo y datos de salud.',
+        oath2: '2. El Pacto de Confidencialidad',
+        oath2Sub: 'Secreto Compartido',
+        oath2Text: 'Me comprometo a mantener toda la información personal y médica confidencial.',
+        oath3: '3. El Principio de No Discriminación',
+        oath3Sub: 'Igualdad de Respeto',
+        oath3Text: 'Trato a cada miembro con dignidad, independientemente de su genotipo.',
+        oath4: '4. Responsabilidad Preventiva',
+        oath4Sub: 'Orientación para la Salud',
+        oath4Text: 'Acepto medidas de protección como el filtrado de compatibilidades de riesgo.',
+        oath5: '5. Benevolencia Ética',
+        oath5Sub: 'Cortesía',
+        oath5Text: 'Adopto una conducta ejemplar y respetuosa en mis mensajes.',
         signupTitle: 'Crear mi perfil',
         signupSub: 'Toda la información es confidencial',
         firstName: 'Nombre',
@@ -458,6 +550,7 @@ const translations = {
         male: 'Hombre',
         female: 'Mujer',
         dob: 'Fecha de nacimiento',
+        dobPlaceholder: 'dd/mm/aaaa',
         city: 'Ciudad de residencia',
         genotype: 'Genotipo',
         bloodGroup: 'Grupo sanguíneo',
@@ -465,8 +558,12 @@ const translations = {
         yes: 'Sí',
         no: 'No',
         createProfile: 'Crear mi perfil',
-        backCharter: '← Volver',
+        backCharter: '← Volver a la carta',
         required: 'obligatorio',
+        honorTitle: 'Juramento de Honor',
+        honorText: 'Confirmo bajo mi honor que mi información es sincera y conforme a la realidad.',
+        swear: 'Lo juro',
+        accessProfile: 'Acceder a mi perfil',
         myProfile: 'Mi Perfil',
         home: 'Inicio',
         messages: 'Mensajes',
@@ -486,8 +583,8 @@ const translations = {
         backProfile: '← Mi perfil',
         toMessages: 'Mensajes →',
         healthCommitment: 'Su compromiso con la salud',
-        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
-        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
+        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero.',
+        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero.',
         understood: 'Entiendo',
         inboxTitle: 'Bandeja de entrada',
         emptyInbox: 'Bandeja vacía',
@@ -511,7 +608,7 @@ const translations = {
         confirmDelete: '¿Eliminar permanentemente?',
         noBlocked: 'No hay usuarios bloqueados',
         thankYou: 'Gracias por este intercambio',
-        thanksMessage: 'Rencontre le agradece',
+        thanksMessage: 'Genlove le agradece',
         newSearch: 'Nueva búsqueda',
         logoutSuccess: 'Sesión cerrada',
         seeYouSoon: '¡Hasta pronto!',
@@ -525,10 +622,10 @@ const translations = {
         pageNotFoundMessage: 'La página que busca no existe.',
         residence_label: 'Residencia',
         project_life: 'Proyecto de vida',
-        interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad. ¿Puedes tomar unos minutos para conversar?',
+        interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad y mismos proyectos de vida. ¿Puedes tomar unos minutos para conversar?',
         acceptRequest: '✓ Aceptar',
         rejectRequest: '✗ Rechazar',
-        rejectionPopup: 'Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas.',
+        rejectionPopup: 'Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas porque estás a punto de encontrar a la persona adecuada.',
         gotIt: 'Entiendo',
         returnProfile: '📋 Mi perfil',
         newMatch: '🔍 Nueva búsqueda',
@@ -551,10 +648,10 @@ const translations = {
         year: 'Año'
     },
     ar: {
-        appName: 'رينكونتر',
+        appName: 'جينلوف',
         slogan: '💑 وحد القلب والصحة لبناء أزواج أصحاء',
         security: '🛡️ بياناتك الصحية مشفرة',
-        welcome: 'مرحباً بك',
+        welcome: 'مرحباً بك في جينلوف',
         haveAccount: 'هل لديك حساب بالفعل؟',
         login: 'تسجيل الدخول',
         createAccount: 'إنشاء حساب',
@@ -563,6 +660,25 @@ const translations = {
         yourName: 'اسمك الأول',
         backHome: '→ العودة إلى الرئيسية',
         nameNotFound: 'الاسم غير موجود. يرجى إنشاء حساب.',
+        charterTitle: '📜 ميثاق الشرف',
+        charterSubtitle: 'اقرأ هذه الالتزامات الخمسة بعناية',
+        scrollDown: '⬇️ انتقل إلى الأسفل ⬇️',
+        accept: 'أقبل وأواصل',
+        oath1: '١. قسم الإخلاص',
+        oath1Sub: 'الحقيقة الطبية',
+        oath1Text: 'أتعهد بشرفي بتقديم معلومات دقيقة عن نمطي الوراثي وبياناتي الصحية.',
+        oath2: '٢. ميثاق السرية',
+        oath2Sub: 'السر المشترك',
+        oath2Text: 'ألتزم بالحفاظ على سرية جميع المعلومات الشخصية والطبية.',
+        oath3: '٣. مبدأ عدم التمييز',
+        oath3Sub: 'المساواة في الاحترام',
+        oath3Text: 'أعامل كل عضو بكرامة، بغض النظر عن نمطه الوراثي.',
+        oath4: '٤. المسؤولية الوقائية',
+        oath4Sub: 'التوجيه الصحي',
+        oath4Text: 'أقبل تدابير الحماية مثل تصفية التوافقيات الخطرة.',
+        oath5: '٥. الإحسان الأخلاقي',
+        oath5Sub: 'المجاملة',
+        oath5Text: 'أعتمد سلوكاً مثالياً ومحترماً في رسائلي.',
         signupTitle: 'إنشاء ملفي الشخصي',
         signupSub: 'جميع المعلومات سرية',
         firstName: 'الاسم الأول',
@@ -571,6 +687,7 @@ const translations = {
         male: 'ذكر',
         female: 'أنثى',
         dob: 'تاريخ الميلاد',
+        dobPlaceholder: 'yyyy/mm/dd',
         city: 'مدينة الإقامة',
         genotype: 'النمط الوراثي',
         bloodGroup: 'فصيلة الدم',
@@ -578,8 +695,12 @@ const translations = {
         yes: 'نعم',
         no: 'لا',
         createProfile: 'إنشاء ملفي الشخصي',
-        backCharter: '→ العودة',
+        backCharter: '→ العودة إلى الميثاق',
         required: 'إلزامي',
+        honorTitle: 'قسم الشرف',
+        honorText: 'أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع.',
+        swear: 'أقسم',
+        accessProfile: 'الوصول إلى ملفي الشخصي',
         myProfile: 'ملفي الشخصي',
         home: 'الرئيسية',
         messages: 'الرسائل',
@@ -599,8 +720,8 @@ const translations = {
         backProfile: '→ ملفي الشخصي',
         toMessages: '→ الرسائل',
         healthCommitment: 'التزامك الصحي',
-        popupMessageAS: 'كملف AS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
-        popupMessageSS: 'كملف SS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
+        popupMessageAS: 'كملف AS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا.',
+        popupMessageSS: 'كملف SS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا.',
         understood: 'فهمت',
         inboxTitle: 'صندوق الوارد',
         emptyInbox: 'صندوق فارغ',
@@ -624,7 +745,7 @@ const translations = {
         confirmDelete: 'حذف نهائياً؟',
         noBlocked: 'لا يوجد مستخدمين محظورين',
         thankYou: 'شكراً لهذا التبادل',
-        thanksMessage: 'رينكونتر تشكرك',
+        thanksMessage: 'جينلوف تشكرك',
         newSearch: 'بحث جديد',
         logoutSuccess: 'تم تسجيل الخروج بنجاح',
         seeYouSoon: 'أراك قريباً!',
@@ -638,10 +759,10 @@ const translations = {
         pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
         residence_label: 'الإقامة',
         project_life: 'مشروع الحياة',
-        interestPopup: '{name} مهتم جداً بملفك الشخصي لأنكما تشاركان توافقاً جيداً. هل يمكنك أخذ بضع دقائق للدردشة؟',
+        interestPopup: '{name} مهتم جداً بملفك الشخصي لأنكما تشاركان توافقاً جيداً ونفس مشاريع الحياة. هل يمكنك أخذ بضع دقائق للدردشة؟',
         acceptRequest: '✓ قبول',
         rejectRequest: '✗ رفض',
-        rejectionPopup: 'عذراً، {name} لم يعط رداً إيجابياً لطلبك. قم بإجراء عمليات بحث أخرى.',
+        rejectionPopup: 'عذراً، {name} لم يعط رداً إيجابياً لطلبك. قم بإجراء عمليات بحث أخرى لأنك على وشك العثور على الشخص المناسب.',
         gotIt: 'فهمت',
         returnProfile: '📋 ملفي الشخصي',
         newMatch: '🔍 بحث جديد',
@@ -664,10 +785,10 @@ const translations = {
         year: 'سنة'
     },
     zh: {
-        appName: '相遇',
+        appName: '真愛基因',
         slogan: '💑 结合心灵与健康，建立健康的伴侣关系',
         security: '🛡️ 您的健康数据已加密',
-        welcome: '欢迎',
+        welcome: '欢迎来到真愛基因',
         haveAccount: '已有帐户？',
         login: '登录',
         createAccount: '创建帐户',
@@ -676,6 +797,25 @@ const translations = {
         yourName: '您的名字',
         backHome: '← 返回首页',
         nameNotFound: '未找到名字。请创建帐户。',
+        charterTitle: '📜 荣誉宪章',
+        charterSubtitle: '请仔细阅读这5项承诺',
+        scrollDown: '⬇️ 滚动到底部 ⬇️',
+        accept: '我接受并继续',
+        oath1: '1. 真诚誓言',
+        oath1Sub: '医疗真相',
+        oath1Text: '我以荣誉保证提供关于我的基因型和健康数据的准确信息。',
+        oath2: '2. 保密契约',
+        oath2Sub: '共享秘密',
+        oath2Text: '我承诺对所有个人和医疗信息保密。',
+        oath3: '3. 非歧视原则',
+        oath3Sub: '尊重平等',
+        oath3Text: '我尊重每一位成员，无论其基因型如何。',
+        oath4: '4. 预防责任',
+        oath4Sub: '健康导向',
+        oath4Text: '我接受保护措施，如过滤风险兼容性。',
+        oath5: '5. 道德仁慈',
+        oath5Sub: '礼貌',
+        oath5Text: '我在信息中采取模范和尊重的行为。',
         signupTitle: '创建我的个人资料',
         signupSub: '所有信息都是保密的',
         firstName: '名字',
@@ -684,6 +824,7 @@ const translations = {
         male: '男',
         female: '女',
         dob: '出生日期',
+        dobPlaceholder: 'yyyy/mm/dd',
         city: '居住城市',
         genotype: '基因型',
         bloodGroup: '血型',
@@ -691,8 +832,12 @@ const translations = {
         yes: '是',
         no: '否',
         createProfile: '创建个人资料',
-        backCharter: '← 返回',
+        backCharter: '← 返回宪章',
         required: '必填',
+        honorTitle: '荣誉誓言',
+        honorText: '我以荣誉确认我的信息是真实的，符合实际情况。',
+        swear: '我发誓',
+        accessProfile: '访问我的个人资料',
         myProfile: '我的个人资料',
         home: '首页',
         messages: '消息',
@@ -712,8 +857,8 @@ const translations = {
         backProfile: '← 我的个人资料',
         toMessages: '消息 →',
         healthCommitment: '您的健康承诺',
-        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
-        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
+        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。',
+        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。',
         understood: '我明白',
         inboxTitle: '收件箱',
         emptyInbox: '空收件箱',
@@ -737,7 +882,7 @@ const translations = {
         confirmDelete: '永久删除？',
         noBlocked: '没有已屏蔽的用户',
         thankYou: '感谢您的交流',
-        thanksMessage: '相遇感谢您',
+        thanksMessage: '真愛基因感谢您',
         newSearch: '新搜索',
         logoutSuccess: '退出成功',
         seeYouSoon: '再见！',
@@ -751,10 +896,10 @@ const translations = {
         pageNotFoundMessage: '您查找的页面不存在。',
         residence_label: '居住地',
         project_life: '人生计划',
-        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性。您能花几分钟聊聊吗？',
+        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性和相同的人生规划。您能花几分钟聊聊吗？',
         acceptRequest: '✓ 接受',
         rejectRequest: '✗ 拒绝',
-        rejectionPopup: '抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧。',
+        rejectionPopup: '抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧，您即将找到合适的人。',
         gotIt: '明白了',
         returnProfile: '📋 我的个人资料',
         newMatch: '🔍 新搜索',
@@ -839,11 +984,14 @@ const styles = `
     }
     h1 { font-size: 2.4rem; margin: 10px 0; }
     h2 { font-size: 2rem; margin-bottom: 20px; color: #1a2a44; }
+    h3 { font-size: 1.6rem; margin: 15px 0; }
+    p { font-size: 1.2rem; line-height: 1.6; }
     .logo-text {
         font-size: 5rem;
         font-weight: 800;
         margin: 20px 0;
         letter-spacing: -2px;
+        text-shadow: 4px 4px 0 rgba(255,65,108,0.1);
         text-align: center;
     }
     .slogan {
@@ -887,14 +1035,15 @@ const styles = `
     .lang-btn:hover, .lang-btn.active {
         background: #ff416c;
         color: white;
+        transform: translateY(-2px);
     }
     .btn-pink, .btn-dark {
         padding: 15px 25px;
-        border-radius: 30px;
-        font-size: 1.1rem;
+        border-radius: 60px;
+        font-size: 1.3rem;
         font-weight: 600;
-        width: 100%;
-        margin: 10px 0;
+        width: 90%;
+        margin: 15px auto;
         display: block;
         text-align: center;
         text-decoration: none;
@@ -918,28 +1067,29 @@ const styles = `
     }
     .btn-action {
         padding: 12px 20px;
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
+        font-size: 1.1rem;
         font-weight: 600;
+        border-radius: 30px;
+        border: none;
+        cursor: pointer;
         transition: all 0.2s;
     }
-    .btn-contact {
-        background: #ff416c;
-        color: white;
+    .btn-action.small {
+        padding: 10px 15px;
+        font-size: 1rem;
     }
-    .btn-block {
-        background: #dc3545;
-        color: white;
-    }
+    .btn-contact { background: #ff416c; color: white; }
+    .btn-details { background: #1a2a44; color: white; }
+    .btn-block { background: #dc3545; color: white; }
     .input-box {
         width: 100%;
         padding: 15px;
         border: 2px solid #e2e8f0;
         border-radius: 15px;
-        margin: 10px 0;
-        font-size: 1rem;
+        margin: 12px 0;
+        font-size: 1.2rem;
         background: #f8f9fa;
+        transition: all 0.3s;
     }
     .input-box:focus {
         border-color: #ff416c;
@@ -948,49 +1098,189 @@ const styles = `
     }
     .input-label {
         text-align: left;
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: #1a2a44;
         margin-top: 10px;
+        margin-bottom: -5px;
         font-weight: 600;
     }
-    .match-card {
+    .photo-circle {
+        width: 120px;
+        height: 120px;
+        border: 4px solid #ff416c;
+        border-radius: 50%;
+        margin: 20px auto;
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 10px 25px rgba(255,65,108,0.3);
+    }
+    .match-card, .inbox-item, .st-group {
         background: white;
         border-radius: 25px;
         margin: 15px 0;
         padding: 20px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        font-size: 1.1rem;
+    }
+    .match-card {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
     .match-header {
         display: flex;
         align-items: center;
-        gap: 15px;
-        margin-bottom: 15px;
+        gap: 20px;
+    }
+    .match-header .match-info {
+        flex: 1;
+    }
+    .match-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    .match-actions .btn-action {
+        flex: 1;
     }
     .match-photo-blur {
-        width: 60px;
-        height: 60px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         background: #f0f0f0;
         filter: blur(5px);
         flex-shrink: 0;
     }
-    .match-actions {
+    .inbox-item {
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+    }
+    .inbox-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255,65,108,0.15);
+    }
+    .inbox-item.unread {
+        background: #e8f0fe;
+        border-left: 5px solid #ff416c;
+    }
+    .inbox-item.unread .user-name {
+        color: #ff416c;
+        font-weight: bold;
+    }
+    .inbox-item.unread .message-preview {
+        color: #1a2a44;
+        font-weight: 600;
+    }
+    .unread-badge {
+        background: #ff416c;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+        min-width: 22px;
+        height: 22px;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+        margin-left: 8px;
+    }
+    .profile-unread {
+        background: #ff416c;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 5px;
+        padding: 0 4px;
+    }
+    .st-group {
+        background: white;
+        border-radius: 25px;
+        margin: 15px 0;
+        padding: 5px 0;
+    }
+    .st-item {
         display: flex;
-        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 1.2rem;
+    }
+    .st-item:last-child {
+        border-bottom: none;
+    }
+    .charte-box {
+        height: 500px;
+        overflow-y: auto;
+        background: #fff5f7;
+        border: 2px solid #ffdae0;
+        border-radius: 25px;
+        padding: 30px;
+        font-size: 1.2rem;
+        color: #1a2a44;
+        line-height: 1.8;
+        margin: 20px 0;
+        text-align: left;
+    }
+    .charte-section {
+        margin-bottom: 35px;
+        padding-bottom: 25px;
+        border-bottom: 2px dashed #ffdae0;
+    }
+    .charte-section:last-child {
+        border-bottom: none;
+    }
+    .charte-title {
+        color: #ff416c;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+    .charte-subtitle {
+        color: #1a2a44;
+        font-size: 1.2rem;
+        font-style: italic;
+        margin-bottom: 12px;
+    }
+    .scroll-indicator {
+        text-align: center;
+        color: #ff416c;
+        font-size: 1.1rem;
+        margin: 15px 0;
+        padding: 12px;
+        background: rgba(255,65,108,0.1);
+        border-radius: 40px;
+    }
+    .chat-header {
+        background: #1a2a44;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.2rem;
     }
     .chat-messages {
         padding: 20px;
         min-height: 60vh;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         background: #f5f7fb;
     }
     .bubble {
         padding: 12px 18px;
-        border-radius: 20px;
+        border-radius: 25px;
         max-width: 80%;
-        font-size: 1rem;
+        font-size: 1.1rem;
         line-height: 1.5;
     }
     .received {
@@ -1004,17 +1294,9 @@ const styles = `
         align-self: flex-end;
         border-bottom-right-radius: 5px;
     }
-    .chat-header {
-        background: #1a2a44;
-        color: white;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
     .input-area {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         padding: 15px;
         background: white;
         border-top: 2px solid #eee;
@@ -1022,7 +1304,7 @@ const styles = `
     .input-area input {
         flex: 1;
         padding: 12px 20px;
-        font-size: 1rem;
+        font-size: 1.1rem;
         border: 2px solid #e2e8f0;
         border-radius: 30px;
         outline: none;
@@ -1037,6 +1319,7 @@ const styles = `
         border: none;
         border-radius: 30px;
         cursor: pointer;
+        font-size: 1.1rem;
         font-weight: 600;
     }
     .navigation {
@@ -1053,13 +1336,19 @@ const styles = `
         color: #1a2a44;
         border-radius: 30px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        font-size: 1.1rem;
     }
     .back-link {
         display: inline-block;
         margin: 20px 0;
         color: #666;
         text-decoration: none;
-        font-size: 1rem;
+        font-size: 1.1rem;
+    }
+    .login-prompt {
+        font-size: 1.2rem;
+        color: #1a2a44;
+        margin: 20px 0 10px;
     }
     .empty-message {
         text-align: center;
@@ -1068,25 +1357,12 @@ const styles = `
         background: white;
         border-radius: 25px;
         margin: 20px 0;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
-    .st-group {
-        background: white;
-        border-radius: 25px;
-        margin: 15px 0;
-        padding: 5px 0;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    }
-    .st-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 20px;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 1.1rem;
-    }
-    .st-item:last-child {
-        border-bottom: none;
+    .empty-message span {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 20px;
     }
     .danger-zone {
         border: 2px solid #dc3545;
@@ -1202,50 +1478,22 @@ const styles = `
             transform: translateY(0) scale(1);
         }
     }
-    .unread-badge {
-        background: #ff416c;
-        color: white;
-        font-size: 0.8rem;
-        font-weight: bold;
-        min-width: 22px;
-        height: 22px;
-        border-radius: 11px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 6px;
-        margin-left: 8px;
+    .custom-date-picker {
+        display: flex;
+        gap: 5px;
+        margin: 10px 0;
     }
-    .profile-unread {
-        background: #ff416c;
-        color: white;
-        font-size: 0.7rem;
-        font-weight: bold;
-        min-width: 18px;
-        height: 18px;
-        border-radius: 9px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 5px;
-        padding: 0 4px;
+    .date-part {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        font-size: 1rem;
+        background: #f8f9fa;
     }
-    .inbox-item {
-        background: white;
-        border-radius: 25px;
-        margin: 15px 0;
-        padding: 20px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    .inbox-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(255,65,108,0.15);
-    }
-    .inbox-item.unread {
-        background: #e8f0fe;
-        border-left: 5px solid #ff416c;
+    .date-part:focus {
+        border-color: #ff416c;
+        outline: none;
     }
     @media (max-width: 420px) {
         body { font-size: 15px; }
@@ -1253,6 +1501,7 @@ const styles = `
         .logo-text { font-size: 4.2rem; }
         h2 { font-size: 1.8rem; }
         .btn-pink, .btn-dark { width: 95%; padding: 15px; }
+        .custom-date-picker { flex-direction: column; }
     }
 </style>
 `;
@@ -1333,10 +1582,10 @@ function generateDateOptions(req, selectedDate = null) {
     const currentYear = new Date().getFullYear();
     const selected = selectedDate ? new Date(selectedDate) : null;
     
-    let html = '<div class="custom-date-picker" style="display: flex; gap: 5px;">';
+    let html = '<div class="custom-date-picker">';
     
     // Jour
-    html += '<select name="day" class="input-box" style="flex:1;" required><option value="">' + t('day') + '</option>';
+    html += '<select name="day" class="date-part" required><option value="">' + t('day') + '</option>';
     for (let d = 1; d <= 31; d++) {
         const sel = (selected && selected.getDate() === d) ? 'selected' : '';
         html += `<option value="${d}" ${sel}>${d}</option>`;
@@ -1344,7 +1593,7 @@ function generateDateOptions(req, selectedDate = null) {
     html += '</select>';
     
     // Mois
-    html += '<select name="month" class="input-box" style="flex:2;" required><option value="">' + t('month') + '</option>';
+    html += '<select name="month" class="date-part" required><option value="">' + t('month') + '</option>';
     for (let m = 0; m < 12; m++) {
         const monthVal = m + 1;
         const sel = (selected && selected.getMonth() === m) ? 'selected' : '';
@@ -1353,7 +1602,7 @@ function generateDateOptions(req, selectedDate = null) {
     html += '</select>';
     
     // Année
-    html += '<select name="year" class="input-box" style="flex:1;" required><option value="">' + t('year') + '</option>';
+    html += '<select name="year" class="date-part" required><option value="">' + t('year') + '</option>';
     for (let y = currentYear - 100; y <= currentYear - 18; y++) {
         const sel = (selected && selected.getFullYear() === y) ? 'selected' : '';
         html += `<option value="${y}" ${sel}>${y}</option>`;
@@ -1388,7 +1637,7 @@ app.get('/', (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('welcome')}</title>
     ${styles}
 </head>
@@ -1404,12 +1653,12 @@ app.get('/', (req, res) => {
                 <a href="/lang/zh" class="lang-btn ${currentLang === 'zh' ? 'active' : ''}">${t('chinese')}</a>
             </div>
             <div class="logo-text">
-                <span style="color:#1a2a44;">Ren</span><span style="color:#ff416c;">contre</span>
+                <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
             </div>
             <div class="slogan">${t('slogan')}</div>
-            <div class="login-prompt" style="font-size: 1.2rem; color: #1a2a44; margin: 20px 0 10px;">${t('haveAccount')}</div>
+            <div class="login-prompt">${t('haveAccount')}</div>
             <a href="/login" class="btn-dark">${t('login')}</a>
-            <a href="/signup" class="btn-pink">${t('createAccount')}</a>
+            <a href="/charte-engagement" class="btn-pink">${t('createAccount')}</a>
             <div style="margin-top:40px; font-size:1rem; color:#666;">${t('security')}</div>
         </div>
     </div>
@@ -1424,7 +1673,7 @@ app.get('/login', (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('loginTitle')}</title>
     ${styles}
 </head>
@@ -1457,6 +1706,70 @@ app.get('/login', (req, res) => {
 </html>`);
 });
 
+// CHARTE D'ENGAGEMENT
+app.get('/charte-engagement', (req, res) => {
+    const t = req.t;
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('charterTitle')}</title>
+    ${styles}
+</head>
+<body>
+    <div class="app-shell">
+        <div class="page-white">
+            <h2>${t('charterTitle')}</h2>
+            <p style="font-size:1.2rem; margin-bottom:25px;">${t('charterSubtitle')}</p>
+            <div class="charte-box" id="charteBox" onscroll="checkScroll(this)">
+                <div class="charte-section">
+                    <div class="charte-title">${t('oath1')}</div>
+                    <div class="charte-subtitle">${t('oath1Sub')}</div>
+                    <p>${t('oath1Text')}</p>
+                </div>
+                <div class="charte-section">
+                    <div class="charte-title">${t('oath2')}</div>
+                    <div class="charte-subtitle">${t('oath2Sub')}</div>
+                    <p>${t('oath2Text')}</p>
+                </div>
+                <div class="charte-section">
+                    <div class="charte-title">${t('oath3')}</div>
+                    <div class="charte-subtitle">${t('oath3Sub')}</div>
+                    <p>${t('oath3Text')}</p>
+                </div>
+                <div class="charte-section">
+                    <div class="charte-title">${t('oath4')}</div>
+                    <div class="charte-subtitle">${t('oath4Sub')}</div>
+                    <p>${t('oath4Text')}</p>
+                </div>
+                <div class="charte-section">
+                    <div class="charte-title">${t('oath5')}</div>
+                    <div class="charte-subtitle">${t('oath5Sub')}</div>
+                    <p>${t('oath5Text')}</p>
+                </div>
+            </div>
+            <div class="scroll-indicator" id="scrollIndicator">${t('scrollDown')}</div>
+            <button id="agreeBtn" class="btn-pink" onclick="acceptCharte()" disabled>${t('accept')}</button>
+            <a href="/" class="back-link">← ${t('backHome')}</a>
+        </div>
+    </div>
+    <script>
+        function checkScroll(el) {
+            if (el.scrollHeight - el.scrollTop <= el.clientHeight + 5) {
+                document.getElementById('agreeBtn').disabled = false;
+                document.getElementById('agreeBtn').style.opacity = '1';
+                document.getElementById('scrollIndicator').style.opacity = '0.3';
+            }
+        }
+        function acceptCharte() {
+            if (!document.getElementById('agreeBtn').disabled) window.location.href = '/signup';
+        }
+    </script>
+</body>
+</html>`);
+});
+
 // INSCRIPTION
 app.get('/signup', (req, res) => {
     const t = req.t;
@@ -1466,7 +1779,7 @@ app.get('/signup', (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('signupTitle')}</title>
     ${styles}
 </head>
@@ -1477,10 +1790,10 @@ app.get('/signup', (req, res) => {
             <p style="font-size: 1.2rem; margin-bottom: 20px;">${t('signupSub')}</p>
             <form id="signupForm">
                 <div class="input-label">${t('firstName')}</div>
-                <input type="text" name="firstName" class="input-box" required>
+                <input type="text" name="firstName" class="input-box" placeholder="${t('firstName')}" required>
                 
                 <div class="input-label">${t('lastName')}</div>
-                <input type="text" name="lastName" class="input-box" required>
+                <input type="text" name="lastName" class="input-box" placeholder="${t('lastName')}" required>
                 
                 <div class="input-label">${t('gender')}</div>
                 <select name="gender" class="input-box" required>
@@ -1489,11 +1802,11 @@ app.get('/signup', (req, res) => {
                     <option value="Femme">${t('female')}</option>
                 </select>
                 
-                <div class="input-label">${t('dob')}</div>
+                <div class="input-label">${t('dob')} (${t('dobPlaceholder')})</div>
                 ${datePicker}
                 
                 <div class="input-label">${t('city')}</div>
-                <input type="text" name="residence" class="input-box" required>
+                <input type="text" name="residence" class="input-box" placeholder="${t('city')}" required>
                 
                 <div class="input-label">${t('genotype')}</div>
                 <select name="genotype" class="input-box" required>
@@ -1527,7 +1840,7 @@ app.get('/signup', (req, res) => {
                 
                 <button type="submit" class="btn-pink">${t('createProfile')}</button>
             </form>
-            <a href="/" class="back-link">← ${t('backHome')}</a>
+            <a href="/charte-engagement" class="back-link">← ${t('backCharter')}</a>
         </div>
     </div>
     <script>
@@ -1568,7 +1881,7 @@ app.get('/profile', requireAuth, async (req, res) => {
         if (!user) return res.redirect('/');
         
         const t = req.t;
-        const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false });
+        const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false, isBlocked: false });
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
         
@@ -1576,7 +1889,7 @@ app.get('/profile', requireAuth, async (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('myProfile')}</title>
     ${styles}
 </head>
@@ -1616,8 +1929,8 @@ app.get('/profile', requireAuth, async (req, res) => {
         
         <div class="page-white">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <a href="/" class="btn-dark" style="padding: 10px 20px; width: auto;">${t('home')}</a>
-                <a href="/inbox" class="btn-pink" style="padding: 10px 20px; width: auto; display: flex; align-items: center;">
+                <a href="/" class="btn-dark" style="padding: 12px 20px; width: auto;">${t('home')}</a>
+                <a href="/inbox" class="btn-pink" style="padding: 12px 20px; width: auto; display: flex; align-items: center;">
                     ${t('messages')} ${unreadBadge}
                 </a>
                 <a href="/settings" style="font-size: 2rem; text-decoration: none;">⚙️</a>
@@ -1634,10 +1947,10 @@ app.get('/profile', requireAuth, async (req, res) => {
                 </select>
             </div>
             
-            <div class="photo-circle" style="width: 120px; height: 120px; border-radius: 50%; background: #f0f0f0; margin: 20px auto; border: 3px solid #ff416c;"></div>
+            <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
             
             <h2 style="text-align: center;">${user.firstName} ${user.lastName}</h2>
-            <p style="text-align: center; font-size:1.1rem;">${user.residence || ''} • ${genderDisplay}</p>
+            <p style="text-align: center; font-size:1.2rem;">${user.residence || ''} • ${genderDisplay}</p>
             
             <div class="st-group">
                 <div class="st-item"><span>${t('genotype_label')}</span><b>${user.genotype}</b></div>
@@ -1739,7 +2052,8 @@ app.get('/matching', requireAuth, async (req, res) => {
         
         // Récupérer les IDs exclus
         const messages = await Message.find({
-            $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }]
+            $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
+            isBlocked: false
         });
         
         const conversationIds = new Set();
@@ -1785,7 +2099,7 @@ app.get('/matching', requireAuth, async (req, res) => {
         if (partners.length === 0) {
             partnersHTML = `
                 <div class="empty-message">
-                    <span style="font-size: 3rem;">🔍</span>
+                    <span>🔍</span>
                     <h3>${t('searchOngoing')}</h3>
                     <p>${t('expandCommunity')}</p>
                 </div>
@@ -1803,7 +2117,7 @@ app.get('/matching', requireAuth, async (req, res) => {
                             </div>
                         </div>
                         <div class="match-actions">
-                            <button class="btn-action btn-contact" style="flex:1;" onclick="sendInterest('${p._id}', '${p.firstName}')">
+                            <button class="btn-action btn-contact small" onclick="sendInterest('${p._id}', '${p.firstName}')">
                                 💬 ${t('contact')}
                             </button>
                         </div>
@@ -1829,12 +2143,12 @@ app.get('/matching', requireAuth, async (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('compatiblePartners')}</title>
     ${styles}
     <style>
-        #genlove-popup { display: none; }
-        #loading-popup { display: none; }
+        #genlove-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px; }
+        #loading-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:20000; align-items:center; justify-content:center; padding:20px; }
     </style>
 </head>
 <body>
@@ -1874,6 +2188,9 @@ app.get('/matching', requireAuth, async (req, res) => {
                     document.getElementById('loading-message').innerText = '${t('requestSent')}';
                     setTimeout(() => {
                         document.getElementById('loading-popup').style.display = 'none';
+                        if (data.success) {
+                            alert('Intérêt envoyé à ' + receiverName);
+                        }
                     }, 1000);
                 })
                 .catch(() => {
@@ -1900,7 +2217,8 @@ app.get('/inbox', requireAuth, async (req, res) => {
         const t = req.t;
         
         const messages = await Message.find({
-            $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }]
+            $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
+            isBlocked: false
         })
         .populate('senderId receiverId')
         .sort({ timestamp: -1 });
@@ -1909,11 +2227,18 @@ app.get('/inbox', requireAuth, async (req, res) => {
         
         for (const m of messages) {
             const other = m.senderId._id.equals(currentUser._id) ? m.receiverId : m.senderId;
+            
+            // Vérifier si l'autre utilisateur n'est pas bloqué
+            if (currentUser.blockedUsers && currentUser.blockedUsers.includes(other._id)) {
+                continue; // Ignorer les conversations avec des utilisateurs bloqués
+            }
+            
             if (!conversations.has(other._id.toString())) {
                 const unread = await Message.countDocuments({
                     senderId: other._id,
                     receiverId: currentUser._id,
-                    read: false
+                    read: false,
+                    isBlocked: false
                 });
                 conversations.set(other._id.toString(), {
                     user: other,
@@ -1927,7 +2252,7 @@ app.get('/inbox', requireAuth, async (req, res) => {
         if (conversations.size === 0) {
             inboxHTML = `
                 <div class="empty-message">
-                    <span style="font-size: 3rem;">📭</span>
+                    <span>📭</span>
                     <h3>${t('emptyInbox')}</h3>
                     <p>${t('startConversation')}</p>
                     <a href="/matching" class="btn-pink" style="display: inline-block; width: auto; margin-top: 20px;">${t('findPartners')}</a>
@@ -1955,7 +2280,7 @@ app.get('/inbox', requireAuth, async (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('inboxTitle')}</title>
     ${styles}
 </head>
@@ -1992,7 +2317,10 @@ app.get('/chat', requireAuth, async (req, res) => {
         const t = req.t;
         
         // Vérifier blocage
-        if (partner.blockedBy && partner.blockedBy.includes(currentUser._id)) {
+        const isBlockedByPartner = partner.blockedBy && partner.blockedBy.includes(currentUser._id);
+        const hasBlockedPartner = currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId);
+        
+        if (isBlockedByPartner) {
             return res.send(`
                 <div class="app-shell">
                     <div class="page-white" style="text-align: center; padding: 50px 20px;">
@@ -2004,13 +2332,9 @@ app.get('/chat', requireAuth, async (req, res) => {
             `);
         }
         
-        if (currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId)) {
-            return res.redirect('/inbox');
-        }
-        
         // Marquer les messages comme lus
         await Message.updateMany(
-            { senderId: partnerId, receiverId: currentUser._id, read: false },
+            { senderId: partnerId, receiverId: currentUser._id, read: false, isBlocked: false },
             { read: true }
         );
         
@@ -2018,7 +2342,8 @@ app.get('/chat', requireAuth, async (req, res) => {
             $or: [
                 { senderId: currentUser._id, receiverId: partnerId },
                 { senderId: partnerId, receiverId: currentUser._id }
-            ]
+            ],
+            isBlocked: false
         }).sort({ timestamp: 1 });
         
         let msgs = '';
@@ -2031,7 +2356,7 @@ app.get('/chat', requireAuth, async (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - Chat</title>
     ${styles}
 </head>
@@ -2049,10 +2374,12 @@ app.get('/chat', requireAuth, async (req, res) => {
             ${msgs}
         </div>
         
-        <div class="input-area">
-            <input id="msgInput" placeholder="${t('yourMessage')}">
-            <button onclick="sendMessage('${partnerId}')">${t('send')}</button>
-        </div>
+        ${!hasBlockedPartner ? `
+            <div class="input-area">
+                <input id="msgInput" placeholder="${t('yourMessage')}">
+                <button onclick="sendMessage('${partnerId}')">${t('send')}</button>
+            </div>
+        ` : ''}
     </div>
     
     <script>
@@ -2097,7 +2424,7 @@ app.get('/settings', requireAuth, async (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('settingsTitle')}</title>
     ${styles}
 </head>
@@ -2124,6 +2451,7 @@ app.get('/settings', requireAuth, async (req, res) => {
                 </div>
             </div>
             
+            <a href="/edit-profile" class="btn-dark" style="text-decoration: none;">✏️ ${t('editProfile')}</a>
             <a href="/blocked-list" class="btn-dark" style="text-decoration: none;">🚫 ${t('blockedUsers')} (${blockedCount})</a>
             
             <div class="st-group danger-zone">
@@ -2157,6 +2485,107 @@ app.get('/settings', requireAuth, async (req, res) => {
     }
 });
 
+// EDIT PROFILE
+app.get('/edit-profile', requireAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        const t = req.t;
+        const datePicker = generateDateOptions(req, user.dob);
+        
+        const bloodOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => 
+            `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g}</option>`
+        ).join('');
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('editProfile')}</title>
+    ${styles}
+</head>
+<body>
+    <div class="app-shell">
+        <div class="page-white">
+            <h2>${t('editProfile')}</h2>
+            <form id="editForm">
+                <div class="input-label">${t('firstName')}</div>
+                <input type="text" name="firstName" class="input-box" value="${user.firstName}" required>
+                
+                <div class="input-label">${t('lastName')}</div>
+                <input type="text" name="lastName" class="input-box" value="${user.lastName}" required>
+                
+                <div class="input-label">${t('gender')}</div>
+                <select name="gender" class="input-box" required>
+                    <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
+                    <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
+                </select>
+                
+                <div class="input-label">${t('dob')}</div>
+                ${datePicker}
+                
+                <div class="input-label">${t('city')}</div>
+                <input type="text" name="residence" class="input-box" value="${user.residence || ''}" required>
+                
+                <div class="input-label">${t('genotype')}</div>
+                <select name="genotype" class="input-box" required>
+                    <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
+                    <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
+                    <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
+                </select>
+                
+                <div class="input-label">${t('bloodGroup')}</div>
+                <select name="bloodGroup" class="input-box" required>
+                    ${bloodOptions}
+                </select>
+                
+                <div class="input-label">${t('desireChild')}</div>
+                <select name="desireChild" class="input-box" required>
+                    <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
+                    <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
+                </select>
+                
+                <button type="submit" class="btn-pink">${t('editProfile')}</button>
+            </form>
+            <a href="/profile" class="back-link">← ${t('backProfile')}</a>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const day = document.querySelector('select[name="day"]').value;
+            const month = document.querySelector('select[name="month"]').value;
+            const year = document.querySelector('select[name="year"]').value;
+            
+            if (!day || !month || !year) {
+                alert('${t('dob')} ${t('required')}');
+                return;
+            }
+            
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            data.dob = dob;
+            
+            const res = await fetch('/api/users/profile', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if (res.ok) window.location.href = '/profile';
+            else alert('Erreur lors de la modification');
+        });
+    </script>
+</body>
+</html>`);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur édition');
+    }
+});
+
 // BLOCKED LIST
 app.get('/blocked-list', requireAuth, async (req, res) => {
     try {
@@ -2168,7 +2597,7 @@ app.get('/blocked-list', requireAuth, async (req, res) => {
             currentUser.blockedUsers.forEach(user => {
                 blockedHTML += `
                     <div class="inbox-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><b>${user.firstName} ${user.lastName}</b></span>
+                        <span><b style="font-size:1.3rem;">${user.firstName} ${user.lastName}</b></span>
                         <button class="btn-action" onclick="unblockUser('${user._id}')" style="background:#4CAF50; color:white; padding:8px 15px;">${t('unblock')}</button>
                     </div>
                 `;
@@ -2181,7 +2610,7 @@ app.get('/blocked-list', requireAuth, async (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('blockedUsers')}</title>
     ${styles}
 </head>
@@ -2216,7 +2645,7 @@ app.get('/logout-success', (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('logoutSuccess')}</title>
     ${styles}
     <style>
@@ -2307,7 +2736,8 @@ app.post('/api/requests', requireAuth, async (req, res) => {
             $or: [
                 { senderId: req.session.userId, receiverId },
                 { senderId: receiverId, receiverId: req.session.userId }
-            ]
+            ],
+            isBlocked: false
         });
         
         if (existingConversation) {
@@ -2358,7 +2788,8 @@ app.post('/api/requests/:id/accept', requireAuth, async (req, res) => {
             senderId: request.senderId._id,
             receiverId: request.receiverId._id,
             text: "Bonjour ! J'aimerais échanger avec vous.",
-            read: false
+            read: false,
+            isBlocked: false
         });
         await welcomeMsg.save();
         
@@ -2433,11 +2864,20 @@ app.post('/api/rejections/:id/view', requireAuth, async (req, res) => {
 // Envoyer un message
 app.post('/api/messages', requireAuth, async (req, res) => {
     try {
+        const receiverId = req.body.receiverId;
+        
+        // Vérifier si l'utilisateur n'est pas bloqué
+        const receiver = await User.findById(receiverId);
+        if (receiver && receiver.blockedBy && receiver.blockedBy.includes(req.session.userId)) {
+            return res.status(403).json({ error: "Vous avez bloqué cet utilisateur" });
+        }
+        
         const msg = new Message({
             senderId: req.session.userId,
-            receiverId: req.body.receiverId,
+            receiverId: receiverId,
             text: req.body.text,
-            read: false
+            read: false,
+            isBlocked: false
         });
         await msg.save();
         res.json(msg);
@@ -2457,15 +2897,28 @@ app.post('/api/block/:userId', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'Utilisateur non trouvé' });
         }
         
+        // Ajouter aux blockedUsers de current
         if (!current.blockedUsers) current.blockedUsers = [];
         if (!current.blockedUsers.includes(req.params.userId)) {
             current.blockedUsers.push(req.params.userId);
         }
         
+        // Ajouter aux blockedBy de target
         if (!target.blockedBy) target.blockedBy = [];
         if (!target.blockedBy.includes(req.session.userId)) {
             target.blockedBy.push(req.session.userId);
         }
+        
+        // Masquer tous les messages entre ces deux utilisateurs (effet miroir)
+        await Message.updateMany(
+            {
+                $or: [
+                    { senderId: req.session.userId, receiverId: req.params.userId },
+                    { senderId: req.params.userId, receiverId: req.session.userId }
+                ]
+            },
+            { isBlocked: true }
+        );
         
         await current.save();
         await target.save();
@@ -2481,15 +2934,44 @@ app.post('/api/block/:userId', requireAuth, async (req, res) => {
 app.post('/api/unblock/:userId', requireAuth, async (req, res) => {
     try {
         const current = await User.findById(req.session.userId);
+        const target = await User.findById(req.params.userId);
         
         if (current.blockedUsers) {
             current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== req.params.userId);
-            await current.save();
         }
+        
+        if (target && target.blockedBy) {
+            target.blockedBy = target.blockedBy.filter(id => id.toString() !== req.session.userId);
+        }
+        
+        // Restaurer tous les messages entre ces deux utilisateurs
+        await Message.updateMany(
+            {
+                $or: [
+                    { senderId: req.session.userId, receiverId: req.params.userId },
+                    { senderId: req.params.userId, receiverId: req.session.userId }
+                ]
+            },
+            { isBlocked: false }
+        );
+        
+        await current.save();
+        if (target) await target.save();
         
         res.json({ success: true });
     } catch(e) {
         console.error("Erreur dans /api/unblock:", e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Update profile
+app.put('/api/users/profile', requireAuth, async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.session.userId, req.body);
+        res.json({ success: true });
+    } catch(e) {
+        console.error("Erreur dans /api/users/profile:", e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -2521,6 +3003,7 @@ app.use((req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - ${t('appName')}</title>
     ${styles}
     <style>
@@ -2555,7 +3038,7 @@ app.use((req, res) => {
 // DÉMARRAGE
 // ============================================
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
+    console.log(`🚀 Genlove démarré sur http://localhost:${port}`);
 });
 
 process.on('SIGINT', () => {
