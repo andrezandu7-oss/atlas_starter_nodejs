@@ -2006,7 +2006,7 @@ app.get("/sas-validation", requireAuth, async (req, res) => {
 </html>`);
 });
 
-// PROFIL
+// PROFIL - VERSION CORRIGÉE AVEC BOUTONS FONCTIONNELS
 app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -2030,6 +2030,7 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
 </head>
 <body>
     <div class="app-shell">
+        <!-- POPUP DE DEMANDE -->
         <div id="request-popup">
             <div class="popup-card">
                 <div class="popup-icon">💌</div>
@@ -2040,6 +2041,7 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
                 </div>
             </div>
         </div>
+        <!-- POPUP DE REJET -->
         <div id="rejection-popup">
             <div class="popup-card">
                 <div class="popup-icon">😔</div>
@@ -2081,6 +2083,7 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
     </div>
     <script>
         let currentRequestId = null;
+
         async function checkRequests() {
             try {
                 const res = await fetch('/api/requests/pending');
@@ -2090,29 +2093,40 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
                 }
             } catch(e) {}
         }
+
         function showRequestPopup(r) {
             currentRequestId = r._id;
-            const prenom = r.senderId.firstName;
+            const prenom = r.senderId ? r.senderId.firstName : 'quelqu\'un';
             const msg = '${t('interestPopup')}'.replace('{name}', prenom);
             document.getElementById('request-message').innerText = msg;
             document.getElementById('request-popup').style.display = 'flex';
             vibrate([200,100,200]);
         }
+
         async function acceptRequest() {
             if (!currentRequestId) return;
-            const res = await fetch('/api/requests/' + currentRequestId + '/accept', { method: 'POST' });
+            const res = await fetch('/api/requests/' + currentRequestId + '/accept', { 
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
             if (res.ok) {
                 document.getElementById('request-popup').style.display = 'none';
                 window.location.href = '/inbox';
             }
         }
+
         async function rejectRequest() {
             if (!currentRequestId) return;
-            const res = await fetch('/api/requests/' + currentRequestId + '/reject', { method: 'POST' });
+            const res = await fetch('/api/requests/' + currentRequestId + '/reject', { 
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
             if (res.ok) {
                 document.getElementById('request-popup').style.display = 'none';
+                currentRequestId = null;
             }
         }
+
         async function checkRejections() {
             try {
                 const res = await fetch('/api/rejections/unread');
@@ -2122,21 +2136,25 @@ app.get("/profile", requireAuth, requireVerified, async (req, res) => {
                 }
             } catch(e) {}
         }
+
         function showRejectionPopup(r) {
-            const prenom = r.senderFirstName;
+            const prenom = r.senderFirstName || 'quelqu\'un';
             const msg = '${t('rejectionPopup')}'.replace('{name}', prenom);
             document.getElementById('rejection-message').innerText = msg;
             document.getElementById('rejection-popup').style.display = 'flex';
             fetch('/api/rejections/' + r.requestId + '/view', { method: 'POST' });
         }
+
         function goToProfile() {
             document.getElementById('rejection-popup').style.display = 'none';
             window.location.href = '/profile';
         }
+
         function goToMatching() {
             document.getElementById('rejection-popup').style.display = 'none';
             window.location.href = '/matching';
         }
+
         setInterval(checkRequests, 5000);
         setInterval(checkRejections, 5000);
         checkRequests();
