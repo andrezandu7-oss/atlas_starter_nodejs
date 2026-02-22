@@ -64,7 +64,7 @@ const messageSchema = new mongoose.Schema({
     text: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
     read: { type: Boolean, default: false },
-    isBlocked: { type: Boolean, default: false } // Pour masquer les messages lors du blocage
+    isBlocked: { type: Boolean, default: false }
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -139,7 +139,6 @@ const translations = {
         male: 'Homme',
         female: 'Femme',
         dob: 'Date de naissance',
-        dobPlaceholder: 'jj/mm/aaaa',
         city: 'Ville de résidence',
         genotype: 'Génotype',
         bloodGroup: 'Groupe sanguin',
@@ -172,8 +171,8 @@ const translations = {
         backProfile: '← Mon profil',
         toMessages: 'Messages →',
         healthCommitment: 'Votre engagement santé',
-        popupMessageAS: 'En tant que profil AS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable.',
-        popupMessageSS: 'En tant que profil SS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose. Construisons ensemble un amour sain et durable.',
+        popupMessageAS: 'En tant que profil AS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose.',
+        popupMessageSS: 'En tant que profil SS, nous ne vous présentons que des partenaires AA. Ce choix responsable garantit la sérénité de votre futur foyer et protège votre descendance contre la drépanocytose.',
         understood: 'J\'ai compris',
         inboxTitle: 'Boîte de réception',
         emptyInbox: 'Boîte vide',
@@ -211,10 +210,10 @@ const translations = {
         pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.',
         residence_label: 'Résidence',
         project_life: 'Projet de vie',
-        interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité et mêmes projets de vie. Pouvez-vous prendre quelques minutes pour échanger ?',
+        interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité. Pouvez-vous prendre quelques minutes pour échanger ?',
         acceptRequest: '✓ Accepter',
         rejectRequest: '✗ Refuser',
-        rejectionPopup: 'Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches car vous êtes sur le point de trouver la bonne personne.',
+        rejectionPopup: 'Désolé, {name} n\'a pas donné une suite favorable à votre demande. Lancez d\'autres recherches.',
         gotIt: 'J\'ai compris',
         returnProfile: '📋 Mon profil',
         newMatch: '🔍 Nouvelle recherche',
@@ -276,7 +275,6 @@ const translations = {
         male: 'Male',
         female: 'Female',
         dob: 'Date of birth',
-        dobPlaceholder: 'dd/mm/yyyy',
         city: 'City of residence',
         genotype: 'Genotype',
         bloodGroup: 'Blood group',
@@ -309,8 +307,8 @@ const translations = {
         backProfile: '← My profile',
         toMessages: 'Messages →',
         healthCommitment: 'Your health commitment',
-        popupMessageAS: 'As an AS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together.',
-        popupMessageSS: 'As an SS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease. Let\'s build a healthy and lasting love together.',
+        popupMessageAS: 'As an AS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease.',
+        popupMessageSS: 'As an SS profile, we only show you AA partners. This responsible choice guarantees the serenity of your future family and protects your offspring against sickle cell disease.',
         understood: 'I understand',
         inboxTitle: 'Inbox',
         emptyInbox: 'Empty inbox',
@@ -348,10 +346,10 @@ const translations = {
         pageNotFoundMessage: 'The page you are looking for does not exist.',
         residence_label: 'Residence',
         project_life: 'Life project',
-        interestPopup: '{name} is very attracted to your profile because you share good compatibility and same life projects. Can you take a few minutes to chat?',
+        interestPopup: '{name} is very attracted to your profile because you share good compatibility. Can you take a few minutes to chat?',
         acceptRequest: '✓ Accept',
         rejectRequest: '✗ Reject',
-        rejectionPopup: 'Sorry, {name} did not give a favorable response to your request. Start other searches because you are about to find the right person.',
+        rejectionPopup: 'Sorry, {name} did not give a favorable response to your request. Start other searches.',
         gotIt: 'Got it',
         returnProfile: '📋 My profile',
         newMatch: '🔍 New search',
@@ -413,7 +411,6 @@ const translations = {
         male: 'Homem',
         female: 'Mulher',
         dob: 'Data de nascimento',
-        dobPlaceholder: 'dd/mm/aaaa',
         city: 'Cidade de residência',
         genotype: 'Genótipo',
         bloodGroup: 'Grupo sanguíneo',
@@ -446,8 +443,8 @@ const translations = {
         backProfile: '← Meu perfil',
         toMessages: 'Mensagens →',
         healthCommitment: 'Seu compromisso com a saúde',
-        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro.',
-        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme. Vamos construir juntos um amor saudável e duradouro.',
+        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
+        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
         understood: 'Entendi',
         inboxTitle: 'Caixa de entrada',
         emptyInbox: 'Caixa vazia',
@@ -485,10 +482,10 @@ const translations = {
         pageNotFoundMessage: 'A página que você procura não existe.',
         residence_label: 'Residência',
         project_life: 'Projeto de vida',
-        interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade e mesmos projetos de vida. Você pode alguns minutos para conversar?',
+        interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade. Você pode alguns minutos para conversar?',
         acceptRequest: '✓ Aceitar',
         rejectRequest: '✗ Recusar',
-        rejectionPopup: 'Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas porque você está prestes a encontrar a pessoa certa.',
+        rejectionPopup: 'Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas.',
         gotIt: 'Entendi',
         returnProfile: '📋 Meu perfil',
         newMatch: '🔍 Nova pesquisa',
@@ -550,7 +547,6 @@ const translations = {
         male: 'Hombre',
         female: 'Mujer',
         dob: 'Fecha de nacimiento',
-        dobPlaceholder: 'dd/mm/aaaa',
         city: 'Ciudad de residencia',
         genotype: 'Genotipo',
         bloodGroup: 'Grupo sanguíneo',
@@ -583,8 +579,8 @@ const translations = {
         backProfile: '← Mi perfil',
         toMessages: 'Mensajes →',
         healthCommitment: 'Su compromiso con la salud',
-        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero.',
-        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes. Construyamos juntos un amor saludable y duradero.',
+        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
+        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
         understood: 'Entiendo',
         inboxTitle: 'Bandeja de entrada',
         emptyInbox: 'Bandeja vacía',
@@ -622,10 +618,10 @@ const translations = {
         pageNotFoundMessage: 'La página que busca no existe.',
         residence_label: 'Residencia',
         project_life: 'Proyecto de vida',
-        interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad y mismos proyectos de vida. ¿Puedes tomar unos minutos para conversar?',
+        interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad. ¿Puedes tomar unos minutos para conversar?',
         acceptRequest: '✓ Aceptar',
         rejectRequest: '✗ Rechazar',
-        rejectionPopup: 'Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas porque estás a punto de encontrar a la persona adecuada.',
+        rejectionPopup: 'Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas.',
         gotIt: 'Entiendo',
         returnProfile: '📋 Mi perfil',
         newMatch: '🔍 Nueva búsqueda',
@@ -687,7 +683,6 @@ const translations = {
         male: 'ذكر',
         female: 'أنثى',
         dob: 'تاريخ الميلاد',
-        dobPlaceholder: 'yyyy/mm/dd',
         city: 'مدينة الإقامة',
         genotype: 'النمط الوراثي',
         bloodGroup: 'فصيلة الدم',
@@ -720,8 +715,8 @@ const translations = {
         backProfile: '→ ملفي الشخصي',
         toMessages: '→ الرسائل',
         healthCommitment: 'التزامك الصحي',
-        popupMessageAS: 'كملف AS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا.',
-        popupMessageSS: 'كملف SS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية. دعونا نبني معًا حبًا صحيًا ودائمًا.',
+        popupMessageAS: 'كملف AS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
+        popupMessageSS: 'كملف SS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
         understood: 'فهمت',
         inboxTitle: 'صندوق الوارد',
         emptyInbox: 'صندوق فارغ',
@@ -759,10 +754,10 @@ const translations = {
         pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
         residence_label: 'الإقامة',
         project_life: 'مشروع الحياة',
-        interestPopup: '{name} مهتم جداً بملفك الشخصي لأنكما تشاركان توافقاً جيداً ونفس مشاريع الحياة. هل يمكنك أخذ بضع دقائق للدردشة؟',
+        interestPopup: '{name} مهتم جداً بملفك الشخصي لأنكما تشاركان توافقاً جيداً. هل يمكنك أخذ بضع دقائق للدردشة؟',
         acceptRequest: '✓ قبول',
         rejectRequest: '✗ رفض',
-        rejectionPopup: 'عذراً، {name} لم يعط رداً إيجابياً لطلبك. قم بإجراء عمليات بحث أخرى لأنك على وشك العثور على الشخص المناسب.',
+        rejectionPopup: 'عذراً، {name} لم يعط رداً إيجابياً لطلبك. قم بإجراء عمليات بحث أخرى.',
         gotIt: 'فهمت',
         returnProfile: '📋 ملفي الشخصي',
         newMatch: '🔍 بحث جديد',
@@ -785,10 +780,10 @@ const translations = {
         year: 'سنة'
     },
     zh: {
-        appName: '真愛基因',
+        appName: '真爱基因',
         slogan: '💑 结合心灵与健康，建立健康的伴侣关系',
         security: '🛡️ 您的健康数据已加密',
-        welcome: '欢迎来到真愛基因',
+        welcome: '欢迎来到真爱基因',
         haveAccount: '已有帐户？',
         login: '登录',
         createAccount: '创建帐户',
@@ -824,7 +819,6 @@ const translations = {
         male: '男',
         female: '女',
         dob: '出生日期',
-        dobPlaceholder: 'yyyy/mm/dd',
         city: '居住城市',
         genotype: '基因型',
         bloodGroup: '血型',
@@ -857,8 +851,8 @@ const translations = {
         backProfile: '← 我的个人资料',
         toMessages: '消息 →',
         healthCommitment: '您的健康承诺',
-        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。',
-        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。让我们一起建立健康持久的爱情。',
+        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
+        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
         understood: '我明白',
         inboxTitle: '收件箱',
         emptyInbox: '空收件箱',
@@ -882,7 +876,7 @@ const translations = {
         confirmDelete: '永久删除？',
         noBlocked: '没有已屏蔽的用户',
         thankYou: '感谢您的交流',
-        thanksMessage: '真愛基因感谢您',
+        thanksMessage: '真爱基因感谢您',
         newSearch: '新搜索',
         logoutSuccess: '退出成功',
         seeYouSoon: '再见！',
@@ -896,10 +890,10 @@ const translations = {
         pageNotFoundMessage: '您查找的页面不存在。',
         residence_label: '居住地',
         project_life: '人生计划',
-        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性和相同的人生规划。您能花几分钟聊聊吗？',
+        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性。您能花几分钟聊聊吗？',
         acceptRequest: '✓ 接受',
         rejectRequest: '✗ 拒绝',
-        rejectionPopup: '抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧，您即将找到合适的人。',
+        rejectionPopup: '抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧。',
         gotIt: '明白了',
         returnProfile: '📋 我的个人资料',
         newMatch: '🔍 新搜索',
@@ -953,7 +947,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============================================
-// STYLES CSS
+// STYLES CSS COMPLETS AVEC NOUVEAUX STYLES
 // ============================================
 const styles = `
 <style>
@@ -986,10 +980,18 @@ const styles = `
     h2 { font-size: 2rem; margin-bottom: 20px; color: #1a2a44; }
     h3 { font-size: 1.6rem; margin: 15px 0; }
     p { font-size: 1.2rem; line-height: 1.6; }
+    
+    /* Nouveau logo avec coeur ADN */
+    .logo-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 20px;
+    }
     .logo-text {
         font-size: 5rem;
         font-weight: 800;
-        margin: 20px 0;
+        margin: 10px 0 20px;
         letter-spacing: -2px;
         text-shadow: 4px 4px 0 rgba(255,65,108,0.1);
         text-align: center;
@@ -997,9 +999,9 @@ const styles = `
     .slogan {
         font-weight: 500;
         color: #1a2a44;
-        margin: 20px 25px 40px;
-        font-size: 1.3rem;
-        line-height: 1.7;
+        margin: 10px 25px 30px;
+        font-size: 1.2rem;
+        line-height: 1.5;
         text-align: center;
     }
     .home-screen {
@@ -1008,42 +1010,70 @@ const styles = `
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 30px;
+        padding: 20px;
         text-align: center;
         background: linear-gradient(135deg, #fff5f7 0%, #f4e9da 100%);
     }
-    .language-selector-home {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
-        margin-bottom: 20px;
+    
+    /* Sélecteur de langue compact */
+    .language-selector-compact {
+        position: relative;
+        margin: 10px 0 20px;
     }
-    .lang-btn {
+    .lang-btn-compact {
         background: white;
         border: 2px solid #ff416c;
         color: #1a2a44;
-        padding: 8px 12px;
+        padding: 10px 20px;
         border-radius: 30px;
-        font-size: 0.9rem;
+        font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
-    .lang-btn:hover, .lang-btn.active {
+    .lang-btn-compact:hover {
         background: #ff416c;
         color: white;
-        transform: translateY(-2px);
     }
+    .language-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        z-index: 1000;
+        min-width: 180px;
+        margin-top: 5px;
+    }
+    .dropdown-item {
+        display: block;
+        padding: 12px 20px;
+        text-decoration: none;
+        color: #1a2a44;
+        border-bottom: 1px solid #eee;
+        transition: background 0.2s;
+    }
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+    .dropdown-item:hover {
+        background: #f8f9fa;
+    }
+    
+    /* Boutons */
     .btn-pink, .btn-dark {
         padding: 15px 25px;
         border-radius: 60px;
-        font-size: 1.3rem;
+        font-size: 1.2rem;
         font-weight: 600;
         width: 90%;
-        margin: 15px auto;
+        margin: 10px auto;
         display: block;
         text-align: center;
         text-decoration: none;
@@ -1066,28 +1096,26 @@ const styles = `
         box-shadow: 0 15px 30px rgba(255,65,108,0.4);
     }
     .btn-action {
-        padding: 12px 20px;
-        font-size: 1.1rem;
+        padding: 10px 15px;
+        font-size: 0.9rem;
         font-weight: 600;
         border-radius: 30px;
         border: none;
         cursor: pointer;
         transition: all 0.2s;
     }
-    .btn-action.small {
-        padding: 10px 15px;
-        font-size: 1rem;
-    }
     .btn-contact { background: #ff416c; color: white; }
     .btn-details { background: #1a2a44; color: white; }
     .btn-block { background: #dc3545; color: white; }
+    
+    /* Inputs */
     .input-box {
         width: 100%;
-        padding: 15px;
+        padding: 14px;
         border: 2px solid #e2e8f0;
         border-radius: 15px;
-        margin: 12px 0;
-        font-size: 1.2rem;
+        margin: 8px 0;
+        font-size: 1rem;
         background: #f8f9fa;
         transition: all 0.3s;
     }
@@ -1098,80 +1126,385 @@ const styles = `
     }
     .input-label {
         text-align: left;
-        font-size: 1rem;
+        font-size: 0.9rem;
         color: #1a2a44;
         margin-top: 10px;
-        margin-bottom: -5px;
         font-weight: 600;
     }
+    
+    /* Date picker horizontal */
+    .custom-date-picker {
+        display: flex;
+        gap: 5px;
+        margin: 10px 0;
+    }
+    .date-part {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        background: #f8f9fa;
+    }
+    .date-part:focus {
+        border-color: #ff416c;
+        outline: none;
+    }
+    
+    /* Photo */
     .photo-circle {
-        width: 120px;
-        height: 120px;
+        width: 110px;
+        height: 110px;
         border: 4px solid #ff416c;
         border-radius: 50%;
-        margin: 20px auto;
+        margin: 15px auto;
         background-size: cover;
         background-position: center;
         box-shadow: 0 10px 25px rgba(255,65,108,0.3);
-    }
-    .match-card, .inbox-item, .st-group {
-        background: white;
-        border-radius: 25px;
-        margin: 15px 0;
-        padding: 20px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        font-size: 1.1rem;
-    }
-    .match-card {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    .match-header {
         display: flex;
         align-items: center;
-        gap: 20px;
+        justify-content: center;
+        cursor: pointer;
     }
-    .match-header .match-info {
+    
+    /* Match cards */
+    .match-card {
+        background: white;
+        border-radius: 25px;
+        margin: 10px 15px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .match-photo-blur {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background: #eee;
+        filter: blur(6px);
+        flex-shrink: 0;
+    }
+    .match-info {
         flex: 1;
     }
     .match-actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
+    }
+    
+    /* Style groups */
+    .st-group {
+        background: white;
+        border-radius: 15px;
+        margin: 0 15px 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        text-align: left;
+    }
+    .st-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f8f8f8;
+        color: #333;
+        font-size: 0.95rem;
+    }
+    .st-item:last-child {
+        border-bottom: none;
+    }
+    
+    /* Charte améliorée */
+    .charte-box {
+        height: 400px;
+        overflow-y: auto;
+        background: #fff5f7;
+        border: 2px solid #ffdae0;
+        border-radius: 25px;
+        padding: 30px;
+        font-size: 1.1rem;
+        color: #1a2a44;
+        line-height: 1.6;
+        margin: 20px 0;
+        text-align: left;
+    }
+    .charte-section {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px dashed #ffdae0;
+    }
+    .charte-section:last-child {
+        border-bottom: none;
+    }
+    .charte-title {
+        color: #ff416c;
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+    .charte-subtitle {
+        color: #1a2a44;
+        font-size: 1.1rem;
+        font-style: italic;
+        margin-bottom: 8px;
+    }
+    .scroll-indicator {
+        text-align: center;
+        color: #ff416c;
+        font-size: 1rem;
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(255,65,108,0.1);
+        border-radius: 40px;
+    }
+    
+    /* Popups */
+    #request-popup, #rejection-popup, #loading-popup, #genlove-popup, #popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.9);
+        z-index: 10000;
+        align-items: center;
         justify-content: center;
+        padding: 20px;
+        backdrop-filter: blur(5px);
     }
-    .match-actions .btn-action {
-        flex: 1;
-    }
-    .match-photo-blur {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        background: #f0f0f0;
-        filter: blur(5px);
-        flex-shrink: 0;
-    }
-    .inbox-item {
-        cursor: pointer;
-        transition: all 0.3s;
+    .popup-card, .popup-content {
+        background: white;
+        border-radius: 30px;
+        padding: 30px 25px;
+        max-width: 380px;
+        width: 100%;
+        text-align: center;
+        animation: popupAppear 0.4s ease-out;
+        border: 3px solid #ff416c;
+        box-shadow: 0 20px 40px rgba(255,65,108,0.3);
         position: relative;
     }
-    .inbox-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(255,65,108,0.15);
+    .close-popup {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
     }
-    .inbox-item.unread {
-        background: #e8f0fe;
-        border-left: 5px solid #ff416c;
+    .popup-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
     }
-    .inbox-item.unread .user-name {
+    .popup-title {
         color: #ff416c;
+        font-size: 1.4rem;
         font-weight: bold;
+        margin-bottom: 15px;
     }
-    .inbox-item.unread .message-preview {
+    .popup-message, .popup-msg {
         color: #1a2a44;
-        font-weight: 600;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        padding: 0 10px;
     }
+    .popup-msg {
+        background: #e7f3ff;
+        padding: 15px;
+        border-radius: 12px;
+        border-left: 5px solid #007bff;
+        text-align: left;
+    }
+    .popup-buttons {
+        display: flex;
+        gap: 15px;
+        margin: 15px 0;
+    }
+    .popup-buttons button {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .accept-btn { background: #ff416c; color: white; }
+    .reject-btn { background: #1a2a44; color: white; }
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .ok-btn {
+        background: #ff416c;
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    /* Loader */
+    #loader {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: white;
+        z-index: 100;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+    }
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #ff416c;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    @keyframes popupAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Notification */
+    #genlove-notify {
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 380px;
+        background: #1a2a44;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 60px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: 0.5s;
+        z-index: 9999;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        border-left: 5px solid #ff416c;
+        font-size: 1rem;
+    }
+    #genlove-notify.show { top: 20px; }
+    
+    /* Navigation */
+    .navigation {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .nav-link {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        background: white;
+        text-decoration: none;
+        color: #1a2a44;
+        border-radius: 30px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        font-size: 1rem;
+    }
+    .back-link {
+        display: inline-block;
+        margin: 15px 0;
+        color: #666;
+        text-decoration: none;
+        font-size: 1rem;
+    }
+    
+    /* Info bubble */
+    .info-bubble {
+        background: #e7f3ff;
+        color: #1a2a44;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 15px;
+        font-size: 0.9rem;
+        border-left: 5px solid #007bff;
+        text-align: left;
+    }
+    
+    /* Switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 45px;
+        height: 24px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #ff416c;
+    }
+    input:checked + .slider:before {
+        transform: translateX(21px);
+    }
+    
+    /* Danger zone */
+    .danger-zone {
+        border: 2px solid #dc3545;
+        background: #fff5f5;
+        margin-top: 30px;
+    }
+    
+    /* Empty message */
+    .empty-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+        background: white;
+        border-radius: 25px;
+        margin: 20px 0;
+        font-size: 1.1rem;
+    }
+    
+    /* Unread badges */
     .unread-badge {
         background: #ff416c;
         color: white;
@@ -1200,65 +1533,8 @@ const styles = `
         margin-left: 5px;
         padding: 0 4px;
     }
-    .st-group {
-        background: white;
-        border-radius: 25px;
-        margin: 15px 0;
-        padding: 5px 0;
-    }
-    .st-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 20px;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 1.2rem;
-    }
-    .st-item:last-child {
-        border-bottom: none;
-    }
-    .charte-box {
-        height: 500px;
-        overflow-y: auto;
-        background: #fff5f7;
-        border: 2px solid #ffdae0;
-        border-radius: 25px;
-        padding: 30px;
-        font-size: 1.2rem;
-        color: #1a2a44;
-        line-height: 1.8;
-        margin: 20px 0;
-        text-align: left;
-    }
-    .charte-section {
-        margin-bottom: 35px;
-        padding-bottom: 25px;
-        border-bottom: 2px dashed #ffdae0;
-    }
-    .charte-section:last-child {
-        border-bottom: none;
-    }
-    .charte-title {
-        color: #ff416c;
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 12px;
-    }
-    .charte-subtitle {
-        color: #1a2a44;
-        font-size: 1.2rem;
-        font-style: italic;
-        margin-bottom: 12px;
-    }
-    .scroll-indicator {
-        text-align: center;
-        color: #ff416c;
-        font-size: 1.1rem;
-        margin: 15px 0;
-        padding: 12px;
-        background: rgba(255,65,108,0.1);
-        border-radius: 40px;
-    }
+    
+    /* Chat */
     .chat-header {
         background: #1a2a44;
         color: white;
@@ -1266,22 +1542,22 @@ const styles = `
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
     .chat-messages {
         padding: 20px;
         min-height: 60vh;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         background: #f5f7fb;
     }
     .bubble {
         padding: 12px 18px;
-        border-radius: 25px;
+        border-radius: 20px;
         max-width: 80%;
-        font-size: 1.1rem;
-        line-height: 1.5;
+        font-size: 1rem;
+        line-height: 1.4;
     }
     .received {
         background: white;
@@ -1296,7 +1572,7 @@ const styles = `
     }
     .input-area {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         padding: 15px;
         background: white;
         border-top: 2px solid #eee;
@@ -1304,7 +1580,7 @@ const styles = `
     .input-area input {
         flex: 1;
         padding: 12px 20px;
-        font-size: 1.1rem;
+        font-size: 1rem;
         border: 2px solid #e2e8f0;
         border-radius: 30px;
         outline: none;
@@ -1319,191 +1595,77 @@ const styles = `
         border: none;
         border-radius: 30px;
         cursor: pointer;
-        font-size: 1.1rem;
         font-weight: 600;
     }
-    .navigation {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-    }
-    .nav-link {
-        flex: 1;
-        text-align: center;
-        padding: 12px;
-        background: white;
-        text-decoration: none;
-        color: #1a2a44;
-        border-radius: 30px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-        font-size: 1.1rem;
-    }
-    .back-link {
-        display: inline-block;
-        margin: 20px 0;
-        color: #666;
-        text-decoration: none;
-        font-size: 1.1rem;
-    }
-    .login-prompt {
-        font-size: 1.2rem;
-        color: #1a2a44;
-        margin: 20px 0 10px;
-    }
-    .empty-message {
-        text-align: center;
-        padding: 50px 20px;
-        color: #666;
+    
+    /* Inbox */
+    .inbox-item {
         background: white;
         border-radius: 25px;
-        margin: 20px 0;
-        font-size: 1.2rem;
+        margin: 10px 0;
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: all 0.3s;
     }
-    .empty-message span {
-        font-size: 3rem;
-        display: block;
-        margin-bottom: 20px;
+    .inbox-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255,65,108,0.15);
     }
-    .danger-zone {
-        border: 2px solid #dc3545;
-        background: #fff5f5;
-        margin-top: 30px;
+    .inbox-item.unread {
+        background: #e8f0fe;
+        border-left: 5px solid #ff416c;
     }
     
-    /* Popups */
-    #request-popup, #rejection-popup, #loading-popup, #genlove-popup {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.9);
-        z-index: 10000;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        backdrop-filter: blur(5px);
-    }
-    .popup-card {
-        background: white;
-        border-radius: 30px;
-        padding: 35px 25px;
-        max-width: 380px;
-        width: 100%;
-        text-align: center;
-        animation: popupAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 3px solid #ff416c;
-        box-shadow: 0 20px 40px rgba(255,65,108,0.3);
-    }
-    .popup-icon {
-        font-size: 4rem;
-        margin-bottom: 15px;
-    }
-    .popup-title {
-        color: #ff416c;
-        font-size: 1.6rem;
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-    .popup-message {
-        color: #1a2a44;
-        font-size: 1.2rem;
-        line-height: 1.6;
-        margin-bottom: 25px;
-        padding: 0 10px;
-    }
-    .popup-buttons {
-        display: flex;
-        gap: 15px;
-        margin: 20px 0;
-    }
-    .popup-buttons button {
-        flex: 1;
+    /* Serment */
+    .serment-container {
+        background: #f8f9fa;
         padding: 15px;
-        border: none;
-        border-radius: 50px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    .accept-btn {
-        background: #ff416c;
-        color: white;
-    }
-    .reject-btn {
-        background: #1a2a44;
-        color: white;
-    }
-    .action-buttons {
+        border-radius: 12px;
+        border: 1px solid #ffdae0;
+        text-align: left;
         display: flex;
         gap: 10px;
-        margin-top: 20px;
-    }
-    .ok-btn {
-        background: #ff416c;
-        color: white;
-        padding: 15px 30px;
-        border: none;
-        border-radius: 50px;
-        font-weight: bold;
-        cursor: pointer;
-        width: 100%;
-        transition: all 0.3s;
-    }
-    .ok-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(255,65,108,0.3);
-    }
-    .spinner {
-        width: 50px;
-        height: 50px;
-        border: 5px solid #f3f3f3;
-        border-top: 5px solid #ff416c;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 20px;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    @keyframes popupAppear {
-        from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.9);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-    .custom-date-picker {
-        display: flex;
-        gap: 5px;
+        align-items: flex-start;
         margin: 10px 0;
     }
-    .date-part {
-        flex: 1;
-        padding: 15px;
-        border: 2px solid #e2e8f0;
-        border-radius: 15px;
-        font-size: 1rem;
-        background: #f8f9fa;
+    .serment-text {
+        font-size: 0.85rem;
+        color: #d63384;
+        line-height: 1.4;
     }
-    .date-part:focus {
-        border-color: #ff416c;
-        outline: none;
-    }
+    
     @media (max-width: 420px) {
         body { font-size: 15px; }
         .app-shell { max-width: 100%; }
-        .logo-text { font-size: 4.2rem; }
+        .logo-text { font-size: 4rem; }
         h2 { font-size: 1.8rem; }
         .btn-pink, .btn-dark { width: 95%; padding: 15px; }
-        .custom-date-picker { flex-direction: column; }
+        .custom-date-picker { flex-direction: row; }
+        .date-part { padding: 10px; }
     }
 </style>
+`;
+
+// ============================================
+// NOTIFICATION SCRIPT
+// ============================================
+const notifyScript = `
+<script>
+function showNotify(msg, type) {
+    const n = document.getElementById('genlove-notify');
+    const m = document.getElementById('notify-msg');
+    if(m) m.innerText = msg;
+    if(n) {
+        n.style.backgroundColor = type === 'success' ? '#4CAF50' : '#1a2a44';
+        n.classList.add('show');
+    }
+    setTimeout(() => n.classList.remove('show'), 3000);
+}
+function vibrate(pattern) {
+    if ("vibrate" in navigator) navigator.vibrate(pattern);
+}
+</script>
 `;
 
 // ============================================
@@ -1628,7 +1790,7 @@ app.get('/lang/:lang', async (req, res) => {
     res.redirect(req.get('referer') || '/');
 });
 
-// ACCUEIL
+// ACCUEIL avec nouveau logo et sélecteur compact
 app.get('/', (req, res) => {
     const t = req.t;
     const currentLang = req.lang;
@@ -1640,28 +1802,76 @@ app.get('/', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('welcome')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
         <div class="home-screen">
-            <div class="language-selector-home">
-                <a href="/lang/fr" class="lang-btn ${currentLang === 'fr' ? 'active' : ''}">${t('french')}</a>
-                <a href="/lang/en" class="lang-btn ${currentLang === 'en' ? 'active' : ''}">${t('english')}</a>
-                <a href="/lang/pt" class="lang-btn ${currentLang === 'pt' ? 'active' : ''}">${t('portuguese')}</a>
-                <a href="/lang/es" class="lang-btn ${currentLang === 'es' ? 'active' : ''}">${t('spanish')}</a>
-                <a href="/lang/ar" class="lang-btn ${currentLang === 'ar' ? 'active' : ''}">${t('arabic')}</a>
-                <a href="/lang/zh" class="lang-btn ${currentLang === 'zh' ? 'active' : ''}">${t('chinese')}</a>
+            <!-- Sélecteur de langue compact -->
+            <div class="language-selector-compact">
+                <button onclick="toggleLanguageDropdown()" class="lang-btn-compact">
+                    <span>🌐</span> 
+                    <span id="selected-language">${t('french')}</span>
+                    <span style="font-size: 0.8rem;">▼</span>
+                </button>
+                <div id="language-dropdown" class="language-dropdown">
+                    <a href="/lang/fr" class="dropdown-item">🇫🇷 ${t('french')}</a>
+                    <a href="/lang/en" class="dropdown-item">🇬🇧 ${t('english')}</a>
+                    <a href="/lang/pt" class="dropdown-item">🇵🇹 ${t('portuguese')}</a>
+                    <a href="/lang/es" class="dropdown-item">🇪🇸 ${t('spanish')}</a>
+                    <a href="/lang/ar" class="dropdown-item">🇸🇦 ${t('arabic')}</a>
+                    <a href="/lang/zh" class="dropdown-item">🇨🇳 ${t('chinese')}</a>
+                </div>
             </div>
+            
+            <!-- Nouveau logo coeur ADN avec loupe -->
+            <div class="logo-container">
+                <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+                    <!-- Cœur principal -->
+                    <path d="M50 88 L20 50 C10 35 20 15 35 15 C45 15 50 25 50 25 C50 25 55 15 65 15 C80 15 90 35 80 50 L50 88" 
+                          fill="#ff416c" stroke="#1a2a44" stroke-width="2"/>
+                    <!-- ADN en spirale à l'intérieur -->
+                    <path d="M35 35 Q45 30, 50 35 T65 35 M35 45 Q45 40, 50 45 T65 45 M35 55 Q45 50, 50 55 T65 55" 
+                          stroke="white" stroke-width="2" fill="none" stroke-dasharray="3 2"/>
+                    <!-- Loupe de recherche -->
+                    <circle cx="70" cy="30" r="12" fill="none" stroke="white" stroke-width="3"/>
+                    <line x1="78" y1="38" x2="88" y2="48" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+            </div>
+            
             <div class="logo-text">
                 <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
             </div>
+            
             <div class="slogan">${t('slogan')}</div>
-            <div class="login-prompt">${t('haveAccount')}</div>
+            
+            <div style="font-size:1.1rem; color:#1a2a44; margin:20px 0 10px;">${t('haveAccount')}</div>
             <a href="/login" class="btn-dark">${t('login')}</a>
             <a href="/charte-engagement" class="btn-pink">${t('createAccount')}</a>
-            <div style="margin-top:40px; font-size:1rem; color:#666;">${t('security')}</div>
+            <div style="margin-top:30px; font-size:0.9rem; color:#666;">${t('security')}</div>
         </div>
     </div>
+    
+    <script>
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('language-dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('language-dropdown');
+            const button = event.target.closest('.lang-btn-compact');
+            if (!button && dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                document.getElementById('selected-language').innerText = this.innerText.replace(/[🇫🇷🇬🇧🇵🇹🇪🇸🇸🇦🇨🇳]/g, '').trim();
+            });
+        });
+    </script>
 </body>
 </html>`);
 });
@@ -1676,6 +1886,7 @@ app.get('/login', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('loginTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1706,7 +1917,7 @@ app.get('/login', (req, res) => {
 </html>`);
 });
 
-// CHARTE D'ENGAGEMENT
+// CHARTE D'ENGAGEMENT avec scroll corrigé
 app.get('/charte-engagement', (req, res) => {
     const t = req.t;
     res.send(`<!DOCTYPE html>
@@ -1716,6 +1927,7 @@ app.get('/charte-engagement', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('charterTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -1749,19 +1961,35 @@ app.get('/charte-engagement', (req, res) => {
                     <p>${t('oath5Text')}</p>
                 </div>
             </div>
-            <div class="scroll-indicator" id="scrollIndicator">${t('scrollDown')}</div>
-            <button id="agreeBtn" class="btn-pink" onclick="acceptCharte()" disabled>${t('accept')}</button>
+            <div class="scroll-indicator" id="scrollIndicator">⬇️ ${t('scrollDown')} ⬇️</div>
+            <button id="agreeBtn" class="btn-pink" onclick="acceptCharte()" disabled style="opacity: 0.5; cursor: not-allowed;">${t('accept')}</button>
             <a href="/" class="back-link">← ${t('backHome')}</a>
         </div>
     </div>
+    
     <script>
         function checkScroll(el) {
             if (el.scrollHeight - el.scrollTop <= el.clientHeight + 5) {
                 document.getElementById('agreeBtn').disabled = false;
                 document.getElementById('agreeBtn').style.opacity = '1';
+                document.getElementById('agreeBtn').style.cursor = 'pointer';
                 document.getElementById('scrollIndicator').style.opacity = '0.3';
+            } else {
+                document.getElementById('agreeBtn').disabled = true;
+                document.getElementById('agreeBtn').style.opacity = '0.5';
+                document.getElementById('agreeBtn').style.cursor = 'not-allowed';
+                document.getElementById('scrollIndicator').style.opacity = '1';
             }
         }
+        
+        window.onload = function() {
+            const charteBox = document.getElementById('charteBox');
+            if (charteBox.scrollTop === 0) {
+                document.getElementById('agreeBtn').disabled = true;
+                document.getElementById('agreeBtn').style.opacity = '0.5';
+            }
+        };
+        
         function acceptCharte() {
             if (!document.getElementById('agreeBtn').disabled) window.location.href = '/signup';
         }
@@ -1770,7 +1998,7 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION
+// INSCRIPTION avec date horizontale
 app.get('/signup', (req, res) => {
     const t = req.t;
     const datePicker = generateDateOptions(req);
@@ -1782,69 +2010,119 @@ app.get('/signup', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('signupTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
-        <div class="page-white">
-            <h2>${t('signupTitle')}</h2>
+        <div id="loader">
+            <div class="spinner"></div>
+            <h3>Analyse sécurisée...</h3>
+            <p>Vérification de vos données médicales.</p>
+        </div>
+        <div class="page-white" id="main-content">
+            <h2 style="color:#ff416c;">${t('signupTitle')}</h2>
             <p style="font-size: 1.2rem; margin-bottom: 20px;">${t('signupSub')}</p>
-            <form id="signupForm">
-                <div class="input-label">${t('firstName')}</div>
-                <input type="text" name="firstName" class="input-box" placeholder="${t('firstName')}" required>
+            <form onsubmit="saveAndRedirect(event)">
+                <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
+                    <span id="photoText">📷 Photo</span>
+                </div>
+                <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)">
                 
-                <div class="input-label">${t('lastName')}</div>
-                <input type="text" name="lastName" class="input-box" placeholder="${t('lastName')}" required>
+                <input type="text" id="firstName" class="input-box" placeholder="${t('firstName')}" required>
+                <input type="text" id="lastName" class="input-box" placeholder="${t('lastName')}" required>
                 
-                <div class="input-label">${t('gender')}</div>
-                <select name="gender" class="input-box" required>
+                <select id="gender" class="input-box" required>
                     <option value="">${t('gender')}</option>
                     <option value="Homme">${t('male')}</option>
                     <option value="Femme">${t('female')}</option>
                 </select>
                 
-                <div class="input-label">${t('dob')} (${t('dobPlaceholder')})</div>
+                <div class="input-label">${t('dob')}</div>
                 ${datePicker}
                 
-                <div class="input-label">${t('city')}</div>
-                <input type="text" name="residence" class="input-box" placeholder="${t('city')}" required>
+                <input type="text" id="residence" class="input-box" placeholder="${t('city')}" required>
                 
-                <div class="input-label">${t('genotype')}</div>
-                <select name="genotype" class="input-box" required>
+                <select id="genotype" class="input-box" required>
                     <option value="">${t('genotype')}</option>
                     <option value="AA">AA</option>
                     <option value="AS">AS</option>
                     <option value="SS">SS</option>
                 </select>
                 
-                <div class="input-label">${t('bloodGroup')}</div>
-                <select name="bloodGroup" class="input-box" required>
-                    <option value="">${t('bloodGroup')}</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                </select>
+                <div style="display:flex; gap:10px;">
+                    <select id="bloodType" class="input-box" style="flex:2;" required>
+                        <option value="">${t('bloodGroup')}</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+                    <select id="bloodRh" class="input-box" style="flex:1;" required>
+                        <option value="+">+</option>
+                        <option value="-">-</option>
+                    </select>
+                </div>
                 
-                <div class="input-label">${t('desireChild')}</div>
-                <select name="desireChild" class="input-box" required>
+                <select id="desireChild" class="input-box" required>
                     <option value="">${t('desireChild')}</option>
                     <option value="Oui">${t('yes')}</option>
                     <option value="Non">${t('no')}</option>
                 </select>
                 
-                <input type="hidden" name="language" value="${req.lang}">
+                <div class="serment-container">
+                    <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
+                    <label for="oath" class="serment-text">${t('honorText')}</label>
+                </div>
                 
                 <button type="submit" class="btn-pink">${t('createProfile')}</button>
             </form>
             <a href="/charte-engagement" class="back-link">← ${t('backCharter')}</a>
         </div>
     </div>
+    
     <script>
-        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        let photoBase64 = localStorage.getItem('userPhoto') || "";
+        
+        window.onload = function() {
+            if(photoBase64) {
+                document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
+                document.getElementById('photoText').style.display = 'none';
+            }
+            document.getElementById('firstName').value = localStorage.getItem('userFirstName') || "";
+            document.getElementById('lastName').value = localStorage.getItem('userLastName') || "";
+            document.getElementById('gender').value = localStorage.getItem('userGender') || "";
+            document.getElementById('residence').value = localStorage.getItem('userResidence') || "";
+            document.getElementById('genotype').value = localStorage.getItem('userGenotype') || "";
+            
+            const fullBlood = localStorage.getItem('userBloodGroup') || "";
+            if(fullBlood) {
+                document.getElementById('bloodType').value = fullBlood.replace(/[+-]/g, "");
+                document.getElementById('bloodRh').value = fullBlood.includes('+') ? '+' : '-';
+            }
+            document.getElementById('desireChild').value = localStorage.getItem('userDesireChild') || "";
+            
+            // Charger la date
+            const savedDob = localStorage.getItem('userDob');
+            if(savedDob) {
+                const date = new Date(savedDob);
+                document.querySelector('select[name="day"]').value = date.getDate();
+                document.querySelector('select[name="month"]').value = date.getMonth() + 1;
+                document.querySelector('select[name="year"]').value = date.getFullYear();
+            }
+        };
+        
+        function previewPhoto(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                photoBase64 = reader.result;
+                document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
+                document.getElementById('photoCircle').style.backgroundSize = 'cover';
+                document.getElementById('photoText').style.display = 'none';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+        
+        function saveAndRedirect(e) {
             e.preventDefault();
             
             const day = document.querySelector('select[name="day"]').value;
@@ -1857,24 +2135,29 @@ app.get('/signup', (req, res) => {
             }
             
             const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            data.dob = dob;
             
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            if (res.ok) window.location.href = '/profile';
-            else alert('Erreur lors de l\\'inscription');
-        });
+            document.getElementById('loader').style.display = 'flex';
+            
+            localStorage.setItem('userPhoto', photoBase64);
+            localStorage.setItem('userFirstName', document.getElementById('firstName').value);
+            localStorage.setItem('userLastName', document.getElementById('lastName').value);
+            localStorage.setItem('userGender', document.getElementById('gender').value);
+            localStorage.setItem('userDob', dob);
+            localStorage.setItem('userResidence', document.getElementById('residence').value);
+            localStorage.setItem('userGenotype', document.getElementById('genotype').value);
+            localStorage.setItem('userBloodGroup', document.getElementById('bloodType').value + document.getElementById('bloodRh').value);
+            localStorage.setItem('userDesireChild', document.getElementById('desireChild').value);
+            
+            setTimeout(() => {
+                window.location.href = '/profile';
+            }, 2000);
+        }
     </script>
 </body>
 </html>`);
 });
 
-// PROFIL avec popups
+// PROFIL
 app.get('/profile', requireAuth, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -1892,6 +2175,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('myProfile')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
@@ -2041,7 +2325,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     }
 });
 
-// MATCHING
+// MATCHING avec commentaires inspirés du nouveau code et blocage symétrique corrigé
 app.get('/matching', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2050,7 +2334,7 @@ app.get('/matching', requireAuth, async (req, res) => {
         const t = req.t;
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
         
-        // Récupérer les IDs exclus
+        // Récupérer les IDs exclus (avec blocage symétrique)
         const messages = await Message.find({
             $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
             isBlocked: false
@@ -2068,7 +2352,14 @@ app.get('/matching', requireAuth, async (req, res) => {
         
         const rejectedArray = currentUser.rejectedRequests ? currentUser.rejectedRequests.map(id => id.toString()) : [];
         const blockedArray = currentUser.blockedUsers ? currentUser.blockedUsers.map(id => id.toString()) : [];
-        const excludedIds = [...new Set([...blockedArray, ...Array.from(conversationIds), ...rejectedArray])];
+        const blockedByArray = currentUser.blockedBy ? currentUser.blockedBy.map(id => id.toString()) : [];
+        
+        const excludedIds = [...new Set([
+            ...blockedArray, 
+            ...blockedByArray,
+            ...Array.from(conversationIds), 
+            ...rejectedArray
+        ])];
         
         // Requête de base
         let query = { 
@@ -2078,14 +2369,6 @@ app.get('/matching', requireAuth, async (req, res) => {
         
         if (excludedIds.length > 0) {
             query._id.$nin = excludedIds;
-        }
-        
-        // Exclure ceux qui nous ont bloqués
-        const blockedByOthers = await User.find({ blockedBy: currentUser._id }).distinct('_id');
-        if (blockedByOthers.length) {
-            query._id.$nin = query._id.$nin ? 
-                [...query._id.$nin, ...blockedByOthers.map(id => id.toString())] : 
-                blockedByOthers.map(id => id.toString());
         }
         
         let partners = await User.find(query);
@@ -2109,16 +2392,17 @@ app.get('/matching', requireAuth, async (req, res) => {
                 const age = calculerAge(p.dob);
                 partnersHTML += `
                     <div class="match-card">
-                        <div class="match-header">
-                            <div class="match-photo-blur"></div>
-                            <div class="match-info">
-                                <b style="font-size:1.3rem;">${p.firstName}</b>
-                                <br><span style="font-size:1.1rem;">${p.genotype} • ${age} ans</span>
-                            </div>
+                        <div class="match-photo-blur"></div>
+                        <div class="match-info">
+                            <b style="font-size:1.2rem;">${p.firstName}</b>
+                            <br><span style="font-size:0.9rem;">${p.genotype} • ${age} ans</span>
                         </div>
                         <div class="match-actions">
-                            <button class="btn-action btn-contact small" onclick="sendInterest('${p._id}', '${p.firstName}')">
+                            <button class="btn-action btn-contact" onclick="sendInterest('${p._id}', '${p.firstName}')">
                                 💬 ${t('contact')}
+                            </button>
+                            <button class="btn-action btn-details" onclick="showDetails(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+                                ${t('details')}
                             </button>
                         </div>
                     </div>
@@ -2146,13 +2430,17 @@ app.get('/matching', requireAuth, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('compatiblePartners')}</title>
     ${styles}
+    ${notifyScript}
     <style>
         #genlove-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px; }
         #loading-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:20000; align-items:center; justify-content:center; padding:20px; }
+        #popup-overlay { display: none; }
     </style>
 </head>
 <body>
     <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        
         ${ssasPopup}
         
         <div id="loading-popup">
@@ -2162,18 +2450,33 @@ app.get('/matching', requireAuth, async (req, res) => {
             </div>
         </div>
         
-        <div class="page-white">
-            <h2>${t('compatiblePartners')}</h2>
-            ${partnersHTML}
-            <div class="navigation">
-                <a href="/profile" class="nav-link">← ${t('backProfile')}</a>
-                <a href="/inbox" class="nav-link">${t('toMessages')}</a>
+        <div id="popup-overlay" onclick="closePopup()">
+            <div class="popup-content" onclick="event.stopPropagation()">
+                <span class="close-popup" onclick="closePopup()">&times;</span>
+                <h3 id="pop-name" style="color:#ff416c; margin-top:0;">${t('details')}</h3>
+                <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
+                <div id="pop-msg" class="popup-msg"></div>
+                <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="sendInterestFromPopup()"> ${t('contact')}</button>
             </div>
         </div>
+        
+        <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;">
+            <h3 style="margin:0; color:#1a2a44;">${t('compatiblePartners')}</h3>
+        </div>
+        
+        <div id="match-container">
+            ${partnersHTML}
+        </div>
+        
+        <a href="/profile" class="btn-pink">${t('backProfile')}</a>
     </div>
     
     <script>
+        let currentPartner = null;
+        let currentPartnerId = null;
+        
         function sendInterest(receiverId, receiverName) {
+            currentPartnerId = receiverId;
             document.getElementById('loading-popup').style.display = 'flex';
             document.getElementById('loading-message').innerText = '${t('sendingRequest')}';
             
@@ -2189,15 +2492,64 @@ app.get('/matching', requireAuth, async (req, res) => {
                     setTimeout(() => {
                         document.getElementById('loading-popup').style.display = 'none';
                         if (data.success) {
-                            alert('Intérêt envoyé à ' + receiverName);
+                            showNotify('Intérêt envoyé à ' + receiverName, 'success');
                         }
                     }, 1000);
                 })
                 .catch(() => {
                     document.getElementById('loading-popup').style.display = 'none';
-                    alert('Erreur réseau');
+                    showNotify('Erreur réseau', 'error');
                 });
             }, 2000);
+        }
+        
+        function sendInterestFromPopup() {
+            if (currentPartnerId) {
+                sendInterest(currentPartnerId, currentPartner ? currentPartner.firstName : '');
+                closePopup();
+            }
+        }
+        
+        function showDetails(partner) {
+            currentPartner = partner;
+            currentPartnerId = partner._id;
+            
+            const myGt = '${currentUser.genotype}';
+            
+            document.getElementById('pop-name').innerText = partner.firstName || "Profil";
+            document.getElementById('pop-details').innerHTML = \`
+                <b>${t('genotype_label')} :</b> \${partner.genotype}<br>
+                <b>${t('blood_label')} :</b> \${partner.bloodGroup}<br><br>
+                <b>${t('project_label')} :</b><br>
+                <i>\${partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}'}</i>
+            \`;
+            
+            let msg = "";
+            if(myGt === "AA" && partner.genotype === "AA") {
+                msg = "<b>💞 L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale. En choisissant un partenaire AA, vous offrez à votre future descendance une protection totale contre la drépanocytose.";
+            }
+            else if(myGt === "AA" && partner.genotype === "AS") {
+                msg = "<b>🛡️ L'Union Protectrice :</b> Excellent choix. En tant que AA, vous jouez un rôle protecteur essentiel. Votre union ne présente aucun risque de naissance d'un enfant SS.";
+            }
+            else if(myGt === "AA" && partner.genotype === "SS") {
+                msg = "<b>💪 L'Union Solidaire :</b> Une union magnifique et sans crainte. Votre profil AA est le partenaire idéal pour une personne SS. Aucun de vos enfants ne souffrira de la forme majeure.";
+            }
+            else if(myGt === "AS" && partner.genotype === "AA") {
+                msg = "<b>✨ L'Union Équilibrée :</b> Votre choix est responsable ! En vous unissant à un partenaire AA, vous éliminez tout risque de drépanocytose pour vos enfants.";
+            }
+            else if(myGt === "SS" && partner.genotype === "AA") {
+                msg = "<b>🌈 L'Union Espoir :</b> Vous avez fait le choix le plus sûr. Votre union avec un partenaire AA garantit que tous vos enfants seront porteurs AS mais jamais atteints de la forme SS.";
+            }
+            else {
+                msg = "<b>💬 Compatibilité standard :</b> Vous pouvez échanger avec ce profil.";
+            }
+            
+            document.getElementById('pop-msg').innerHTML = msg;
+            document.getElementById('popup-overlay').style.display = 'flex';
+        }
+        
+        function closePopup() {
+            document.getElementById('popup-overlay').style.display = 'none';
         }
     </script>
 </body>
@@ -2230,7 +2582,7 @@ app.get('/inbox', requireAuth, async (req, res) => {
             
             // Vérifier si l'autre utilisateur n'est pas bloqué
             if (currentUser.blockedUsers && currentUser.blockedUsers.includes(other._id)) {
-                continue; // Ignorer les conversations avec des utilisateurs bloqués
+                continue;
             }
             
             if (!conversations.has(other._id.toString())) {
@@ -2283,9 +2635,11 @@ app.get('/inbox', requireAuth, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('inboxTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
         <div class="page-white">
             <h2>${t('inboxTitle')}</h2>
             ${inboxHTML}
@@ -2359,9 +2713,11 @@ app.get('/chat', requireAuth, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - Chat</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
         <div class="chat-header">
             <span><b>${partner.firstName}</b></span>
             <div>
@@ -2402,7 +2758,6 @@ app.get('/chat', requireAuth, async (req, res) => {
             }
         }
         
-        // Scroll en bas
         window.scrollTo(0, document.body.scrollHeight);
     </script>
 </body>
@@ -2427,46 +2782,66 @@ app.get('/settings', requireAuth, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('settingsTitle')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
-        <div class="page-white">
-            <h2>${t('settingsTitle')}</h2>
-            
-            <div class="st-group">
-                <div class="st-item">${t('visibility')}<input type="checkbox" checked></div>
-                <div class="st-item">${t('notifications')}<input type="checkbox"></div>
-            </div>
-            
-            <div class="st-group">
-                <div class="st-item">${t('language')}
-                    <select onchange="window.location.href='/lang/'+this.value" style="padding:8px; border-radius:10px;">
-                        <option value="fr" ${currentUser.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
-                        <option value="en" ${currentUser.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
-                        <option value="pt" ${currentUser.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
-                        <option value="es" ${currentUser.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
-                        <option value="ar" ${currentUser.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
-                        <option value="zh" ${currentUser.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
-                    </select>
-                </div>
-            </div>
-            
-            <a href="/edit-profile" class="btn-dark" style="text-decoration: none;">✏️ ${t('editProfile')}</a>
-            <a href="/blocked-list" class="btn-dark" style="text-decoration: none;">🚫 ${t('blockedUsers')} (${blockedCount})</a>
-            
-            <div class="st-group danger-zone">
-                <div class="st-item" style="color:#dc3545;">${t('dangerZone')}</div>
-                <div class="st-item">
-                    <span>${t('deleteAccount')}</span>
-                    <button class="btn-action btn-block" onclick="deleteAccount()" style="padding:8px 15px;">${t('delete')}</button>
-                </div>
-            </div>
-            
-            <div class="navigation">
-                <a href="/profile" class="nav-link">← ${t('backProfile')}</a>
-                <a href="/logout-success" class="nav-link" style="color:#ff416c;">${t('logout')}</a>
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        <div style="padding:25px; background:white; text-align:center;">
+            <div style="font-size:2.5rem; font-weight:bold;">
+                <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
             </div>
         </div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
+        <div class="st-group">
+            <div class="st-item">
+                <span>${t('visibility')}</span>
+                <label class="switch">
+                    <input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'; showNotify('${t('settingsTitle')} mis à jour !')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="st-item" style="font-size:0.8rem; color:#666;">Statut actuel : <b id="status" style="color:#ff416c;">Public</b></div>
+        </div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">${t('language')}</div>
+        <div class="st-group">
+            <div class="st-item">
+                <span>${t('language')}</span>
+                <select onchange="window.location.href='/lang/'+this.value" style="padding:8px; border-radius:10px; border:1px solid #ddd;">
+                    <option value="fr" ${currentUser.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
+                    <option value="en" ${currentUser.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
+                    <option value="pt" ${currentUser.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
+                    <option value="es" ${currentUser.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
+                    <option value="ar" ${currentUser.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
+                    <option value="zh" ${currentUser.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
+        <div class="st-group">
+            <a href="/edit-profile" style="text-decoration:none;" class="st-item">
+                <span>✏️ ${t('editProfile')}</span>
+                <b>Modifier ➔</b>
+            </a>
+            <a href="/blocked-list" style="text-decoration:none;" class="st-item">
+                <span>🚫 ${t('blockedUsers')}</span>
+                <b>${blockedCount} ➔</b>
+            </a>
+        </div>
+        
+        <div class="st-group danger-zone">
+            <div class="st-item" style="color:#dc3545; font-weight:bold;">${t('dangerZone')}</div>
+            <div style="display:flex; justify-content:space-around; padding:15px;">
+                <button onclick="deleteAccount()" style="background:#1a2a44; color:white; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">${t('delete')}</button>
+                <button onclick="showNotify('Action annulée')" style="background:#eee; color:#333; border:none; padding:10px 25px; border-radius:10px; cursor:pointer;">Annuler</button>
+            </div>
+        </div>
+        
+        <a href="/profile" class="btn-pink">${t('backProfile')}</a>
+        <a href="/logout-success" class="btn-dark" style="text-decoration:none;">${t('logout')}</a>
     </div>
     
     <script>
@@ -2503,9 +2878,11 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('editProfile')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
         <div class="page-white">
             <h2>${t('editProfile')}</h2>
             <form id="editForm">
@@ -2574,8 +2951,12 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
-            if (res.ok) window.location.href = '/profile';
-            else alert('Erreur lors de la modification');
+            if (res.ok) {
+                showNotify('Profil mis à jour', 'success');
+                setTimeout(() => window.location.href = '/profile', 1000);
+            } else {
+                alert('Erreur lors de la modification');
+            }
         });
     </script>
 </body>
@@ -2597,7 +2978,7 @@ app.get('/blocked-list', requireAuth, async (req, res) => {
             currentUser.blockedUsers.forEach(user => {
                 blockedHTML += `
                     <div class="inbox-item" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span><b style="font-size:1.3rem;">${user.firstName} ${user.lastName}</b></span>
+                        <span><b style="font-size:1.2rem;">${user.firstName} ${user.lastName}</b></span>
                         <button class="btn-action" onclick="unblockUser('${user._id}')" style="background:#4CAF50; color:white; padding:8px 15px;">${t('unblock')}</button>
                     </div>
                 `;
@@ -2613,9 +2994,11 @@ app.get('/blocked-list', requireAuth, async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>${t('appName')} - ${t('blockedUsers')}</title>
     ${styles}
+    ${notifyScript}
 </head>
 <body>
     <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
         <div class="page-white">
             <h2>${t('blockedUsers')}</h2>
             ${blockedHTML}
@@ -2626,7 +3009,8 @@ app.get('/blocked-list', requireAuth, async (req, res) => {
     <script>
         async function unblockUser(id) {
             await fetch('/api/unblock/' + id, { method: 'POST' });
-            location.reload();
+            showNotify('Utilisateur débloqué', 'success');
+            setTimeout(() => location.reload(), 1000);
         }
     </script>
 </body>
@@ -2866,7 +3250,6 @@ app.post('/api/messages', requireAuth, async (req, res) => {
     try {
         const receiverId = req.body.receiverId;
         
-        // Vérifier si l'utilisateur n'est pas bloqué
         const receiver = await User.findById(receiverId);
         if (receiver && receiver.blockedBy && receiver.blockedBy.includes(req.session.userId)) {
             return res.status(403).json({ error: "Vous avez bloqué cet utilisateur" });
@@ -2897,19 +3280,16 @@ app.post('/api/block/:userId', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'Utilisateur non trouvé' });
         }
         
-        // Ajouter aux blockedUsers de current
         if (!current.blockedUsers) current.blockedUsers = [];
         if (!current.blockedUsers.includes(req.params.userId)) {
             current.blockedUsers.push(req.params.userId);
         }
         
-        // Ajouter aux blockedBy de target
         if (!target.blockedBy) target.blockedBy = [];
         if (!target.blockedBy.includes(req.session.userId)) {
             target.blockedBy.push(req.session.userId);
         }
         
-        // Masquer tous les messages entre ces deux utilisateurs (effet miroir)
         await Message.updateMany(
             {
                 $or: [
@@ -2944,7 +3324,6 @@ app.post('/api/unblock/:userId', requireAuth, async (req, res) => {
             target.blockedBy = target.blockedBy.filter(id => id.toString() !== req.session.userId);
         }
         
-        // Restaurer tous les messages entre ces deux utilisateurs
         await Message.updateMany(
             {
                 $or: [
