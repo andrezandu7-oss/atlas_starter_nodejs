@@ -50,6 +50,7 @@ const userSchema = new mongoose.Schema({
     photo: String,
     language: { type: String, default: 'fr' },
     isVerified: { type: Boolean, default: false },
+    isPublic: { type: Boolean, default: true }, // AJOUT : visibilité du profil
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -2059,7 +2060,7 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION
+// INSCRIPTION - CORRIGÉE (formulaire toujours vide)
 app.get('/signup', (req, res) => {
     const t = req.t;
     const datePicker = generateDateOptions(req);
@@ -2142,25 +2143,36 @@ app.get('/signup', (req, res) => {
     </div>
     
     <script>
-        let photoBase64 = localStorage.getItem('userPhoto') || "";
+        let photoBase64 = ""; // Toujours vide au départ
         
         window.onload = function() {
-            if(photoBase64) {
-                document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
-                document.getElementById('photoText').style.display = 'none';
-            }
-            document.getElementById('firstName').value = localStorage.getItem('userFirstName') || "";
-            document.getElementById('lastName').value = localStorage.getItem('userLastName') || "";
-            document.getElementById('gender').value = localStorage.getItem('userGender') || "";
-            document.getElementById('residence').value = localStorage.getItem('userResidence') || "";
-            document.getElementById('genotype').value = localStorage.getItem('userGenotype') || "";
+            // Réinitialiser TOUS les champs
+            document.getElementById('photoCircle').style.backgroundImage = '';
+            document.getElementById('photoText').style.display = 'block';
+            document.getElementById('firstName').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('gender').value = '';
+            document.getElementById('residence').value = '';
+            document.getElementById('genotype').value = '';
+            document.getElementById('bloodType').value = '';
+            document.getElementById('bloodRh').value = '+';
+            document.getElementById('desireChild').value = '';
             
-            const fullBlood = localStorage.getItem('userBloodGroup') || "";
-            if(fullBlood) {
-                document.getElementById('bloodType').value = fullBlood.replace(/[+-]/g, "");
-                document.getElementById('bloodRh').value = fullBlood.includes('+') ? '+' : '-';
-            }
-            document.getElementById('desireChild').value = localStorage.getItem('userDesireChild') || "";
+            // Réinitialiser les selects de date
+            document.querySelector('select[name="day"]').value = '';
+            document.querySelector('select[name="month"]').value = '';
+            document.querySelector('select[name="year"]').value = '';
+            
+            // Nettoyer localStorage
+            localStorage.removeItem('userPhoto');
+            localStorage.removeItem('userFirstName');
+            localStorage.removeItem('userLastName');
+            localStorage.removeItem('userGender');
+            localStorage.removeItem('userDob');
+            localStorage.removeItem('userResidence');
+            localStorage.removeItem('userGenotype');
+            localStorage.removeItem('userBloodGroup');
+            localStorage.removeItem('userDesireChild');
         };
         
         function previewPhoto(e) {
@@ -2200,7 +2212,8 @@ app.get('/signup', (req, res) => {
                 bloodGroup: document.getElementById('bloodType').value + document.getElementById('bloodRh').value,
                 desireChild: document.getElementById('desireChild').value,
                 photo: photoBase64 || "",
-                language: '${req.lang}'
+                language: '${req.lang}',
+                isPublic: true // Par défaut, le profil est public
             };
             
             try {
@@ -2213,15 +2226,17 @@ app.get('/signup', (req, res) => {
                 const data = await res.json();
                 
                 if (data.success) {
-                    localStorage.setItem('userPhoto', photoBase64);
-                    localStorage.setItem('userFirstName', userData.firstName);
-                    localStorage.setItem('userLastName', userData.lastName);
-                    localStorage.setItem('userGender', userData.gender);
-                    localStorage.setItem('userDob', dob);
-                    localStorage.setItem('userResidence', userData.residence);
-                    localStorage.setItem('userGenotype', userData.genotype);
-                    localStorage.setItem('userBloodGroup', userData.bloodGroup);
-                    localStorage.setItem('userDesireChild', userData.desireChild);
+                    // NE PAS sauvegarder dans localStorage
+                    // Nettoyer les anciennes données
+                    localStorage.removeItem('userPhoto');
+                    localStorage.removeItem('userFirstName');
+                    localStorage.removeItem('userLastName');
+                    localStorage.removeItem('userGender');
+                    localStorage.removeItem('userDob');
+                    localStorage.removeItem('userResidence');
+                    localStorage.removeItem('userGenotype');
+                    localStorage.removeItem('userBloodGroup');
+                    localStorage.removeItem('userDesireChild');
                     
                     setTimeout(() => {
                         window.location.href = '/profile';
@@ -2423,7 +2438,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     }
 });
 
-// MATCHING avec boutons réparés
+// MATCHING avec filtre isPublic
 app.get('/matching', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2459,10 +2474,11 @@ app.get('/matching', requireAuth, async (req, res) => {
             ...rejectedArray
         ])];
         
-        // Requête de base
+        // Requête de base avec filtre isPublic
         let query = { 
             _id: { $ne: currentUser._id },
-            gender: currentUser.gender === 'Homme' ? 'Femme' : 'Homme'
+            gender: currentUser.gender === 'Homme' ? 'Femme' : 'Homme',
+            isPublic: true // ← FILTRE : uniquement les profils publics
         };
         
         if (excludedIds.length > 0) {
@@ -2873,7 +2889,7 @@ app.get('/chat', requireAuth, async (req, res) => {
     }
 });
 
-// SETTINGS
+// SETTINGS avec visibilité fonctionnelle
 app.get('/settings', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2920,11 +2936,13 @@ app.get('/settings', requireAuth, async (req, res) => {
             <div class="st-item">
                 <span>${t('visibility')}</span>
                 <label class="switch">
-                    <input type="checkbox" checked onchange="document.getElementById('status').innerText = this.checked ? 'Public' : 'Privé'; showNotify('${t('settingsTitle')} mis à jour !')">
+                    <input type="checkbox" id="visibilitySwitch" ${currentUser.isPublic ? 'checked' : ''} onchange="updateVisibility(this.checked)">
                     <span class="slider"></span>
                 </label>
             </div>
-            <div class="st-item" style="font-size:0.8rem; color:#666;">Statut actuel : <b id="status" style="color:#ff416c;">Public</b></div>
+            <div class="st-item" style="font-size:0.8rem; color:#666;">
+                Statut actuel : <b id="status" style="color:#ff416c;">${currentUser.isPublic ? 'Public' : 'Privé'}</b>
+            </div>
         </div>
         
         <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">${t('language')}</div>
@@ -2994,6 +3012,26 @@ app.get('/settings', requireAuth, async (req, res) => {
                 }
             } catch(e) {
                 showNotify('Erreur réseau', 'error');
+            }
+        }
+        
+        async function updateVisibility(isPublic) {
+            const status = document.getElementById('status');
+            status.innerText = isPublic ? 'Public' : 'Privé';
+            
+            const res = await fetch('/api/visibility', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ isPublic })
+            });
+            
+            if (res.ok) {
+                showNotify('Visibilité mise à jour', 'success');
+            } else {
+                showNotify('Erreur lors de la mise à jour', 'error');
+                // Revenir à l'état précédent
+                document.getElementById('visibilitySwitch').checked = !isPublic;
+                status.innerText = !isPublic ? 'Public' : 'Privé';
             }
         }
     </script>
@@ -3506,6 +3544,17 @@ app.put('/api/users/profile', requireAuth, async (req, res) => {
         res.json({ success: true });
     } catch(e) {
         console.error("Erreur dans /api/users/profile:", e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Update visibility
+app.put('/api/visibility', requireAuth, async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.session.userId, { isPublic: req.body.isPublic });
+        res.json({ success: true });
+    } catch(e) {
+        console.error("Erreur dans /api/visibility:", e);
         res.status(500).json({ error: e.message });
     }
 });
