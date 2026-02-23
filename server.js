@@ -217,15 +217,15 @@ app.get('/signup', (req, res) => {
         <!-- FORMULAIRE -->
         <div class="form-group">
             <label>Nom complet <span class="badge" id="qrBadge" style="display:none;">QR scanné</span></label>
-            <input type="text" id="fullName" readonly>
+            <input type="text" id="fullName" placeholder="En attente de scan..." readonly>
         </div>
         <div class="form-group">
             <label>Génotype</label>
-            <input type="text" id="genotype" readonly>
+            <input type="text" id="genotype" placeholder="En attente de scan..." readonly>
         </div>
         <div class="form-group">
             <label>Groupe sanguin</label>
-            <input type="text" id="bloodGroup" readonly>
+            <input type="text" id="bloodGroup" placeholder="En attente de scan..." readonly>
         </div>
         
         <button class="submit-btn" id="submitBtn" disabled onclick="submitForm()">Créer mon compte</button>
@@ -245,9 +245,13 @@ app.get('/signup', (req, res) => {
         let scanner = null;
         
         function startScanner() {
-            document.getElementById('camera-container').style.display = 'block';
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'block';
+            const cameraContainer = document.getElementById('camera-container');
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            
+            cameraContainer.style.display = 'block';
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
             
             scanner = new Html5Qrcode("qr-reader");
             
@@ -265,14 +269,19 @@ app.get('/signup', (req, res) => {
                             document.getElementById('submitBtn').disabled = false;
                             document.getElementById('status').innerHTML = '✅ Scan réussi !';
                             stopScanner();
+                        } else {
+                            document.getElementById('status').innerHTML = '❌ Format invalide';
                         }
                     } catch(e) {
                         document.getElementById('status').innerHTML = '❌ QR code invalide';
                     }
                 },
-                (error) => {}
+                (errorMessage) => {
+                    // Ignorer les erreurs de scan
+                }
             ).catch((err) => {
                 document.getElementById('status').innerHTML = '❌ Erreur caméra';
+                stopScanner();
             });
         }
         
@@ -282,6 +291,8 @@ app.get('/signup', (req, res) => {
                     document.getElementById('camera-container').style.display = 'none';
                     document.getElementById('startBtn').style.display = 'block';
                     document.getElementById('stopBtn').style.display = 'none';
+                }).catch((err) => {
+                    console.log(err);
                 });
             }
         }
@@ -292,6 +303,7 @@ app.get('/signup', (req, res) => {
             document.getElementById('bloodGroup').value = bloodGroup;
             document.getElementById('qrBadge').style.display = 'inline-block';
             document.getElementById('submitBtn').disabled = false;
+            document.getElementById('status').innerHTML = '';
         }
         
         function submitForm() {
@@ -307,9 +319,21 @@ app.get('/signup', (req, res) => {
 // PAGE LOGIN (simplifiée)
 // ============================================
 app.get('/login', (req, res) => {
-    res.send('<h2 style="text-align:center;margin-top:50px;">Page de connexion</h2><p style="text-align:center;"><a href="/">Retour</a></p>');
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Connexion</title></head>
+        <body style="text-align:center;padding:50px;">
+            <h2>Page de connexion</h2>
+            <p><a href="/">Retour à l'accueil</a></p>
+        </body>
+        </html>
+    `);
 });
 
-app.listen(port, () => {
-    console.log(`🚀 Serveur sur http://localhost:${port}`);
+// ============================================
+// LANCEMENT DU SERVEUR
+// ============================================
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
 });
