@@ -1,5 +1,241 @@
+const express = require('express');
+const path = require('path');
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Servir les fichiers statiques
+app.use(express.static(path.join(__dirname, 'public')));
+
 // ============================================
-// PAGE D'INSCRIPTION AVEC QR - VERSION CORRIGÉE
+// PAGE D'ACCUEIL
+// ============================================
+app.get('/', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genlove - Accueil</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #fdf2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-shell {
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            background: #f4e9da;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            margin: 0 auto;
+        }
+        .home-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff5f7 0%, #f4e9da 100%);
+        }
+        .logo-text {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 10px 0 20px;
+        }
+        .slogan {
+            font-weight: 500;
+            color: #1a2a44;
+            margin: 10px 25px 30px;
+            font-size: 1.2rem;
+        }
+        .btn-dark, .btn-pink {
+            padding: 15px 25px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            width: 90%;
+            margin: 10px auto;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-pink {
+            background: #ff416c;
+            color: white;
+        }
+        .btn-dark {
+            background: #1a2a44;
+            color: white;
+        }
+        .btn-pink:hover, .btn-dark:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255,65,108,0.4);
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <div class="home-screen">
+            <div class="logo-text">
+                <span style="color:#1a2a44;">Gen</span><span style="color:#FF69B4;">love</span>
+            </div>
+            <div class="slogan">Unissez cœur et santé pour bâtir des couples sains 💑</div>
+            
+            <div style="font-size:1.1rem; color:#1a2a44; margin:20px 0 10px;">Avez-vous déjà un compte ?</div>
+            <a href="/login" class="btn-dark">Se connecter</a>
+            <a href="/signup" class="btn-pink">Créer un compte</a>
+            
+            <div style="margin-top:30px; font-size:0.9rem; color:#666;">🛡️ Vos données de santé sont cryptées</div>
+        </div>
+    </div>
+</body>
+</html>`);
+});
+
+// ============================================
+// PAGE DE LOGIN (simplifiée)
+// ============================================
+app.get('/login', (req, res) => {
+    res.send(`
+        <h1 style="text-align:center; margin-top:50px;">Page de connexion</h1>
+        <p style="text-align:center;"><a href="/">Retour à l'accueil</a></p>
+    `);
+});
+
+// ============================================
+// PAGE DE PROFIL (simulée)
+// ============================================
+app.get('/profile', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <title>Profil Genlove</title>
+    <style>
+        body { font-family: Arial; padding: 20px; text-align: center; background: #f4e9da; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; }
+        .success { color: #4caf50; font-size: 2rem; margin: 20px; }
+        .badge { background: #4caf50; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success">✅</div>
+        <h2>Bienvenue sur Genlove !</h2>
+        <div id="userInfo"></div>
+        <p><a href="/">Retour à l'accueil</a></p>
+    </div>
+    <script>
+        const user = JSON.parse(localStorage.getItem('genlove_user') || '{}');
+        document.getElementById('userInfo').innerHTML = \`
+            <p><strong>Nom:</strong> \${user.fullName || 'Non renseigné'}</p>
+            <p><strong>Génotype:</strong> \${user.genotype || 'Non renseigné'}</p>
+            <p><strong>Groupe sanguin:</strong> \${user.bloodGroup || 'Non renseigné'}</p>
+            <p><span class="badge">\${user.verified ? '✅ Certifié' : '📝 Non certifié'}</span></p>
+        \`;
+    </script>
+</body>
+</html>`);
+});
+
+// ============================================
+// PAGE DE GÉNÉRATION DE QR CODE (POUR TEST)
+// ============================================
+app.get('/qr-generator', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <title>Générateur QR code</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 400px; margin: 0 auto; background: #f4e9da; }
+        .container { background: white; padding: 20px; border-radius: 20px; }
+        select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
+        button { background: #ff416c; color: white; border: none; cursor: pointer; }
+        #qrcode { display: flex; justify-content: center; margin: 20px 0; }
+        .back { text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Générateur de QR code</h2>
+        <p>Générez des QR codes pour tester l'application</p>
+        
+        <select id="genotype">
+            <option value="AA">AA</option>
+            <option value="AS">AS</option>
+            <option value="SS">SS</option>
+        </select>
+        
+        <select id="bloodGroup">
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
+        
+        <button onclick="generateQR()">Générer QR code</button>
+        
+        <div id="qrcode"></div>
+        
+        <div class="back">
+            <a href="/signup">→ Aller à l'inscription</a>
+        </div>
+    </div>
+
+    <script>
+        function generateQR() {
+            const qrData = {
+                patientName: 'João Manuel Silva',
+                patientId: 'ANG-1990-123456',
+                genotype: document.getElementById('genotype').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                dateOfBirth: '1990-05-15',
+                issuedBy: 'Laboratorio Central'
+            };
+            
+            document.getElementById('qrcode').innerHTML = '';
+            
+            QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(qrData), {
+                width: 250
+            }, function(err, canvas) {
+                if (err) {
+                    alert('Erreur: ' + err);
+                    return;
+                }
+                document.getElementById('qrcode').appendChild(canvas);
+            });
+        }
+    </script>
+</body>
+</html>`);
+});
+
+// ============================================
+// PAGE D'INSCRIPTION AVEC QR SCANNER FONCTIONNEL
 // ============================================
 app.get('/signup', (req, res) => {
     res.send(`<!DOCTYPE html>
@@ -7,7 +243,7 @@ app.get('/signup', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Genlove - Inscription QR</title>
+    <title>Genlove - Inscription</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -101,6 +337,17 @@ app.get('/signup', (req, res) => {
             font-size: 0.9rem;
             min-height: 20px;
         }
+        #stop-scan {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin-top: 10px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+        }
         
         /* Séparateur */
         .separator {
@@ -158,9 +405,6 @@ app.get('/signup', (req, res) => {
             font-size: 0.8rem;
             color: #666;
             margin-top: 5px;
-        }
-        .input-hint i {
-            color: #4caf50;
         }
         
         /* Bouton */
@@ -247,16 +491,6 @@ app.get('/signup', (req, res) => {
             background: #667eea;
             color: white;
         }
-        #stop-scan {
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            cursor: pointer;
-            display: none;
-        }
     </style>
     
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
@@ -335,6 +569,7 @@ app.get('/signup', (req, res) => {
                     <button class="test-qr-btn" onclick="simulateQR('AS', 'A+', '1992-08-20')">AS / A+</button>
                     <button class="test-qr-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')">SS / B-</button>
                 </div>
+                <p style="font-size:0.8rem; margin-top:10px;">👉 Allez aussi sur <a href="/qr-generator" target="_blank">/qr-generator</a> pour créer vos propres QR codes</p>
             </div>
             
             <a href="/" class="back-link">← Retour à l'accueil</a>
@@ -351,7 +586,7 @@ app.get('/signup', (req, res) => {
             const scanBtn = document.querySelector('.btn-scan');
             
             readerDiv.style.display = 'block';
-            stopBtn.style.display = 'block';
+            stopBtn.style.display = 'inline-block';
             scanBtn.style.display = 'none';
             
             html5QrCode = new Html5Qrcode("qr-reader");
@@ -401,6 +636,10 @@ app.get('/signup', (req, res) => {
                 }).catch((err) => {
                     console.warn(err);
                 });
+            } else {
+                document.getElementById('qr-reader').style.display = 'none';
+                document.getElementById('stop-scan').style.display = 'none';
+                document.querySelector('.btn-scan').style.display = 'block';
             }
         }
         
@@ -474,7 +713,7 @@ app.get('/signup', (req, res) => {
             localStorage.setItem('genlove_user', JSON.stringify(userData));
             
             alert('✅ Compte créé avec succès !');
-            window.location.href = '/profile-qr';
+            window.location.href = '/profile';
         }
         
         function showStatus(message, type) {
@@ -489,14 +728,15 @@ app.get('/signup', (req, res) => {
             const date = new Date(dateStr);
             return date.toLocaleDateString('fr-FR');
         }
-        
-        // Nettoyer le scanner si on quitte la page
-        window.addEventListener('beforeunload', function() {
-            if (html5QrCode && scannerActive) {
-                html5QrCode.stop();
-            }
-        });
     </script>
 </body>
 </html>`);
+});
+
+// Lancer le serveur
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Serveur lancé sur http://localhost:${port}`);
+    console.log(`📱 Accueil: http://localhost:${port}`);
+    console.log(`📱 Inscription avec QR: http://localhost:${port}/signup`);
+    console.log(`📱 Générateur de QR: http://localhost:${port}/qr-generator`);
 });
