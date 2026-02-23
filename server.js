@@ -96,18 +96,13 @@ app.get('/signup', (req, res) => {
             text-align: center;
             margin-bottom: 20px;
         }
-        #camera-container {
+        #reader {
             width: 100%;
             height: 250px;
             background: #000;
             border-radius: 10px;
             overflow: hidden;
             margin: 10px 0;
-            display: none;
-        }
-        #qr-reader {
-            width: 100%;
-            height: 100%;
         }
         .scan-btn {
             background: #ff416c;
@@ -118,11 +113,7 @@ app.get('/signup', (req, res) => {
             width: 100%;
             font-size: 1.1rem;
             cursor: pointer;
-            margin: 10px 0;
-        }
-        .stop-btn {
-            background: #666;
-            display: none;
+            margin: 5px 0;
         }
         
         /* Formulaire */
@@ -205,12 +196,9 @@ app.get('/signup', (req, res) => {
         
         <!-- SCANNER -->
         <div class="scanner-section">
-            <div>📸 Scannez votre QR code</div>
-            <div id="camera-container">
-                <div id="qr-reader"></div>
-            </div>
-            <button class="scan-btn" id="startBtn" onclick="startScanner()">Activer la caméra</button>
-            <button class="scan-btn stop-btn" id="stopBtn" onclick="stopScanner()">Arrêter</button>
+            <div style="margin-bottom:10px;">📸 Scannez votre QR code</div>
+            <div id="reader"></div>
+            <button class="scan-btn" onclick="startScanner()">Démarrer le scan</button>
             <div id="status" style="margin-top:10px;"></div>
         </div>
         
@@ -242,59 +230,55 @@ app.get('/signup', (req, res) => {
     </div>
 
     <script>
-        let scanner = null;
+        let html5QrCode = null;
         
         function startScanner() {
-            const cameraContainer = document.getElementById('camera-container');
-            const startBtn = document.getElementById('startBtn');
-            const stopBtn = document.getElementById('stopBtn');
+            const statusDiv = document.getElementById('status');
             
-            cameraContainer.style.display = 'block';
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'block';
+            html5QrCode = new Html5Qrcode("reader");
             
-            scanner = new Html5Qrcode("qr-reader");
-            
-            scanner.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    try {
-                        const data = JSON.parse(decodedText);
-                        if (data.patientName && data.genotype && data.bloodGroup) {
-                            document.getElementById('fullName').value = data.patientName;
-                            document.getElementById('genotype').value = data.genotype;
-                            document.getElementById('bloodGroup').value = data.bloodGroup;
-                            document.getElementById('qrBadge').style.display = 'inline-block';
-                            document.getElementById('submitBtn').disabled = false;
-                            document.getElementById('status').innerHTML = '✅ Scan réussi !';
-                            stopScanner();
-                        } else {
-                            document.getElementById('status').innerHTML = '❌ Format invalide';
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                try {
+                    const data = JSON.parse(decodedText);
+                    
+                    if (data.patientName && data.genotype && data.bloodGroup) {
+                        document.getElementById('fullName').value = data.patientName;
+                        document.getElementById('genotype').value = data.genotype;
+                        document.getElementById('bloodGroup').value = data.bloodGroup;
+                        document.getElementById('qrBadge').style.display = 'inline-block';
+                        document.getElementById('submitBtn').disabled = false;
+                        statusDiv.innerHTML = '✅ Scan réussi !';
+                        
+                        if (html5QrCode) {
+                            html5QrCode.stop().then(() => {
+                                html5QrCode = null;
+                            }).catch(err => console.log(err));
                         }
-                    } catch(e) {
-                        document.getElementById('status').innerHTML = '❌ QR code invalide';
+                    } else {
+                        statusDiv.innerHTML = '❌ Format invalide';
                     }
-                },
+                } catch(e) {
+                    statusDiv.innerHTML = '❌ QR code invalide';
+                }
+            };
+            
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                rememberLastUsedCamera: true,
+                showTorchButtonIfSupported: true
+            };
+            
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                qrCodeSuccessCallback,
                 (errorMessage) => {
                     // Ignorer les erreurs de scan
                 }
             ).catch((err) => {
-                document.getElementById('status').innerHTML = '❌ Erreur caméra';
-                stopScanner();
+                statusDiv.innerHTML = '❌ Erreur caméra: ' + err;
             });
-        }
-        
-        function stopScanner() {
-            if (scanner) {
-                scanner.stop().then(() => {
-                    document.getElementById('camera-container').style.display = 'none';
-                    document.getElementById('startBtn').style.display = 'block';
-                    document.getElementById('stopBtn').style.display = 'none';
-                }).catch((err) => {
-                    console.log(err);
-                });
-            }
         }
         
         function fillTestData(genotype, bloodGroup) {
