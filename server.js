@@ -981,12 +981,12 @@ const styles = `
     h3 { font-size: 1.6rem; margin: 15px 0; }
     p { font-size: 1.2rem; line-height: 1.6; }
     
-    /* Logo avec coeur ADN */
+    /* Logo avec coeur ADN et loupe - Design personnalisé */
     .logo-container {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 10px;
         position: relative;
-        width: 140px;
-        height: 140px;
-        margin: 0 auto 20px;
         animation: gentlePulse 3s infinite ease-in-out;
     }
     
@@ -997,17 +997,18 @@ const styles = `
     }
     
     .logo-container svg path:first-child {
-        filter: drop-shadow(0 0 8px rgba(255,65,108,0.6));
+        filter: drop-shadow(0 5px 15px rgba(255,105,180,0.4));
     }
     
     .logo-text {
-        font-size: 4.5rem;
+        font-size: 3rem;
         font-weight: 800;
-        margin: -10px 0 20px;
-        letter-spacing: -2px;
-        text-shadow: 4px 4px 0 rgba(255,65,108,0.1);
+        margin: 5px 0 20px;
+        letter-spacing: -1px;
+        text-shadow: 2px 2px 0 rgba(255,105,180,0.2);
         text-align: center;
     }
+    
     .slogan {
         font-weight: 500;
         color: #1a2a44;
@@ -1650,7 +1651,8 @@ const styles = `
     @media (max-width: 420px) {
         body { font-size: 15px; }
         .app-shell { max-width: 100%; }
-        .logo-text { font-size: 4rem; }
+        .logo-container { width: 160px; height: 160px; }
+        .logo-text { font-size: 2.5rem; }
         h2 { font-size: 1.8rem; }
         .btn-pink, .btn-dark { width: 95%; padding: 15px; }
         .custom-date-picker { flex-direction: row; }
@@ -1802,7 +1804,7 @@ app.get('/lang/:lang', async (req, res) => {
     res.redirect(req.get('referer') || '/');
 });
 
-// ACCUEIL avec nouveau logo amélioré
+// ACCUEIL avec nouveau logo personnalisé
 app.get('/', (req, res) => {
     const t = req.t;
     const currentLang = req.lang;
@@ -1836,31 +1838,62 @@ app.get('/', (req, res) => {
                 </div>
             </div>
             
-            <!-- Nouveau logo coeur ADN avec loupe amélioré -->
+            <!-- Logo personnalisé : Cœur rose + ADN bleu/vert + Loupe blanche avec étoile -->
             <div class="logo-container">
-                <svg viewBox="0 0 120 120" style="width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(255,65,108,0.3));">
-                    <!-- Cœur principal plus élégant -->
-                    <path d="M60 105 L20 55 C8 38 20 15 40 15 C50 15 55 25 60 30 C65 25 70 15 80 15 C100 15 112 38 100 55 L60 105" 
-                          fill="#ff416c" stroke="#1a2a44" stroke-width="2.5"/>
+                <svg viewBox="0 0 200 200" style="width: 100%; height: 100%;">
+                    <!-- Arrière-plan : Grand cœur rose -->
+                    <path d="M100 170 L35 90 C15 60 35 20 65 20 C80 20 92 35 100 45 C108 35 120 20 135 20 C165 20 185 60 165 90 L100 170" 
+                          fill="#FF69B4" opacity="0.9" stroke="#333" stroke-width="1"/>
                     
-                    <!-- Spirale ADN plus visible -->
-                    <path d="M40 40 Q50 32, 60 40 T80 40 M40 52 Q50 44, 60 52 T80 52 M40 64 Q50 56, 60 64 T80 64" 
-                          stroke="white" stroke-width="3" fill="none" stroke-dasharray="5 3"/>
+                    <!-- Double hélice d'ADN à gauche -->
+                    <!-- Brin gauche (bleu) -->
+                    <path d="M45 50 L45 140" stroke="#4169E1" stroke-width="4" fill="none" stroke-dasharray="8 8"/>
+                    <!-- Brin droit (vert) -->
+                    <path d="M65 50 L65 140" stroke="#32CD32" stroke-width="4" fill="none" stroke-dasharray="8 8"/>
                     
-                    <!-- Loupe de recherche stylisée -->
-                    <circle cx="85" cy="30" r="16" fill="none" stroke="white" stroke-width="3.5"/>
-                    <line x1="96" y1="41" x2="108" y2="53" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Barreaux multicolores entre les brins -->
+                    <line x1="45" y1="55" x2="65" y2="55" stroke="#FF4444" stroke-width="3"/>
+                    <line x1="45" y1="75" x2="65" y2="75" stroke="#FF4444" stroke-width="3"/>
+                    <line x1="45" y1="95" x2="65" y2="95" stroke="#FF4444" stroke-width="3"/>
+                    <line x1="45" y1="115" x2="65" y2="115" stroke="#FF4444" stroke-width="3"/>
+                    <line x1="45" y1="135" x2="65" y2="135" stroke="#FF4444" stroke-width="3"/>
+                    <line x1="45" y1="65" x2="65" y2="65" stroke="#FFD700" stroke-width="3"/>
+                    <line x1="45" y1="85" x2="65" y2="85" stroke="#FFD700" stroke-width="3"/>
+                    <line x1="45" y1="105" x2="65" y2="105" stroke="#FFD700" stroke-width="3"/>
+                    <line x1="45" y1="125" x2="65" y2="125" stroke="#FFD700" stroke-width="3"/>
+                    <line x1="45" y1="70" x2="65" y2="70" stroke="#FFA500" stroke-width="3"/>
+                    <line x1="45" y1="90" x2="65" y2="90" stroke="#FFA500" stroke-width="3"/>
+                    <line x1="45" y1="110" x2="65" y2="110" stroke="#FFA500" stroke-width="3"/>
+                    <line x1="45" y1="130" x2="65" y2="130" stroke="#FFA500" stroke-width="3"/>
+                    <line x1="45" y1="80" x2="65" y2="80" stroke="#9932CC" stroke-width="3"/>
+                    <line x1="45" y1="100" x2="65" y2="100" stroke="#9932CC" stroke-width="3"/>
+                    <line x1="45" y1="120" x2="65" y2="120" stroke="#9932CC" stroke-width="3"/>
+                    <line x1="45" y1="140" x2="65" y2="140" stroke="#9932CC" stroke-width="3"/>
                     
-                    <!-- Petit point brillant sur la loupe -->
-                    <circle cx="80" cy="25" r="2" fill="white" opacity="0.8"/>
+                    <!-- Loupe blanche à droite -->
+                    <circle cx="145" cy="80" r="28" fill="white" stroke="#333" stroke-width="2" opacity="0.95"/>
+                    <!-- Manche de la loupe -->
+                    <rect x="163" y="95" width="25" height="8" rx="4" fill="white" stroke="#333" stroke-width="1.5" transform="rotate(35, 170, 100)"/>
                     
-                    <!-- Effet de lueur -->
-                    <circle cx="60" cy="60" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="8 4"/>
+                    <!-- Étoile lumineuse dans la loupe -->
+                    <circle cx="145" cy="80" r="10" fill="#FFD700" opacity="0.8"/>
+                    <!-- Rayons de l'étoile -->
+                    <line x1="145" y1="65" x2="145" y2="70" stroke="#FFD700" stroke-width="2"/>
+                    <line x1="145" y1="90" x2="145" y2="95" stroke="#FFD700" stroke-width="2"/>
+                    <line x1="130" y1="80" x2="135" y2="80" stroke="#FFD700" stroke-width="2"/>
+                    <line x1="155" y1="80" x2="160" y2="80" stroke="#FFD700" stroke-width="2"/>
+                    <line x1="135" y1="68" x2="140" y2="73" stroke="#FFD700" stroke-width="2"/>
+                    <line x1="150" y1="87" x2="155" y2="92" stroke="#FFD700" stroke-width="2"/>
+                    <line x1="135" y1="92" x2="140" y2="87" stroke="#FFD700" stroke-width="2"/>
+                    <line x1="150" y1="68" x2="155" y2="73" stroke="#FFD700" stroke-width="2"/>
+                    
+                    <!-- Petite étoile centrale -->
+                    <circle cx="145" cy="80" r="3" fill="white"/>
                 </svg>
             </div>
             
             <div class="logo-text">
-                <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
+                <span style="color:#1a2a44;">Gen</span><span style="color:#FF69B4;">love</span>
             </div>
             
             <div class="slogan">${t('slogan')}</div>
@@ -1931,6 +1964,14 @@ app.get('/login', (req, res) => {
             });
             if (res.ok) window.location.href = '/profile';
             else alert('${t('nameNotFound')}');
+        });
+        
+        // Touche Entrée pour soumettre
+        document.getElementById('firstName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('loginForm').requestSubmit();
+            }
         });
     </script>
 </body>
@@ -2018,7 +2059,7 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION corrigée
+// INSCRIPTION
 app.get('/signup', (req, res) => {
     const t = req.t;
     const datePicker = generateDateOptions(req);
@@ -2147,10 +2188,8 @@ app.get('/signup', (req, res) => {
             
             const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
             
-            // Afficher le loader
             document.getElementById('loader').style.display = 'flex';
             
-            // Préparer les données
             const userData = {
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
@@ -2174,7 +2213,6 @@ app.get('/signup', (req, res) => {
                 const data = await res.json();
                 
                 if (data.success) {
-                    // Sauvegarder en local
                     localStorage.setItem('userPhoto', photoBase64);
                     localStorage.setItem('userFirstName', userData.firstName);
                     localStorage.setItem('userLastName', userData.lastName);
@@ -2197,6 +2235,18 @@ app.get('/signup', (req, res) => {
                 alert("Erreur de connexion au serveur");
                 document.getElementById('loader').style.display = 'none';
             }
+        });
+        
+        // Touche Entrée pour soumettre
+        document.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    if (document.getElementById('oath').checked) {
+                        document.querySelector('button[type="submit"]').click();
+                    }
+                }
+            });
         });
     </script>
 </body>
@@ -2373,7 +2423,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     }
 });
 
-// MATCHING
+// MATCHING avec boutons réparés
 app.get('/matching', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2541,6 +2591,8 @@ app.get('/matching', requireAuth, async (req, res) => {
                         document.getElementById('loading-popup').style.display = 'none';
                         if (data.success) {
                             showNotify('Intérêt envoyé à ' + receiverName, 'success');
+                        } else {
+                            showNotify('Erreur: ' + (data.error || 'Inconnue'), 'error');
                         }
                     }, 1000);
                 })
@@ -2803,6 +2855,14 @@ app.get('/chat', requireAuth, async (req, res) => {
             }
         }
         
+        // Touche Entrée pour envoyer
+        document.getElementById('msgInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage('${partnerId}');
+            }
+        });
+        
         window.scrollTo(0, document.body.scrollHeight);
     </script>
 </body>
@@ -2813,7 +2873,7 @@ app.get('/chat', requireAuth, async (req, res) => {
     }
 });
 
-// SETTINGS avec confirmation de suppression améliorée
+// SETTINGS
 app.get('/settings', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -3042,6 +3102,16 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
             } else {
                 alert('Erreur lors de la modification');
             }
+        });
+        
+        // Touche Entrée pour soumettre
+        document.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.querySelector('button[type="submit"]').click();
+                }
+            });
         });
     </script>
 </body>
