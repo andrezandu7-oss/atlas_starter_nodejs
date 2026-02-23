@@ -44,13 +44,14 @@ const userSchema = new mongoose.Schema({
     gender: String,
     dob: String,
     residence: String,
+    region: { type: String, default: '' }, // AJOUT : région pour le filtrage
     genotype: { type: String, enum: ['AA', 'AS', 'SS'] },
     bloodGroup: String,
     desireChild: String,
     photo: String,
     language: { type: String, default: 'fr' },
     isVerified: { type: Boolean, default: false },
-    isPublic: { type: Boolean, default: true }, // AJOUT : visibilité du profil
+    isPublic: { type: Boolean, default: true },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -141,6 +142,9 @@ const translations = {
         female: 'Femme',
         dob: 'Date de naissance',
         city: 'Ville de résidence',
+        region: 'Région',
+        allRegions: 'Toutes les régions',
+        myRegion: 'Ma région uniquement',
         genotype: 'Génotype',
         bloodGroup: 'Groupe sanguin',
         desireChild: 'Désir d\'enfant ?',
@@ -160,6 +164,8 @@ const translations = {
         genotype_label: 'Génotype',
         blood_label: 'Groupe',
         age_label: 'Âge',
+        residence_label: 'Résidence',
+        region_label: 'Région',
         project_label: 'Projet',
         findPartner: 'Trouver un partenaire',
         editProfile: 'Modifier mon profil',
@@ -209,7 +215,6 @@ const translations = {
         chinese: '中文',
         pageNotFound: 'Page non trouvée',
         pageNotFoundMessage: 'La page que vous cherchez n\'existe pas.',
-        residence_label: 'Résidence',
         project_life: 'Projet de vie',
         interestPopup: '{name} est très attiré par votre profil car vous partagez une bonne compatibilité. Pouvez-vous prendre quelques minutes pour échanger ?',
         acceptRequest: '✓ Accepter',
@@ -277,6 +282,9 @@ const translations = {
         female: 'Female',
         dob: 'Date of birth',
         city: 'City of residence',
+        region: 'Region',
+        allRegions: 'All regions',
+        myRegion: 'My region only',
         genotype: 'Genotype',
         bloodGroup: 'Blood group',
         desireChild: 'Desire for children?',
@@ -296,6 +304,8 @@ const translations = {
         genotype_label: 'Genotype',
         blood_label: 'Blood',
         age_label: 'Age',
+        residence_label: 'Residence',
+        region_label: 'Region',
         project_label: 'Project',
         findPartner: 'Find a partner',
         editProfile: 'Edit my profile',
@@ -345,7 +355,6 @@ const translations = {
         chinese: 'Chinese',
         pageNotFound: 'Page not found',
         pageNotFoundMessage: 'The page you are looking for does not exist.',
-        residence_label: 'Residence',
         project_life: 'Life project',
         interestPopup: '{name} is very attracted to your profile because you share good compatibility. Can you take a few minutes to chat?',
         acceptRequest: '✓ Accept',
@@ -413,6 +422,9 @@ const translations = {
         female: 'Mulher',
         dob: 'Data de nascimento',
         city: 'Cidade de residência',
+        region: 'Região',
+        allRegions: 'Todas as regiões',
+        myRegion: 'Minha região apenas',
         genotype: 'Genótipo',
         bloodGroup: 'Grupo sanguíneo',
         desireChild: 'Desejo de ter filhos?',
@@ -432,6 +444,8 @@ const translations = {
         genotype_label: 'Genótipo',
         blood_label: 'Grupo',
         age_label: 'Idade',
+        residence_label: 'Residência',
+        region_label: 'Região',
         project_label: 'Projeto',
         findPartner: 'Encontrar parceiro(a)',
         editProfile: 'Editar perfil',
@@ -481,7 +495,6 @@ const translations = {
         chinese: 'Chinês',
         pageNotFound: 'Página não encontrada',
         pageNotFoundMessage: 'A página que você procura não existe.',
-        residence_label: 'Residência',
         project_life: 'Projeto de vida',
         interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade. Você pode alguns minutos para conversar?',
         acceptRequest: '✓ Aceitar',
@@ -549,6 +562,9 @@ const translations = {
         female: 'Mujer',
         dob: 'Fecha de nacimiento',
         city: 'Ciudad de residencia',
+        region: 'Región',
+        allRegions: 'Todas las regiones',
+        myRegion: 'Mi región solamente',
         genotype: 'Genotipo',
         bloodGroup: 'Grupo sanguíneo',
         desireChild: '¿Deseo de tener hijos?',
@@ -568,6 +584,8 @@ const translations = {
         genotype_label: 'Genotipo',
         blood_label: 'Grupo',
         age_label: 'Edad',
+        residence_label: 'Residencia',
+        region_label: 'Región',
         project_label: 'Proyecto',
         findPartner: 'Encontrar pareja',
         editProfile: 'Editar perfil',
@@ -617,7 +635,6 @@ const translations = {
         chinese: 'Chino',
         pageNotFound: 'Página no encontrada',
         pageNotFoundMessage: 'La página que busca no existe.',
-        residence_label: 'Residencia',
         project_life: 'Proyecto de vida',
         interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad. ¿Puedes tomar unos minutos para conversar?',
         acceptRequest: '✓ Aceptar',
@@ -685,6 +702,9 @@ const translations = {
         female: 'أنثى',
         dob: 'تاريخ الميلاد',
         city: 'مدينة الإقامة',
+        region: 'المنطقة',
+        allRegions: 'جميع المناطق',
+        myRegion: 'منطقتي فقط',
         genotype: 'النمط الوراثي',
         bloodGroup: 'فصيلة الدم',
         desireChild: 'الرغبة في الأطفال؟',
@@ -704,6 +724,8 @@ const translations = {
         genotype_label: 'النمط الوراثي',
         blood_label: 'الفصيلة',
         age_label: 'العمر',
+        residence_label: 'الإقامة',
+        region_label: 'المنطقة',
         project_label: 'المشروع',
         findPartner: 'العثور على شريك',
         editProfile: 'تعديل الملف الشخصي',
@@ -753,7 +775,6 @@ const translations = {
         chinese: 'الصينية',
         pageNotFound: 'الصفحة غير موجودة',
         pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
-        residence_label: 'الإقامة',
         project_life: 'مشروع الحياة',
         interestPopup: '{name} مهتم جداً بملفك الشخصي لأنكما تشاركان توافقاً جيداً. هل يمكنك أخذ بضع دقائق للدردشة؟',
         acceptRequest: '✓ قبول',
@@ -821,6 +842,9 @@ const translations = {
         female: '女',
         dob: '出生日期',
         city: '居住城市',
+        region: '地区',
+        allRegions: '所有地区',
+        myRegion: '仅我的地区',
         genotype: '基因型',
         bloodGroup: '血型',
         desireChild: '想要孩子吗？',
@@ -840,6 +864,8 @@ const translations = {
         genotype_label: '基因型',
         blood_label: '血型',
         age_label: '年龄',
+        residence_label: '居住地',
+        region_label: '地区',
         project_label: '项目',
         findPartner: '寻找伴侣',
         editProfile: '编辑个人资料',
@@ -889,7 +915,6 @@ const translations = {
         chinese: '中文',
         pageNotFound: '页面未找到',
         pageNotFoundMessage: '您查找的页面不存在。',
-        residence_label: '居住地',
         project_life: '人生计划',
         interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性。您能花几分钟聊聊吗？',
         acceptRequest: '✓ 接受',
@@ -1649,6 +1674,15 @@ const styles = `
         line-height: 1.4;
     }
     
+    /* Filtre région */
+    .filter-container {
+        padding: 15px;
+        background: white;
+        margin: 10px 15px;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
     @media (max-width: 420px) {
         body { font-size: 15px; }
         .app-shell { max-width: 100%; }
@@ -2060,7 +2094,7 @@ app.get('/charte-engagement', (req, res) => {
 </html>`);
 });
 
-// INSCRIPTION - CORRIGÉE (formulaire toujours vide)
+// INSCRIPTION
 app.get('/signup', (req, res) => {
     const t = req.t;
     const datePicker = generateDateOptions(req);
@@ -2103,6 +2137,7 @@ app.get('/signup', (req, res) => {
                 ${datePicker}
                 
                 <input type="text" id="residence" class="input-box" placeholder="${t('city')}" required>
+                <input type="text" id="region" class="input-box" placeholder="${t('region')}" required>
                 
                 <select id="genotype" class="input-box" required>
                     <option value="">${t('genotype')}</option>
@@ -2143,36 +2178,24 @@ app.get('/signup', (req, res) => {
     </div>
     
     <script>
-        let photoBase64 = ""; // Toujours vide au départ
+        let photoBase64 = "";
         
         window.onload = function() {
-            // Réinitialiser TOUS les champs
             document.getElementById('photoCircle').style.backgroundImage = '';
             document.getElementById('photoText').style.display = 'block';
             document.getElementById('firstName').value = '';
             document.getElementById('lastName').value = '';
             document.getElementById('gender').value = '';
             document.getElementById('residence').value = '';
+            document.getElementById('region').value = '';
             document.getElementById('genotype').value = '';
             document.getElementById('bloodType').value = '';
             document.getElementById('bloodRh').value = '+';
             document.getElementById('desireChild').value = '';
             
-            // Réinitialiser les selects de date
             document.querySelector('select[name="day"]').value = '';
             document.querySelector('select[name="month"]').value = '';
             document.querySelector('select[name="year"]').value = '';
-            
-            // Nettoyer localStorage
-            localStorage.removeItem('userPhoto');
-            localStorage.removeItem('userFirstName');
-            localStorage.removeItem('userLastName');
-            localStorage.removeItem('userGender');
-            localStorage.removeItem('userDob');
-            localStorage.removeItem('userResidence');
-            localStorage.removeItem('userGenotype');
-            localStorage.removeItem('userBloodGroup');
-            localStorage.removeItem('userDesireChild');
         };
         
         function previewPhoto(e) {
@@ -2208,12 +2231,13 @@ app.get('/signup', (req, res) => {
                 gender: document.getElementById('gender').value,
                 dob: dob,
                 residence: document.getElementById('residence').value,
+                region: document.getElementById('region').value,
                 genotype: document.getElementById('genotype').value,
                 bloodGroup: document.getElementById('bloodType').value + document.getElementById('bloodRh').value,
                 desireChild: document.getElementById('desireChild').value,
                 photo: photoBase64 || "",
                 language: '${req.lang}',
-                isPublic: true // Par défaut, le profil est public
+                isPublic: true
             };
             
             try {
@@ -2226,18 +2250,6 @@ app.get('/signup', (req, res) => {
                 const data = await res.json();
                 
                 if (data.success) {
-                    // NE PAS sauvegarder dans localStorage
-                    // Nettoyer les anciennes données
-                    localStorage.removeItem('userPhoto');
-                    localStorage.removeItem('userFirstName');
-                    localStorage.removeItem('userLastName');
-                    localStorage.removeItem('userGender');
-                    localStorage.removeItem('userDob');
-                    localStorage.removeItem('userResidence');
-                    localStorage.removeItem('userGenotype');
-                    localStorage.removeItem('userBloodGroup');
-                    localStorage.removeItem('userDesireChild');
-                    
                     setTimeout(() => {
                         window.location.href = '/profile';
                     }, 2000);
@@ -2252,7 +2264,6 @@ app.get('/signup', (req, res) => {
             }
         });
         
-        // Touche Entrée pour soumettre
         document.querySelectorAll('input, select').forEach(field => {
             field.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
@@ -2347,12 +2358,14 @@ app.get('/profile', requireAuth, async (req, res) => {
             <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
             
             <h2 style="text-align: center;">${user.firstName} ${user.lastName}</h2>
-            <p style="text-align: center; font-size:1.2rem;">${user.residence || ''} • ${genderDisplay}</p>
+            <p style="text-align: center; font-size:1.2rem;">${user.residence || ''} • ${user.region || ''} • ${genderDisplay}</p>
             
             <div class="st-group">
                 <div class="st-item"><span>${t('genotype_label')}</span><b>${user.genotype}</b></div>
                 <div class="st-item"><span>${t('blood_label')}</span><b>${user.bloodGroup}</b></div>
                 <div class="st-item"><span>${t('age_label')}</span><b>${calculerAge(user.dob)} ${t('age_label')}</b></div>
+                <div class="st-item"><span>${t('residence_label')}</span><b>${user.residence || ''}</b></div>
+                <div class="st-item"><span>${t('region_label')}</span><b>${user.region || ''}</b></div>
                 <div class="st-item"><span>${t('project_label')}</span><b>${user.desireChild === 'Oui' ? t('yes') : t('no')}</b></div>
             </div>
             
@@ -2438,7 +2451,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     }
 });
 
-// MATCHING avec filtre isPublic
+// MATCHING avec filtre région et résidence affichée
 app.get('/matching', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2446,8 +2459,9 @@ app.get('/matching', requireAuth, async (req, res) => {
         
         const t = req.t;
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
+        const regionFilter = req.query.region || 'all';
         
-        // Récupérer les IDs exclus (avec blocage symétrique)
+        // Récupérer les IDs exclus
         const messages = await Message.find({
             $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
             isBlocked: false
@@ -2474,15 +2488,20 @@ app.get('/matching', requireAuth, async (req, res) => {
             ...rejectedArray
         ])];
         
-        // Requête de base avec filtre isPublic
+        // Requête de base
         let query = { 
             _id: { $ne: currentUser._id },
             gender: currentUser.gender === 'Homme' ? 'Femme' : 'Homme',
-            isPublic: true // ← FILTRE : uniquement les profils publics
+            isPublic: true
         };
         
         if (excludedIds.length > 0) {
             query._id.$nin = excludedIds;
+        }
+        
+        // Filtre région
+        if (regionFilter === 'mine' && currentUser.region) {
+            query.region = currentUser.region;
         }
         
         let partners = await User.find(query);
@@ -2506,10 +2525,11 @@ app.get('/matching', requireAuth, async (req, res) => {
                 const age = calculerAge(p.dob);
                 partnersHTML += `
                     <div class="match-card">
-                        <div class="match-photo-blur"></div>
+                        <div class="match-photo-blur" style="background-image:url('${p.photo || ''}'); filter: blur(6px);"></div>
                         <div class="match-info">
                             <b style="font-size:1.2rem;">${p.firstName}</b>
                             <br><span style="font-size:0.9rem;">${p.genotype} • ${age} ans</span>
+                            <br><span style="font-size:0.8rem; color:#666;">📍 ${p.residence || ''} (${p.region || ''})</span>
                         </div>
                         <div class="match-actions">
                             <button class="btn-action btn-contact" onclick="sendInterest('${p._id}', '${p.firstName}')">
@@ -2578,6 +2598,14 @@ app.get('/matching', requireAuth, async (req, res) => {
             <h3 style="margin:0; color:#1a2a44;">${t('compatiblePartners')}</h3>
         </div>
         
+        <!-- Filtre région -->
+        <div class="filter-container">
+            <select id="regionFilter" class="input-box" style="margin:0;" onchange="applyRegionFilter()">
+                <option value="all" ${regionFilter === 'all' ? 'selected' : ''}>${t('allRegions')}</option>
+                <option value="mine" ${regionFilter === 'mine' ? 'selected' : ''}>${t('myRegion')} (${currentUser.region || ''})</option>
+            </select>
+        </div>
+        
         <div id="match-container">
             ${partnersHTML}
         </div>
@@ -2589,34 +2617,37 @@ app.get('/matching', requireAuth, async (req, res) => {
         let currentPartner = null;
         let currentPartnerId = null;
         
+        function applyRegionFilter() {
+            const filter = document.getElementById('regionFilter').value;
+            window.location.href = '/matching?region=' + filter;
+        }
+        
         function sendInterest(receiverId, receiverName) {
             currentPartnerId = receiverId;
             document.getElementById('loading-popup').style.display = 'flex';
             document.getElementById('loading-message').innerText = '${t('sendingRequest')}';
             
-            setTimeout(() => {
-                fetch('/api/requests', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ receiverId })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('loading-message').innerText = '${t('requestSent')}';
-                    setTimeout(() => {
-                        document.getElementById('loading-popup').style.display = 'none';
-                        if (data.success) {
-                            showNotify('Intérêt envoyé à ' + receiverName, 'success');
-                        } else {
-                            showNotify('Erreur: ' + (data.error || 'Inconnue'), 'error');
-                        }
-                    }, 1000);
-                })
-                .catch(() => {
+            fetch('/api/requests', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ receiverId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading-message').innerText = '${t('requestSent')}';
+                setTimeout(() => {
                     document.getElementById('loading-popup').style.display = 'none';
-                    showNotify('Erreur réseau', 'error');
-                });
-            }, 2000);
+                    if (data.success) {
+                        showNotify('Intérêt envoyé à ' + receiverName, 'success');
+                    } else {
+                        showNotify('Erreur: ' + (data.error || 'Inconnue'), 'error');
+                    }
+                }, 1000);
+            })
+            .catch(() => {
+                document.getElementById('loading-popup').style.display = 'none';
+                showNotify('Erreur réseau', 'error');
+            });
         }
         
         function sendInterestFromPopup() {
@@ -2635,7 +2666,10 @@ app.get('/matching', requireAuth, async (req, res) => {
             document.getElementById('pop-name').innerText = partner.firstName || "Profil";
             document.getElementById('pop-details').innerHTML = \`
                 <b>${t('genotype_label')} :</b> \${partner.genotype}<br>
-                <b>${t('blood_label')} :</b> \${partner.bloodGroup}<br><br>
+                <b>${t('blood_label')} :</b> \${partner.bloodGroup}<br>
+                <b>${t('residence_label')} :</b> \${partner.residence || ''}<br>
+                <b>${t('region_label')} :</b> \${partner.region || ''}<br>
+                <b>${t('age_label')} :</b> ${calculerAge(partner.dob)} ans<br><br>
                 <b>${t('project_label')} :</b><br>
                 <i>\${partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}'}</i>
             \`;
@@ -2871,7 +2905,6 @@ app.get('/chat', requireAuth, async (req, res) => {
             }
         }
         
-        // Touche Entrée pour envoyer
         document.getElementById('msgInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -2889,7 +2922,7 @@ app.get('/chat', requireAuth, async (req, res) => {
     }
 });
 
-// SETTINGS avec visibilité fonctionnelle
+// SETTINGS
 app.get('/settings', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -3029,7 +3062,6 @@ app.get('/settings', requireAuth, async (req, res) => {
                 showNotify('Visibilité mise à jour', 'success');
             } else {
                 showNotify('Erreur lors de la mise à jour', 'error');
-                // Revenir à l'état précédent
                 document.getElementById('visibilitySwitch').checked = !isPublic;
                 status.innerText = !isPublic ? 'Public' : 'Privé';
             }
@@ -3051,7 +3083,7 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
         const datePicker = generateDateOptions(req, user.dob);
         
         const bloodOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => 
-            `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g}</option>`
+            `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g</option>`
         ).join('');
         
         res.send(`<!DOCTYPE html>
@@ -3086,6 +3118,9 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
                 
                 <div class="input-label">${t('city')}</div>
                 <input type="text" name="residence" class="input-box" value="${user.residence || ''}" required>
+                
+                <div class="input-label">${t('region')}</div>
+                <input type="text" name="region" class="input-box" value="${user.region || ''}" required>
                 
                 <div class="input-label">${t('genotype')}</div>
                 <select name="genotype" class="input-box" required>
@@ -3142,7 +3177,6 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
             }
         });
         
-        // Touche Entrée pour soumettre
         document.querySelectorAll('input, select').forEach(field => {
             field.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
