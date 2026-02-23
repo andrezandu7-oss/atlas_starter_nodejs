@@ -1812,7 +1812,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     }
 });
 
-// MATCHING
+// MATCHING - Version corrigée
 app.get('/matching', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -1822,6 +1822,7 @@ app.get('/matching', requireAuth, async (req, res) => {
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
         const regionFilter = req.query.region || 'all';
         
+        // Récupérer les IDs exclus
         const messages = await Message.find({
             $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
             isBlocked: false
@@ -1848,6 +1849,7 @@ app.get('/matching', requireAuth, async (req, res) => {
             ...rejectedArray
         ])];
         
+        // Requête de base
         let query = { 
             _id: { $ne: currentUser._id },
             gender: currentUser.gender === 'Homme' ? 'Femme' : 'Homme',
@@ -1858,15 +1860,30 @@ app.get('/matching', requireAuth, async (req, res) => {
             query._id.$nin = excludedIds;
         }
         
+        // Filtre région
         if (regionFilter === 'mine' && currentUser.region) {
             query.region = currentUser.region;
         }
         
         let partners = await User.find(query);
         
+        // Filtre génétique
         if (isSSorAS) {
             partners = partners.filter(p => p.genotype === 'AA');
         }
+        
+        // Préparer les données des partenaires pour le JavaScript
+        const partnersData = partners.map(p => ({
+            _id: p._id.toString(),
+            firstName: p.firstName,
+            genotype: p.genotype,
+            bloodGroup: p.bloodGroup,
+            residence: p.residence || '',
+            region: p.region || '',
+            desireChild: p.desireChild,
+            photo: p.photo || '',
+            dob: p.dob
+        }));
         
         let partnersHTML = '';
         if (partners.length === 0) {
@@ -1882,7 +1899,7 @@ app.get('/matching', requireAuth, async (req, res) => {
                 const age = calculerAge(p.dob);
                 partnersHTML += `
                     <div class="match-card">
-                        <div class="match-photo-blur" style="background-image:url('${p.photo || ''}'); filter: blur(6px);"></div>
+                        <div class="match-photo-blur" style="background-image:url('${p.photo || ''}'); background-size: cover; filter: blur(6px);"></div>
                         <div class="match-info">
                             <b style="font-size:1.2rem;">${p.firstName}</b>
                             <br><span style="font-size:0.9rem;">${p.genotype} • ${age} ans</span>
@@ -1970,8 +1987,9 @@ app.get('/matching', requireAuth, async (req, res) => {
     </div>
     
     <script>
+        // Données des partenaires passées depuis le serveur
+        const partners = ${JSON.stringify(partnersData)};
         let currentPartnerId = null;
-        let partners = ${JSON.stringify(partners)};
         
         function applyRegionFilter() {
             const filter = document.getElementById('regionFilter').value;
@@ -2021,14 +2039,28 @@ app.get('/matching', requireAuth, async (req, res) => {
             currentPartnerId = partner._id;
             
             const myGt = '${currentUser.genotype}';
+            const age = ${calculerAge('0000-00-00')}; // Cette ligne sera remplacée
+            
+            // Calculer l'âge côté client
+            function calculateAge(dob) {
+                if (!dob) return "?";
+                const birthDate = new Date(dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+                return age;
+            }
+            
+            const partnerAge = calculateAge(partner.dob);
             
             document.getElementById('pop-name').innerText = partner.firstName || "Profil";
             document.getElementById('pop-details').innerHTML = 
                 '<b>${t('genotype_label')} :</b> ' + partner.genotype + '<br>' +
                 '<b>${t('blood_label')} :</b> ' + partner.bloodGroup + '<br>' +
-                '<b>${t('residence_label')} :</b> ' + (partner.residence || '') + '<br>' +
-                '<b>${t('region_label')} :</b> ' + (partner.region || '') + '<br>' +
-                '<b>${t('age_label')} :</b> ' + ${calculerAge(partner.dob)} + ' ans<br><br>' +
+                '<b>${t('residence_label')} :</b> ' + partner.residence + '<br>' +
+                '<b>${t('region_label')} :</b> ' + partner.region + '<br>' +
+                '<b>${t('age_label')} :</b> ' + partnerAge + ' ans<br><br>' +
                 '<b>${t('project_label')} :</b><br>' +
                 '<i>' + (partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}') + '</i>';
             
@@ -2063,11 +2095,10 @@ app.get('/matching', requireAuth, async (req, res) => {
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("Erreur matching:", error);
         res.status(500).send('Erreur matching');
     }
 });
-
 // INBOX
 app.get('/inbox', requireAuth, async (req, res) => {
     try {
