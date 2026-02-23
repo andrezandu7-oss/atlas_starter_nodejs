@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
     gender: String,
     dob: String,
     residence: String,
-    region: { type: String, default: '' }, // AJOUT : région pour le filtrage
+    region: { type: String, default: '' },
     genotype: { type: String, enum: ['AA', 'AS', 'SS'] },
     bloodGroup: String,
     desireChild: String,
@@ -98,7 +98,7 @@ const requireVerified = (req, res, next) => {
 };
 
 // ==============================================
-// SYSTÈME DE TRADUCTION MULTILINGUE COMPLET (6 LANGUES)
+// SYSTÈME DE TRADUCTION MULTILINGUE
 // ==============================================
 const translations = {
     fr: {
@@ -380,566 +380,6 @@ const translations = {
         day: 'Day',
         month: 'Month',
         year: 'Year'
-    },
-    pt: {
-        appName: 'Genlove',
-        slogan: 'Una coração e saúde para construir casais saudáveis 💑',
-        security: '🛡️ Seus dados de saúde estão criptografados',
-        welcome: 'Bem-vindo ao Genlove',
-        haveAccount: 'Já tem uma conta?',
-        login: 'Entrar',
-        createAccount: 'Criar conta',
-        loginTitle: 'Entrar',
-        enterName: 'Digite seu primeiro nome para entrar',
-        yourName: 'Seu primeiro nome',
-        backHome: '← Voltar ao início',
-        nameNotFound: 'Nome não encontrado. Por favor, crie uma conta.',
-        charterTitle: '📜 A Carta de Honra',
-        charterSubtitle: 'Leia estes 5 compromissos atentamente',
-        scrollDown: '⬇️ Role até o final ⬇️',
-        accept: 'Aceito e continuo',
-        oath1: '1. O Juramento de Sinceridade',
-        oath1Sub: 'Verdade Médica',
-        oath1Text: 'Comprometo-me, sob minha honra, a fornecer informações precisas sobre meu genótipo e dados de saúde.',
-        oath2: '2. O Pacto de Confidencialidade',
-        oath2Sub: 'Segredo Compartilhado',
-        oath2Text: 'Comprometo-me a manter todas as informações pessoais e médicas confidenciais.',
-        oath3: '3. O Princípio da Não-Discriminação',
-        oath3Sub: 'Igualdade de Respeito',
-        oath3Text: 'Trato cada membro com dignidade, independentemente do seu genótipo.',
-        oath4: '4. Responsabilidade Preventiva',
-        oath4Sub: 'Orientação para a Saúde',
-        oath4Text: 'Aceito medidas de proteção como a filtragem de compatibilidades de risco.',
-        oath5: '5. Benevolência Ética',
-        oath5Sub: 'Cortesia',
-        oath5Text: 'Adoto uma conduta exemplar e respeitosa em minhas mensagens.',
-        signupTitle: 'Criar meu perfil',
-        signupSub: 'Todas as informações são confidenciais',
-        firstName: 'Primeiro nome',
-        lastName: 'Sobrenome',
-        gender: 'Gênero',
-        male: 'Homem',
-        female: 'Mulher',
-        dob: 'Data de nascimento',
-        city: 'Cidade de residência',
-        region: 'Região',
-        allRegions: 'Todas as regiões',
-        myRegion: 'Minha região apenas',
-        genotype: 'Genótipo',
-        bloodGroup: 'Grupo sanguíneo',
-        desireChild: 'Desejo de ter filhos?',
-        yes: 'Sim',
-        no: 'Não',
-        createProfile: 'Criar meu perfil',
-        backCharter: '← Voltar à carta',
-        required: 'obrigatório',
-        honorTitle: 'Juramento de Honra',
-        honorText: 'Confirmo por minha honra que minhas informações são sinceras e conformes à realidade.',
-        swear: 'Eu juro',
-        accessProfile: 'Acessar meu perfil',
-        myProfile: 'Meu Perfil',
-        home: 'Início',
-        messages: 'Mensagens',
-        settings: 'Configurações',
-        genotype_label: 'Genótipo',
-        blood_label: 'Grupo',
-        age_label: 'Idade',
-        residence_label: 'Residência',
-        region_label: 'Região',
-        project_label: 'Projeto',
-        findPartner: 'Encontrar parceiro(a)',
-        editProfile: 'Editar perfil',
-        compatiblePartners: 'Parceiros compatíveis',
-        noPartners: 'Nenhum parceiro encontrado no momento',
-        searchOngoing: 'Pesquisa em andamento...',
-        expandCommunity: 'Estamos expandindo nossa comunidade. Volte em breve!',
-        details: 'Detalhes',
-        contact: 'Contatar',
-        backProfile: '← Meu perfil',
-        toMessages: 'Mensagens →',
-        healthCommitment: 'Seu compromisso com a saúde',
-        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
-        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
-        understood: 'Entendi',
-        inboxTitle: 'Caixa de entrada',
-        emptyInbox: 'Caixa vazia',
-        startConversation: 'Comece uma conversa!',
-        findPartners: 'Encontrar parceiros',
-        block: 'Bloquear',
-        unblock: 'Desbloquear',
-        yourMessage: 'Sua mensagem...',
-        send: 'Enviar',
-        blockedByUser: 'Conversa impossível',
-        blockedMessage: 'Este usuário bloqueou você. Não é possível enviar mensagens.',
-        settingsTitle: 'Configurações',
-        visibility: 'Visibilidade do perfil',
-        notifications: 'Notificações push',
-        language: 'Idioma',
-        blockedUsers: 'Usuários bloqueados',
-        dangerZone: '⚠️ ZONA DE PERIGO',
-        deleteAccount: 'Excluir minha conta',
-        delete: 'Excluir',
-        logout: 'Sair',
-        confirmDelete: 'Excluir permanentemente?',
-        noBlocked: 'Nenhum usuário bloqueado',
-        thankYou: 'Obrigado por este encontro',
-        thanksMessage: 'Genlove agradece',
-        newSearch: 'Nova pesquisa',
-        logoutSuccess: 'Saída bem-sucedida',
-        seeYouSoon: 'Até breve!',
-        french: 'Francês',
-        english: 'Inglês',
-        portuguese: 'Português',
-        spanish: 'Espanhol',
-        arabic: 'Árabe',
-        chinese: 'Chinês',
-        pageNotFound: 'Página não encontrada',
-        pageNotFoundMessage: 'A página que você procura não existe.',
-        project_life: 'Projeto de vida',
-        interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade. Você pode alguns minutos para conversar?',
-        acceptRequest: '✓ Aceitar',
-        rejectRequest: '✗ Recusar',
-        rejectionPopup: 'Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas.',
-        gotIt: 'Entendi',
-        returnProfile: '📋 Meu perfil',
-        newMatch: '🔍 Nova pesquisa',
-        sendingRequest: '⏳ Seu pedido está sendo enviado...',
-        requestSent: '✅ Pedido enviado!',
-        january: 'Janeiro',
-        february: 'Fevereiro',
-        march: 'Março',
-        april: 'Abril',
-        may: 'Maio',
-        june: 'Junho',
-        july: 'Julho',
-        august: 'Agosto',
-        september: 'Setembro',
-        october: 'Outubro',
-        november: 'Novembro',
-        december: 'Dezembro',
-        day: 'Dia',
-        month: 'Mês',
-        year: 'Ano'
-    },
-    es: {
-        appName: 'Genlove',
-        slogan: 'Une corazón y salud para construir parejas saludables 💑',
-        security: '🛡️ Sus datos de salud están encriptados',
-        welcome: 'Bienvenido a Genlove',
-        haveAccount: '¿Ya tienes una cuenta?',
-        login: 'Iniciar sesión',
-        createAccount: 'Crear cuenta',
-        loginTitle: 'Iniciar sesión',
-        enterName: 'Ingrese su nombre para iniciar sesión',
-        yourName: 'Su nombre',
-        backHome: '← Volver al inicio',
-        nameNotFound: 'Nombre no encontrado. Por favor, cree una cuenta.',
-        charterTitle: '📜 La Carta de Honor',
-        charterSubtitle: 'Lea estos 5 compromisos atentamente',
-        scrollDown: '⬇️ Desplácese hasta el final ⬇️',
-        accept: 'Acepto y continúo',
-        oath1: '1. El Juramento de Sinceridad',
-        oath1Sub: 'Verdad Médica',
-        oath1Text: 'Me comprometo bajo mi honor a proporcionar información precisa sobre mi genotipo y datos de salud.',
-        oath2: '2. El Pacto de Confidencialidad',
-        oath2Sub: 'Secreto Compartido',
-        oath2Text: 'Me comprometo a mantener toda la información personal y médica confidencial.',
-        oath3: '3. El Principio de No Discriminación',
-        oath3Sub: 'Igualdad de Respeto',
-        oath3Text: 'Trato a cada miembro con dignidad, independientemente de su genotipo.',
-        oath4: '4. Responsabilidad Preventiva',
-        oath4Sub: 'Orientación para la Salud',
-        oath4Text: 'Acepto medidas de protección como el filtrado de compatibilidades de riesgo.',
-        oath5: '5. Benevolencia Ética',
-        oath5Sub: 'Cortesía',
-        oath5Text: 'Adopto una conducta ejemplar y respetuosa en mis mensajes.',
-        signupTitle: 'Crear mi perfil',
-        signupSub: 'Toda la información es confidencial',
-        firstName: 'Nombre',
-        lastName: 'Apellido',
-        gender: 'Género',
-        male: 'Hombre',
-        female: 'Mujer',
-        dob: 'Fecha de nacimiento',
-        city: 'Ciudad de residencia',
-        region: 'Región',
-        allRegions: 'Todas las regiones',
-        myRegion: 'Mi región solamente',
-        genotype: 'Genotipo',
-        bloodGroup: 'Grupo sanguíneo',
-        desireChild: '¿Deseo de tener hijos?',
-        yes: 'Sí',
-        no: 'No',
-        createProfile: 'Crear mi perfil',
-        backCharter: '← Volver a la carta',
-        required: 'obligatorio',
-        honorTitle: 'Juramento de Honor',
-        honorText: 'Confirmo bajo mi honor que mi información es sincera y conforme a la realidad.',
-        swear: 'Lo juro',
-        accessProfile: 'Acceder a mi perfil',
-        myProfile: 'Mi Perfil',
-        home: 'Inicio',
-        messages: 'Mensajes',
-        settings: 'Configuración',
-        genotype_label: 'Genotipo',
-        blood_label: 'Grupo',
-        age_label: 'Edad',
-        residence_label: 'Residencia',
-        region_label: 'Región',
-        project_label: 'Proyecto',
-        findPartner: 'Encontrar pareja',
-        editProfile: 'Editar perfil',
-        compatiblePartners: 'Parejas compatibles',
-        noPartners: 'No se encontraron parejas por el momento',
-        searchOngoing: 'Búsqueda en curso...',
-        expandCommunity: 'Estamos expandiendo nuestra comunidad. ¡Vuelva pronto!',
-        details: 'Detalles',
-        contact: 'Contactar',
-        backProfile: '← Mi perfil',
-        toMessages: 'Mensajes →',
-        healthCommitment: 'Su compromiso con la salud',
-        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
-        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
-        understood: 'Entiendo',
-        inboxTitle: 'Bandeja de entrada',
-        emptyInbox: 'Bandeja vacía',
-        startConversation: '¡Comience una conversación!',
-        findPartners: 'Encontrar parejas',
-        block: 'Bloquear',
-        unblock: 'Desbloquear',
-        yourMessage: 'Su mensaje...',
-        send: 'Enviar',
-        blockedByUser: 'Conversación imposible',
-        blockedMessage: 'Este usuario le ha bloqueado. No puede enviarle mensajes.',
-        settingsTitle: 'Configuración',
-        visibility: 'Visibilidad del perfil',
-        notifications: 'Notificaciones push',
-        language: 'Idioma',
-        blockedUsers: 'Usuarios bloqueados',
-        dangerZone: '⚠️ ZONA DE PELIGRO',
-        deleteAccount: 'Eliminar mi cuenta',
-        delete: 'Eliminar',
-        logout: 'Cerrar sesión',
-        confirmDelete: '¿Eliminar permanentemente?',
-        noBlocked: 'No hay usuarios bloqueados',
-        thankYou: 'Gracias por este intercambio',
-        thanksMessage: 'Genlove le agradece',
-        newSearch: 'Nueva búsqueda',
-        logoutSuccess: 'Sesión cerrada',
-        seeYouSoon: '¡Hasta pronto!',
-        french: 'Francés',
-        english: 'Inglés',
-        portuguese: 'Portugués',
-        spanish: 'Español',
-        arabic: 'Árabe',
-        chinese: 'Chino',
-        pageNotFound: 'Página no encontrada',
-        pageNotFoundMessage: 'La página que busca no existe.',
-        project_life: 'Proyecto de vida',
-        interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad. ¿Puedes tomar unos minutos para conversar?',
-        acceptRequest: '✓ Aceptar',
-        rejectRequest: '✗ Rechazar',
-        rejectionPopup: 'Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas.',
-        gotIt: 'Entiendo',
-        returnProfile: '📋 Mi perfil',
-        newMatch: '🔍 Nueva búsqueda',
-        sendingRequest: '⏳ Tu solicitud está siendo enviada...',
-        requestSent: '✅ Solicitud enviada!',
-        january: 'Enero',
-        february: 'Febrero',
-        march: 'Marzo',
-        april: 'Abril',
-        may: 'Mayo',
-        june: 'Junio',
-        july: 'Julio',
-        august: 'Agosto',
-        september: 'Septiembre',
-        october: 'Octubre',
-        november: 'Noviembre',
-        december: 'Diciembre',
-        day: 'Día',
-        month: 'Mes',
-        year: 'Año'
-    },
-    ar: {
-        appName: 'جينلوف',
-        slogan: '💑 وحد القلب والصحة لبناء أزواج أصحاء',
-        security: '🛡️ بياناتك الصحية مشفرة',
-        welcome: 'مرحباً بك في جينلوف',
-        haveAccount: 'هل لديك حساب بالفعل؟',
-        login: 'تسجيل الدخول',
-        createAccount: 'إنشاء حساب',
-        loginTitle: 'تسجيل الدخول',
-        enterName: 'أدخل اسمك الأول لتسجيل الدخول',
-        yourName: 'اسمك الأول',
-        backHome: '→ العودة إلى الرئيسية',
-        nameNotFound: 'الاسم غير موجود. يرجى إنشاء حساب.',
-        charterTitle: '📜 ميثاق الشرف',
-        charterSubtitle: 'اقرأ هذه الالتزامات الخمسة بعناية',
-        scrollDown: '⬇️ انتقل إلى الأسفل ⬇️',
-        accept: 'أقبل وأواصل',
-        oath1: '١. قسم الإخلاص',
-        oath1Sub: 'الحقيقة الطبية',
-        oath1Text: 'أتعهد بشرفي بتقديم معلومات دقيقة عن نمطي الوراثي وبياناتي الصحية.',
-        oath2: '٢. ميثاق السرية',
-        oath2Sub: 'السر المشترك',
-        oath2Text: 'ألتزم بالحفاظ على سرية جميع المعلومات الشخصية والطبية.',
-        oath3: '٣. مبدأ عدم التمييز',
-        oath3Sub: 'المساواة في الاحترام',
-        oath3Text: 'أعامل كل عضو بكرامة، بغض النظر عن نمطه الوراثي.',
-        oath4: '٤. المسؤولية الوقائية',
-        oath4Sub: 'التوجيه الصحي',
-        oath4Text: 'أقبل تدابير الحماية مثل تصفية التوافقيات الخطرة.',
-        oath5: '٥. الإحسان الأخلاقي',
-        oath5Sub: 'المجاملة',
-        oath5Text: 'أعتمد سلوكاً مثالياً ومحترماً في رسائلي.',
-        signupTitle: 'إنشاء ملفي الشخصي',
-        signupSub: 'جميع المعلومات سرية',
-        firstName: 'الاسم الأول',
-        lastName: 'اسم العائلة',
-        gender: 'الجنس',
-        male: 'ذكر',
-        female: 'أنثى',
-        dob: 'تاريخ الميلاد',
-        city: 'مدينة الإقامة',
-        region: 'المنطقة',
-        allRegions: 'جميع المناطق',
-        myRegion: 'منطقتي فقط',
-        genotype: 'النمط الوراثي',
-        bloodGroup: 'فصيلة الدم',
-        desireChild: 'الرغبة في الأطفال؟',
-        yes: 'نعم',
-        no: 'لا',
-        createProfile: 'إنشاء ملفي الشخصي',
-        backCharter: '→ العودة إلى الميثاق',
-        required: 'إلزامي',
-        honorTitle: 'قسم الشرف',
-        honorText: 'أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع.',
-        swear: 'أقسم',
-        accessProfile: 'الوصول إلى ملفي الشخصي',
-        myProfile: 'ملفي الشخصي',
-        home: 'الرئيسية',
-        messages: 'الرسائل',
-        settings: 'الإعدادات',
-        genotype_label: 'النمط الوراثي',
-        blood_label: 'الفصيلة',
-        age_label: 'العمر',
-        residence_label: 'الإقامة',
-        region_label: 'المنطقة',
-        project_label: 'المشروع',
-        findPartner: 'العثور على شريك',
-        editProfile: 'تعديل الملف الشخصي',
-        compatiblePartners: 'الشركاء المتوافقون',
-        noPartners: 'لم يتم العثور على شركاء في الوقت الحالي',
-        searchOngoing: 'البحث جار...',
-        expandCommunity: 'نحن نوسع مجتمعنا. عد قريباً!',
-        details: 'التفاصيل',
-        contact: 'اتصال',
-        backProfile: '→ ملفي الشخصي',
-        toMessages: '→ الرسائل',
-        healthCommitment: 'التزامك الصحي',
-        popupMessageAS: 'كملف AS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
-        popupMessageSS: 'كملف SS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
-        understood: 'فهمت',
-        inboxTitle: 'صندوق الوارد',
-        emptyInbox: 'صندوق فارغ',
-        startConversation: 'ابدأ محادثة!',
-        findPartners: 'العثور على شركاء',
-        block: 'حظر',
-        unblock: 'إلغاء الحظر',
-        yourMessage: 'رسالتك...',
-        send: 'إرسال',
-        blockedByUser: 'محادثة غير ممكنة',
-        blockedMessage: 'هذا المستخدم قام بحظرك. لا يمكنك إرسال رسائل له.',
-        settingsTitle: 'الإعدادات',
-        visibility: 'رؤية الملف الشخصي',
-        notifications: 'إشعارات فورية',
-        language: 'اللغة',
-        blockedUsers: 'المستخدمون المحظورون',
-        dangerZone: '⚠️ منطقة الخطر',
-        deleteAccount: 'حذف حسابي',
-        delete: 'حذف',
-        logout: 'تسجيل الخروج',
-        confirmDelete: 'حذف نهائياً؟',
-        noBlocked: 'لا يوجد مستخدمين محظورين',
-        thankYou: 'شكراً لهذا التبادل',
-        thanksMessage: 'جينلوف تشكرك',
-        newSearch: 'بحث جديد',
-        logoutSuccess: 'تم تسجيل الخروج بنجاح',
-        seeYouSoon: 'أراك قريباً!',
-        french: 'الفرنسية',
-        english: 'الإنجليزية',
-        portuguese: 'البرتغالية',
-        spanish: 'الإسبانية',
-        arabic: 'العربية',
-        chinese: 'الصينية',
-        pageNotFound: 'الصفحة غير موجودة',
-        pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
-        project_life: 'مشروع الحياة',
-        interestPopup: '{name} مهتم جداً بملفك الشخصي لأنكما تشاركان توافقاً جيداً. هل يمكنك أخذ بضع دقائق للدردشة؟',
-        acceptRequest: '✓ قبول',
-        rejectRequest: '✗ رفض',
-        rejectionPopup: 'عذراً، {name} لم يعط رداً إيجابياً لطلبك. قم بإجراء عمليات بحث أخرى.',
-        gotIt: 'فهمت',
-        returnProfile: '📋 ملفي الشخصي',
-        newMatch: '🔍 بحث جديد',
-        sendingRequest: '⏳ جاري إرسال طلبك...',
-        requestSent: '✅ تم إرسال الطلب!',
-        january: 'يناير',
-        february: 'فبراير',
-        march: 'مارس',
-        april: 'أبريل',
-        may: 'مايو',
-        june: 'يونيو',
-        july: 'يوليو',
-        august: 'أغسطس',
-        september: 'سبتمبر',
-        october: 'أكتوبر',
-        november: 'نوفمبر',
-        december: 'ديسمبر',
-        day: 'يوم',
-        month: 'شهر',
-        year: 'سنة'
-    },
-    zh: {
-        appName: '真爱基因',
-        slogan: '💑 结合心灵与健康，建立健康的伴侣关系',
-        security: '🛡️ 您的健康数据已加密',
-        welcome: '欢迎来到真爱基因',
-        haveAccount: '已有帐户？',
-        login: '登录',
-        createAccount: '创建帐户',
-        loginTitle: '登录',
-        enterName: '输入您的名字以登录',
-        yourName: '您的名字',
-        backHome: '← 返回首页',
-        nameNotFound: '未找到名字。请创建帐户。',
-        charterTitle: '📜 荣誉宪章',
-        charterSubtitle: '请仔细阅读这5项承诺',
-        scrollDown: '⬇️ 滚动到底部 ⬇️',
-        accept: '我接受并继续',
-        oath1: '1. 真诚誓言',
-        oath1Sub: '医疗真相',
-        oath1Text: '我以荣誉保证提供关于我的基因型和健康数据的准确信息。',
-        oath2: '2. 保密契约',
-        oath2Sub: '共享秘密',
-        oath2Text: '我承诺对所有个人和医疗信息保密。',
-        oath3: '3. 非歧视原则',
-        oath3Sub: '尊重平等',
-        oath3Text: '我尊重每一位成员，无论其基因型如何。',
-        oath4: '4. 预防责任',
-        oath4Sub: '健康导向',
-        oath4Text: '我接受保护措施，如过滤风险兼容性。',
-        oath5: '5. 道德仁慈',
-        oath5Sub: '礼貌',
-        oath5Text: '我在信息中采取模范和尊重的行为。',
-        signupTitle: '创建我的个人资料',
-        signupSub: '所有信息都是保密的',
-        firstName: '名字',
-        lastName: '姓氏',
-        gender: '性别',
-        male: '男',
-        female: '女',
-        dob: '出生日期',
-        city: '居住城市',
-        region: '地区',
-        allRegions: '所有地区',
-        myRegion: '仅我的地区',
-        genotype: '基因型',
-        bloodGroup: '血型',
-        desireChild: '想要孩子吗？',
-        yes: '是',
-        no: '否',
-        createProfile: '创建个人资料',
-        backCharter: '← 返回宪章',
-        required: '必填',
-        honorTitle: '荣誉誓言',
-        honorText: '我以荣誉确认我的信息是真实的，符合实际情况。',
-        swear: '我发誓',
-        accessProfile: '访问我的个人资料',
-        myProfile: '我的个人资料',
-        home: '首页',
-        messages: '消息',
-        settings: '设置',
-        genotype_label: '基因型',
-        blood_label: '血型',
-        age_label: '年龄',
-        residence_label: '居住地',
-        region_label: '地区',
-        project_label: '项目',
-        findPartner: '寻找伴侣',
-        editProfile: '编辑个人资料',
-        compatiblePartners: '兼容的伴侣',
-        noPartners: '目前未找到伴侣',
-        searchOngoing: '搜索中...',
-        expandCommunity: '我们正在扩大社区。请稍后再来！',
-        details: '详情',
-        contact: '联系',
-        backProfile: '← 我的个人资料',
-        toMessages: '消息 →',
-        healthCommitment: '您的健康承诺',
-        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
-        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
-        understood: '我明白',
-        inboxTitle: '收件箱',
-        emptyInbox: '空收件箱',
-        startConversation: '开始对话！',
-        findPartners: '寻找伴侣',
-        block: '屏蔽',
-        unblock: '解除屏蔽',
-        yourMessage: '您的消息...',
-        send: '发送',
-        blockedByUser: '无法对话',
-        blockedMessage: '此用户已屏蔽您。您无法向他发送消息。',
-        settingsTitle: '设置',
-        visibility: '个人资料可见性',
-        notifications: '推送通知',
-        language: '语言',
-        blockedUsers: '已屏蔽用户',
-        dangerZone: '⚠️ 危险区域',
-        deleteAccount: '删除我的帐户',
-        delete: '删除',
-        logout: '退出',
-        confirmDelete: '永久删除？',
-        noBlocked: '没有已屏蔽的用户',
-        thankYou: '感谢您的交流',
-        thanksMessage: '真爱基因感谢您',
-        newSearch: '新搜索',
-        logoutSuccess: '退出成功',
-        seeYouSoon: '再见！',
-        french: '法语',
-        english: '英语',
-        portuguese: '葡萄牙语',
-        spanish: '西班牙语',
-        arabic: '阿拉伯语',
-        chinese: '中文',
-        pageNotFound: '页面未找到',
-        pageNotFoundMessage: '您查找的页面不存在。',
-        project_life: '人生计划',
-        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性。您能花几分钟聊聊吗？',
-        acceptRequest: '✓ 接受',
-        rejectRequest: '✗ 拒绝',
-        rejectionPopup: '抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧。',
-        gotIt: '明白了',
-        returnProfile: '📋 我的个人资料',
-        newMatch: '🔍 新搜索',
-        sendingRequest: '⏳ 您的请求正在发送中...',
-        requestSent: '✅ 请求已发送！',
-        january: '一月',
-        february: '二月',
-        march: '三月',
-        april: '四月',
-        may: '五月',
-        june: '六月',
-        july: '七月',
-        august: '八月',
-        september: '九月',
-        october: '十月',
-        november: '十一月',
-        december: '十二月',
-        day: '日',
-        month: '月',
-        year: '年'
     }
 };
 
@@ -973,7 +413,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============================================
-// STYLES CSS COMPLETS
+// STYLES CSS
 // ============================================
 const styles = `
 <style>
@@ -1007,7 +447,6 @@ const styles = `
     h3 { font-size: 1.6rem; margin: 15px 0; }
     p { font-size: 1.2rem; line-height: 1.6; }
     
-    /* Logo avec coeur ADN et loupe - Design personnalisé */
     .logo-container {
         width: 200px;
         height: 200px;
@@ -1022,19 +461,13 @@ const styles = `
         100% { transform: scale(1); }
     }
     
-    .logo-container svg path:first-child {
-        filter: drop-shadow(0 5px 15px rgba(255,105,180,0.4));
-    }
-    
     .logo-text {
         font-size: 3rem;
         font-weight: 800;
         margin: 5px 0 20px;
         letter-spacing: -1px;
-        text-shadow: 2px 2px 0 rgba(255,105,180,0.2);
         text-align: center;
     }
-    
     .slogan {
         font-weight: 500;
         color: #1a2a44;
@@ -1054,7 +487,6 @@ const styles = `
         background: linear-gradient(135deg, #fff5f7 0%, #f4e9da 100%);
     }
     
-    /* Sélecteur de langue compact */
     .language-selector-compact {
         position: relative;
         margin: 10px 0 20px;
@@ -1105,7 +537,6 @@ const styles = `
         background: #f8f9fa;
     }
     
-    /* Boutons */
     .btn-pink, .btn-dark {
         padding: 15px 25px;
         border-radius: 60px;
@@ -1147,7 +578,6 @@ const styles = `
     .btn-details { background: #1a2a44; color: white; }
     .btn-block { background: #dc3545; color: white; }
     
-    /* Inputs */
     .input-box {
         width: 100%;
         padding: 14px;
@@ -1171,7 +601,6 @@ const styles = `
         font-weight: 600;
     }
     
-    /* Date picker horizontal */
     .custom-date-picker {
         display: flex;
         gap: 5px;
@@ -1190,7 +619,6 @@ const styles = `
         outline: none;
     }
     
-    /* Photo */
     .photo-circle {
         width: 110px;
         height: 110px;
@@ -1206,7 +634,6 @@ const styles = `
         cursor: pointer;
     }
     
-    /* Match cards */
     .match-card {
         background: white;
         border-radius: 25px;
@@ -1233,7 +660,6 @@ const styles = `
         gap: 8px;
     }
     
-    /* Style groups */
     .st-group {
         background: white;
         border-radius: 15px;
@@ -1255,7 +681,6 @@ const styles = `
         border-bottom: none;
     }
     
-    /* Charte améliorée */
     .charte-box {
         height: 400px;
         overflow-y: auto;
@@ -1299,7 +724,6 @@ const styles = `
         border-radius: 40px;
     }
     
-    /* Popups */
     #request-popup, #rejection-popup, #loading-popup, #genlove-popup, #popup-overlay, #delete-confirm-popup {
         display: none;
         position: fixed;
@@ -1390,7 +814,6 @@ const styles = `
         width: 100%;
     }
     
-    /* Loader */
     #loader {
         display: none;
         position: absolute;
@@ -1427,7 +850,6 @@ const styles = `
         }
     }
     
-    /* Notification */
     #genlove-notify {
         position: fixed;
         top: -100px;
@@ -1450,7 +872,6 @@ const styles = `
     }
     #genlove-notify.show { top: 20px; }
     
-    /* Navigation */
     .navigation {
         display: flex;
         gap: 10px;
@@ -1475,7 +896,14 @@ const styles = `
         font-size: 1rem;
     }
     
-    /* Info bubble */
+    .filter-container {
+        padding: 15px;
+        background: white;
+        margin: 10px 15px;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
     .info-bubble {
         background: #e7f3ff;
         color: #1a2a44;
@@ -1487,7 +915,6 @@ const styles = `
         text-align: left;
     }
     
-    /* Switch */
     .switch {
         position: relative;
         display: inline-block;
@@ -1525,14 +952,12 @@ const styles = `
         transform: translateX(21px);
     }
     
-    /* Danger zone */
     .danger-zone {
         border: 2px solid #dc3545;
         background: #fff5f5;
         margin-top: 30px;
     }
     
-    /* Empty message */
     .empty-message {
         text-align: center;
         padding: 40px 20px;
@@ -1543,7 +968,6 @@ const styles = `
         font-size: 1.1rem;
     }
     
-    /* Unread badges */
     .unread-badge {
         background: #ff416c;
         color: white;
@@ -1573,7 +997,6 @@ const styles = `
         padding: 0 4px;
     }
     
-    /* Chat */
     .chat-header {
         background: #1a2a44;
         color: white;
@@ -1637,7 +1060,6 @@ const styles = `
         font-weight: 600;
     }
     
-    /* Inbox */
     .inbox-item {
         background: white;
         border-radius: 25px;
@@ -1656,7 +1078,6 @@ const styles = `
         border-left: 5px solid #ff416c;
     }
     
-    /* Serment */
     .serment-container {
         background: #f8f9fa;
         padding: 15px;
@@ -1672,15 +1093,6 @@ const styles = `
         font-size: 0.85rem;
         color: #d63384;
         line-height: 1.4;
-    }
-    
-    /* Filtre région */
-    .filter-container {
-        padding: 15px;
-        background: white;
-        margin: 10px 15px;
-        border-radius: 15px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     
     @media (max-width: 420px) {
@@ -1795,7 +1207,6 @@ function generateDateOptions(req, selectedDate = null) {
     
     let html = '<div class="custom-date-picker">';
     
-    // Jour
     html += '<select name="day" class="date-part" required><option value="">' + t('day') + '</option>';
     for (let d = 1; d <= 31; d++) {
         const sel = (selected && selected.getDate() === d) ? 'selected' : '';
@@ -1803,7 +1214,6 @@ function generateDateOptions(req, selectedDate = null) {
     }
     html += '</select>';
     
-    // Mois
     html += '<select name="month" class="date-part" required><option value="">' + t('month') + '</option>';
     for (let m = 0; m < 12; m++) {
         const monthVal = m + 1;
@@ -1812,7 +1222,6 @@ function generateDateOptions(req, selectedDate = null) {
     }
     html += '</select>';
     
-    // Année
     html += '<select name="year" class="date-part" required><option value="">' + t('year') + '</option>';
     for (let y = currentYear - 100; y <= currentYear - 18; y++) {
         const sel = (selected && selected.getFullYear() === y) ? 'selected' : '';
@@ -1827,7 +1236,6 @@ function generateDateOptions(req, selectedDate = null) {
 // ROUTES
 // ============================================
 
-// Route pour changer de langue
 app.get('/lang/:lang', async (req, res) => {
     const lang = req.params.lang;
     if (['fr','en','pt','es','ar','zh'].includes(lang)) {
@@ -1839,7 +1247,7 @@ app.get('/lang/:lang', async (req, res) => {
     res.redirect(req.get('referer') || '/');
 });
 
-// ACCUEIL avec nouveau logo personnalisé
+// ACCUEIL
 app.get('/', (req, res) => {
     const t = req.t;
     const currentLang = req.lang;
@@ -1856,7 +1264,6 @@ app.get('/', (req, res) => {
 <body>
     <div class="app-shell">
         <div class="home-screen">
-            <!-- Sélecteur de langue compact -->
             <div class="language-selector-compact">
                 <button onclick="toggleLanguageDropdown()" class="lang-btn-compact">
                     <span>🌐</span> 
@@ -1873,56 +1280,20 @@ app.get('/', (req, res) => {
                 </div>
             </div>
             
-            <!-- Logo personnalisé : Cœur rose + ADN bleu/vert + Loupe blanche avec étoile -->
             <div class="logo-container">
                 <svg viewBox="0 0 200 200" style="width: 100%; height: 100%;">
-                    <!-- Arrière-plan : Grand cœur rose -->
                     <path d="M100 170 L35 90 C15 60 35 20 65 20 C80 20 92 35 100 45 C108 35 120 20 135 20 C165 20 185 60 165 90 L100 170" 
                           fill="#FF69B4" opacity="0.9" stroke="#333" stroke-width="1"/>
-                    
-                    <!-- Double hélice d'ADN à gauche -->
-                    <!-- Brin gauche (bleu) -->
                     <path d="M45 50 L45 140" stroke="#4169E1" stroke-width="4" fill="none" stroke-dasharray="8 8"/>
-                    <!-- Brin droit (vert) -->
                     <path d="M65 50 L65 140" stroke="#32CD32" stroke-width="4" fill="none" stroke-dasharray="8 8"/>
-                    
-                    <!-- Barreaux multicolores entre les brins -->
                     <line x1="45" y1="55" x2="65" y2="55" stroke="#FF4444" stroke-width="3"/>
                     <line x1="45" y1="75" x2="65" y2="75" stroke="#FF4444" stroke-width="3"/>
                     <line x1="45" y1="95" x2="65" y2="95" stroke="#FF4444" stroke-width="3"/>
                     <line x1="45" y1="115" x2="65" y2="115" stroke="#FF4444" stroke-width="3"/>
                     <line x1="45" y1="135" x2="65" y2="135" stroke="#FF4444" stroke-width="3"/>
-                    <line x1="45" y1="65" x2="65" y2="65" stroke="#FFD700" stroke-width="3"/>
-                    <line x1="45" y1="85" x2="65" y2="85" stroke="#FFD700" stroke-width="3"/>
-                    <line x1="45" y1="105" x2="65" y2="105" stroke="#FFD700" stroke-width="3"/>
-                    <line x1="45" y1="125" x2="65" y2="125" stroke="#FFD700" stroke-width="3"/>
-                    <line x1="45" y1="70" x2="65" y2="70" stroke="#FFA500" stroke-width="3"/>
-                    <line x1="45" y1="90" x2="65" y2="90" stroke="#FFA500" stroke-width="3"/>
-                    <line x1="45" y1="110" x2="65" y2="110" stroke="#FFA500" stroke-width="3"/>
-                    <line x1="45" y1="130" x2="65" y2="130" stroke="#FFA500" stroke-width="3"/>
-                    <line x1="45" y1="80" x2="65" y2="80" stroke="#9932CC" stroke-width="3"/>
-                    <line x1="45" y1="100" x2="65" y2="100" stroke="#9932CC" stroke-width="3"/>
-                    <line x1="45" y1="120" x2="65" y2="120" stroke="#9932CC" stroke-width="3"/>
-                    <line x1="45" y1="140" x2="65" y2="140" stroke="#9932CC" stroke-width="3"/>
-                    
-                    <!-- Loupe blanche à droite -->
                     <circle cx="145" cy="80" r="28" fill="white" stroke="#333" stroke-width="2" opacity="0.95"/>
-                    <!-- Manche de la loupe -->
                     <rect x="163" y="95" width="25" height="8" rx="4" fill="white" stroke="#333" stroke-width="1.5" transform="rotate(35, 170, 100)"/>
-                    
-                    <!-- Étoile lumineuse dans la loupe -->
                     <circle cx="145" cy="80" r="10" fill="#FFD700" opacity="0.8"/>
-                    <!-- Rayons de l'étoile -->
-                    <line x1="145" y1="65" x2="145" y2="70" stroke="#FFD700" stroke-width="2"/>
-                    <line x1="145" y1="90" x2="145" y2="95" stroke="#FFD700" stroke-width="2"/>
-                    <line x1="130" y1="80" x2="135" y2="80" stroke="#FFD700" stroke-width="2"/>
-                    <line x1="155" y1="80" x2="160" y2="80" stroke="#FFD700" stroke-width="2"/>
-                    <line x1="135" y1="68" x2="140" y2="73" stroke="#FFD700" stroke-width="2"/>
-                    <line x1="150" y1="87" x2="155" y2="92" stroke="#FFD700" stroke-width="2"/>
-                    <line x1="135" y1="92" x2="140" y2="87" stroke="#FFD700" stroke-width="2"/>
-                    <line x1="150" y1="68" x2="155" y2="73" stroke="#FFD700" stroke-width="2"/>
-                    
-                    <!-- Petite étoile centrale -->
                     <circle cx="145" cy="80" r="3" fill="white"/>
                 </svg>
             </div>
@@ -1952,12 +1323,6 @@ app.get('/', (req, res) => {
             if (!button && dropdown.style.display === 'block') {
                 dropdown.style.display = 'none';
             }
-        });
-        
-        document.querySelectorAll('.dropdown-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                document.getElementById('selected-language').innerText = this.innerText.replace(/[🇫🇷🇬🇧🇵🇹🇪🇸🇸🇦🇨🇳]/g, '').trim();
-            });
         });
     </script>
 </body>
@@ -2001,7 +1366,6 @@ app.get('/login', (req, res) => {
             else alert('${t('nameNotFound')}');
         });
         
-        // Touche Entrée pour soumettre
         document.getElementById('firstName').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -2303,7 +1667,6 @@ app.get('/profile', requireAuth, async (req, res) => {
     <div class="app-shell">
         <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
         
-        <!-- POPUP DE DEMANDE -->
         <div id="request-popup">
             <div class="popup-card">
                 <div class="popup-icon">💌</div>
@@ -2315,7 +1678,6 @@ app.get('/profile', requireAuth, async (req, res) => {
             </div>
         </div>
         
-        <!-- POPUP DE REJET -->
         <div id="rejection-popup">
             <div class="popup-card">
                 <div class="popup-icon">🌸</div>
@@ -2327,7 +1689,6 @@ app.get('/profile', requireAuth, async (req, res) => {
             </div>
         </div>
         
-        <!-- POPUP DE LOADING -->
         <div id="loading-popup">
             <div class="popup-card">
                 <div class="spinner"></div>
@@ -2451,7 +1812,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     }
 });
 
-// MATCHING avec filtre région et résidence affichée
+// MATCHING
 app.get('/matching', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
@@ -2461,7 +1822,6 @@ app.get('/matching', requireAuth, async (req, res) => {
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
         const regionFilter = req.query.region || 'all';
         
-        // Récupérer les IDs exclus
         const messages = await Message.find({
             $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
             isBlocked: false
@@ -2488,7 +1848,6 @@ app.get('/matching', requireAuth, async (req, res) => {
             ...rejectedArray
         ])];
         
-        // Requête de base
         let query = { 
             _id: { $ne: currentUser._id },
             gender: currentUser.gender === 'Homme' ? 'Femme' : 'Homme',
@@ -2499,14 +1858,12 @@ app.get('/matching', requireAuth, async (req, res) => {
             query._id.$nin = excludedIds;
         }
         
-        // Filtre région
         if (regionFilter === 'mine' && currentUser.region) {
             query.region = currentUser.region;
         }
         
         let partners = await User.find(query);
         
-        // Filtre génétique
         if (isSSorAS) {
             partners = partners.filter(p => p.genotype === 'AA');
         }
@@ -2535,7 +1892,7 @@ app.get('/matching', requireAuth, async (req, res) => {
                             <button class="btn-action btn-contact" onclick="sendInterest('${p._id}', '${p.firstName}')">
                                 💬 ${t('contact')}
                             </button>
-                            <button class="btn-action btn-details" onclick="showDetails(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+                            <button class="btn-action btn-details" onclick="showDetails('${p._id}')">
                                 ${t('details')}
                             </button>
                         </div>
@@ -2598,7 +1955,6 @@ app.get('/matching', requireAuth, async (req, res) => {
             <h3 style="margin:0; color:#1a2a44;">${t('compatiblePartners')}</h3>
         </div>
         
-        <!-- Filtre région -->
         <div class="filter-container">
             <select id="regionFilter" class="input-box" style="margin:0;" onchange="applyRegionFilter()">
                 <option value="all" ${regionFilter === 'all' ? 'selected' : ''}>${t('allRegions')}</option>
@@ -2614,8 +1970,8 @@ app.get('/matching', requireAuth, async (req, res) => {
     </div>
     
     <script>
-        let currentPartner = null;
         let currentPartnerId = null;
+        let partners = ${JSON.stringify(partners)};
         
         function applyRegionFilter() {
             const filter = document.getElementById('regionFilter').value;
@@ -2652,27 +2008,29 @@ app.get('/matching', requireAuth, async (req, res) => {
         
         function sendInterestFromPopup() {
             if (currentPartnerId) {
-                sendInterest(currentPartnerId, currentPartner ? currentPartner.firstName : '');
+                const partner = partners.find(p => p._id === currentPartnerId);
+                sendInterest(currentPartnerId, partner ? partner.firstName : '');
                 closePopup();
             }
         }
         
-        function showDetails(partner) {
-            currentPartner = partner;
+        function showDetails(partnerId) {
+            const partner = partners.find(p => p._id === partnerId);
+            if (!partner) return;
+            
             currentPartnerId = partner._id;
             
             const myGt = '${currentUser.genotype}';
             
             document.getElementById('pop-name').innerText = partner.firstName || "Profil";
-            document.getElementById('pop-details').innerHTML = \`
-                <b>${t('genotype_label')} :</b> \${partner.genotype}<br>
-                <b>${t('blood_label')} :</b> \${partner.bloodGroup}<br>
-                <b>${t('residence_label')} :</b> \${partner.residence || ''}<br>
-                <b>${t('region_label')} :</b> \${partner.region || ''}<br>
-                <b>${t('age_label')} :</b> ${calculerAge(partner.dob)} ans<br><br>
-                <b>${t('project_label')} :</b><br>
-                <i>\${partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}'}</i>
-            \`;
+            document.getElementById('pop-details').innerHTML = 
+                '<b>${t('genotype_label')} :</b> ' + partner.genotype + '<br>' +
+                '<b>${t('blood_label')} :</b> ' + partner.bloodGroup + '<br>' +
+                '<b>${t('residence_label')} :</b> ' + (partner.residence || '') + '<br>' +
+                '<b>${t('region_label')} :</b> ' + (partner.region || '') + '<br>' +
+                '<b>${t('age_label')} :</b> ' + ${calculerAge(partner.dob)} + ' ans<br><br>' +
+                '<b>${t('project_label')} :</b><br>' +
+                '<i>' + (partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}') + '</i>';
             
             let msg = "";
             if(myGt === "AA" && partner.genotype === "AA") {
@@ -2942,7 +2300,6 @@ app.get('/settings', requireAuth, async (req, res) => {
     <div class="app-shell">
         <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
         
-        <!-- POPUP DE CONFIRMATION SUPPRESSION -->
         <div id="delete-confirm-popup">
             <div class="popup-card" style="max-width:340px;">
                 <div class="popup-icon">⚠️</div>
@@ -3083,7 +2440,7 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
         const datePicker = generateDateOptions(req, user.dob);
         
         const bloodOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => 
-            `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g</option>`
+            `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g}</option>`
         ).join('');
         
         res.send(`<!DOCTYPE html>
@@ -3291,7 +2648,6 @@ app.get('/logout-success', (req, res) => {
 // ROUTES API
 // ============================================
 
-// Login
 app.post('/api/login', async (req, res) => {
     try {
         const user = await User.findOne({ firstName: req.body.firstName }).sort({ createdAt: -1 });
@@ -3307,7 +2663,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Register
 app.post('/api/register', async (req, res) => {
     try {
         const user = new User(req.body);
@@ -3323,7 +2678,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Envoyer un intérêt
 app.post('/api/requests', requireAuth, async (req, res) => {
     try {
         const { receiverId } = req.body;
@@ -3369,7 +2723,6 @@ app.post('/api/requests', requireAuth, async (req, res) => {
     }
 });
 
-// Récupérer les demandes en attente
 app.get('/api/requests/pending', requireAuth, async (req, res) => {
     try {
         const requests = await Request.find({
@@ -3385,7 +2738,6 @@ app.get('/api/requests/pending', requireAuth, async (req, res) => {
     }
 });
 
-// Accepter une demande
 app.post('/api/requests/:id/accept', requireAuth, async (req, res) => {
     try {
         const request = await Request.findById(req.params.id).populate('senderId receiverId');
@@ -3415,7 +2767,6 @@ app.post('/api/requests/:id/accept', requireAuth, async (req, res) => {
     }
 });
 
-// Rejeter une demande
 app.post('/api/requests/:id/reject', requireAuth, async (req, res) => {
     try {
         const request = await Request.findById(req.params.id).populate('senderId receiverId');
@@ -3440,7 +2791,6 @@ app.post('/api/requests/:id/reject', requireAuth, async (req, res) => {
     }
 });
 
-// Récupérer les rejets non vus
 app.get('/api/rejections/unread', requireAuth, async (req, res) => {
     try {
         const requests = await Request.find({
@@ -3461,7 +2811,6 @@ app.get('/api/rejections/unread', requireAuth, async (req, res) => {
     }
 });
 
-// Marquer un rejet comme vu
 app.post('/api/rejections/:id/view', requireAuth, async (req, res) => {
     try {
         await Request.findByIdAndUpdate(req.params.id, { viewed: true });
@@ -3472,7 +2821,6 @@ app.post('/api/rejections/:id/view', requireAuth, async (req, res) => {
     }
 });
 
-// Envoyer un message
 app.post('/api/messages', requireAuth, async (req, res) => {
     try {
         const receiverId = req.body.receiverId;
@@ -3497,7 +2845,6 @@ app.post('/api/messages', requireAuth, async (req, res) => {
     }
 });
 
-// Bloquer
 app.post('/api/block/:userId', requireAuth, async (req, res) => {
     try {
         const current = await User.findById(req.session.userId);
@@ -3537,7 +2884,6 @@ app.post('/api/block/:userId', requireAuth, async (req, res) => {
     }
 });
 
-// Débloquer
 app.post('/api/unblock/:userId', requireAuth, async (req, res) => {
     try {
         const current = await User.findById(req.session.userId);
@@ -3571,7 +2917,6 @@ app.post('/api/unblock/:userId', requireAuth, async (req, res) => {
     }
 });
 
-// Update profile
 app.put('/api/users/profile', requireAuth, async (req, res) => {
     try {
         await User.findByIdAndUpdate(req.session.userId, req.body);
@@ -3582,7 +2927,6 @@ app.put('/api/users/profile', requireAuth, async (req, res) => {
     }
 });
 
-// Update visibility
 app.put('/api/visibility', requireAuth, async (req, res) => {
     try {
         await User.findByIdAndUpdate(req.session.userId, { isPublic: req.body.isPublic });
@@ -3593,7 +2937,6 @@ app.put('/api/visibility', requireAuth, async (req, res) => {
     }
 });
 
-// Supprimer compte
 app.delete('/api/delete-account', requireAuth, async (req, res) => {
     try {
         const id = req.session.userId;
@@ -3608,12 +2951,10 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
     }
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
-// 404
 app.use((req, res) => {
     const t = req.t;
     res.status(404).send(`<!DOCTYPE html>
