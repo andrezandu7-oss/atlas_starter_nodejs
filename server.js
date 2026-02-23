@@ -3,7 +3,7 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Servir les fichiers statiques (si besoin)
+// Servir les fichiers statiques
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Page de test QR code
@@ -34,12 +34,10 @@ app.get('/qr-test', (req, res) => {
             color: #333;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 2rem;
         }
         h2 {
             color: #555;
             margin: 20px 0 10px;
-            font-size: 1.4rem;
             border-left: 5px solid #667eea;
             padding-left: 15px;
         }
@@ -65,7 +63,6 @@ app.get('/qr-test', (req, res) => {
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
-            transition: border 0.3s;
         }
         input:focus, select:focus {
             border-color: #667eea;
@@ -80,12 +77,10 @@ app.get('/qr-test', (req, res) => {
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
             margin-right: 10px;
         }
         button:hover {
             background: #764ba2;
-            transform: translateY(-2px);
         }
         .qr-container {
             display: flex;
@@ -95,7 +90,6 @@ app.get('/qr-test', (req, res) => {
             padding: 20px;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         #qrCode {
             max-width: 250px;
@@ -120,18 +114,6 @@ app.get('/qr-test', (req, res) => {
             border-radius: 8px;
             margin: 15px 0;
         }
-        .badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        .badge-lab {
-            background: #4caf50;
-            color: white;
-        }
         .institution-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -150,17 +132,6 @@ app.get('/qr-test', (req, res) => {
         .institution-item input[type="checkbox"] {
             width: 20px;
             height: 20px;
-        }
-        .access-level {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 5px;
-        }
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #666;
-            font-size: 0.9rem;
         }
         .nav-links {
             display: flex;
@@ -181,10 +152,9 @@ app.get('/qr-test', (req, res) => {
             color: white;
         }
     </style>
-    <!-- Bibliothèque pour QR code -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <!-- Bibliothèque pour scanner QR code -->
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -195,23 +165,22 @@ app.get('/qr-test', (req, res) => {
         
         <h1>🔐 Genlove - Prototype QR Code Santé</h1>
         
-        <!-- SECTION 1: GÉNÉRATEUR DE QR CODE (LABORATOIRE) -->
+        <!-- SECTION 1: GÉNÉRATEUR DE QR CODE -->
         <div class="section">
             <h2>🏥 Laboratoire - Génération du QR code</h2>
             <div class="form-group">
                 <label>Nom du laboratoire :</label>
                 <input type="text" id="labName" value="Laboratorio Central de Luanda" readonly>
-                <small class="access-level">ID: LAB-001-AO (accrédité par le ministère)</small>
             </div>
             
             <div class="form-group">
                 <label>Nom complet du patient :</label>
-                <input type="text" id="patientName" value="João Manuel Silva" placeholder="Nom du patient">
+                <input type="text" id="patientName" value="João Manuel Silva">
             </div>
             
             <div class="form-group">
-                <label>Numéro d'identification nationale :</label>
-                <input type="text" id="patientId" value="ANG-1990-123456" placeholder="ANG-AAAA-123456">
+                <label>Numéro d'identification :</label>
+                <input type="text" id="patientId" value="ANG-1990-123456">
             </div>
             
             <div class="form-group">
@@ -242,48 +211,45 @@ app.get('/qr-test', (req, res) => {
                 <input type="date" id="dob" value="1990-05-15">
             </div>
             
-            <button onclick="generateQR()">🔐 Générer QR code sécurisé</button>
+            <button onclick="generateQR()">🔐 Générer QR code</button>
             
             <div id="qrContainer" class="qr-container" style="display: none;">
-                <h3>QR Code du certificat médical</h3>
+                <h3>QR Code du certificat</h3>
                 <div id="qrCode"></div>
                 <div class="result-box">
-                    <strong>✅ Données signées par le laboratoire</strong>
-                    <p style="margin-top: 5px; font-size: 0.8rem;">Signature numérique: <span id="signature"></span></p>
+                    <strong>✅ Données signées</strong>
+                    <p style="margin-top: 5px; font-size: 0.8rem;">Signature: <span id="signature"></span></p>
                 </div>
             </div>
         </div>
         
-        <!-- SECTION 2: INSTITUTIONS AUTORISÉES À LIRE -->
+        <!-- SECTION 2: INSTITUTIONS AUTORISÉES -->
         <div class="section">
-            <h2>🏛️ Registre des institutions autorisées</h2>
-            <p>Sélectionnez les institutions autorisées à lire ce QR code :</p>
-            
+            <h2>🏛️ Institutions autorisées</h2>
             <div class="institution-list" id="institutionList"></div>
-            
-            <button onclick="saveAuthorizedReaders()">💾 Enregistrer les autorisations</button>
+            <button onclick="saveAuthorizedReaders()">💾 Enregistrer</button>
         </div>
         
-        <!-- SECTION 3: LECTEUR DE QR CODE (APPLICATION) -->
+        <!-- SECTION 3: LECTEUR QR CODE -->
         <div class="section">
             <h2>📱 Application - Scan du QR code</h2>
             
             <div class="form-group">
-                <label>Quelle application lit le QR code ?</label>
+                <label>Application lectrice :</label>
                 <select id="appSelector">
-                    <option value="GENLOVE">💘 Genlove - App de rencontre</option>
-                    <option value="HOPITAL-CENTRAL">🏥 Hôpital Central de Luanda</option>
-                    <option value="SEGURO-SAUD">🛡️ Seguro Saúde - Assurance</option>
-                    <option value="INAC">🆔 INAC - Identification nationale</option>
-                    <option value="MINSA">🏛️ Ministère de la Santé</option>
-                    <option value="HACKER">⚠️ Application non autorisée</option>
+                    <option value="GENLOVE">💘 Genlove</option>
+                    <option value="HOPITAL-CENTRAL">🏥 Hôpital Central</option>
+                    <option value="SEGURO-SAUD">🛡️ Seguro Saúde</option>
+                    <option value="INAC">🆔 INAC</option>
+                    <option value="MINSA">🏛️ Ministère Santé</option>
+                    <option value="HACKER">⚠️ Non autorisée</option>
                 </select>
             </div>
             
-            <div id="reader" style="width: 100%;"></div>
+            <div id="reader"></div>
             
-            <button onclick="startScanner()">📸 Démarrer le scan</button>
-            <button onclick="stopScanner()">⏹️ Arrêter le scan</button>
+            <button onclick="startScanner()">📸 Scanner</button>
+            <button onclick="stopScanner()">⏹️ Arrêter</button>
             
             <div id="scanResult" class="result-box" style="display: none;"></div>
             <div id="errorResult" class="warning-box" style="display: none;"></div>
@@ -291,7 +257,7 @@ app.get('/qr-test', (req, res) => {
             <div id="patientForm" style="display: none; margin-top: 20px; padding: 20px; background: #f0f0f0; border-radius: 8px;">
                 <h3>📋 Formulaire pré-rempli</h3>
                 <div class="form-group">
-                    <label>Nom complet :</label>
+                    <label>Nom :</label>
                     <input type="text" id="formFullName" readonly>
                 </div>
                 <div class="form-group">
@@ -302,68 +268,48 @@ app.get('/qr-test', (req, res) => {
                     <label>Groupe sanguin :</label>
                     <input type="text" id="formBloodGroup" readonly>
                 </div>
-                <div class="form-group">
-                    <label>Date de naissance :</label>
-                    <input type="text" id="formDob" readonly>
-                </div>
-                <div class="badge badge-lab" id="verifiedBadge" style="display: none;">✅ Certifié par laboratoire</div>
+                <div class="badge" style="background:#4caf50; color:white; padding:5px 10px; border-radius:20px; display:inline-block;" id="verifiedBadge">✅ Certifié</div>
             </div>
         </div>
-        
-        <footer>
-            Prototype Genlove - Système de vérification par QR code<br>
-            ⚕️ Données de santé sécurisées - Accès restreint aux institutions autorisées
-        </footer>
     </div>
 
     <script>
-        // ============================================
-        // 1. CONFIGURATION DES INSTITUTIONS AUTORISÉES
-        // ============================================
+        // Institutions autorisées
         const authorizedInstitutions = [
-            { 
-                id: 'GENLOVE', 
-                name: 'Genlove', 
-                type: 'app', 
-                access: ['nom', 'genotype', 'groupe_sanguin'],
-                icon: '💘' 
-            },
-            { 
-                id: 'HOPITAL-CENTRAL', 
-                name: 'Hôpital Central', 
-                type: 'healthcare', 
-                access: ['nom', 'prenom', 'genotype', 'groupe_sanguin', 'date_naissance', 'historique'],
-                icon: '🏥' 
-            },
-            { 
-                id: 'SEGURO-SAUD', 
-                name: 'Seguro Saúde', 
-                type: 'insurance', 
-                access: ['nom', 'genotype', 'groupe_sanguin'],
-                icon: '🛡️' 
-            },
-            { 
-                id: 'INAC', 
-                name: 'INAC', 
-                type: 'government', 
-                access: ['nom', 'date_naissance', 'patientId'],
-                icon: '🆔' 
-            },
-            { 
-                id: 'MINSA', 
-                name: 'Ministère Santé', 
-                type: 'government', 
-                access: ['statistiques_anonymes'],
-                icon: '🏛️' 
-            }
+            { id: 'GENLOVE', name: 'Genlove', access: ['nom', 'genotype', 'groupe_sanguin'], icon: '💘' },
+            { id: 'HOPITAL-CENTRAL', name: 'Hôpital Central', access: ['nom', 'genotype', 'groupe_sanguin', 'date_naissance'], icon: '🏥' },
+            { id: 'SEGURO-SAUD', name: 'Seguro Saúde', access: ['nom', 'genotype', 'groupe_sanguin'], icon: '🛡️' },
+            { id: 'INAC', name: 'INAC', access: ['nom', 'date_naissance', 'patientId'], icon: '🆔' },
+            { id: 'MINSA', name: 'Ministère Santé', access: ['statistiques_anonymes'], icon: '🏛️' }
         ];
 
-        // Clé secrète du ministère (simulée)
         const SECRET_KEY = 'angola-health-ministry-secret-2025';
 
-        // ============================================
-        // 2. GÉNÉRATION DU QR CODE (LABORATOIRE)
-        // ============================================
+        // Charger les institutions
+        function loadInstitutions() {
+            const list = document.getElementById('institutionList');
+            list.innerHTML = '';
+            authorizedInstitutions.forEach(inst => {
+                const div = document.createElement('div');
+                div.className = 'institution-item';
+                div.innerHTML = \`
+                    <input type="checkbox" id="inst_\${inst.id}" value="\${inst.id}" checked>
+                    <label for="inst_\${inst.id}">\${inst.icon} \${inst.name}</label>
+                \`;
+                list.appendChild(div);
+            });
+        }
+
+        // Récupérer les lecteurs autorisés
+        function getAuthorizedReaders() {
+            const readers = [];
+            document.querySelectorAll('#institutionList input:checked').forEach(cb => {
+                readers.push(cb.value);
+            });
+            return readers;
+        }
+
+        // Générer QR code
         function generateQR() {
             const labName = document.getElementById('labName').value;
             const patientName = document.getElementById('patientName').value;
@@ -372,34 +318,25 @@ app.get('/qr-test', (req, res) => {
             const bloodGroup = document.getElementById('bloodGroup').value;
             const dob = document.getElementById('dob').value;
             
-            const dataToSign = `${labName}|${patientId}|${genotype}|${bloodGroup}|${dob}`;
+            const dataToSign = \`\${labName}|\${patientId}|\${genotype}|\${bloodGroup}|\${dob}\`;
             const signature = CryptoJS.HmacSHA256(dataToSign, SECRET_KEY).toString();
             
             const qrData = {
                 version: '1.0',
-                format: 'ANGOLA-HEALTH-2025',
                 issuedBy: labName,
-                labId: 'LAB-001-AO',
                 patientName: patientName,
                 patientId: patientId,
                 genotype: genotype,
                 bloodGroup: bloodGroup,
                 dateOfBirth: dob,
-                issuedAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
                 signature: signature,
                 authorizedReaders: getAuthorizedReaders()
             };
             
             document.getElementById('signature').innerText = signature.substring(0, 20) + '...';
+            document.getElementById('qrContainer').style.display = 'flex';
             
-            const qrContainer = document.getElementById('qrContainer');
-            qrContainer.style.display = 'flex';
-            
-            QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(qrData), {
-                width: 250,
-                margin: 2
-            }, function(err, canvas) {
+            QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(qrData), { width: 250 }, function(err, canvas) {
                 if (err) {
                     console.error(err);
                     return;
@@ -410,49 +347,16 @@ app.get('/qr-test', (req, res) => {
             });
         }
 
-        // ============================================
-        // 3. LISTE DES INSTITUTIONS AUTORISÉES
-        // ============================================
-        function loadInstitutions() {
-            const list = document.getElementById('institutionList');
-            list.innerHTML = '';
-            
-            authorizedInstitutions.forEach(inst => {
-                const div = document.createElement('div');
-                div.className = 'institution-item';
-                div.innerHTML = `
-                    <input type="checkbox" id="inst_${inst.id}" value="${inst.id}" checked>
-                    <label for="inst_${inst.id}">
-                        ${inst.icon} ${inst.name}
-                        <span class="access-level">${inst.access.join(', ')}</span>
-                    </label>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        function getAuthorizedReaders() {
-            const readers = [];
-            document.querySelectorAll('#institutionList input:checked').forEach(cb => {
-                readers.push(cb.value);
-            });
-            return readers;
-        }
-
         function saveAuthorizedReaders() {
-            alert('✅ Liste des institutions autorisées enregistrée !');
+            alert('✅ Liste enregistrée !');
         }
 
-        // ============================================
-        // 4. SCANNER QR CODE (APPLICATION)
-        // ============================================
         let html5QrCode = null;
 
         function startScanner() {
             const appId = document.getElementById('appSelector').value;
             
             html5QrCode = new Html5Qrcode("reader");
-            
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
@@ -465,115 +369,73 @@ app.get('/qr-test', (req, res) => {
                     }
                     html5QrCode.stop();
                 },
-                (error) => {
-                    console.warn(error);
-                }
+                (error) => console.warn(error)
             );
         }
 
         function stopScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop();
-            }
+            if (html5QrCode) html5QrCode.stop();
         }
 
         function verifyQRData(qrData, appId) {
-            const dataToVerify = `${qrData.issuedBy}|${qrData.patientId}|${qrData.genotype}|${qrData.bloodGroup}|${qrData.dateOfBirth}`;
+            const dataToVerify = \`\${qrData.issuedBy}|\${qrData.patientId}|\${qrData.genotype}|\${qrData.bloodGroup}|\${qrData.dateOfBirth}\`;
             const expectedSignature = CryptoJS.HmacSHA256(dataToVerify, SECRET_KEY).toString();
             
-            const resultDiv = document.getElementById('scanResult');
-            const errorDiv = document.getElementById('errorResult');
-            
             if (qrData.signature !== expectedSignature) {
-                showError('❌ SIGNATURE INVALIDE - Ce certificat a été falsifié !');
+                showError('❌ SIGNATURE INVALIDE');
                 return;
             }
             
             if (!qrData.authorizedReaders || !qrData.authorizedReaders.includes(appId)) {
-                showError(`⛔ ACCÈS REFUSÉ - ${getAppName(appId)} n'est pas autorisée`);
-                console.warn(\`Tentative d'accès non autorisée: \${appId}\`);
+                showError('⛔ ACCÈS REFUSÉ');
                 return;
             }
             
             const institution = authorizedInstitutions.find(i => i.id === appId);
             
-            resultDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
+            document.getElementById('scanResult').style.display = 'block';
+            document.getElementById('errorResult').style.display = 'none';
             
-            let displayHTML = \`
-                <strong>✅ ACCÈS AUTORISÉ - \${getAppName(appId)}</strong>
-                <p>Niveaux d'accès: \${institution.access.join(', ')}</p>
-                <hr style="margin: 10px 0;">
-            \`;
+            let displayHTML = '<strong>✅ ACCÈS AUTORISÉ</strong><hr>';
             
             if (institution.access.includes('nom')) {
-                displayHTML += \`<p><strong>Nom complet:</strong> \${qrData.patientName}</p>\`;
+                displayHTML += \`<p><strong>Nom:</strong> \${qrData.patientName}</p>\`;
             }
-            
             if (institution.access.includes('genotype')) {
                 displayHTML += \`<p><strong>Génotype:</strong> \${qrData.genotype}</p>\`;
             }
-            
             if (institution.access.includes('groupe_sanguin')) {
                 displayHTML += \`<p><strong>Groupe sanguin:</strong> \${qrData.bloodGroup}</p>\`;
             }
             
-            if (institution.access.includes('date_naissance')) {
-                displayHTML += \`<p><strong>Date de naissance:</strong> \${new Date(qrData.dateOfBirth).toLocaleDateString()}</p>\`;
-            }
-            
-            if (institution.access.includes('patientId')) {
-                displayHTML += \`<p><strong>ID National:</strong> \${qrData.patientId}</p>\`;
-            }
-            
-            displayHTML += \`<p style="color: #4caf50; margin-top: 10px;">🔒 Données lues avec consentement</p>\`;
-            
-            resultDiv.innerHTML = displayHTML;
+            document.getElementById('scanResult').innerHTML = displayHTML;
             
             document.getElementById('patientForm').style.display = 'block';
             document.getElementById('formFullName').value = qrData.patientName;
             document.getElementById('formGenotype').value = qrData.genotype;
             document.getElementById('formBloodGroup').value = qrData.bloodGroup;
-            document.getElementById('formDob').value = new Date(qrData.dateOfBirth).toLocaleDateString();
-            document.getElementById('verifiedBadge').style.display = 'inline-block';
         }
 
         function showError(message) {
-            const resultDiv = document.getElementById('scanResult');
-            const errorDiv = document.getElementById('errorResult');
-            
-            resultDiv.style.display = 'none';
-            errorDiv.style.display = 'block';
-            errorDiv.innerHTML = \`<strong>⛔ ERREUR</strong><p>\${message}</p>\`;
-            
+            document.getElementById('scanResult').style.display = 'none';
+            document.getElementById('errorResult').style.display = 'block';
+            document.getElementById('errorResult').innerHTML = \`<strong>⛔ ERREUR</strong><p>\${message}</p>\`;
             document.getElementById('patientForm').style.display = 'none';
         }
 
-        function getAppName(appId) {
-            const app = authorizedInstitutions.find(i => i.id === appId);
-            return app ? app.name : appId;
-        }
-
-        window.onload = function() {
-            loadInstitutions();
-        };
+        window.onload = loadInstitutions;
     </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
 </html>`);
 });
 
-// Route d'accueil (optionnelle, pour revenir à votre app)
+// Route d'accueil
 app.get('/', (req, res) => {
-    res.send(`
-        <h1>Genlove</h1>
-        <p><a href="/qr-test">Tester le système QR code</a></p>
-    `);
+    res.send('<h1>Genlove</h1><p><a href="/qr-test">Tester le QR code</a></p>');
 });
 
 // Lancer le serveur
 app.listen(port, () => {
-    console.log(`🚀 Serveur lancé sur http://localhost:${port}`);
-    console.log(`📱 Test QR code: http://localhost:${port}/qr-test`);
+    console.log(`🚀 Serveur sur http://localhost:${port}`);
+    console.log(`📱 Test QR: http://localhost:${port}/qr-test`);
 });
