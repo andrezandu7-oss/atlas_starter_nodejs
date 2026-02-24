@@ -2106,93 +2106,230 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
+// INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
+// ============================================
 app.get('/signup-qr', (req, res) => {
-    res.send(`
-<!DOCTYPE html>
-<html>
+    const t = req.t;
+    const datePicker = generateDateOptions(req);
+    
+    res.send(`<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan Certificat</title>
-    <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - Inscription QR</title>
+    ${styles}
+    ${notifyScript}
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
-<body style="font-family:sans-serif; background:#f4f7f6; margin:0; padding:20px;">
-
-    <div style="max-width:500px; margin:auto; background:white; border-radius:20px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
-        <h3 style="text-align:center; color:#1a2a44;">Scanner votre certificat</h3>
+<body>
+    <div class="app-shell">
+        <div id="loader">
+            <div class="spinner"></div>
+            <h3>Création de votre profil...</h3>
+        </div>
         
-        <div id="reader" style="width:100%; border-radius:15px; overflow:hidden; border:1px solid #ddd;"></div>
-
-        <form action="/api/register-qr" method="POST" style="margin-top:20px;">
-            <input type="hidden" name="isVerified" value="true">
-            
-            <div style="background:#e9f7ef; padding:15px; border-radius:10px; margin-bottom:15px;">
-                <p style="font-size:12px; color:#28a745; margin:0 0 10px 0;">✔ Données automatiques</p>
-                <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
+        <div class="page-white">
+            <div class="qr-card">
+                <h2>${t('withCertificate')}</h2>
+                <p>Scannez votre QR code médical</p>
                 
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <input type="text" id="d" placeholder="JJ" readonly style="width:30%; padding:10px;">
-                    <input type="text" id="m" placeholder="MM" readonly style="width:30%; padding:10px;">
-                    <input type="text" id="y" placeholder="AAAA" readonly style="width:40%; padding:10px;">
+                <div id="reader"></div>
+                
+                <!-- Zone de débogage -->
+                <div class="debug-box" id="debug">
+                    <strong>Dernier scan:</strong> <span id="debugText"></span>
                 </div>
-                <input type="hidden" id="dob" name="dob">
-            </div>
-
-            <p style="font-weight:bold; color:#ff416c; font-size:14px;">Localisation & Projet</p>
-            <input type="text" name="residence" placeholder="Ville actuelle" required style="width:100%; margin:8px 0; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            <input type="text" name="region" placeholder="Région" required style="width:100%; margin:8px 0; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            
-            <label style="display:block; margin-top:10px; font-size:13px;">Désir d'enfant ?</label>
-            <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:15px;">
-                <option value="Oui">Oui</option>
-                <option value="Non">Non</option>
-            </select>
-
-            <button type="submit" style="width:100%; padding:15px; background:#ff416c; color:white; border:none; border-radius:30px; font-weight:bold; cursor:pointer;">Finaliser l'inscription</button>
-        </form>
-    </div>
-
-    <script>
-        // Utilisation d'un intervalle pour vérifier que la bibliothèque est chargée
-        let checkLib = setInterval(() => {
-            if (typeof Html5QrcodeScanner !== "undefined") {
-                clearInterval(checkLib);
-                startScanner();
-            }
-        }, 500);
-
-        function startScanner() {
-            const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-            scanner.render((decodedText) => {
-                const data = decodedText.split('|');
-                if(data.length >= 5) {
-                    document.getElementById('fn').value = data[0].trim();
-                    document.getElementById('ln').value = data[1].trim();
-                    document.getElementById('gt').value = data[2].trim();
-                    document.getElementById('bg').value = data[3].trim();
-                    document.getElementById('dob').value = data[4].trim();
+                
+                <form id="regForm">
+                    <!-- Photo à remplir manuellement -->
+                    <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
+                        <span id="photoText">📷 Photo</span>
+                    </div>
+                    <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)" accept="image/*">
                     
-                    const date = data[4].trim().split('/');
-                    if(date.length === 3) {
-                        document.getElementById('d').value = date[0];
-                        document.getElementById('m').value = date[1];
-                        document.getElementById('y').value = date[2];
+                    <!-- Données du QR (verrouillées) -->
+                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="input-box locked">
+                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="input-box locked">
+                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="input-box locked">
+                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="input-box locked">
+                    
+                    <!-- Date de naissance (dans le QR) -->
+                    <input type="text" id="dob" placeholder="${t('dob')}" readonly class="input-box locked" style="display: none;">
+                    
+                    <!-- Message d'aide -->
+                    <div class="info-message">
+                        <span class="info-icon">📍</span>
+                        <p>${t('locationHelp')}</p>
+                    </div>
+                    
+                    <!-- Champs manuels -->
+                    <input type="text" id="residence" placeholder="${t('city')}" class="input-box" required>
+                    <input type="text" id="region" placeholder="${t('region')}" class="input-box" required>
+                    
+                    <select id="desireChild" class="input-box" required>
+                        <option value="">${t('desireChild')}</option>
+                        <option value="Oui">${t('yes')}</option>
+                        <option value="Non">${t('no')}</option>
+                    </select>
+                    
+                    <input type="hidden" id="gender" value="Non spécifié">
+                    <input type="hidden" id="qrVerified" value="false">
+                    <input type="hidden" id="verifiedBy" value="">
+                    
+                    <!-- Serment -->
+                    <div class="serment-container">
+                        <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
+                        <label for="oath" class="serment-text">${t('honorText')}</label>
+                    </div>
+                    
+                    <button type="submit" class="btn-pink" id="submitBtn" disabled>${t('createProfile')}</button>
+                </form>
+                
+                <!-- Boutons de test -->
+                <div class="test-buttons">
+                    <button class="test-btn" onclick="simulateQR('AA', 'O+', '1990-05-15')">AA/O+</button>
+                    <button class="test-btn" onclick="simulateQR('AS', 'A+', '1992-08-20')">AS/A+</button>
+                    <button class="test-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')">SS/B-</button>
+                </div>
+                
+                <a href="/generator" target="_blank" class="qr-link">📱 ${t('scanAutomatic')}</a>
+                <a href="/signup-choice" class="back-link">← ${t('backCharter')}</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let photoBase64 = "";
+        
+        // TON CODE DE SCAN - EXACTEMENT COMME DANS TON EXEMPLE
+        const scanner = new Html5Qrcode("reader");
+        
+        scanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            (text) => {
+                document.getElementById('debug').style.display = 'block';
+                document.getElementById('debugText').innerText = text;
+                
+                let nom = '', geno = '', gs = '', dob = '';
+                
+                // Format 1: NOM:...|GENO:...|GS:...|DOB:...
+                if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
+                    const parts = text.split('|');
+                    parts.forEach(p => {
+                        if(p.startsWith('NOM:')) nom = p.split(':')[1];
+                        if(p.startsWith('GENO:')) geno = p.split(':')[1];
+                        if(p.startsWith('GS:')) gs = p.split(':')[1];
+                        if(p.startsWith('DOB:')) dob = p.split(':')[1];
+                    });
+                }
+                
+                // Format 2: { "patientName": "...", "genotype": "...", "bloodGroup": "...", "dateOfBirth": "..." }
+                try {
+                    const json = JSON.parse(text);
+                    if (json.patientName) nom = json.patientName;
+                    if (json.genotype) geno = json.genotype;
+                    if (json.bloodGroup) gs = json.bloodGroup;
+                    if (json.dateOfBirth) dob = json.dateOfBirth;
+                } catch(e) {}
+                
+                if (nom && geno && gs) {
+                    const parts = nom.split(' ');
+                    document.getElementById('firstName').value = parts[0] || '';
+                    document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
+                    document.getElementById('genotype').value = geno;
+                    document.getElementById('bloodGroup').value = gs;
+                    
+                    if (dob) {
+                        document.getElementById('dob').value = dob;
+                        document.getElementById('dob').style.display = 'block';
                     }
-                    scanner.clear();
+                    
+                    document.getElementById('qrVerified').value = 'true';
+                    document.getElementById('verifiedBy').value = 'QR Scan';
+                    document.getElementById('submitBtn').disabled = false;
+                    
+                    scanner.stop();
+                    document.getElementById('reader').style.display = 'none';
                     alert("✅ Scan réussi !");
                 }
-            });
+            },
+            (error) => {}
+        ).catch(err => {
+            alert("❌ Erreur caméra: " + err);
+        });
+
+        function simulateQR(genotype, bloodGroup, dob) {
+            document.getElementById('firstName').value = 'João';
+            document.getElementById('lastName').value = 'Silva';
+            document.getElementById('genotype').value = genotype;
+            document.getElementById('bloodGroup').value = bloodGroup;
+            document.getElementById('dob').value = dob;
+            document.getElementById('dob').style.display = 'block';
+            document.getElementById('qrVerified').value = 'true';
+            document.getElementById('verifiedBy').value = 'Test';
+            document.getElementById('submitBtn').disabled = false;
+            scanner.stop();
+            document.getElementById('reader').style.display = 'none';
         }
+
+        function previewPhoto(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                photoBase64 = reader.result;
+                document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
+                document.getElementById('photoCircle').style.backgroundSize = 'cover';
+                document.getElementById('photoText').style.display = 'none';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        document.getElementById('regForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            document.getElementById('loader').style.display = 'flex';
+            
+            const userData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                gender: document.getElementById('gender').value,
+                dob: document.getElementById('dob').value || '2000-01-01',
+                residence: document.getElementById('residence').value,
+                region: document.getElementById('region').value,
+                genotype: document.getElementById('genotype').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                desireChild: document.getElementById('desireChild').value,
+                photo: photoBase64 || "",
+                language: '${req.lang}',
+                isPublic: true,
+                qrVerified: true,
+                verifiedBy: document.getElementById('verifiedBy').value,
+                verifiedAt: new Date(),
+                verificationBadge: 'lab'
+            };
+            
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(userData)
+            });
+            
+            const data = await res.json();
+            
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                if (data.success) {
+                    window.location.href = '/profile';
+                } else {
+                    alert("Erreur: " + (data.error || "Inconnue"));
+                }
+            }, 2000);
+        });
     </script>
 </body>
-</html>
-    `);
+</html>`);
 });
-
-
 
 // ============================================
 // INSCRIPTION MANUELLE
@@ -2377,6 +2514,119 @@ app.get('/signup-manual', (req, res) => {
                 alert("Erreur de connexion au serveur");
             }
         });
+    </script>
+</body>
+</html>`);
+});
+
+// ============================================
+// GÉNÉRATEUR DE QR CODE
+// ============================================
+app.get('/generator', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur QR - Genlove</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4e9da;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #1a2a44;
+            text-align: center;
+        }
+        select, button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+        }
+        button {
+            background: #ff416c;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Générateur de QR code</h2>
+        
+        <select id="genotype">
+            <option value="AA">AA</option>
+            <option value="AS">AS</option>
+            <option value="SS">SS</option>
+        </select>
+        
+        <select id="bloodGroup">
+            <option value="O+">O+</option>
+            <option value="A+">A+</option>
+            <option value="B+">B+</option>
+            <option value="AB+">AB+</option>
+            <option value="O-">O-</option>
+            <option value="A-">A-</option>
+            <option value="B-">B-</option>
+            <option value="AB-">AB-</option>
+        </select>
+        
+        <input type="date" id="dob" value="1990-05-15" style="width:100%; padding:15px; margin:10px 0; border:2px solid #e2e8f0; border-radius:15px;">
+        
+        <button onclick="generateQR()">Générer QR code</button>
+        
+        <div id="qrcode"></div>
+        
+        <a href="/signup-qr" class="back-link">← Retour à l'inscription</a>
+    </div>
+    
+    <script>
+        function generateQR() {
+            const data = {
+                patientName: "João Silva",
+                genotype: document.getElementById('genotype').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                dateOfBirth: document.getElementById('dob').value
+            };
+            
+            QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(data), { width: 250 }, (err, canvas) => {
+                if (err) {
+                    alert('Erreur: ' + err);
+                    return;
+                }
+                document.getElementById('qrcode').innerHTML = '';
+                document.getElementById('qrcode').appendChild(canvas);
+            });
+        }
     </script>
 </body>
 </html>`);
