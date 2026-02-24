@@ -2177,18 +2177,18 @@ app.get('/signup-qr', (req, res) => {
 
         <script>
             let scanner = null;
-            let isScanning = false;
+            let isScanning = true;
 
             function initScanner() {
                 const statusEl = document.getElementById('status');
+                
+                // ✅ DÉTECTION PORTS RAPIDE - IDENTIQUE À L'ORIGINAL
                 scanner = new Html5QrcodeScanner("reader", { 
                     fps: 10, 
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0,
-                    disableFlip: false
-                }, false);
+                    qrbox: 250  // ← Format ORIGINAL simple → délai ~500ms
+                });
 
-                scanner.renderSuccess((decodedText, decodedResult) => {
+                scanner.render((decodedText) => {
                     if (isScanning) {
                         processQRData(decodedText);
                     }
@@ -2196,7 +2196,6 @@ app.get('/signup-qr', (req, res) => {
                     // Erreur silencieuse
                 });
 
-                // Status scanning
                 statusEl.textContent = "📱 Positionnez le QR code";
                 statusEl.style.display = 'block';
             }
@@ -2225,7 +2224,7 @@ app.get('/signup-qr', (req, res) => {
                         throw new Error('Date invalide');
                     }
 
-                    // Remplissage des champs
+                    // ✅ REMPLISSAGE IDENTIQUE À L'ORIGINAL
                     document.getElementById('fn').value = data[0].trim();
                     document.getElementById('ln').value = data[1].trim();
                     document.getElementById('gt').value = data[2].trim();
@@ -2236,7 +2235,7 @@ app.get('/signup-qr', (req, res) => {
                     document.getElementById('m').value = dateParts[1];
                     document.getElementById('y').value = dateParts[2];
 
-                    // Affichage section certifiée
+                    // UX améliorée
                     document.getElementById('certData').style.display = 'block';
                     document.getElementById('manualFields').style.display = 'block';
                     document.getElementById('submitBtn').disabled = false;
@@ -2245,11 +2244,8 @@ app.get('/signup-qr', (req, res) => {
                     document.getElementById('submitBtn').style.color = 'white';
                     document.getElementById('submitBtn').style.cursor = 'pointer';
 
-                    // Arrêt scanner
-                    if (scanner) scanner.clear();
+                    scanner.clear();
                     isScanning = false;
-
-                    // Notification moderne
                     showToast('Certificat validé avec succès ! ✅');
 
                 } catch (error) {
@@ -2283,13 +2279,6 @@ app.get('/signup-qr', (req, res) => {
                         showToast('Veuillez compléter tous les champs', 'error');
                         return false;
                     }
-                }
-            });
-
-            // Focus auto sur residence après scan
-            document.getElementById('certData').addEventListener('transitionend', () => {
-                if (document.getElementById('residence')) {
-                    document.querySelector('[name="residence"]').focus();
                 }
             });
 
