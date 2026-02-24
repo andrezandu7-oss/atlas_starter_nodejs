@@ -98,13 +98,8 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
-const requireVerified = (req, res, next) => {
-    if (!req.session.isVerified) return res.redirect('/sas-validation');
-    next();
-};
-
 // ==============================================
-// SYSTÈME DE TRADUCTION MULTILINGUE (6 LANGUES COMPLET)
+// SYSTÈME DE TRADUCTION MULTILINGUE (6 LANGUES)
 // ==============================================
 const translations = {
     fr: {
@@ -2069,7 +2064,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION AVEC QR CODE
+// INSCRIPTION AVEC QR CODE (ACTIVÉ)
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const t = req.t;
@@ -2083,6 +2078,29 @@ app.get('/signup-qr', (req, res) => {
     ${styles}
     ${notifyScript}
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        #reader {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        #reader video {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .scan-button {
+            background: #ff416c;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="app-shell">
@@ -2100,6 +2118,7 @@ app.get('/signup-qr', (req, res) => {
                 <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
                 <h3 style="color:white;">${t('withCertificate')}</h3>
                 <div id="reader"></div>
+                <button class="scan-button" onclick="startScanner()" id="scanBtn">📷 Activer la caméra</button>
                 <div id="scan-status" style="margin-top: 10px; color: #ffd700;"></div>
             </div>
             
@@ -2117,9 +2136,6 @@ app.get('/signup-qr', (req, res) => {
                     <input type="text" id="lastName" class="input-box" placeholder="${t('lastName')}" readonly>
                     <input type="text" id="genotype" class="input-box" placeholder="${t('genotype')}" readonly>
                     <input type="text" id="bloodGroup" class="input-box" placeholder="${t('bloodGroup')}" readonly>
-                    <div class="custom-date-picker" id="dobPicker" style="display: none;">
-                        <!-- Sera rempli automatiquement -->
-                    </div>
                     <input type="hidden" id="dob" value="">
                 </div>
                 
@@ -2143,7 +2159,7 @@ app.get('/signup-qr', (req, res) => {
                     </select>
                 </div>
                 
-                <!-- Genre caché (sera demandé plus tard) -->
+                <!-- Genre caché -->
                 <input type="hidden" id="gender" value="Non spécifié">
                 <input type="hidden" id="qrVerified" value="false">
                 <input type="hidden" id="verifiedBy" value="">
@@ -2168,11 +2184,11 @@ app.get('/signup-qr', (req, res) => {
         let photoBase64 = "";
         let scanner = null;
         
-        window.onload = function() {
-            startScanner();
-        };
-        
         function startScanner() {
+            const scanBtn = document.getElementById('scanBtn');
+            scanBtn.innerText = '⏳ Activation...';
+            scanBtn.disabled = true;
+            
             scanner = new Html5Qrcode("reader");
             
             scanner.start(
@@ -2200,7 +2216,8 @@ app.get('/signup-qr', (req, res) => {
                             document.getElementById('scan-status').style.color = '#4caf50';
                             
                             scanner.stop();
-                            document.getElementById('reader').style.display = 'none';
+                            document.getElementById('reader').innerHTML = '';
+                            scanBtn.style.display = 'none';
                         } else {
                             document.getElementById('scan-status').innerHTML = '❌ Format de QR code invalide';
                         }
@@ -2210,7 +2227,9 @@ app.get('/signup-qr', (req, res) => {
                 },
                 (error) => {}
             ).catch(err => {
-                document.getElementById('scan-status').innerHTML = '❌ Erreur caméra';
+                document.getElementById('scan-status').innerHTML = '❌ Erreur caméra: ' + err;
+                scanBtn.innerText = '📷 Réessayer';
+                scanBtn.disabled = false;
             });
         }
         
@@ -2230,7 +2249,6 @@ app.get('/signup-qr', (req, res) => {
             
             document.getElementById('loader').style.display = 'flex';
             
-            // Utiliser une date par défaut si non fournie
             const dob = document.getElementById('dob').value || '2000-01-01';
             
             const userData = {
@@ -2280,7 +2298,7 @@ app.get('/signup-qr', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION MANUELLE (COMPLÈTE)
+// INSCRIPTION MANUELLE
 // ============================================
 app.get('/signup-manual', (req, res) => {
     const t = req.t;
@@ -2644,7 +2662,7 @@ app.get('/profile', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// MATCHING (fonctionnel)
+// MATCHING
 // ============================================
 app.get('/matching', requireAuth, async (req, res) => {
     try {
@@ -2919,27 +2937,641 @@ app.get('/matching', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// INBOX (simplifié pour l'exemple)
+// INBOX (Messages)
 // ============================================
-app.get('/inbox', requireAuth, (req, res) => {
-    const t = req.t;
-    res.send(`<h1>${t('inboxTitle')}</h1><p>Page en construction</p><a href="/profile">Retour</a>`);
+app.get('/inbox', requireAuth, async (req, res) => {
+    try {
+        const currentUser = await User.findById(req.session.userId);
+        if (!currentUser) return res.redirect('/');
+        
+        const t = req.t;
+        
+        const messages = await Message.find({
+            $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
+            isBlocked: false
+        })
+        .populate('senderId receiverId')
+        .sort({ timestamp: -1 });
+        
+        const conversations = new Map();
+        
+        for (const m of messages) {
+            const other = m.senderId._id.equals(currentUser._id) ? m.receiverId : m.senderId;
+            
+            if (currentUser.blockedUsers && currentUser.blockedUsers.includes(other._id)) {
+                continue;
+            }
+            
+            if (!conversations.has(other._id.toString())) {
+                const unread = await Message.countDocuments({
+                    senderId: other._id,
+                    receiverId: currentUser._id,
+                    read: false,
+                    isBlocked: false
+                });
+                conversations.set(other._id.toString(), {
+                    user: other,
+                    last: m,
+                    unread
+                });
+            }
+        }
+        
+        let inboxHTML = '';
+        if (conversations.size === 0) {
+            inboxHTML = `
+                <div class="empty-message">
+                    <span>📭</span>
+                    <h3>${t('emptyInbox')}</h3>
+                    <p>${t('startConversation')}</p>
+                    <a href="/matching" class="btn-pink" style="display: inline-block; width: auto; margin-top: 20px;">${t('findPartners')}</a>
+                </div>
+            `;
+        } else {
+            conversations.forEach((conv, id) => {
+                const timeAgo = formatTimeAgo(conv.last.timestamp, currentUser.language);
+                inboxHTML += `
+                    <div class="inbox-item ${conv.unread ? 'unread' : ''}" onclick="window.location.href='/chat?partnerId=${id}'">
+                        <div style="display: flex; justify-content: space-between;">
+                            <b class="user-name">${conv.user.firstName} ${conv.user.lastName}</b>
+                            <span style="font-size:0.9rem; color:#999;">${timeAgo}</span>
+                        </div>
+                        <div class="message-preview" style="margin-top: 5px;">
+                            ${conv.last.text.substring(0, 50)}${conv.last.text.length > 50 ? '...' : ''}
+                        </div>
+                        ${conv.unread > 0 ? `<span class="unread-badge">${conv.unread}</span>` : ''}
+                    </div>
+                `;
+            });
+        }
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('inboxTitle')}</title>
+    ${styles}
+    ${notifyScript}
+</head>
+<body>
+    <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        <div class="page-white">
+            <h2>${t('inboxTitle')}</h2>
+            ${inboxHTML}
+            <div class="navigation">
+                <a href="/profile" class="nav-link">← ${t('backProfile')}</a>
+                <a href="/matching" class="nav-link">${t('findPartner')}</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>`);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur inbox');
+    }
 });
 
 // ============================================
-// CHAT (simplifié pour l'exemple)
+// CHAT
 // ============================================
-app.get('/chat', requireAuth, (req, res) => {
-    const t = req.t;
-    res.send(`<h1>Chat</h1><p>Page en construction</p><a href="/inbox">Retour</a>`);
+app.get('/chat', requireAuth, async (req, res) => {
+    try {
+        const currentUser = await User.findById(req.session.userId);
+        const partnerId = req.query.partnerId;
+        
+        if (!partnerId) return res.redirect('/inbox');
+        
+        const partner = await User.findById(partnerId);
+        if (!partner) return res.redirect('/inbox');
+        
+        const t = req.t;
+        
+        const isBlockedByPartner = partner.blockedBy && partner.blockedBy.includes(currentUser._id);
+        const hasBlockedPartner = currentUser.blockedUsers && currentUser.blockedUsers.includes(partnerId);
+        
+        if (isBlockedByPartner) {
+            return res.send(`
+                <div class="app-shell">
+                    <div class="page-white" style="text-align: center; padding: 50px 20px;">
+                        <h2>⛔ ${t('blockedByUser')}</h2>
+                        <p>${t('blockedMessage')}</p>
+                        <a href="/inbox" class="btn-pink">${t('backHome')}</a>
+                    </div>
+                </div>
+            `);
+        }
+        
+        await Message.updateMany(
+            { senderId: partnerId, receiverId: currentUser._id, read: false, isBlocked: false },
+            { read: true }
+        );
+        
+        const messages = await Message.find({
+            $or: [
+                { senderId: currentUser._id, receiverId: partnerId },
+                { senderId: partnerId, receiverId: currentUser._id }
+            ],
+            isBlocked: false
+        }).sort({ timestamp: 1 });
+        
+        let msgs = '';
+        messages.forEach(m => {
+            const cls = m.senderId.equals(currentUser._id) ? 'sent' : 'received';
+            msgs += `<div class="bubble ${cls}">${m.text}</div>`;
+        });
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - Chat</title>
+    ${styles}
+    ${notifyScript}
+    <style>
+        .chat-header {
+            background: #1a2a44;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            padding: 20px;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f5f7fb;
+        }
+        .bubble {
+            padding: 12px 18px;
+            border-radius: 20px;
+            max-width: 80%;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+        .received {
+            background: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        .sent {
+            background: #ff416c;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            border-top: 2px solid #eee;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 30px;
+            outline: none;
+        }
+        .input-area button {
+            padding: 12px 25px;
+            background: #ff416c;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        <div class="chat-header">
+            <span><b>${partner.firstName}</b></span>
+            <div>
+                <button class="btn-action btn-block" onclick="blockUser('${partnerId}')" style="padding:8px 15px; margin-right:10px;">${t('block')}</button>
+                <a href="/inbox" style="color: white; text-decoration: none; font-size: 1.5rem;">✕</a>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            ${msgs}
+        </div>
+        
+        ${!hasBlockedPartner ? `
+            <div class="input-area">
+                <input id="msgInput" placeholder="${t('yourMessage')}">
+                <button onclick="sendMessage('${partnerId}')">${t('send')}</button>
+            </div>
+        ` : ''}
+    </div>
+    
+    <script>
+        async function sendMessage(id) {
+            const msg = document.getElementById('msgInput');
+            if (msg.value.trim()) {
+                await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ receiverId: id, text: msg.value })
+                });
+                location.reload();
+            }
+        }
+        
+        async function blockUser(id) {
+            if (confirm('${t('block')} ?')) {
+                await fetch('/api/block/' + id, { method: 'POST' });
+                window.location.href = '/inbox';
+            }
+        }
+        
+        document.getElementById('msgInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage('${partnerId}');
+            }
+        });
+        
+        window.scrollTo(0, document.body.scrollHeight);
+    </script>
+</body>
+</html>`);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur chat');
+    }
 });
 
 // ============================================
-// SETTINGS (simplifié pour l'exemple)
+// SETTINGS (Paramètres)
 // ============================================
-app.get('/settings', requireAuth, (req, res) => {
+app.get('/settings', requireAuth, async (req, res) => {
+    try {
+        const currentUser = await User.findById(req.session.userId);
+        const t = req.t;
+        const blockedCount = currentUser.blockedUsers ? currentUser.blockedUsers.length : 0;
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('settingsTitle')}</title>
+    ${styles}
+    ${notifyScript}
+</head>
+<body>
+    <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        
+        <div id="delete-confirm-popup">
+            <div class="popup-card" style="max-width:340px;">
+                <div class="popup-icon">⚠️</div>
+                <h3 style="color:#dc3545; margin-bottom:15px;">Supprimer le compte ?</h3>
+                <p style="color:#666; margin-bottom:25px; font-size:1rem;">
+                    Voulez-vous vraiment supprimer votre compte ?<br>
+                    <strong>Cette action effacera définitivement toutes vos données.</strong>
+                </p>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="confirmDelete()" style="flex:1; background:#dc3545; color:white; border:none; padding:15px; border-radius:50px; font-weight:bold; cursor:pointer;">Oui, supprimer</button>
+                    <button onclick="closeDeletePopup()" style="flex:1; background:#eee; color:#333; border:none; padding:15px; border-radius:50px; font-weight:bold; cursor:pointer;">Annuler</button>
+                </div>
+            </div>
+        </div>
+        
+        <div style="padding:25px; background:white; text-align:center;">
+            <div style="font-size:2.5rem; font-weight:bold;">
+                <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
+            </div>
+        </div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
+        <div class="st-group">
+            <div class="st-item">
+                <span>${t('visibility')}</span>
+                <label class="switch">
+                    <input type="checkbox" id="visibilitySwitch" ${currentUser.isPublic ? 'checked' : ''} onchange="updateVisibility(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="st-item" style="font-size:0.8rem; color:#666;">
+                Statut actuel : <b id="status" style="color:#ff416c;">${currentUser.isPublic ? 'Public' : 'Privé'}</b>
+            </div>
+        </div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">${t('language')}</div>
+        <div class="st-group">
+            <div class="st-item">
+                <span>${t('language')}</span>
+                <select onchange="window.location.href='/lang/'+this.value" style="padding:8px; border-radius:10px; border:1px solid #ddd;">
+                    <option value="fr" ${currentUser.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
+                    <option value="en" ${currentUser.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
+                    <option value="pt" ${currentUser.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
+                    <option value="es" ${currentUser.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
+                    <option value="ar" ${currentUser.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
+                    <option value="zh" ${currentUser.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
+        <div class="st-group">
+            <a href="/edit-profile" style="text-decoration:none;" class="st-item">
+                <span>✏️ ${t('editProfile')}</span>
+                <b>Modifier ➔</b>
+            </a>
+            <a href="/blocked-list" style="text-decoration:none;" class="st-item">
+                <span>🚫 ${t('blockedUsers')}</span>
+                <b>${blockedCount} ➔</b>
+            </a>
+        </div>
+        
+        <div class="st-group danger-zone">
+            <div class="st-item" style="color:#dc3545; font-weight:bold; justify-content:center;">
+                ⚠️ ${t('dangerZone')} ⚠️
+            </div>
+            <div style="padding:20px; text-align:center;">
+                <p style="color:#666; margin-bottom:20px; font-size:0.95rem;">
+                    ${t('deleteAccount')}
+                </p>
+                <button id="deleteBtn" class="btn-action btn-block" style="background:#dc3545; color:white; padding:15px; width:100%; font-size:1.1rem;" onclick="showDeleteConfirmation()">
+                    🗑️ ${t('delete')}
+                </button>
+            </div>
+        </div>
+        
+        <a href="/profile" class="btn-pink">${t('backProfile')}</a>
+        <a href="/logout-success" class="btn-dark" style="text-decoration:none;">${t('logout')}</a>
+    </div>
+    
+    <script>
+        function showDeleteConfirmation() {
+            document.getElementById('delete-confirm-popup').style.display = 'flex';
+        }
+        
+        function closeDeletePopup() {
+            document.getElementById('delete-confirm-popup').style.display = 'none';
+        }
+        
+        async function confirmDelete() {
+            closeDeletePopup();
+            showNotify('Suppression en cours...', 'info');
+            try {
+                const res = await fetch('/api/delete-account', { method: 'DELETE' });
+                if (res.ok) {
+                    showNotify('Compte supprimé', 'success');
+                    setTimeout(() => window.location.href = '/', 1500);
+                } else {
+                    showNotify('Erreur lors de la suppression', 'error');
+                }
+            } catch(e) {
+                showNotify('Erreur réseau', 'error');
+            }
+        }
+        
+        async function updateVisibility(isPublic) {
+            const status = document.getElementById('status');
+            status.innerText = isPublic ? 'Public' : 'Privé';
+            
+            const res = await fetch('/api/visibility', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ isPublic })
+            });
+            
+            if (res.ok) {
+                showNotify('Visibilité mise à jour', 'success');
+            } else {
+                showNotify('Erreur lors de la mise à jour', 'error');
+                document.getElementById('visibilitySwitch').checked = !isPublic;
+                status.innerText = !isPublic ? 'Public' : 'Privé';
+            }
+        }
+    </script>
+</body>
+</html>`);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur paramètres');
+    }
+});
+
+// ============================================
+// EDIT PROFILE
+// ============================================
+app.get('/edit-profile', requireAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        const t = req.t;
+        const datePicker = generateDateOptions(req, user.dob);
+        
+        const bloodOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => 
+            `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g}</option>`
+        ).join('');
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('editProfile')}</title>
+    ${styles}
+    ${notifyScript}
+</head>
+<body>
+    <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        <div class="page-white">
+            <h2>${t('editProfile')}</h2>
+            <form id="editForm">
+                <div class="input-label">${t('firstName')}</div>
+                <input type="text" name="firstName" class="input-box" value="${user.firstName}" required>
+                
+                <div class="input-label">${t('lastName')}</div>
+                <input type="text" name="lastName" class="input-box" value="${user.lastName}" required>
+                
+                <div class="input-label">${t('gender')}</div>
+                <select name="gender" class="input-box" required>
+                    <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
+                    <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
+                </select>
+                
+                <div class="input-label">${t('dob')}</div>
+                ${datePicker}
+                
+                <div class="input-label">${t('city')}</div>
+                <input type="text" name="residence" class="input-box" value="${user.residence || ''}" required>
+                
+                <div class="input-label">${t('region')}</div>
+                <input type="text" name="region" class="input-box" value="${user.region || ''}" required>
+                
+                <div class="input-label">${t('genotype')}</div>
+                <select name="genotype" class="input-box" required>
+                    <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
+                    <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
+                    <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
+                </select>
+                
+                <div class="input-label">${t('bloodGroup')}</div>
+                <select name="bloodGroup" class="input-box" required>
+                    ${bloodOptions}
+                </select>
+                
+                <div class="input-label">${t('desireChild')}</div>
+                <select name="desireChild" class="input-box" required>
+                    <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
+                    <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
+                </select>
+                
+                <button type="submit" class="btn-pink">${t('editProfile')}</button>
+            </form>
+            <a href="/profile" class="back-link">← ${t('backProfile')}</a>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const day = document.querySelector('select[name="day"]').value;
+            const month = document.querySelector('select[name="month"]').value;
+            const year = document.querySelector('select[name="year"]').value;
+            
+            if (!day || !month || !year) {
+                alert('${t('dob')} ${t('required')}');
+                return;
+            }
+            
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            data.dob = dob;
+            
+            const res = await fetch('/api/users/profile', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                showNotify('Profil mis à jour', 'success');
+                setTimeout(() => window.location.href = '/profile', 1000);
+            } else {
+                alert('Erreur lors de la modification');
+            }
+        });
+    </script>
+</body>
+</html>`);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur édition');
+    }
+});
+
+// ============================================
+// BLOCKED LIST
+// ============================================
+app.get('/blocked-list', requireAuth, async (req, res) => {
+    try {
+        const currentUser = await User.findById(req.session.userId).populate('blockedUsers');
+        const t = req.t;
+        
+        let blockedHTML = '';
+        if (currentUser.blockedUsers && currentUser.blockedUsers.length > 0) {
+            currentUser.blockedUsers.forEach(user => {
+                blockedHTML += `
+                    <div class="inbox-item" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><b style="font-size:1.2rem;">${user.firstName} ${user.lastName}</b></span>
+                        <button class="btn-action" onclick="unblockUser('${user._id}')" style="background:#4CAF50; color:white; padding:8px 15px;">${t('unblock')}</button>
+                    </div>
+                `;
+            });
+        } else {
+            blockedHTML = `<div class="empty-message"><span>🔓</span><p>${t('noBlocked')}</p></div>`;
+        }
+        
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('blockedUsers')}</title>
+    ${styles}
+    ${notifyScript}
+</head>
+<body>
+    <div class="app-shell">
+        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        <div class="page-white">
+            <h2>${t('blockedUsers')}</h2>
+            ${blockedHTML}
+            <a href="/settings" class="back-link">← ${t('backHome')}</a>
+        </div>
+    </div>
+    
+    <script>
+        async function unblockUser(id) {
+            await fetch('/api/unblock/' + id, { method: 'POST' });
+            showNotify('Utilisateur débloqué', 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+    </script>
+</body>
+</html>`);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur');
+    }
+});
+
+// ============================================
+// LOGOUT SUCCESS
+// ============================================
+app.get('/logout-success', (req, res) => {
     const t = req.t;
-    res.send(`<h1>${t('settingsTitle')}</h1><p>Page en construction</p><a href="/profile">Retour</a>`);
+    req.session.destroy();
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('logoutSuccess')}</title>
+    ${styles}
+    <style>
+        .end-overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a44, #ff416c);
+        }
+        .end-card {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 30px;
+            text-align: center;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="end-overlay">
+    <div class="end-card">
+        <h2 style="font-size:2.2rem; color: #1a2a44;">${t('logoutSuccess')}</h2>
+        <p style="font-size:1.3rem; margin:25px 0; color: #666;">${t('seeYouSoon')}</p>
+        <a href="/" class="btn-pink" style="text-decoration: none;">${t('home')}</a>
+    </div>
+</body>
+</html>`);
 });
 
 // ============================================
@@ -3053,6 +3685,113 @@ app.post('/api/requests/:id/reject', requireAuth, async (req, res) => {
     }
 });
 
+app.post('/api/messages', requireAuth, async (req, res) => {
+    try {
+        const msg = new Message({
+            senderId: req.session.userId,
+            receiverId: req.body.receiverId,
+            text: req.body.text,
+            read: false
+        });
+        await msg.save();
+        res.json(msg);
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/block/:userId', requireAuth, async (req, res) => {
+    try {
+        const current = await User.findById(req.session.userId);
+        const target = await User.findById(req.params.userId);
+        
+        if (!current || !target) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+        
+        if (!current.blockedUsers) current.blockedUsers = [];
+        if (!current.blockedUsers.includes(req.params.userId)) {
+            current.blockedUsers.push(req.params.userId);
+        }
+        
+        if (!target.blockedBy) target.blockedBy = [];
+        if (!target.blockedBy.includes(req.session.userId)) {
+            target.blockedBy.push(req.session.userId);
+        }
+        
+        await Message.updateMany(
+            {
+                $or: [
+                    { senderId: req.session.userId, receiverId: req.params.userId },
+                    { senderId: req.params.userId, receiverId: req.session.userId }
+                ]
+            },
+            { isBlocked: true }
+        );
+        
+        await current.save();
+        await target.save();
+        
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/unblock/:userId', requireAuth, async (req, res) => {
+    try {
+        const current = await User.findById(req.session.userId);
+        
+        if (current.blockedUsers) {
+            current.blockedUsers = current.blockedUsers.filter(id => id.toString() !== req.params.userId);
+            await current.save();
+        }
+        
+        await Message.updateMany(
+            {
+                $or: [
+                    { senderId: req.session.userId, receiverId: req.params.userId },
+                    { senderId: req.params.userId, receiverId: req.session.userId }
+                ]
+            },
+            { isBlocked: false }
+        );
+        
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.put('/api/users/profile', requireAuth, async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.session.userId, req.body);
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.put('/api/visibility', requireAuth, async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.session.userId, { isPublic: req.body.isPublic });
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.delete('/api/delete-account', requireAuth, async (req, res) => {
+    try {
+        const id = req.session.userId;
+        await Message.deleteMany({ $or: [{ senderId: id }, { receiverId: id }] });
+        await Request.deleteMany({ $or: [{ senderId: id }, { receiverId: id }] });
+        await User.findByIdAndDelete(id);
+        req.session.destroy();
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // ============================================
 // DÉMARRAGE
 // ============================================
@@ -3067,6 +3806,8 @@ app.listen(port, '0.0.0.0', () => {
     console.log(`   - Login: /login`);
     console.log(`   - Profil: /profile`);
     console.log(`   - Matching: /matching`);
+    console.log(`   - Messages: /inbox`);
+    console.log(`   - Paramètres: /settings`);
 });
 
 process.on('SIGINT', () => {
