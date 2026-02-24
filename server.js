@@ -155,6 +155,163 @@ app.get('/generator', (req, res) => {
     `);
 });
 
+const express = require('express');
+const mongoose = require('mongoose');
+const app = express();
+
+// --- CONFIGURATION ---
+app.use(express.json());
+const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/genlove";
+
+// Connexion MongoDB
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ MongoDB Connecté"))
+    .catch(err => console.error("❌ Erreur de connexion:", err));
+
+// Modèle Utilisateur
+const User = mongoose.model('User', new mongoose.Schema({
+    nom: String,
+    genotype: { type: String, uppercase: true, enum: ['AA', 'AS', 'SS'] },
+    groupeSanguin: String,
+    email: { type: String, unique: true, required: true },
+    verified: { type: Boolean, default: false }
+}));
+
+// --- ROUTES API ---
+app.post('/api/register', async (req, res) => {
+    try {
+        const newUser = new User(req.body);
+        await newUser.save();
+        res.status(201).json({ success: true });
+    } catch (e) {
+        res.status(400).json({ error: "Email déjà utilisé ou données manquantes." });
+    }
+});
+
+// --- PAGE D'ACCUEIL ---
+app.get('/', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Genlove - Accueil</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                }
+                .container {
+                    max-width: 400px;
+                    background: white;
+                    padding: 40px;
+                    border-radius: 20px;
+                    text-align: center;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                }
+                h1 {
+                    color: #1a2a44;
+                    font-size: 3rem;
+                    margin: 0;
+                }
+                .pink { color: #ff416c; }
+                .slogan {
+                    color: #666;
+                    margin: 20px 0;
+                    font-size: 1.2rem;
+                }
+                .btn {
+                    display: block;
+                    padding: 15px;
+                    margin: 10px 0;
+                    border-radius: 30px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    font-size: 1.1rem;
+                    transition: transform 0.3s;
+                }
+                .btn:hover {
+                    transform: translateY(-2px);
+                }
+                .btn.dark {
+                    background: #1a2a44;
+                    color: white;
+                }
+                .btn.pink {
+                    background: #ff416c;
+                    color: white;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1><span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span></h1>
+                <div class="slogan">Unissez cœur et santé pour un avenir serein 💑</div>
+                <a href="/signup" class="btn dark">Créer un compte</a>
+                <a href="/login" class="btn pink">Se connecter</a>
+                <div style="margin-top:30px; font-size:0.8rem; color:#999;">🛡️ Données de santé cryptées</div>
+            </div>
+        </body>
+        </html>
+    `);
+});
+
+// --- PAGE GÉNÉRATEUR DE QR CODE ---
+app.get('/generator', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Générateur QR - Genlove</title>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+            <style>
+                body { font-family: Arial; padding: 20px; max-width: 400px; margin: 0 auto; background: #f4f4f9; }
+                .card { background: white; padding: 20px; border-radius: 15px; }
+                select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; }
+                #qrcode { display: flex; justify-content: center; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2>Générateur de QR code</h2>
+                <select id="genotype">
+                    <option value="AA">AA</option>
+                    <option value="AS">AS</option>
+                    <option value="SS">SS</option>
+                </select>
+                <select id="bloodGroup">
+                    <option value="O+">O+</option>
+                    <option value="A+">A+</option>
+                    <option value="B+">B+</option>
+                    <option value="AB+">AB+</option>
+                </select>
+                <button onclick="generateQR()">Générer QR</button>
+                <div id="qrcode"></div>
+                <p><a href="/signup">→ Aller à l'inscription</a></p>
+            </div>
+            <script>
+                function generateQR() {
+                    const data = "NOM:João Silva|GENO:" + document.getElementById('genotype').value + "|GS:" + document.getElementById('bloodGroup').value;
+                    
+                    QRCode.toCanvas(document.createElement('canvas'), data, { width: 250 }, (err, canvas) => {
+                        document.getElementById('qrcode').innerHTML = '';
+                        document.getElementById('qrcode').appendChild(canvas);
+                    });
+                }
+            </script>
+        </body>
+        </html>
+    `);
+});
+
 // --- PAGE D'INSCRIPTION AVEC SCAN QR CORRIGÉE ---
 app.get('/signup', (req, res) => {
     res.send(`
@@ -362,6 +519,20 @@ app.get('/signup', (req, res) => {
 </html>
     `);
 });
+
+// --- PAGE LOGIN ---
+app.get('/login', (req, res) => {
+    res.send('<h2 style="text-align:center;margin-top:50px;">Page de connexion (bientôt)</h2><p style="text-align:center;"><a href="/">Retour</a></p>');
+});
+
+// --- LANCEMENT ---
+app.listen(PORT, '0.0.0.0', () => {
+    console.log("🚀 Genlove démarré sur le port " + PORT);
+    console.log("📱 Accueil: http://localhost:" + PORT);
+    console.log("📱 Inscription: http://localhost:" + PORT + "/signup");
+    console.log("📱 Générateur QR: http://localhost:" + PORT + "/generator");
+});
+
 
 // --- PAGE LOGIN ---
 app.get('/login', (req, res) => {
