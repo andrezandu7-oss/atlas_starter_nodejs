@@ -2106,11 +2106,11 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
+// ============================================
+// INSCRIPTION QR - VERSION CORRIGÉE
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const t = req.t;
-    const datePicker = generateDateOptions(req);
     
     res.send(`<!DOCTYPE html>
 <html lang="fr">
@@ -2130,35 +2130,64 @@ app.get('/signup-qr', (req, res) => {
         </div>
         
         <div class="page-white">
-            <div class="qr-card">
+            <div class="qr-card" style="background: white; padding: 20px; border-radius: 20px;">
                 <h2>${t('withCertificate')}</h2>
                 <p>Scannez votre QR code médical</p>
                 
-                <div id="reader"></div>
+                <!-- Scanner QR (exactement comme ton code) -->
+                <div id="reader" style="width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px;"></div>
                 
                 <!-- Zone de débogage -->
-                <div class="debug-box" id="debug">
+                <div class="debug-box" id="debug" style="display: none; background: #f0f0f0; padding: 10px; border-radius: 8px; margin: 10px 0;">
                     <strong>Dernier scan:</strong> <span id="debugText"></span>
                 </div>
                 
+                <!-- Photo (indépendante) -->
+                <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()" style="margin: 20px auto;">
+                    <span id="photoText">📷 Photo</span>
+                </div>
+                <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)" accept="image/*">
+                
                 <form id="regForm">
-                    <!-- Photo à remplir manuellement -->
-                    <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
-                        <span id="photoText">📷 Photo</span>
+                    <!-- 5 CHAMPS À REMPLIR AUTOMATIQUEMENT -->
+                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
+                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
+                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
+                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
+                    
+                    <!-- DATE DE NAISSANCE - 3 CASES HORIZONTALES -->
+                    <div class="input-label">${t('dob')}</div>
+                    <div class="custom-date-picker" id="datePicker">
+                        <select id="dobDay" class="date-part" required disabled>
+                            <option value="">Jour</option>
+                            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                        </select>
+                        <select id="dobMonth" class="date-part" required disabled>
+                            <option value="">Mois</option>
+                            <option value="1">Janvier</option>
+                            <option value="2">Février</option>
+                            <option value="3">Mars</option>
+                            <option value="4">Avril</option>
+                            <option value="5">Mai</option>
+                            <option value="6">Juin</option>
+                            <option value="7">Juillet</option>
+                            <option value="8">Août</option>
+                            <option value="9">Septembre</option>
+                            <option value="10">Octobre</option>
+                            <option value="11">Novembre</option>
+                            <option value="12">Décembre</option>
+                        </select>
+                        <select id="dobYear" class="date-part" required disabled>
+                            <option value="">Année</option>
+                            ${Array.from({length: 100}, (_, i) => {
+                                const year = new Date().getFullYear() - 18 - i;
+                                return `<option value="${year}">${year}</option>`;
+                            }).join('')}
+                        </select>
                     </div>
-                    <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)" accept="image/*">
-                    
-                    <!-- Données du QR (verrouillées) -->
-                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="input-box locked">
-                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="input-box locked">
-                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="input-box locked">
-                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="input-box locked">
-                    
-                    <!-- Date de naissance (dans le QR) -->
-                    <input type="text" id="dob" placeholder="${t('dob')}" readonly class="input-box locked" style="display: none;">
                     
                     <!-- Message d'aide -->
-                    <div class="info-message">
+                    <div class="info-message" style="margin-top: 20px;">
                         <span class="info-icon">📍</span>
                         <p>${t('locationHelp')}</p>
                     </div>
@@ -2187,14 +2216,14 @@ app.get('/signup-qr', (req, res) => {
                 </form>
                 
                 <!-- Boutons de test -->
-                <div class="test-buttons">
-                    <button class="test-btn" onclick="simulateQR('AA', 'O+', '1990-05-15')">AA/O+</button>
-                    <button class="test-btn" onclick="simulateQR('AS', 'A+', '1992-08-20')">AS/A+</button>
-                    <button class="test-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')">SS/B-</button>
+                <div class="test-buttons" style="display: flex; gap: 5px; margin-top: 15px;">
+                    <button class="test-btn" onclick="simulateQR('AA', 'O+', '1990-05-15')" style="flex:1; background:#1a2a44; color:white; border:none; padding:10px; border-radius:30px;">AA/O+</button>
+                    <button class="test-btn" onclick="simulateQR('AS', 'A+', '1992-08-20')" style="flex:1; background:#1a2a44; color:white; border:none; padding:10px; border-radius:30px;">AS/A+</button>
+                    <button class="test-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')" style="flex:1; background:#1a2a44; color:white; border:none; padding:10px; border-radius:30px;">SS/B-</button>
                 </div>
                 
-                <a href="/generator" target="_blank" class="qr-link">📱 ${t('scanAutomatic')}</a>
-                <a href="/signup-choice" class="back-link">← ${t('backCharter')}</a>
+                <a href="/generator" target="_blank" style="display:block; text-align:center; margin:15px 0; color:#ff416c;">📱 Générer un vrai QR code</a>
+                <a href="/signup-choice" class="back-link" style="display:block; text-align:center; margin-top:15px; color:#666;">← Retour</a>
             </div>
         </div>
     </div>
@@ -2241,9 +2270,17 @@ app.get('/signup-qr', (req, res) => {
                     document.getElementById('genotype').value = geno;
                     document.getElementById('bloodGroup').value = gs;
                     
+                    // Remplir la date si présente
                     if (dob) {
-                        document.getElementById('dob').value = dob;
-                        document.getElementById('dob').style.display = 'block';
+                        const date = new Date(dob);
+                        document.getElementById('dobDay').value = date.getDate();
+                        document.getElementById('dobMonth').value = date.getMonth() + 1;
+                        document.getElementById('dobYear').value = date.getFullYear();
+                        
+                        // Activer les selects
+                        document.getElementById('dobDay').disabled = false;
+                        document.getElementById('dobMonth').disabled = false;
+                        document.getElementById('dobYear').disabled = false;
                     }
                     
                     document.getElementById('qrVerified').value = 'true';
@@ -2265,8 +2302,16 @@ app.get('/signup-qr', (req, res) => {
             document.getElementById('lastName').value = 'Silva';
             document.getElementById('genotype').value = genotype;
             document.getElementById('bloodGroup').value = bloodGroup;
-            document.getElementById('dob').value = dob;
-            document.getElementById('dob').style.display = 'block';
+            
+            const date = new Date(dob);
+            document.getElementById('dobDay').value = date.getDate();
+            document.getElementById('dobMonth').value = date.getMonth() + 1;
+            document.getElementById('dobYear').value = date.getFullYear();
+            
+            document.getElementById('dobDay').disabled = false;
+            document.getElementById('dobMonth').disabled = false;
+            document.getElementById('dobYear').disabled = false;
+            
             document.getElementById('qrVerified').value = 'true';
             document.getElementById('verifiedBy').value = 'Test';
             document.getElementById('submitBtn').disabled = false;
@@ -2290,11 +2335,24 @@ app.get('/signup-qr', (req, res) => {
             
             document.getElementById('loader').style.display = 'flex';
             
+            // Récupérer la date
+            const day = document.getElementById('dobDay').value;
+            const month = document.getElementById('dobMonth').value;
+            const year = document.getElementById('dobYear').value;
+            
+            if (!day || !month || !year) {
+                alert('Veuillez remplir la date de naissance');
+                document.getElementById('loader').style.display = 'none';
+                return;
+            }
+            
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            
             const userData = {
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
                 gender: document.getElementById('gender').value,
-                dob: document.getElementById('dob').value || '2000-01-01',
+                dob: dob,
                 residence: document.getElementById('residence').value,
                 region: document.getElementById('region').value,
                 genotype: document.getElementById('genotype').value,
@@ -2330,7 +2388,6 @@ app.get('/signup-qr', (req, res) => {
 </body>
 </html>`);
 });
-
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
