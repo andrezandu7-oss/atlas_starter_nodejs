@@ -2108,91 +2108,71 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 // INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
 // ============================================
-app.get('/signup-qr', (req, res) => {
-    res.send(`
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan Certificat</title>
-    <script src="https://unpkg.com/html5-qrcode" defer></script>
-</head>
-<body style="font-family:sans-serif; background:#f4f7f6; margin:0; padding:20px;">
+<script>
+    let scannerInstance = null;
 
-    <div style="max-width:500px; margin:auto; background:white; border-radius:20px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
-        <h3 style="text-align:center; color:#1a2a44;">Scanner votre certificat</h3>
-        
-        <div id="reader" style="width:100%; border-radius:15px; overflow:hidden; border:1px solid #ddd;"></div>
-
-        <form action="/api/register-qr" method="POST" style="margin-top:20px;">
-            <input type="hidden" name="isVerified" value="true">
-            
-            <div style="background:#e9f7ef; padding:15px; border-radius:10px; margin-bottom:15px;">
-                <p style="font-size:12px; color:#28a745; margin:0 0 10px 0;">✔ Données automatiques</p>
-                <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <input type="text" id="d" placeholder="JJ" readonly style="width:30%; padding:10px;">
-                    <input type="text" id="m" placeholder="MM" readonly style="width:30%; padding:10px;">
-                    <input type="text" id="y" placeholder="AAAA" readonly style="width:40%; padding:10px;">
-                </div>
-                <input type="hidden" id="dob" name="dob">
-            </div>
-
-            <p style="font-weight:bold; color:#ff416c; font-size:14px;">Localisation & Projet</p>
-            <input type="text" name="residence" placeholder="Ville actuelle" required style="width:100%; margin:8px 0; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            <input type="text" name="region" placeholder="Région" required style="width:100%; margin:8px 0; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            
-            <label style="display:block; margin-top:10px; font-size:13px;">Désir d'enfant ?</label>
-            <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:15px;">
-                <option value="Oui">Oui</option>
-                <option value="Non">Non</option>
-            </select>
-
-            <button type="submit" style="width:100%; padding:15px; background:#ff416c; color:white; border:none; border-radius:30px; font-weight:bold; cursor:pointer;">Finaliser l'inscription</button>
-        </form>
-    </div>
-
-    <script>
-        // Utilisation d'un intervalle pour vérifier que la bibliothèque est chargée
-        let checkLib = setInterval(() => {
-            if (typeof Html5QrcodeScanner !== "undefined") {
-                clearInterval(checkLib);
-                startScanner();
-            }
-        }, 500);
-
-        function startScanner() {
-            const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-            scanner.render((decodedText) => {
-                const data = decodedText.split('|');
-                if(data.length >= 5) {
-                    document.getElementById('fn').value = data[0].trim();
-                    document.getElementById('ln').value = data[1].trim();
-                    document.getElementById('gt').value = data[2].trim();
-                    document.getElementById('bg').value = data[3].trim();
-                    document.getElementById('dob').value = data[4].trim();
-                    
-                    const date = data[4].trim().split('/');
-                    if(date.length === 3) {
-                        document.getElementById('d').value = date[0];
-                        document.getElementById('m').value = date[1];
-                        document.getElementById('y').value = date[2];
-                    }
-                    scanner.clear();
-                    alert("✅ Scan réussi !");
-                }
-            });
+    function waitForLibrary() {
+        if (typeof Html5Qrcode !== "undefined") {
+            startScanner();
+        } else {
+            setTimeout(waitForLibrary, 300);
         }
-    </script>
-</body>
-</html>
-    `);
-});
+    }
+
+    waitForLibrary();
+
+    function startScanner() {
+        const html5QrCode = new Html5Qrcode("reader");
+        scannerInstance = html5QrCode;
+
+        Html5Qrcode.getCameras().then(devices => {
+            if (devices && devices.length) {
+                html5QrCode.start(
+                    devices[0].id,
+                    {
+                        fps: 10,
+                        qrbox: 250
+                    },
+                    onScanSuccess,
+                    onScanFailure
+                );
+            }
+        }).catch(err => {
+            alert("Erreur caméra : " + err);
+        });
+    }
+
+    function onScanSuccess(decodedText) {
+        try {
+            // 🔹 On suppose que le QR contient un JSON
+            const data = JSON.parse(decodedText);
+
+            document.getElementById('fn').value = data.firstName || "";
+            document.getElementById('ln').value = data.lastName || "";
+            document.getElementById('gt').value = data.genotype || "";
+            document.getElementById('bg').value = data.bloodGroup || "";
+            document.getElementById('dob').value = data.dob || "";
+
+            if (data.dob) {
+                const parts = data.dob.split('/');
+                if (parts.length === 3) {
+                    document.getElementById('d').value = parts[0];
+                    document.getElementById('m').value = parts[1];
+                    document.getElementById('y').value = parts[2];
+                }
+            }
+
+            scannerInstance.stop();
+            alert("✅ Scan réussi et champs remplis !");
+        } catch (error) {
+            alert("❌ QR invalide ou format incorrect.");
+        }
+    }
+
+    function onScanFailure(error) {
+        // Ignoré pour éviter spam console
+    }
+</script>
 
 // ============================================
 // INSCRIPTION MANUELLE
