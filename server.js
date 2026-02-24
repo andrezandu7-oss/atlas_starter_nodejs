@@ -2106,89 +2106,71 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-app.get('/signup-qr', (req, res) => {
-    res.send(`
-        <script src="https://unpkg.com/html5-qrcode"></script>
-        <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px; color:#1a2a44;">
-            <h3 style="text-align:center;">Inscription par Certificat Médical</h3>
-            
-            <div id="reader" style="width:100%; border-radius:15px; overflow:hidden; border: 2px dashed #ff416c; background:#f9f9f9;"></div>
-            
-            <form action="/api/register-qr" method="POST" enctype="multipart/form-data" style="margin-top:20px;">
-                <input type="hidden" name="isVerified" value="true">
-                
-                <div style="background:#e9f7ef; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #28a745;">
-                    <p style="font-size:12px; color:#28a745; margin:0 0 10px 0; font-weight:bold;">✔ Données extraites du certificat :</p>
-                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; background:#fff;">
-                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; background:#fff;">
-                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; background:#fff;">
-                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; background:#fff;">
-                    
-                    <div style="display:flex; gap:5px; margin-top:5px;">
-                        <input type="text" id="d" placeholder="JJ" readonly style="width:30%; padding:10px; border:1px solid #ccc; background:#fff; text-align:center;">
-                        <input type="text" id="m" placeholder="MM" readonly style="width:30%; padding:10px; border:1px solid #ccc; background:#fff; text-align:center;">
-                        <input type="text" id="y" placeholder="AAAA" readonly style="width:40%; padding:10px; border:1px solid #ccc; background:#fff; text-align:center;">
-                    </div>
-                    <input type="hidden" id="dob" name="dob">
-                </div>
-
-                <div style="background:#fff; padding:15px; border-radius:10px; border:1px solid #ddd;">
-                    <p style="font-weight:bold; color:#ff416c; margin-bottom:15px; font-size:14px;">Aidez les autres à vous localiser facilement</p>
-                    
-                    <label style="font-size:13px; display:block; margin-bottom:5px;">Photo de profil</label>
-                    <input type="file" name="profilePic" accept="image/*" required style="width:100%; margin-bottom:15px; font-size:12px;">
-                    
-                    <input type="text" name="residence" placeholder="Ville actuelle" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-                    <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-                    
-                    <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-                    
-                    <p style="font-weight:bold; color:#1a2a44; font-size:14px; margin-bottom:10px;">Projet de vie :</p>
-                    <label style="display:block; margin-bottom:8px; font-size:13px;">Désir d'enfant ?</label>
-                    <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; background:#fff;">
-                        <option value="Oui">Oui</option>
-                        <option value="Non">Non</option>
-                    </select>
-                </div>
-
-                <button type="submit" style="width:100%; padding:15px; background:linear-gradient(to right, #1a2a44, #ff416c); color:white; border:none; border-radius:30px; margin-top:25px; font-weight:bold; cursor:pointer; font-size:16px;">
-                    Finaliser mon inscription certifiée ✅
-                </button>
-            </form>
-        </div>
-
-        <script>
-            function onScanSuccess(decodedText) {
-                try {
-                    // Format QR : Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
-                    const data = decodedText.split('|');
-                    if(data.length >= 5) {
-                        document.getElementById('fn').value = data[0];
-                        document.getElementById('ln').value = data[1];
-                        document.getElementById('gt').value = data[2];
-                        document.getElementById('bg').value = data[3];
-                        document.getElementById('dob').value = data[4];
-                        
-                        const dateParts = data[4].split('/');
-                        if(dateParts.length === 3) {
-                            document.getElementById('d').value = dateParts[0];
-                            document.getElementById('m').value = dateParts[1];
-                            document.getElementById('y').value = dateParts[2];
-                        }
-                        
-                        html5QrcodeScanner.clear();
-                        alert("Données médicales certifiées récupérées !");
-                    }
-                } catch (err) {
-                    alert("Erreur de lecture : " + err);
-                }
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialisation du scanner
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", 
+            { 
+                fps: 30, // Très rapide pour ne rater aucune frame
+                qrbox: { width: 280, height: 280 }, // Zone de lecture large
+                aspectRatio: 1.0,
+                rememberLastUsedCamera: true,
+                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
             }
+        );
 
-            const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
-            html5QrcodeScanner.render(onScanSuccess);
-        </script>
-    `);
-});
+        function onScanSuccess(decodedText) {
+            console.log("Données brutes détectées:", decodedText);
+            
+            try {
+                // ÉTAPE 1: Nettoyage profond (on enlève les espaces et caractères spéciaux invisibles)
+                const cleanText = decodedText.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+                
+                // ÉTAPE 2: Découpage (Format: André|zandu|AA|B+|11/03/1990)
+                const data = cleanText.split('|');
+
+                if (data.length >= 5) {
+                    // Arrêt immédiat de la caméra pour confirmer la lecture
+                    html5QrcodeScanner.clear();
+                    
+                    // ÉTAPE 3: Remplissage des champs
+                    document.getElementById('fn').value = data[0].trim(); // André
+                    document.getElementById('ln').value = data[1].trim(); // zandu
+                    document.getElementById('gt').value = data[2].trim(); // AA
+                    document.getElementById('bg').value = data[3].trim(); // B+
+                    document.getElementById('dob').value = data[4].trim(); // 11/03/1990
+
+                    // ÉTAPE 4: Ventilation de la date (JJ/MM/AAAA)
+                    const dateParts = data[4].trim().split('/');
+                    if (dateParts.length === 3) {
+                        document.getElementById('d').value = dateParts[0];
+                        document.getElementById('m').value = dateParts[1];
+                        document.getElementById('y').value = dateParts[2];
+                    }
+
+                    // Succès !
+                    alert("✅ Certificat de " + data[0] + " reconnu et validé !");
+                    
+                    // Vibration (sur mobile) pour confirmer
+                    if (navigator.vibrate) navigator.vibrate(100);
+
+                } else {
+                    alert("❌ Format QR non reconnu. Reçu: " + cleanText);
+                }
+            } catch (err) {
+                console.error("Erreur script:", err);
+                alert("Erreur lors du traitement des données.");
+            }
+        }
+
+        function onScanFailure(error) {
+            // On laisse vide pour ne pas ralentir le processeur
+        }
+
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    });
+</script>
 
 
 // ============================================
@@ -2374,119 +2356,6 @@ app.get('/signup-manual', (req, res) => {
                 alert("Erreur de connexion au serveur");
             }
         });
-    </script>
-</body>
-</html>`);
-});
-
-// ============================================
-// GÉNÉRATEUR DE QR CODE
-// ============================================
-app.get('/generator', (req, res) => {
-    res.send(`<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur QR - Genlove</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4e9da;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 400px;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #1a2a44;
-            text-align: center;
-        }
-        select, button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: 2px solid #e2e8f0;
-            border-radius: 15px;
-        }
-        button {
-            background: #ff416c;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        #qrcode {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Générateur de QR code</h2>
-        
-        <select id="genotype">
-            <option value="AA">AA</option>
-            <option value="AS">AS</option>
-            <option value="SS">SS</option>
-        </select>
-        
-        <select id="bloodGroup">
-            <option value="O+">O+</option>
-            <option value="A+">A+</option>
-            <option value="B+">B+</option>
-            <option value="AB+">AB+</option>
-            <option value="O-">O-</option>
-            <option value="A-">A-</option>
-            <option value="B-">B-</option>
-            <option value="AB-">AB-</option>
-        </select>
-        
-        <input type="date" id="dob" value="1990-05-15" style="width:100%; padding:15px; margin:10px 0; border:2px solid #e2e8f0; border-radius:15px;">
-        
-        <button onclick="generateQR()">Générer QR code</button>
-        
-        <div id="qrcode"></div>
-        
-        <a href="/signup-qr" class="back-link">← Retour à l'inscription</a>
-    </div>
-    
-    <script>
-        function generateQR() {
-            const data = {
-                patientName: "João Silva",
-                genotype: document.getElementById('genotype').value,
-                bloodGroup: document.getElementById('bloodGroup').value,
-                dateOfBirth: document.getElementById('dob').value
-            };
-            
-            QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(data), { width: 250 }, (err, canvas) => {
-                if (err) {
-                    alert('Erreur: ' + err);
-                    return;
-                }
-                document.getElementById('qrcode').innerHTML = '';
-                document.getElementById('qrcode').appendChild(canvas);
-            });
-        }
     </script>
 </body>
 </html>`);
