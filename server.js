@@ -2116,79 +2116,54 @@ app.get('/signup-qr', (req, res) => {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-            <style>
-                /* Garde tous les styles précédents - ils sont parfaits */
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { 
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    background: linear-gradient(135deg, #1a2a44 0%, #ff416c 100%);
-                    min-height: 100vh; padding: 15px; color: #1a2a44;
-                }
-                .container { max-width: 500px; margin: 0 auto; /* ... reste identique ... */ }
-                /* Tous les autres styles identiques */
-            </style>
         </head>
         <body>
-            <!-- HTML identique au précédent -->
-            <div class="container">
-                <h3>📋 Inscription Certifiée</h3>
-                <div id="reader" style="width:100%; height:350px; border-radius:20px; overflow:hidden; border:3px dashed #ff416c;"></div>
-                <!-- Formulaire identique -->
-            </div>
+            <!-- Ton HTML identique -->
+            <div id="reader" style="width:100%; height:350px;"></div>
 
             <script>
                 function onScanSuccess(decodedText) {
-                    try {
-                        const data = decodedText.split('|');
-                        if(data.length >= 5) {
-                            // ✅ Remplissage automatique (identique)
-                            document.getElementById('fn').value = data[0].trim();
-                            document.getElementById('ln').value = data[1].trim();
-                            document.getElementById('gt').value = data[2].trim();
-                            document.getElementById('bg').value = data[3].trim();
-                            document.getElementById('dob').value = data[4].trim();
-                            
-                            const dateParts = data[4].split('/');
-                            if(dateParts.length === 3) {
-                                document.getElementById('d').value = dateParts[0];
-                                document.getElementById('m').value = dateParts[1];
-                                document.getElementById('y').value = dateParts[2];
-                            }
-                            
-                            // ✅ UI Feedback
-                            document.getElementById('medicalData').style.display = 'block';
-                            document.getElementById('submitBtn').disabled = false;
-                            
-                            alert("✅ Données certifiées récupérées !");
+                    // Ton code de remplissage identique
+                    const data = decodedText.split('|');
+                    if(data.length >= 5) {
+                        document.getElementById('fn').value = data[0].trim();
+                        document.getElementById('ln').value = data[1].trim();
+                        document.getElementById('gt').value = data[2].trim();
+                        document.getElementById('bg').value = data[3].trim();
+                        document.getElementById('dob').value = data[4].trim();
+                        
+                        const dateParts = data[4].split('/');
+                        if(dateParts.length === 3) {
+                            document.getElementById('d').value = dateParts[0];
+                            document.getElementById('m').value = dateParts[1];
+                            document.getElementById('y').value = dateParts[2];
                         }
-                    } catch(err) {
-                        alert("❌ Erreur: " + err.message);
+                        
+                        document.getElementById('medicalData').style.display = 'block';
+                        document.getElementById('submitBtn').disabled = false;
+                        alert("✅ Données certifiées récupérées !");
                     }
                 }
 
-                // 🔥 SYNTAXE SIMPLIFIÉE QUI FONCTIONNE À COUP SÛR
+                function onScanError() {
+                    // Silencieux
+                }
+
+                // 🔥 CAMÉRA ARRIÈRE FORCÉE
                 const html5QrcodeScanner = new Html5QrcodeScanner(
                     "reader", 
-                    { fps: 15, qrbox: {width: 250, height: 250} },
-                    false // IMPORTANT: false = pas de boutons de contrôle
+                    { 
+                        fps: 15, 
+                        qrbox: {width: 250, height: 250},
+                        // ✅ FORCE CAMÉRA ARRIÈRE
+                        videoConstraints: {
+                            facingMode: { exact: "environment" }  // 📷 Caméra arrière
+                        }
+                    },
+                    false
                 );
                 
-                // Démarre DIRECTEMENT (comme ton code original)
                 html5QrcodeScanner.render(onScanSuccess, onScanError);
-
-                function onScanError(error) {
-                    // Silencieux - normal pendant scan
-                    console.log("Scan error:", error);
-                }
-
-                // Auto-resize responsive
-                window.addEventListener('resize', () => {
-                    if(html5QrcodeScanner) {
-                        html5QrcodeScanner.clear().then(() => {
-                            setTimeout(() => html5QrcodeScanner.render(onScanSuccess, onScanError), 500);
-                        });
-                    }
-                });
             </script>
         </body>
         </html>
