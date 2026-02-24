@@ -562,7 +562,8 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - TON CODE AVEC NOTRE DESIGN
+// ============================================
+// INSCRIPTION QR - VERSION OPÉRATIONNELLE
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const datePicker = generateDateOptions();
@@ -571,11 +572,11 @@ app.get('/signup-qr', (req, res) => {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Genlove - Inscription QR</title>
     ${styles}
     ${notifyScript}
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -587,30 +588,38 @@ app.get('/signup-qr', (req, res) => {
         <div class="page-white">
             <h2>Inscription avec certificat</h2>
             
-            <!-- Section QR Scan - TON CODE -->
+            <!-- Section QR Scan -->
             <div class="qr-scan-section">
-                <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
-                <h3 style="color:white;">Scannez votre QR code</h3>
+                <div style="font-size: 2.5rem; margin-bottom: 15px;">📸</div>
+                <h3 style="color:white; margin-bottom: 10px;">Scannez votre QR code</h3>
+                <p style="font-size: 0.9rem; opacity: 0.9;">Appuyez sur "Autoriser" pour la caméra</p>
                 
-                <div id="reader"></div>
+                <div id="reader" style="height: 300px;"></div>
+                
+                <!-- Status -->
+                <div id="scan-status" style="margin-top: 15px; font-weight: bold;"></div>
                 
                 <!-- Zone de débogage -->
                 <div class="debug-box" id="debug">
                     <strong>Dernier scan:</strong> <span id="debugText"></span>
                 </div>
-                
-                <div id="scan-status" style="margin-top: 10px;"></div>
             </div>
             
-            <!-- Boutons de test - TON CODE -->
+            <!-- Boutons de contrôle caméra -->
+            <div class="test-buttons" id="camera-controls" style="display: none;">
+                <button class="test-btn" onclick="stopScanner()">⏹️ Arrêter</button>
+                <button class="test-btn" onclick="startScanner()">🔄 Relancer</button>
+            </div>
+            
+            <!-- Boutons de test -->
             <div class="test-buttons">
-                <button class="test-btn" onclick="simulateQR('AA', 'O+')">AA / O+</button>
-                <button class="test-btn" onclick="simulateQR('AS', 'A+')">AS / A+</button>
-                <button class="test-btn" onclick="simulateQR('SS', 'B-')">SS / B-</button>
+                <button class="test-btn" onclick="simulateQR('AA', 'O+')">🧪 Test AA/O+</button>
+                <button class="test-btn" onclick="simulateQR('AS', 'A+')">🧪 Test AS/A+</button>
+                <button class="test-btn" onclick="simulateQR('SS', 'B-')">🧪 Test SS/B-</button>
             </div>
             
-            <!-- Lien vers générateur -->
-            <a href="/generator" target="_blank" class="qr-link">📱 Générer un vrai QR code</a>
+            <!-- Lien générateur -->
+            <a href="/generator" target="_blank" class="qr-link">📱 Générer un QR code test</a>
             
             <form id="signupForm">
                 <!-- Photo -->
@@ -637,8 +646,8 @@ app.get('/signup-qr', (req, res) => {
                 <!-- Champs manuels -->
                 <div class="manual-fields">
                     <h3>📍 Votre localisation</h3>
-                    <input type="text" id="residence" class="input-box" placeholder="Ville" required>
-                    <input type="text" id="region" class="input-box" placeholder="Région" required>
+                    <input type="text" id="residence" class="input-box" placeholder="Ville (ex: Luanda)" required>
+                    <input type="text" id="region" class="input-box" placeholder="Région (ex: Luanda)" required>
                     
                     <h3>👶 Projet de vie</h3>
                     <select id="desireChild" class="input-box" required>
@@ -655,156 +664,265 @@ app.get('/signup-qr', (req, res) => {
                 
                 <!-- Serment -->
                 <div class="serment-container">
-                    <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
+                    <input type="checkbox" id="oath" style="width:20px;height:20px;margin-top:4px;" required>
                     <label for="oath" class="serment-text">Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité.</label>
                 </div>
                 
-                <button type="submit" class="btn-pink" id="submitBtn" disabled>S'inscrire</button>
+                <button type="submit" class="btn-pink" id="submitBtn" disabled>✅ S'inscrire</button>
             </form>
             
-            <div style="text-align: center;">
-                <a href="/signup-manual" class="back-link">← Inscription manuelle</a>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/signup-manual" class="back-link">← Inscription manuelle</a> | 
+                <a href="/signup-choice" class="back-link">← Retour au choix</a>
             </div>
-            <a href="/signup-choice" class="back-link">← Retour au choix</a>
         </div>
+    </div>
+
+    <div id="genlove-notify">
+        <span id="notify-icon">📱</span>
+        <span id="notify-msg"></span>
     </div>
     
     <script>
         let photoBase64 = "";
+        let scanner = null;
+        let isScanning = false;
         
-        // TON CODE DE SCAN - EXACTEMENT COMME DANS TON EXEMPLE
-        const scanner = new Html5Qrcode("reader");
+        // Fonction showNotify améliorée
+        function showNotify(msg, type = 'info') {
+            const n = document.getElementById('genlove-notify');
+            const icon = document.getElementById('notify-icon');
+            const m = document.getElementById('notify-msg');
+            
+            if (type === 'success') icon.textContent = '✅';
+            else if (type === 'error') icon.textContent = '❌';
+            else icon.textContent = '📱';
+            
+            m.textContent = msg;
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 4000);
+        }
         
-        scanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: 250 },
-            (text) => {
-                // Afficher ce qui a été scanné
-                document.getElementById('debug').style.display = 'block';
-                document.getElementById('debugText').innerText = text;
+        // Initialisation caméra améliorée
+        async function initScanner() {
+            try {
+                scanner = new Html5Qrcode("reader");
                 
-                console.log("QR scanné:", text);
+                const config = { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    disableFlip: false
+                };
                 
-                // Essayer plusieurs formats
-                let nom = '', geno = '', gs = '';
+                // Demander les permissions explicitement
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                showNotify("✅ Caméra activée ! Pointez vers le QR", 'success');
                 
-                // Format 1: NOM:...|GENO:...|GS:...
-                if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
-                    const parts = text.split('|');
-                    parts.forEach(p => {
-                        if(p.startsWith('NOM:')) nom = p.split(':')[1];
-                        if(p.startsWith('GENO:')) geno = p.split(':')[1];
-                        if(p.startsWith('GS:')) gs = p.split(':')[1];
-                    });
+                // Démarrer le scanner
+                const result = await scanner.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScanSuccess,
+                    onScanFailure
+                );
+                
+                if (result) {
+                    isScanning = true;
+                    document.getElementById('camera-controls').style.display = 'flex';
+                    showStatus("🎯 QR code détecté automatiquement", 'success');
                 }
                 
-                // Format 2: { "patientName": "...", "genotype": "...", "bloodGroup": "..." }
-                try {
-                    const json = JSON.parse(text);
-                    if (json.patientName) nom = json.patientName;
-                    if (json.genotype) geno = json.genotype;
-                    if (json.bloodGroup) gs = json.bloodGroup;
-                } catch(e) {}
+            } catch (err) {
+                console.error("Erreur caméra:", err);
+                showStatus("❌ Autorisez la caméra et rechargez", 'error');
+                showNotify("Caméra bloquée. Activez les permissions.", 'error');
+            }
+        }
+        
+        function onScanSuccess(text) {
+            document.getElementById('debug').style.display = 'block';
+            document.getElementById('debugText').textContent = text;
+            
+            console.log("✅ QR scanné:", text);
+            parseQRData(text);
+        }
+        
+        function onScanFailure(error) {
+            // Silencieux sauf erreur critique
+        }
+        
+        function parseQRData(text) {
+            let nom = '', geno = '', gs = '';
+            
+            // Format 1: NOM:...|GENO:...|GS:...
+            if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
+                const parts = text.split('|');
+                parts.forEach(p => {
+                    if (p.startsWith('NOM:')) nom = p.split(':')[1]?.trim();
+                    if (p.startsWith('GENO:')) geno = p.split(':')[1]?.trim();
+                    if (p.startsWith('GS:')) gs = p.split(':')[1]?.trim();
+                });
+            }
+            
+            // Format 2: JSON
+            try {
+                const json = JSON.parse(text);
+                nom = json.patientName || json.nom || json.name;
+                geno = json.genotype || json.geno;
+                gs = json.bloodGroup || json.gs || json.sanguin;
+            } catch(e) {}
+            
+            // Validation et remplissage
+            if (nom && geno && gs && ['AA','AS','SS'].includes(geno.toUpperCase())) {
+                const nameParts = nom.trim().split(' ');
+                document.getElementById('firstName').value = nameParts[0] || 'Utilisateur';
+                document.getElementById('lastName').value = nameParts.slice(1).join(' ') || 'Certifié';
+                document.getElementById('genotype').value = geno.toUpperCase();
+                document.getElementById('bloodGroup').value = gs.toUpperCase();
                 
-                // Si on a trouvé les données
-                if (nom && geno && gs) {
-                    const nameParts = nom.split(' ');
-                    document.getElementById('firstName').value = nameParts[0] || '';
-                    document.getElementById('lastName').value = nameParts.slice(1).join(' ') || '';
-                    document.getElementById('genotype').value = geno;
-                    document.getElementById('bloodGroup').value = gs;
-                    
-                    document.getElementById('qrVerified').value = 'true';
-                    document.getElementById('verifiedBy').value = 'QR Scan';
-                    
-                    document.getElementById('scan-status').innerHTML = '✅ Scan réussi !';
-                    document.getElementById('scan-status').style.color = '#4caf50';
-                    document.getElementById('submitBtn').disabled = false;
-                    
-                    scanner.stop();
-                    document.getElementById('reader').style.display = 'none';
-                } else {
-                    document.getElementById('scan-status').innerHTML = '❌ Format non reconnu';
-                    document.getElementById('scan-status').style.color = '#ff4444';
+                document.getElementById('qrVerified').value = 'true';
+                document.getElementById('verifiedBy').value = 'Labo QR ' + new Date().toLocaleDateString();
+                document.getElementById('submitBtn').disabled = false;
+                
+                showStatus("✅ Certificat valide ! Remplissez le reste", 'success');
+                showNotify("Scan parfait !", 'success');
+                
+                if (scanner && isScanning) {
+                    stopScanner();
                 }
-            },
-            (error) => {} // Ignorer les erreurs
-        ).catch(err => {
-            document.getElementById('scan-status').innerHTML = '❌ Erreur caméra: ' + err;
-            document.getElementById('scan-status').style.color = '#ff4444';
-        });
-
-        // TON CODE DE SIMULATION
+            } else {
+                showStatus("❌ Format QR invalide", 'error');
+            }
+        }
+        
+        function showStatus(msg, type) {
+            const status = document.getElementById('scan-status');
+            status.innerHTML = msg;
+            status.style.color = type === 'success' ? '#4caf50' : '#ff4444';
+        }
+        
+        function startScanner() {
+            if (scanner) {
+                scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: 250 },
+                    onScanSuccess,
+                    onScanFailure
+                ).then(() => {
+                    isScanning = true;
+                    document.getElementById('camera-controls').style.display = 'flex';
+                    showStatus("🔍 Scanning...", 'info');
+                }).catch(err => {
+                    showStatus("❌ Erreur: " + err, 'error');
+                });
+            }
+        }
+        
+        function stopScanner() {
+            if (scanner && isScanning) {
+                scanner.stop().then(() => {
+                    isScanning = false;
+                    document.getElementById('camera-controls').style.display = 'none';
+                    showStatus("⏸️ Scanner arrêté", 'info');
+                }).catch(err => console.error(err));
+            }
+        }
+        
+        // Simulation pour tests
         function simulateQR(genotype, bloodGroup) {
             document.getElementById('firstName').value = 'João';
             document.getElementById('lastName').value = 'Silva';
             document.getElementById('genotype').value = genotype;
             document.getElementById('bloodGroup').value = bloodGroup;
             document.getElementById('qrVerified').value = 'true';
-            document.getElementById('verifiedBy').value = 'Test';
+            document.getElementById('verifiedBy').value = 'Test Labo';
             document.getElementById('submitBtn').disabled = false;
-            document.getElementById('scan-status').innerHTML = '✅ Test réussi !';
-            document.getElementById('scan-status').style.color = '#4caf50';
-            
-            scanner.stop();
-            document.getElementById('reader').style.display = 'none';
+            showStatus("✅ Test réussi !", 'success');
+            stopScanner();
         }
-
+        
+        // Preview photo
         function previewPhoto(e) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                photoBase64 = reader.result;
-                document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
-                document.getElementById('photoCircle').style.backgroundSize = 'cover';
-                document.getElementById('photoText').style.display = 'none';
-            };
-            reader.readAsDataURL(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    photoBase64 = reader.result;
+                    const circle = document.getElementById('photoCircle');
+                    circle.style.backgroundImage = 'url(' + photoBase64 + ')';
+                    circle.style.backgroundSize = 'cover';
+                    document.getElementById('photoText').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
         }
-
-        document.getElementById('signupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            document.getElementById('loader').style.display = 'flex';
-            
-            const userData = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                gender: 'Non spécifié',
-                dob: '2000-01-01',
-                residence: document.getElementById('residence').value,
-                region: document.getElementById('region').value,
-                genotype: document.getElementById('genotype').value,
-                bloodGroup: document.getElementById('bloodGroup').value,
-                desireChild: document.getElementById('desireChild').value,
-                photo: photoBase64 || "",
-                language: 'fr',
-                isPublic: true,
-                qrVerified: true,
-                verifiedBy: document.getElementById('verifiedBy').value,
-                verifiedAt: new Date(),
-                verificationBadge: 'lab'
-            };
-            
-            try {
-                const res = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(userData)
-                });
+        
+        // Submit form
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('signupForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
                 
-                const data = await res.json();
+                if (!document.getElementById('oath').checked) {
+                    showNotify("Cochez le serment !", 'error');
+                    return;
+                }
                 
-                setTimeout(() => {
+                document.getElementById('loader').style.display = 'flex';
+                
+                const userData = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    gender: 'Non spécifié',
+                    dob: '2000-01-01',
+                    residence: document.getElementById('residence').value,
+                    region: document.getElementById('region').value,
+                    genotype: document.getElementById('genotype').value,
+                    bloodGroup: document.getElementById('bloodGroup').value,
+                    desireChild: document.getElementById('desireChild').value,
+                    photo: photoBase64 || "",
+                    language: 'fr',
+                    isPublic: true,
+                    qrVerified: document.getElementById('qrVerified').value === 'true',
+                    verifiedBy: document.getElementById('verifiedBy').value,
+                    verifiedAt: new Date().toISOString(),
+                    verificationBadge: 'lab'
+                };
+                
+                try {
+                    const res = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(userData)
+                    });
+                    
+                    const data = await res.json();
+                    
+                    setTimeout(() => {
+                        document.getElementById('loader').style.display = 'none';
+                        if (data.success) {
+                            showNotify("🎉 Compte créé avec succès !", 'success');
+                            setTimeout(() => window.location.href = '/profile', 1500);
+                        } else {
+                            showNotify("Erreur: " + (data.error || "Inconnue"), 'error');
+                        }
+                    }, 2000);
+                } catch(error) {
                     document.getElementById('loader').style.display = 'none';
-                    if (data.success) {
-                        window.location.href = '/profile';
-                    } else {
-                        alert("Erreur: " + (data.error || "Inconnue"));
-                    }
-                }, 2000);
-            } catch(error) {
-                document.getElementById('loader').style.display = 'none';
-                alert("Erreur de connexion");
+                    showNotify("Erreur réseau", 'error');
+                }
+            });
+            
+            // Démarrer la caméra au chargement
+            setTimeout(initScanner, 500);
+        });
+        
+        // Gestion du bouton retour
+        window.addEventListener('beforeunload', function() {
+            if (scanner && isScanning) {
+                scanner.stop();
             }
         });
     </script>
