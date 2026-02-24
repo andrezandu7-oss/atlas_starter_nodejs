@@ -2109,61 +2109,71 @@ app.get('/signup-choice', (req, res) => {
 // INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
 // ============================================
 app.get('/signup-qr', (req, res) => {
+    [span_0](start_span)const t = req.t; // Utilisation de votre système de traduction[span_0](end_span)
     res.send(`
         <script src="https://unpkg.com/html5-qrcode"></script>
         <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
-            <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
-            <div id="reader" style="width:100%; border-radius:15px; overflow:hidden; background:#000;"></div>
+            <h2 style="text-align:center;">Scanner le Certificat</h2>
             
-            <form action="/api/register-qr" method="POST" style="margin-top:20px;">
+            <div id="reader" style="width:100%; border-radius:15px; overflow:hidden; background:#f0f0f0; border: 2px dashed #ccc;"></div>
+            
+            <form action="/api/register-verified" method="POST" style="margin-top:20px;">
                 <input type="hidden" name="isVerified" value="true">
                 
-                <div style="background:#e9f7ef; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <p style="font-size:12px; color:#28a745;">✔ Données extraites du certificat :</p>
-                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
-                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
+                <div style="background:#e9f7ef; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #28a745;">
+                    <p style="font-size:12px; color:#28a745; margin-bottom:10px;">✔ Données médicales certifiées</p>
+                    
+                    <input type="text" id="fn" name="firstName" placeholder="${t('firstName')}" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ddd;">
+                    <input type="text" id="ln" name="lastName" placeholder="${t('lastName')}" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ddd;">
+                    <input type="text" id="gt" name="genotype" placeholder="${t('genotype')}" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ddd;">
+                    <input type="text" id="bg" name="bloodGroup" placeholder="${t('bloodGroup')}" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ddd;">
                     
                     <div style="display:flex; gap:5px; margin-top:5px;">
-                        <input type="text" id="d" placeholder="JJ" readonly style="width:30%; padding:10px;">
-                        <input type="text" id="m" placeholder="MM" readonly style="width:30%; padding:10px;">
-                        <input type="text" id="y" placeholder="AAAA" readonly style="width:40%; padding:10px;">
+                        <input type="text" id="d" placeholder="JJ" readonly style="width:30%; padding:10px; text-align:center;">
+                        <input type="text" id="m" placeholder="MM" readonly style="width:30%; padding:10px; text-align:center;">
+                        <input type="text" id="y" placeholder="AAAA" readonly style="width:40%; padding:10px; text-align:center;">
                     </div>
                     <input type="hidden" id="dob" name="dob">
                 </div>
 
-                <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
-                <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                <input type="text" name="residence" placeholder="${t('city')}" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                <input type="text" name="region" placeholder="${t('region')}" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
                 
-                <label style="display:block; margin:10px 0 5px;">Projet de vie : Désir d'enfant ?</label>
-                <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
-                    <option value="Oui">Oui</option>
-                    <option value="Non">Non</option>
+                <label style="display:block; margin:10px 0 5px;">${t('desireChild')}</label>
+                <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <option value="Oui">${t('yes')}</option>
+                    <option value="Non">${t('no')}</option>
                 </select>
 
-                <button type="submit" style="width:100%; padding:15px; background:#ff416c; color:white; border:none; border-radius:30px; margin-top:20px; font-weight:bold;">Finaliser mon inscription certifiée ✅</button>
+                <button type="submit" style="width:100%; padding:15px; background:#ff416c; color:white; border:none; border-radius:30px; margin-top:20px; font-weight:bold; cursor:pointer;">
+                    Valider mon profil certifié ✅
+                </button>
             </form>
         </div>
 
         <script>
-            const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            const scanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
             scanner.render((text) => {
-                // Format QR : Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
+                // Format du QR : Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
                 const data = text.split('|');
-                document.getElementById('fn').value = data[0];
-                document.getElementById('ln').value = data[1];
-                document.getElementById('gt').value = data[2];
-                document.getElementById('bg').value = data[3];
-                document.getElementById('dob').value = data[4];
-                
-                const dateParts = data[4].split('/');
-                document.getElementById('d').value = dateParts[0];
-                document.getElementById('m').value = dateParts[1];
-                document.getElementById('y').value = dateParts[2];
-                
-                scanner.clear();
-                alert("Certificat validé avec succès !");
+                if(data.length >= 5) {
+                    document.getElementById('fn').value = data[0];
+                    document.getElementById('ln').value = data[1];
+                    document.getElementById('gt').value = data[2];
+                    document.getElementById('bg').value = data[3];
+                    document.getElementById('dob').value = data[4];
+                    
+                    // Remplissage des cases date séparées
+                    const date = data[4].split('/');
+                    document.getElementById('d').value = date[0];
+                    document.getElementById('m').value = date[1];
+                    document.getElementById('y').value = date[2];
+                    
+                    scanner.clear();
+                    alert("Certification validée !");
+                } else {
+                    alert("Code QR non conforme.");
+                }
             });
         </script>
     `);
