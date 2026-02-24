@@ -2110,65 +2110,65 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-        </head>
-        <body>
-            <!-- Ton HTML identique -->
-            <div id="reader" style="width:100%; height:350px;"></div>
-
-            <script>
-                function onScanSuccess(decodedText) {
-                    // Ton code de remplissage identique
-                    const data = decodedText.split('|');
-                    if(data.length >= 5) {
-                        document.getElementById('fn').value = data[0].trim();
-                        document.getElementById('ln').value = data[1].trim();
-                        document.getElementById('gt').value = data[2].trim();
-                        document.getElementById('bg').value = data[3].trim();
-                        document.getElementById('dob').value = data[4].trim();
-                        
-                        const dateParts = data[4].split('/');
-                        if(dateParts.length === 3) {
-                            document.getElementById('d').value = dateParts[0];
-                            document.getElementById('m').value = dateParts[1];
-                            document.getElementById('y').value = dateParts[2];
-                        }
-                        
-                        document.getElementById('medicalData').style.display = 'block';
-                        document.getElementById('submitBtn').disabled = false;
-                        alert("✅ Données certifiées récupérées !");
-                    }
-                }
-
-                function onScanError() {
-                    // Silencieux
-                }
-
-                // 🔥 CAMÉRA ARRIÈRE FORCÉE
-                const html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader", 
-                    { 
-                        fps: 15, 
-                        qrbox: {width: 250, height: 250},
-                        // ✅ FORCE CAMÉRA ARRIÈRE
-                        videoConstraints: {
-                            facingMode: { exact: "environment" }  // 📷 Caméra arrière
-                        }
-                    },
-                    false
-                );
+        <script src="https://unpkg.com/html5-qrcode"></script>
+        <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
+            <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
+            <div id="reader" style="width:100%; border-radius:15px; overflow:hidden; background:#000;"></div>
+            
+            <form action="/api/register-qr" method="POST" style="margin-top:20px;">
+                <input type="hidden" name="isVerified" value="true">
                 
-                html5QrcodeScanner.render(onScanSuccess, onScanError);
-            </script>
-        </body>
-        </html>
+                <div style="background:#e9f7ef; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <p style="font-size:12px; color:#28a745;">✔ Données extraites du certificat :</p>
+                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
+                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
+                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
+                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc;">
+                    
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <input type="text" id="d" placeholder="JJ" readonly style="width:30%; padding:10px;">
+                        <input type="text" id="m" placeholder="MM" readonly style="width:30%; padding:10px;">
+                        <input type="text" id="y" placeholder="AAAA" readonly style="width:40%; padding:10px;">
+                    </div>
+                    <input type="hidden" id="dob" name="dob">
+                </div>
+
+                <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                
+                <label style="display:block; margin:10px 0 5px;">Projet de vie : Désir d'enfant ?</label>
+                <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                    <option value="Oui">Oui</option>
+                    <option value="Non">Non</option>
+                </select>
+
+                <button type="submit" style="width:100%; padding:15px; background:#ff416c; color:white; border:none; border-radius:30px; margin-top:20px; font-weight:bold;">Finaliser mon inscription certifiée ✅</button>
+            </form>
+        </div>
+
+        <script>
+            const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            scanner.render((text) => {
+                // Format QR : Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
+                const data = text.split('|');
+                document.getElementById('fn').value = data[0];
+                document.getElementById('ln').value = data[1];
+                document.getElementById('gt').value = data[2];
+                document.getElementById('bg').value = data[3];
+                document.getElementById('dob').value = data[4];
+                
+                const dateParts = data[4].split('/');
+                document.getElementById('d').value = dateParts[0];
+                document.getElementById('m').value = dateParts[1];
+                document.getElementById('y').value = dateParts[2];
+                
+                scanner.clear();
+                alert("Certificat validé avec succès !");
+            });
+        </script>
     `);
 });
+
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
