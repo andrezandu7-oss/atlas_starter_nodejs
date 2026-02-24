@@ -513,183 +513,247 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - TON CODE QUI FONCTIONNE
+// ============================================
+// INSCRIPTION QR - VERSION STABLE ANDROID
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const datePicker = generateDateOptions(req);
-    
+
     res.send(`<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription QR</title>
     ${styles}
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
-    <div class="app-shell">
-        <div id="loader">
-            <div class="spinner"></div>
-            <h3>Création de votre profil...</h3>
+<div class="app-shell">
+
+<div id="loader">
+    <div class="spinner"></div>
+    <h3>Création de votre profil...</h3>
+</div>
+
+<div class="page-white">
+    <h2>Inscription QR</h2>
+
+    <div class="qr-scan-section">
+
+        <button type="button" class="btn-dark" onclick="startCamera()">
+            📷 Activer la caméra
+        </button>
+
+        <button type="button" class="btn-pink" onclick="stopCamera()" style="margin-top:10px;">
+            🛑 Stop caméra
+        </button>
+
+        <div id="reader"></div>
+
+        <div id="scan-status" style="margin-top:10px;"></div>
+
+        <div class="debug-box" id="debug">
+            <strong>Scan:</strong> <span id="debugText"></span>
         </div>
-        
-        <div class="page-white">
-            <h2>Inscription QR</h2>
-            
-            <div class="qr-scan-section">
-                <div id="reader"></div>
-                <div class="debug-box" id="debug">
-                    <strong>Dernier scan:</strong> <span id="debugText"></span>
-                </div>
-                <div id="scan-status" style="margin-top: 10px;"></div>
-            </div>
-            
-            <form id="signupForm">
-                <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
-                    <span id="photoText">📷 Photo</span>
-                </div>
-                <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)" accept="image/*">
-                
-                <div class="qr-fields">
-                    <h3>Données du certificat</h3>
-                    <input type="text" id="firstName" class="input-box" placeholder="Prénom" readonly>
-                    <input type="text" id="lastName" class="input-box" placeholder="Nom" readonly>
-                    <input type="text" id="genotype" class="input-box" placeholder="Génotype" readonly>
-                    <input type="text" id="bloodGroup" class="input-box" placeholder="Groupe sanguin" readonly>
-                </div>
-                
-                <div class="info-message">
-                    <span class="info-icon">📍</span>
-                    <p>Aider les personnes proches à vous contacter</p>
-                </div>
-                
-                <div class="manual-fields">
-                    <h3>Votre localisation</h3>
-                    <input type="text" id="residence" class="input-box" placeholder="Ville" required>
-                    <input type="text" id="region" class="input-box" placeholder="Région" required>
-                    
-                    <h3>Projet de vie</h3>
-                    <select id="desireChild" class="input-box" required>
-                        <option value="">Désir d'enfant ?</option>
-                        <option value="Oui">Oui</option>
-                        <option value="Non">Non</option>
-                    </select>
-                </div>
-                
-                <input type="hidden" id="qrVerified" value="false">
-                <input type="hidden" id="verifiedBy" value="">
-                
-                <div class="serment-container">
-                    <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
-                    <label for="oath" class="serment-text">Je confirme sur l'honneur que mes informations sont sincères</label>
-                </div>
-                
-                <button type="submit" class="btn-pink" id="submitBtn" disabled>S'inscrire</button>
-            </form>
-            
-            <a href="/signup-choice" class="back-link">← Retour</a>
-        </div>
+
     </div>
-    
-    <script>
-        let photoBase64 = "";
-        const scanner = new Html5Qrcode("reader");
-        
-        scanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: 250 },
-            (text) => {
-                document.getElementById('debug').style.display = 'block';
-                document.getElementById('debugText').innerText = text;
-                
-                let nom = '', geno = '', gs = '';
-                
-                if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
-                    const parts = text.split('|');
-                    parts.forEach(p => {
-                        if(p.startsWith('NOM:')) nom = p.split(':')[1];
-                        if(p.startsWith('GENO:')) geno = p.split(':')[1];
-                        if(p.startsWith('GS:')) gs = p.split(':')[1];
-                    });
-                }
-                
-                try {
-                    const json = JSON.parse(text);
-                    if (json.patientName) nom = json.patientName;
-                    if (json.genotype) geno = json.genotype;
-                    if (json.bloodGroup) gs = json.bloodGroup;
-                } catch(e) {}
-                
-                if (nom && geno && gs) {
-                    const parts = nom.split(' ');
-                    document.getElementById('firstName').value = parts[0] || '';
-                    document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
-                    document.getElementById('genotype').value = geno;
-                    document.getElementById('bloodGroup').value = gs;
-                    document.getElementById('qrVerified').value = 'true';
-                    document.getElementById('verifiedBy').value = 'QR Scan';
-                    document.getElementById('submitBtn').disabled = false;
-                    document.getElementById('scan-status').innerHTML = '✅ Scan réussi !';
-                    scanner.stop();
-                } else {
-                    document.getElementById('scan-status').innerHTML = '❌ Format non reconnu';
-                }
+
+<form id="signupForm">
+
+<div class="photo-circle" id="photoCircle"
+onclick="document.getElementById('photoInput').click()">
+<span id="photoText">📷 Photo</span>
+</div>
+
+<input type="file" id="photoInput"
+style="display:none"
+accept="image/*"
+onchange="previewPhoto(event)">
+
+<div class="qr-fields">
+<h3>Données du certificat</h3>
+<input type="text" id="firstName" class="input-box" placeholder="Prénom" readonly>
+<input type="text" id="lastName" class="input-box" placeholder="Nom" readonly>
+<input type="text" id="genotype" class="input-box" placeholder="Génotype" readonly>
+<input type="text" id="bloodGroup" class="input-box" placeholder="Groupe sanguin" readonly>
+</div>
+
+<input type="text" id="residence" class="input-box" placeholder="Ville" required>
+<input type="text" id="region" class="input-box" placeholder="Région" required>
+
+<select id="desireChild" class="input-box" required>
+<option value="">Désir d'enfant ?</option>
+<option value="Oui">Oui</option>
+<option value="Non">Non</option>
+</select>
+
+<input type="hidden" id="qrVerified" value="false">
+<input type="hidden" id="verifiedBy" value="">
+
+<div class="serment-container">
+<input type="checkbox" id="oath" required>
+<label for="oath" class="serment-text">
+Je confirme sur l'honneur que mes informations sont sincères
+</label>
+</div>
+
+<button type="submit" class="btn-pink" id="submitBtn" disabled>
+S'inscrire
+</button>
+
+</form>
+
+<a href="/signup-choice" class="back-link">← Retour</a>
+</div>
+</div>
+
+<script>
+let photoBase64 = "";
+let html5QrCode = null;
+let cameraRunning = false;
+
+async function startCamera() {
+    try {
+        if (cameraRunning) return;
+
+        html5QrCode = new Html5Qrcode("reader");
+
+        await html5QrCode.start(
+            { facingMode: { exact: "environment" } },
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
             },
-            () => {}
-        ).catch(err => {
-            document.getElementById('scan-status').innerHTML = '❌ Erreur caméra: ' + err;
-        });
+            onScanSuccess,
+            onScanError
+        );
 
-        function previewPhoto(e) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                photoBase64 = reader.result;
-                document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
-                document.getElementById('photoText').style.display = 'none';
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        }
+        cameraRunning = true;
+        document.getElementById("scan-status").innerHTML =
+            "📷 Caméra activée";
+    } catch (err) {
+        console.error(err);
+        document.getElementById("scan-status").innerHTML =
+            "❌ Caméra bloquée. Vérifie HTTPS et permissions.";
+    }
+}
 
-        document.getElementById('signupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            document.getElementById('loader').style.display = 'flex';
-            
-            const userData = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                gender: 'Non spécifié',
-                dob: '2000-01-01',
-                residence: document.getElementById('residence').value,
-                region: document.getElementById('region').value,
-                genotype: document.getElementById('genotype').value,
-                bloodGroup: document.getElementById('bloodGroup').value,
-                desireChild: document.getElementById('desireChild').value,
-                photo: photoBase64 || "",
-                language: 'fr',
-                isPublic: true,
-                qrVerified: true,
-                verifiedBy: 'QR Scan',
-                verificationBadge: 'lab'
-            };
-            
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(userData)
-            });
-            
-            setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                if (res.ok) window.location.href = '/profile';
-                else alert("Erreur lors de l'inscription");
-            }, 2000);
+function onScanSuccess(decodedText) {
+
+    document.getElementById("debug").style.display = "block";
+    document.getElementById("debugText").innerText = decodedText;
+
+    let nom="", geno="", gs="";
+
+    if (decodedText.includes("NOM:")) {
+        const parts = decodedText.split("|");
+        parts.forEach(p => {
+            if(p.startsWith("NOM:")) nom = p.split(":")[1];
+            if(p.startsWith("GENO:")) geno = p.split(":")[1];
+            if(p.startsWith("GS:")) gs = p.split(":")[1];
         });
-    </script>
+    }
+
+    try {
+        const json = JSON.parse(decodedText);
+        if(json.patientName) nom=json.patientName;
+        if(json.genotype) geno=json.genotype;
+        if(json.bloodGroup) gs=json.bloodGroup;
+    } catch(e){}
+
+    if(nom && geno && gs){
+
+        const parts = nom.split(" ");
+        document.getElementById("firstName").value = parts[0] || "";
+        document.getElementById("lastName").value =
+            parts.slice(1).join(" ") || "";
+
+        document.getElementById("genotype").value = geno;
+        document.getElementById("bloodGroup").value = gs;
+
+        document.getElementById("qrVerified").value = "true";
+        document.getElementById("verifiedBy").value = "QR Scan";
+
+        document.getElementById("submitBtn").disabled = false;
+
+        document.getElementById("scan-status").innerHTML =
+            "✅ Scan réussi";
+
+        stopCamera();
+    } else {
+        document.getElementById("scan-status").innerHTML =
+            "❌ Format QR non reconnu";
+    }
+}
+
+function onScanError(errorMessage) {
+    // silence volontaire
+}
+
+async function stopCamera(){
+    if(html5QrCode && cameraRunning){
+        await html5QrCode.stop();
+        await html5QrCode.clear();
+        cameraRunning = false;
+
+        document.getElementById("scan-status").innerHTML +=
+            "<br>📴 Caméra arrêtée";
+    }
+}
+
+function previewPhoto(e){
+    const reader = new FileReader();
+    reader.onload = function(){
+        photoBase64 = reader.result;
+        document.getElementById("photoCircle").style.backgroundImage =
+            "url("+photoBase64+")";
+        document.getElementById("photoText").style.display="none";
+    };
+    reader.readAsDataURL(e.target.files[0]);
+}
+
+document.getElementById("signupForm")
+.addEventListener("submit", async function(e){
+
+    e.preventDefault();
+    document.getElementById("loader").style.display="flex";
+
+    const userData={
+        firstName:document.getElementById("firstName").value,
+        lastName:document.getElementById("lastName").value,
+        gender:"Non spécifié",
+        dob:"2000-01-01",
+        residence:document.getElementById("residence").value,
+        region:document.getElementById("region").value,
+        genotype:document.getElementById("genotype").value,
+        bloodGroup:document.getElementById("bloodGroup").value,
+        desireChild:document.getElementById("desireChild").value,
+        photo:photoBase64||"",
+        language:"fr",
+        isPublic:true,
+        qrVerified:true,
+        verifiedBy:"QR Scan",
+        verificationBadge:"lab"
+    };
+
+    const res=await fetch("/api/register",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(userData)
+    });
+
+    setTimeout(()=>{
+        document.getElementById("loader").style.display="none";
+        if(res.ok) window.location.href="/profile";
+        else alert("Erreur inscription");
+    },1500);
+});
+</script>
+
 </body>
 </html>`);
 });
-
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
