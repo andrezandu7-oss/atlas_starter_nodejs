@@ -2107,93 +2107,215 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// ============================================
-// ============================================
-// ============================================
-// ============================================
+//  ============================================
 // ============================================
 // INSCRIPTION AVEC QR CODE - Version avec TON code qui fonctionne
 // ============================================
-<script>
-    let photoBase64 = "";
-    // FORCE 1 : Initialisation immédiate de l'objet (comme dans le code qui marche)
-    const scanner = new Html5Qrcode("reader");
-    
-    async function startScanner() {
-        const scanBtn = document.getElementById('scanBtn');
-        const status = document.getElementById('scan-status');
-        
-        scanBtn.innerText = '⏳ Activation caméra...';
-        scanBtn.disabled = true;
-
-        try {
-            // FORCE 2 : Utilisation de start() avec gestion de promesse (async)
-            await scanner.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    handleScanSuccess(decodedText);
-                },
-                (error) => { /* Ignore les échecs de lecture de frame */ }
-            );
-            
-            status.innerHTML = "✅ Caméra active";
-            status.style.color = "#4caf50";
-        } catch (err) {
-            console.error(err);
-            status.innerHTML = "❌ Erreur : " + err;
-            status.style.color = "#ff4444";
-            scanBtn.innerText = '📷 Réessayer';
-            scanBtn.disabled = false;
+app.get('/signup', (req, res) => {
+    res.send(`
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genlove - Inscription</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
-    }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 { color: #1a2a44; margin-top: 0; }
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+        .debug-box {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 10px 0;
+            display: none;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+        .locked {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #ff416c;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .badge {
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Inscription Genlove</h2>
+        <p>Scannez votre QR code médical</p>
+        
+        <div id="reader"></div>
+        
+        <!-- Zone de débogage (pour voir ce que le scanner lit) -->
+        <div class="debug-box" id="debug">
+            <strong>Dernier scan:</strong> <span id="debugText"></span>
+        </div>
+        
+        <form id="regForm">
+            <input type="text" id="nom" placeholder="Nom complet" readonly class="locked">
+            <input type="text" id="genotype" placeholder="Génotype" readonly class="locked">
+            <input type="text" id="gs" placeholder="Groupe sanguin" readonly class="locked">
+            <input type="email" id="email" placeholder="Votre Email" required>
+            <button type="submit" id="submitBtn" disabled>Finaliser l'inscription</button>
+        </form>
+        
+        <hr>
+        <p style="font-size:0.8rem; text-align:center;">🧪 Pas de QR ? Utilisez les boutons :</p>
+        <div style="display:flex; gap:5px;">
+            <button onclick="simulateQR('AA', 'O+')" style="background:#1a2a44;">AA / O+</button>
+            <button onclick="simulateQR('AS', 'A+')" style="background:#1a2a44;">AS / A+</button>
+            <button onclick="simulateQR('SS', 'B-')" style="background:#1a2a44;">SS / B-</button>
+        </div>
+        
+        <p style="text-align:center; margin-top:15px;">
+            <a href="/generator" target="_blank" style="color:#ff416c;">📱 Générer un vrai QR code</a>
+        </p>
+        
+        <a href="/" style="display:block; text-align:center; margin-top:15px; color:#666;">← Retour</a>
+    </div>
 
-    function handleScanSuccess(decodedText) {
-        try {
-            let data = null;
-            // Test Format JSON
-            try { data = JSON.parse(decodedText); } catch(e) {}
+    <script>
+        const scanner = new Html5Qrcode("reader");
+        
+        // Démarrer le scanner
+        scanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            (text) => {
+                // Afficher ce qui a été scanné (débogage)
+                document.getElementById('debug').style.display = 'block';
+                document.getElementById('debugText').innerText = text;
+                
+                console.log("QR scanné:", text);
+                
+                // Essayer plusieurs formats
+                let nom = '', geno = '', gs = '';
+                
+                // Format 1: NOM:...|GENO:...|GS:...
+                if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
+                    const parts = text.split('|');
+                    parts.forEach(p => {
+                        if(p.startsWith('NOM:')) nom = p.split(':')[1];
+                        if(p.startsWith('GENO:')) geno = p.split(':')[1];
+                        if(p.startsWith('GS:')) gs = p.split(':')[1];
+                    });
+                }
+                
+                // Format 2: { "patientName": "...", "genotype": "...", "bloodGroup": "..." }
+                try {
+                    const json = JSON.parse(text);
+                    if (json.patientName) nom = json.patientName;
+                    if (json.genotype) geno = json.genotype;
+                    if (json.bloodGroup) gs = json.bloodGroup;
+                } catch(e) {}
+                
+                // Si on a trouvé les données
+                if (nom && geno && gs) {
+                    document.getElementById('nom').value = nom;
+                    document.getElementById('genotype').value = geno;
+                    document.getElementById('gs').value = gs;
+                    document.getElementById('submitBtn').disabled = false;
+                    
+                    scanner.stop();
+                    document.getElementById('reader').style.display = 'none';
+                    alert("✅ Scan réussi !");
+                } else {
+                    alert("❌ Format non reconnu. Cliquez sur 'Générer un vrai QR code'");
+                }
+            },
+            (error) => {} // Ignorer les erreurs
+        ).catch(err => {
+            alert("❌ Erreur caméra: " + err);
+        });
 
-            if (data && (data.patientName || data.nom)) {
-                // Remplissage format JSON
-                const name = data.patientName || data.nom;
-                document.getElementById('firstName').value = name.split(' ')[0];
-                document.getElementById('lastName').value = name.split(' ').slice(1).join(' ');
-                document.getElementById('genotype').value = data.genotype || "";
-                document.getElementById('bloodGroup').value = data.bloodGroup || data.gs || "";
-            } 
-            else if (decodedText.includes('NOM:')) {
-                // Remplissage format Texte (Pipe |)
-                const parts = decodedText.split('|');
-                parts.forEach(p => {
-                    if(p.startsWith('NOM:')) {
-                        const n = p.split(':')[1];
-                        document.getElementById('firstName').value = n.split(' ')[0];
-                        document.getElementById('lastName').value = n.split(' ').slice(1).join(' ');
-                    }
-                    if(p.startsWith('GENO:')) document.getElementById('genotype').value = p.split(':')[1];
-                    if(p.startsWith('GS:')) document.getElementById('bloodGroup').value = p.split(':')[1];
-                });
-            }
-
-            // Validation finale
-            document.getElementById('qrVerified').value = 'true';
+        function simulateQR(genotype, bloodGroup) {
+            document.getElementById('nom').value = 'João Silva';
+            document.getElementById('genotype').value = genotype;
+            document.getElementById('gs').value = bloodGroup;
             document.getElementById('submitBtn').disabled = false;
-            document.getElementById('scan-status').innerHTML = '✅ Données récupérées !';
-            
-            // Fermeture propre
             scanner.stop();
             document.getElementById('reader').style.display = 'none';
-            document.getElementById('scanBtn').style.display = 'none';
-
-        } catch(e) {
-            alert("Format de QR code non reconnu");
         }
-    }
-    
-    // ... Gardez vos fonctions previewPhoto et l'écouteur de submit ici ...
-</script>
 
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                nom: document.getElementById('nom').value,
+                genotype: document.getElementById('genotype').value,
+                groupeSanguin: document.getElementById('gs').value,
+                email: document.getElementById('email').value,
+                verified: true
+            };
+            
+            if (!data.nom || !data.genotype || !data.groupeSanguin || !data.email) {
+                alert("❌ Tous les champs sont requis");
+                return;
+            }
+            
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if(res.ok) {
+                alert("🎉 Compte créé !");
+                window.location.href = '/';
+            } else {
+                const err = await res.json();
+                alert("❌ " + err.error);
+            }
+        };
+    </script>
+</body>
+</html>
+    `);
 });
 // ============================================
 // INSCRIPTION MANUELLE
