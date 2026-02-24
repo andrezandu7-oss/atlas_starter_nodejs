@@ -2111,67 +2111,45 @@ app.get('/signup-choice', (req, res) => {
 app.get('/signup-qr', (req, res) => {
     res.send(`
         <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
-        <div style="max-width:500px; margin:auto; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; padding:20px;">
-            <div style="text-align:center; margin-bottom:25px;">
-                <h3 style="margin:0 0 10px 0; color:#1a1a1a;">Scannez le code QR du certificat</h3>
-                <p style="margin:0; color:#666; font-size:14px;">Positionnez le QR code dans le cadre</p>
-            </div>
-            
+        <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
+            <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
             <div id="reader" style="width:100%; height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;">
-                <div id="status" style="position:absolute; top:10px; left:10px; color:white; font-size:12px; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; display:none;">En attente...</div>
+                <div id="status" style="position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; display:none;">📱 Positionnez le QR code</div>
             </div>
             
             <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:25px;">
                 <input type="hidden" name="isVerified" value="true">
                 
                 <div id="certData" style="background:#e8f5e8; padding:20px; border-radius:12px; margin-bottom:20px; display:none; border:2px solid #28a745;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:15px;">
-                        <div style="width:8px; height:8px; background:#28a745; border-radius:50%;"></div>
-                        <p style="font-size:13px; color:#28a745; font-weight:500; margin:0;">✔ Données extraites et validées du certificat</p>
-                    </div>
+                    <p style="color:#28a745; font-weight:500;">✔ Données extraites du certificat</p>
                     
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                        <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:8px; background:#f9fafb;">
-                        <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:8px; background:#f9fafb;">
-                    </div>
+                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
                     
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                        <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:8px; background:#f9fafb;">
-                        <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:8px; background:#f9fafb;">
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center;">
+                        <span style="align-self:center;">/</span>
+                        <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center;">
+                        <span style="align-self:center;">/</span>
+                        <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px;">
                     </div>
-                    
-                    <div style="margin-top:12px;">
-                        <label style="font-size:13px; color:#374151; display:block; margin-bottom:5px;">Date de naissance</label>
-                        <div style="display:flex; gap:8px;">
-                            <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center;">
-                            <span style="align-self:center; color:#9ca3af;">/</span>
-                            <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center;">
-                            <span style="align-self:center; color:#9ca3af;">/</span>
-                            <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px;">
-                        </div>
-                        <input type="hidden" id="dob" name="dob">
-                    </div>
+                    <input type="hidden" id="dob" name="dob">
                 </div>
 
-                <div id="manualFields" style="display:block;">
-                    <input type="text" name="residence" placeholder="Résidence actuelle" required 
-                           style="width:100%; margin:12px 0; padding:14px; border:1px solid #d1d5db; border-radius:8px; font-size:16px; transition:all 0.2s;">
-                    
-                    <input type="text" name="region" placeholder="Région / Province" required 
-                           style="width:100%; margin:12px 0; padding:14px; border:1px solid #d1d5db; border-radius:8px; font-size:16px; transition:all 0.2s;">
-                    
-                    <label style="display:block; margin:20px 0 8px; font-weight:500; color:#1f2937;">Projet de vie</label>
-                    <select name="desireChild" style="width:100%; padding:14px; border:1px solid #d1d5db; border-radius:8px; font-size:16px; background:#fff;">
-                        <option value="">Sélectionnez une option</option>
-                        <option value="Oui">Oui, désir d'enfant</option>
-                        <option value="Non">Non, pas de désir d'enfant</option>
-                        <option value="Undecided">Pas encore décidé(e)</option>
-                    </select>
-                </div>
+                <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
+                <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
+                
+                <label style="display:block; margin:15px 0 5px;">Projet de vie :</label>
+                <select name="desireChild" style="width:100%; padding:14px; border:1px solid #ddd; border-radius:8px;">
+                    <option value="">Choisir...</option>
+                    <option value="Oui">Oui</option>
+                    <option value="Non">Non</option>
+                    <option value="Undecided">Undecided</option>
+                </select>
 
-                <button type="submit" id="submitBtn" disabled style="width:100%; padding:16px; background:#9ca3af; color:#6b7280; border:none; border-radius:30px; margin-top:25px; font-weight:600; font-size:16px; cursor:not-allowed; transition:all 0.2s;">
-                    Compléter les informations manquantes
-                </button>
+                <button type="submit" id="submitBtn" disabled style="width:100%; padding:16px; background:#9ca3af; color:#6b7280; border:none; border-radius:30px; margin-top:20px; font-weight:bold; cursor:not-allowed;">Compléter les informations</button>
             </form>
         </div>
 
@@ -2180,114 +2158,72 @@ app.get('/signup-qr', (req, res) => {
             let isScanning = true;
 
             function initScanner() {
-                const statusEl = document.getElementById('status');
+                document.getElementById('status').style.display = 'block';
                 
-                // ✅ DÉTECTION PORTS RAPIDE - IDENTIQUE À L'ORIGINAL
-                scanner = new Html5QrcodeScanner("reader", { 
-                    fps: 10, 
-                    qrbox: 250  // ← Format ORIGINAL simple → délai ~500ms
-                });
+                // ✅ EXACTEMENT COMME TON CODE ORIGINAL
+                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
 
                 scanner.render((decodedText) => {
                     if (isScanning) {
                         processQRData(decodedText);
                     }
-                }, (error) => {
-                    // Erreur silencieuse
                 });
-
-                statusEl.textContent = "📱 Positionnez le QR code";
-                statusEl.style.display = 'block';
             }
 
             function processQRData(text) {
                 try {
-                    // Format: Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
                     const data = text.trim().split('|');
-                    if (data.length !== 5) {
-                        throw new Error('Format QR invalide');
-                    }
+                    if (data.length !== 5) throw new Error('Format invalide');
 
-                    // Validation des données
-                    if (!data[0]?.trim() || !data[1]?.trim() || !data[2]?.trim() || !data[3]?.trim() || !data[4]?.trim()) {
+                    // Validation simple
+                    if (!data[0] || !data[1] || !data[2] || !data[3] || !data[4]) {
                         throw new Error('Données incomplètes');
                     }
 
-                    // Parsing et validation date
-                    const dateParts = data[4].split('/');
-                    if (dateParts.length !== 3) {
-                        throw new Error('Format date invalide');
-                    }
-
-                    const day = parseInt(dateParts[0]), month = parseInt(dateParts[1]), year = parseInt(dateParts[2]);
-                    if (isNaN(day) || isNaN(month) || isNaN(year) || day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
-                        throw new Error('Date invalide');
-                    }
-
-                    // ✅ REMPLISSAGE IDENTIQUE À L'ORIGINAL
+                    // ✅ REMPLISSAGE IDENTIQUE À TON CODE
                     document.getElementById('fn').value = data[0].trim();
                     document.getElementById('ln').value = data[1].trim();
                     document.getElementById('gt').value = data[2].trim();
                     document.getElementById('bg').value = data[3].trim();
                     document.getElementById('dob').value = data[4].trim();
                     
+                    const dateParts = data[4].split('/');
                     document.getElementById('d').value = dateParts[0];
                     document.getElementById('m').value = dateParts[1];
                     document.getElementById('y').value = dateParts[2];
 
-                    // UX améliorée
+                    // Activation formulaire
                     document.getElementById('certData').style.display = 'block';
-                    document.getElementById('manualFields').style.display = 'block';
                     document.getElementById('submitBtn').disabled = false;
-                    document.getElementById('submitBtn').textContent = 'Finaliser mon inscription certifiée ✅';
+                    document.getElementById('submitBtn').textContent = 'Finaliser inscription certifiée ✅';
                     document.getElementById('submitBtn').style.background = '#10b981';
                     document.getElementById('submitBtn').style.color = 'white';
                     document.getElementById('submitBtn').style.cursor = 'pointer';
 
                     scanner.clear();
                     isScanning = false;
-                    showToast('Certificat validé avec succès ! ✅');
+                    alert('Certificat validé ! ✅');
 
                 } catch (error) {
-                    showToast('Erreur QR: ' + error.message, 'error');
+                    alert('Erreur: ' + error.message);
                 }
             }
 
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.style.cssText = `
-                    position:fixed; top:20px; right:20px; background:${type === 'error' ? '#ef4444' : '#10b981'};
-                    color:white; padding:12px 20px; border-radius:8px; font-weight:500; z-index:10000;
-                    transform:translateX(400px); transition:all 0.3s; max-width:300px; box-shadow:0 4px 12px rgba(0,0,0,0.15);
-                `;
-                toast.textContent = message;
-                document.body.appendChild(toast);
-                
-                setTimeout(() => toast.style.transform = 'translateX(0)', 100);
-                setTimeout(() => {
-                    toast.style.transform = 'translateX(400px)';
-                    setTimeout(() => document.body.removeChild(toast), 300);
-                }, 3000);
-            }
-
-            // Validation formulaire
             document.getElementById('certForm').addEventListener('submit', (e) => {
-                const required = ['residence', 'region', 'desireChild'];
-                for (let field of required) {
-                    if (!document.querySelector(`[name="${field}"]`).value.trim()) {
-                        e.preventDefault();
-                        showToast('Veuillez compléter tous les champs', 'error');
-                        return false;
-                    }
+                const residence = document.querySelector('[name="residence"]').value;
+                const region = document.querySelector('[name="region"]').value;
+                const desireChild = document.querySelector('[name="desireChild"]').value;
+                
+                if (!residence || !region || !desireChild) {
+                    e.preventDefault();
+                    alert('Complétez tous les champs');
                 }
             });
 
-            // Init
             window.addEventListener('load', initScanner);
         </script>
     `);
 });
-
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
