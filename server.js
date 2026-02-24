@@ -2107,7 +2107,8 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION AVEC QR CODE (AVEC TON MÉCANISME)
+// ============================================
+// INSCRIPTION AVEC QR CODE - Version avec ton mécanisme qui fonctionne
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const t = req.t;
@@ -2121,6 +2122,58 @@ app.get('/signup-qr', (req, res) => {
     ${styles}
     ${notifyScript}
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        /* Styles supplémentaires pour le scanner */
+        #reader {
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            background: #000;
+        }
+        .debug-box {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 10px 0;
+            display: none;
+            border-left: 5px solid #ff416c;
+            color: #333;
+            text-align: left;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .test-btn {
+            flex: 1;
+            background: #1a2a44;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .test-btn:hover {
+            background: #ff416c;
+            transform: translateY(-2px);
+        }
+        .qr-link {
+            text-align: center;
+            margin: 15px 0;
+            color: #ff416c;
+            text-decoration: none;
+            display: block;
+        }
+        .qr-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="app-shell">
@@ -2133,7 +2186,7 @@ app.get('/signup-qr', (req, res) => {
         <div class="page-white">
             <h2>${t('signupTitle')}</h2>
             
-            <!-- Section QR Scan -->
+            <!-- Section QR Scan (TON MÉCANISME) -->
             <div class="qr-scan-section">
                 <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
                 <h3 style="color:white;">${t('withCertificate')}</h3>
@@ -2147,7 +2200,7 @@ app.get('/signup-qr', (req, res) => {
                 <div id="scan-status" style="margin-top: 10px; color: #ffd700;"></div>
             </div>
             
-            <!-- Boutons de test -->
+            <!-- Boutons de test (TON CODE) -->
             <div class="test-buttons">
                 <button class="test-btn" onclick="simulateQR('AA', 'O+')">AA / O+</button>
                 <button class="test-btn" onclick="simulateQR('AS', 'A+')">AS / A+</button>
@@ -2219,7 +2272,7 @@ app.get('/signup-qr', (req, res) => {
         let photoBase64 = "";
         let scanner = null;
         
-        // Démarrer le scanner automatiquement
+        // TON CODE DE SCAN - INCHANGÉ
         window.onload = function() {
             startScanner();
         };
@@ -2287,6 +2340,7 @@ app.get('/signup-qr', (req, res) => {
             });
         }
         
+        // TON CODE DE SIMULATION - INCHANGÉ
         function simulateQR(genotype, bloodGroup) {
             document.getElementById('firstName').value = 'João';
             document.getElementById('lastName').value = 'Silva';
