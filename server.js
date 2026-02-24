@@ -401,8 +401,607 @@ const translations = {
         locationHelp: 'Help people near you to contact you easily',
         yourLocation: '📍 Your location',
         lifeProject: '👶 Life project'
+    },
+    pt: {
+        appName: 'Genlove',
+        slogan: 'Una coração e saúde para construir casais saudáveis 💑',
+        security: '🛡️ Seus dados de saúde estão criptografados',
+        welcome: 'Bem-vindo ao Genlove',
+        haveAccount: 'Já tem uma conta?',
+        login: 'Entrar',
+        createAccount: 'Criar conta',
+        loginTitle: 'Entrar',
+        enterName: 'Digite seu primeiro nome para entrar',
+        yourName: 'Seu primeiro nome',
+        backHome: '← Voltar ao início',
+        nameNotFound: 'Nome não encontrado. Por favor, crie uma conta.',
+        charterTitle: '📜 A Carta de Honra',
+        charterSubtitle: 'Leia estes 5 compromissos atentamente',
+        scrollDown: '⬇️ Role até o final ⬇️',
+        accept: 'Aceito e continuo',
+        oath1: '1. O Juramento de Sinceridade',
+        oath1Sub: 'Verdade Médica',
+        oath1Text: 'Comprometo-me, sob minha honra, a fornecer informações precisas sobre meu genótipo e dados de saúde.',
+        oath2: '2. O Pacto de Confidencialidade',
+        oath2Sub: 'Segredo Compartilhado',
+        oath2Text: 'Comprometo-me a manter todas as informações pessoais e médicas confidenciais.',
+        oath3: '3. O Princípio da Não-Discriminação',
+        oath3Sub: 'Igualdade de Respeito',
+        oath3Text: 'Trato cada membro com dignidade, independentemente do seu genótipo.',
+        oath4: '4. Responsabilidade Preventiva',
+        oath4Sub: 'Orientação para a Saúde',
+        oath4Text: 'Aceito medidas de proteção como a filtragem de compatibilidades de risco.',
+        oath5: '5. Benevolência Ética',
+        oath5Sub: 'Cortesia',
+        oath5Text: 'Adoto uma conduta exemplar e respeitosa em minhas mensagens.',
+        signupTitle: 'Criar meu perfil',
+        signupSub: 'Todas as informações são confidenciais',
+        firstName: 'Primeiro nome',
+        lastName: 'Sobrenome',
+        gender: 'Gênero',
+        male: 'Homem',
+        female: 'Mulher',
+        dob: 'Data de nascimento',
+        city: 'Cidade de residência',
+        region: 'Região',
+        allRegions: 'Todas as regiões',
+        myRegion: 'Minha região apenas',
+        genotype: 'Genótipo',
+        bloodGroup: 'Grupo sanguíneo',
+        desireChild: 'Desejo de ter filhos?',
+        yes: 'Sim',
+        no: 'Não',
+        createProfile: 'Criar meu perfil',
+        backCharter: '← Voltar à carta',
+        required: 'obrigatório',
+        honorTitle: 'Juramento de Honra',
+        honorText: 'Confirmo por minha honra que minhas informações são sinceras e conformes à realidade.',
+        swear: 'Eu juro',
+        accessProfile: 'Acessar meu perfil',
+        myProfile: 'Meu Perfil',
+        home: 'Início',
+        messages: 'Mensagens',
+        settings: 'Configurações',
+        genotype_label: 'Genótipo',
+        blood_label: 'Grupo',
+        age_label: 'Idade',
+        residence_label: 'Residência',
+        region_label: 'Região',
+        project_label: 'Projeto',
+        findPartner: 'Encontrar parceiro(a)',
+        editProfile: 'Editar perfil',
+        compatiblePartners: 'Parceiros compatíveis',
+        noPartners: 'Nenhum parceiro encontrado no momento',
+        searchOngoing: 'Pesquisa em andamento...',
+        expandCommunity: 'Estamos expandindo nossa comunidade. Volte em breve!',
+        details: 'Detalhes',
+        contact: 'Contatar',
+        backProfile: '← Meu perfil',
+        toMessages: 'Mensagens →',
+        healthCommitment: 'Seu compromisso com a saúde',
+        popupMessageAS: 'Como perfil AS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
+        popupMessageSS: 'Como perfil SS, mostramos apenas parceiros AA. Esta escolha responsável garante a serenidade do seu futuro lar e protege seus descendentes contra a doença falciforme.',
+        understood: 'Entendi',
+        inboxTitle: 'Caixa de entrada',
+        emptyInbox: 'Caixa vazia',
+        startConversation: 'Comece uma conversa!',
+        findPartners: 'Encontrar parceiros',
+        block: 'Bloquear',
+        unblock: 'Desbloquear',
+        yourMessage: 'Sua mensagem...',
+        send: 'Enviar',
+        blockedByUser: 'Conversa impossível',
+        blockedMessage: 'Este usuário bloqueou você. Não é possível enviar mensagens.',
+        settingsTitle: 'Configurações',
+        visibility: 'Visibilidade do perfil',
+        notifications: 'Notificações push',
+        language: 'Idioma',
+        blockedUsers: 'Usuários bloqueados',
+        dangerZone: '⚠️ ZONA DE PERIGO',
+        deleteAccount: 'Excluir minha conta',
+        delete: 'Excluir',
+        logout: 'Sair',
+        confirmDelete: 'Excluir permanentemente?',
+        noBlocked: 'Nenhum usuário bloqueado',
+        thankYou: 'Obrigado por este encontro',
+        thanksMessage: 'Genlove agradece',
+        newSearch: 'Nova pesquisa',
+        logoutSuccess: 'Saída bem-sucedida',
+        seeYouSoon: 'Até breve!',
+        french: 'Francês',
+        english: 'Inglês',
+        portuguese: 'Português',
+        spanish: 'Espanhol',
+        arabic: 'Árabe',
+        chinese: 'Chinês',
+        pageNotFound: 'Página não encontrada',
+        pageNotFoundMessage: 'A página que você procura não existe.',
+        project_life: 'Projeto de vida',
+        interestPopup: '{name} está muito atraído(a) pelo seu perfil porque vocês compartilham boa compatibilidade. Você pode alguns minutos para conversar?',
+        acceptRequest: '✓ Aceitar',
+        rejectRequest: '✗ Recusar',
+        rejectionPopup: 'Desculpe, {name} não deu um retorno favorável ao seu pedido. Faça outras pesquisas.',
+        gotIt: 'Entendi',
+        returnProfile: '📋 Meu perfil',
+        newMatch: '🔍 Nova pesquisa',
+        sendingRequest: '⏳ Seu pedido está sendo enviado...',
+        requestSent: '✅ Pedido enviado!',
+        january: 'Janeiro',
+        february: 'Fevereiro',
+        march: 'Março',
+        april: 'Abril',
+        may: 'Maio',
+        june: 'Junho',
+        july: 'Julho',
+        august: 'Agosto',
+        september: 'Setembro',
+        october: 'Outubro',
+        november: 'Novembro',
+        december: 'Dezembro',
+        day: 'Dia',
+        month: 'Mês',
+        year: 'Ano',
+        
+        // QR Code translations
+        withCertificate: 'Com certificado médico',
+        manualEntry: 'Manualmente',
+        scanAutomatic: 'Leitura automática dos seus dados',
+        freeEntry: 'Digitação livre das suas informações',
+        dataFromCertificate: '✅ Dados do seu certificado',
+        locationHelp: 'Ajude as pessoas mais próximas de você a contatá-lo facilmente',
+        yourLocation: '📍 Sua localização',
+        lifeProject: '👶 Projeto de vida'
+    },
+    es: {
+        appName: 'Genlove',
+        slogan: 'Une corazón y salud para construir parejas saludables 💑',
+        security: '🛡️ Sus datos de salud están encriptados',
+        welcome: 'Bienvenido a Genlove',
+        haveAccount: '¿Ya tienes una cuenta?',
+        login: 'Iniciar sesión',
+        createAccount: 'Crear cuenta',
+        loginTitle: 'Iniciar sesión',
+        enterName: 'Ingrese su nombre para iniciar sesión',
+        yourName: 'Su nombre',
+        backHome: '← Volver al inicio',
+        nameNotFound: 'Nombre no encontrado. Por favor, cree una cuenta.',
+        charterTitle: '📜 La Carta de Honor',
+        charterSubtitle: 'Lea estos 5 compromisos atentamente',
+        scrollDown: '⬇️ Desplácese hasta el final ⬇️',
+        accept: 'Acepto y continúo',
+        oath1: '1. El Juramento de Sinceridad',
+        oath1Sub: 'Verdad Médica',
+        oath1Text: 'Me comprometo bajo mi honor a proporcionar información precisa sobre mi genotipo y datos de salud.',
+        oath2: '2. El Pacto de Confidencialidad',
+        oath2Sub: 'Secreto Compartido',
+        oath2Text: 'Me comprometo a mantener toda la información personal y médica confidencial.',
+        oath3: '3. El Principio de No Discriminación',
+        oath3Sub: 'Igualdad de Respeto',
+        oath3Text: 'Trato a cada miembro con dignidad, independientemente de su genotipo.',
+        oath4: '4. Responsabilidad Preventiva',
+        oath4Sub: 'Orientación para la Salud',
+        oath4Text: 'Acepto medidas de protección como el filtrado de compatibilidades de riesgo.',
+        oath5: '5. Benevolencia Ética',
+        oath5Sub: 'Cortesía',
+        oath5Text: 'Adopto una conducta ejemplar y respetuosa en mis mensajes.',
+        signupTitle: 'Crear mi perfil',
+        signupSub: 'Toda la información es confidencial',
+        firstName: 'Nombre',
+        lastName: 'Apellido',
+        gender: 'Género',
+        male: 'Hombre',
+        female: 'Mujer',
+        dob: 'Fecha de nacimiento',
+        city: 'Ciudad de residencia',
+        region: 'Región',
+        allRegions: 'Todas las regiones',
+        myRegion: 'Mi región solamente',
+        genotype: 'Genotipo',
+        bloodGroup: 'Grupo sanguíneo',
+        desireChild: '¿Deseo de tener hijos?',
+        yes: 'Sí',
+        no: 'No',
+        createProfile: 'Crear mi perfil',
+        backCharter: '← Volver a la carta',
+        required: 'obligatorio',
+        honorTitle: 'Juramento de Honor',
+        honorText: 'Confirmo bajo mi honor que mi información es sincera y conforme a la realidad.',
+        swear: 'Lo juro',
+        accessProfile: 'Acceder a mi perfil',
+        myProfile: 'Mi Perfil',
+        home: 'Inicio',
+        messages: 'Mensajes',
+        settings: 'Configuración',
+        genotype_label: 'Genotipo',
+        blood_label: 'Grupo',
+        age_label: 'Edad',
+        residence_label: 'Residencia',
+        region_label: 'Región',
+        project_label: 'Proyecto',
+        findPartner: 'Encontrar pareja',
+        editProfile: 'Editar perfil',
+        compatiblePartners: 'Parejas compatibles',
+        noPartners: 'No se encontraron parejas por el momento',
+        searchOngoing: 'Búsqueda en curso...',
+        expandCommunity: 'Estamos expandiendo nuestra comunidad. ¡Vuelva pronto!',
+        details: 'Detalles',
+        contact: 'Contactar',
+        backProfile: '← Mi perfil',
+        toMessages: 'Mensajes →',
+        healthCommitment: 'Su compromiso con la salud',
+        popupMessageAS: 'Como perfil AS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
+        popupMessageSS: 'Como perfil SS, solo le mostramos parejas AA. Esta elección responsable garantiza la serenidad de su futuro hogar y protege a su descendencia contra la enfermedad de células falciformes.',
+        understood: 'Entiendo',
+        inboxTitle: 'Bandeja de entrada',
+        emptyInbox: 'Bandeja vacía',
+        startConversation: '¡Comience una conversación!',
+        findPartners: 'Encontrar parejas',
+        block: 'Bloquear',
+        unblock: 'Desbloquear',
+        yourMessage: 'Su mensaje...',
+        send: 'Enviar',
+        blockedByUser: 'Conversación imposible',
+        blockedMessage: 'Este usuario le ha bloqueado. No puede enviarle mensajes.',
+        settingsTitle: 'Configuración',
+        visibility: 'Visibilidad del perfil',
+        notifications: 'Notificaciones push',
+        language: 'Idioma',
+        blockedUsers: 'Usuarios bloqueados',
+        dangerZone: '⚠️ ZONA DE PELIGRO',
+        deleteAccount: 'Eliminar mi cuenta',
+        delete: 'Eliminar',
+        logout: 'Cerrar sesión',
+        confirmDelete: '¿Eliminar permanentemente?',
+        noBlocked: 'No hay usuarios bloqueados',
+        thankYou: 'Gracias por este intercambio',
+        thanksMessage: 'Genlove le agradece',
+        newSearch: 'Nueva búsqueda',
+        logoutSuccess: 'Sesión cerrada',
+        seeYouSoon: '¡Hasta pronto!',
+        french: 'Francés',
+        english: 'Inglés',
+        portuguese: 'Portugués',
+        spanish: 'Español',
+        arabic: 'Árabe',
+        chinese: 'Chino',
+        pageNotFound: 'Página no encontrada',
+        pageNotFoundMessage: 'La página que busca no existe.',
+        project_life: 'Proyecto de vida',
+        interestPopup: '{name} está muy atraído(a) por tu perfil porque comparten buena compatibilidad. ¿Puedes tomar unos minutos para conversar?',
+        acceptRequest: '✓ Aceptar',
+        rejectRequest: '✗ Rechazar',
+        rejectionPopup: 'Lo sentimos, {name} no dio una respuesta favorable a tu solicitud. Realiza otras búsquedas.',
+        gotIt: 'Entiendo',
+        returnProfile: '📋 Mi perfil',
+        newMatch: '🔍 Nueva búsqueda',
+        sendingRequest: '⏳ Tu solicitud está siendo enviada...',
+        requestSent: '✅ Solicitud enviada!',
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre',
+        day: 'Día',
+        month: 'Mes',
+        year: 'Año',
+        
+        // QR Code translations
+        withCertificate: 'Con certificado médico',
+        manualEntry: 'Manual',
+        scanAutomatic: 'Escaneo automático de sus datos',
+        freeEntry: 'Ingreso libre de su información',
+        dataFromCertificate: '✅ Datos de su certificado',
+        locationHelp: 'Ayude a las personas más cercanas a contactarlo fácilmente',
+        yourLocation: '📍 Su ubicación',
+        lifeProject: '👶 Proyecto de vida'
+    },
+    ar: {
+        appName: 'جينلوف',
+        slogan: '💑 وحد القلب والصحة لبناء أزواج أصحاء',
+        security: '🛡️ بياناتك الصحية مشفرة',
+        welcome: 'مرحباً بك في جينلوف',
+        haveAccount: 'هل لديك حساب بالفعل؟',
+        login: 'تسجيل الدخول',
+        createAccount: 'إنشاء حساب',
+        loginTitle: 'تسجيل الدخول',
+        enterName: 'أدخل اسمك الأول لتسجيل الدخول',
+        yourName: 'اسمك الأول',
+        backHome: '→ العودة إلى الرئيسية',
+        nameNotFound: 'الاسم غير موجود. يرجى إنشاء حساب.',
+        charterTitle: '📜 ميثاق الشرف',
+        charterSubtitle: 'اقرأ هذه الالتزامات الخمسة بعناية',
+        scrollDown: '⬇️ انتقل إلى الأسفل ⬇️',
+        accept: 'أقبل وأواصل',
+        oath1: '١. قسم الإخلاص',
+        oath1Sub: 'الحقيقة الطبية',
+        oath1Text: 'أتعهد بشرفي بتقديم معلومات دقيقة عن نمطي الوراثي وبياناتي الصحية.',
+        oath2: '٢. ميثاق السرية',
+        oath2Sub: 'السر المشترك',
+        oath2Text: 'ألتزم بالحفاظ على سرية جميع المعلومات الشخصية والطبية.',
+        oath3: '٣. مبدأ عدم التمييز',
+        oath3Sub: 'المساواة في الاحترام',
+        oath3Text: 'أعامل كل عضو بكرامة، بغض النظر عن نمطه الوراثي.',
+        oath4: '٤. المسؤولية الوقائية',
+        oath4Sub: 'التوجيه الصحي',
+        oath4Text: 'أقبل تدابير الحماية مثل تصفية التوافقيات الخطرة.',
+        oath5: '٥. الإحسان الأخلاقي',
+        oath5Sub: 'المجاملة',
+        oath5Text: 'أعتمد سلوكاً مثالياً ومحترماً في رسائلي.',
+        signupTitle: 'إنشاء ملفي الشخصي',
+        signupSub: 'جميع المعلومات سرية',
+        firstName: 'الاسم الأول',
+        lastName: 'اسم العائلة',
+        gender: 'الجنس',
+        male: 'ذكر',
+        female: 'أنثى',
+        dob: 'تاريخ الميلاد',
+        city: 'مدينة الإقامة',
+        region: 'المنطقة',
+        allRegions: 'جميع المناطق',
+        myRegion: 'منطقتي فقط',
+        genotype: 'النمط الوراثي',
+        bloodGroup: 'فصيلة الدم',
+        desireChild: 'الرغبة في الأطفال؟',
+        yes: 'نعم',
+        no: 'لا',
+        createProfile: 'إنشاء ملفي الشخصي',
+        backCharter: '→ العودة إلى الميثاق',
+        required: 'إلزامي',
+        honorTitle: 'قسم الشرف',
+        honorText: 'أؤكد بشرفي أن معلوماتي صادقة ومطابقة للواقع.',
+        swear: 'أقسم',
+        accessProfile: 'الوصول إلى ملفي الشخصي',
+        myProfile: 'ملفي الشخصي',
+        home: 'الرئيسية',
+        messages: 'الرسائل',
+        settings: 'الإعدادات',
+        genotype_label: 'النمط الوراثي',
+        blood_label: 'الفصيلة',
+        age_label: 'العمر',
+        residence_label: 'الإقامة',
+        region_label: 'المنطقة',
+        project_label: 'المشروع',
+        findPartner: 'العثور على شريك',
+        editProfile: 'تعديل الملف الشخصي',
+        compatiblePartners: 'الشركاء المتوافقون',
+        noPartners: 'لم يتم العثور على شركاء في الوقت الحالي',
+        searchOngoing: 'البحث جار...',
+        expandCommunity: 'نحن نوسع مجتمعنا. عد قريباً!',
+        details: 'التفاصيل',
+        contact: 'اتصال',
+        backProfile: '→ ملفي الشخصي',
+        toMessages: '→ الرسائل',
+        healthCommitment: 'التزامك الصحي',
+        popupMessageAS: 'كملف AS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
+        popupMessageSS: 'كملف SS، نحن نعرض لك فقط شركاء AA. هذا الاختيار المسؤول يضمن سكينة منزلك المستقبلي ويحمي نسلك من مرض الخلايا المنجلية.',
+        understood: 'فهمت',
+        inboxTitle: 'صندوق الوارد',
+        emptyInbox: 'صندوق فارغ',
+        startConversation: 'ابدأ محادثة!',
+        findPartners: 'العثور على شركاء',
+        block: 'حظر',
+        unblock: 'إلغاء الحظر',
+        yourMessage: 'رسالتك...',
+        send: 'إرسال',
+        blockedByUser: 'محادثة غير ممكنة',
+        blockedMessage: 'هذا المستخدم قام بحظرك. لا يمكنك إرسال رسائل له.',
+        settingsTitle: 'الإعدادات',
+        visibility: 'رؤية الملف الشخصي',
+        notifications: 'إشعارات فورية',
+        language: 'اللغة',
+        blockedUsers: 'المستخدمون المحظورون',
+        dangerZone: '⚠️ منطقة الخطر',
+        deleteAccount: 'حذف حسابي',
+        delete: 'حذف',
+        logout: 'تسجيل الخروج',
+        confirmDelete: 'حذف نهائياً؟',
+        noBlocked: 'لا يوجد مستخدمين محظورين',
+        thankYou: 'شكراً لهذا التبادل',
+        thanksMessage: 'جينلوف تشكرك',
+        newSearch: 'بحث جديد',
+        logoutSuccess: 'تم تسجيل الخروج بنجاح',
+        seeYouSoon: 'أراك قريباً!',
+        french: 'الفرنسية',
+        english: 'الإنجليزية',
+        portuguese: 'البرتغالية',
+        spanish: 'الإسبانية',
+        arabic: 'العربية',
+        chinese: 'الصينية',
+        pageNotFound: 'الصفحة غير موجودة',
+        pageNotFoundMessage: 'الصفحة التي تبحث عنها غير موجودة.',
+        project_life: 'مشروع الحياة',
+        interestPopup: '{name} مهتم جداً بملفك الشخصي لأنكما تشاركان توافقاً جيداً. هل يمكنك أخذ بضع دقائق للدردشة؟',
+        acceptRequest: '✓ قبول',
+        rejectRequest: '✗ رفض',
+        rejectionPopup: 'عذراً، {name} لم يعط رداً إيجابياً لطلبك. قم بإجراء عمليات بحث أخرى.',
+        gotIt: 'فهمت',
+        returnProfile: '📋 ملفي الشخصي',
+        newMatch: '🔍 بحث جديد',
+        sendingRequest: '⏳ جاري إرسال طلبك...',
+        requestSent: '✅ تم إرسال الطلب!',
+        january: 'يناير',
+        february: 'فبراير',
+        march: 'مارس',
+        april: 'أبريل',
+        may: 'مايو',
+        june: 'يونيو',
+        july: 'يوليو',
+        august: 'أغسطس',
+        september: 'سبتمبر',
+        october: 'أكتوبر',
+        november: 'نوفمبر',
+        december: 'ديسمبر',
+        day: 'يوم',
+        month: 'شهر',
+        year: 'سنة',
+        
+        // QR Code translations
+        withCertificate: 'مع شهادة طبية',
+        manualEntry: 'يدوياً',
+        scanAutomatic: 'مسح تلقائي لبياناتك',
+        freeEntry: 'إدخال حر لمعلوماتك',
+        dataFromCertificate: '✅ بيانات من شهادتك',
+        locationHelp: 'ساعد الأشخاص الأقرب إليك على الاتصال بك بسهولة',
+        yourLocation: '📍 موقعك',
+        lifeProject: '👶 مشروع الحياة'
+    },
+    zh: {
+        appName: '真爱基因',
+        slogan: '💑 结合心灵与健康，建立健康的伴侣关系',
+        security: '🛡️ 您的健康数据已加密',
+        welcome: '欢迎来到真爱基因',
+        haveAccount: '已有帐户？',
+        login: '登录',
+        createAccount: '创建帐户',
+        loginTitle: '登录',
+        enterName: '输入您的名字以登录',
+        yourName: '您的名字',
+        backHome: '← 返回首页',
+        nameNotFound: '未找到名字。请创建帐户。',
+        charterTitle: '📜 荣誉宪章',
+        charterSubtitle: '请仔细阅读这5项承诺',
+        scrollDown: '⬇️ 滚动到底部 ⬇️',
+        accept: '我接受并继续',
+        oath1: '1. 真诚誓言',
+        oath1Sub: '医疗真相',
+        oath1Text: '我以荣誉保证提供关于我的基因型和健康数据的准确信息。',
+        oath2: '2. 保密契约',
+        oath2Sub: '共享秘密',
+        oath2Text: '我承诺对所有个人和医疗信息保密。',
+        oath3: '3. 非歧视原则',
+        oath3Sub: '尊重平等',
+        oath3Text: '我尊重每一位成员，无论其基因型如何。',
+        oath4: '4. 预防责任',
+        oath4Sub: '健康导向',
+        oath4Text: '我接受保护措施，如过滤风险兼容性。',
+        oath5: '5. 道德仁慈',
+        oath5Sub: '礼貌',
+        oath5Text: '我在信息中采取模范和尊重的行为。',
+        signupTitle: '创建我的个人资料',
+        signupSub: '所有信息都是保密的',
+        firstName: '名字',
+        lastName: '姓氏',
+        gender: '性别',
+        male: '男',
+        female: '女',
+        dob: '出生日期',
+        city: '居住城市',
+        region: '地区',
+        allRegions: '所有地区',
+        myRegion: '仅我的地区',
+        genotype: '基因型',
+        bloodGroup: '血型',
+        desireChild: '想要孩子吗？',
+        yes: '是',
+        no: '否',
+        createProfile: '创建个人资料',
+        backCharter: '← 返回宪章',
+        required: '必填',
+        honorTitle: '荣誉誓言',
+        honorText: '我以荣誉确认我的信息是真实的，符合实际情况。',
+        swear: '我发誓',
+        accessProfile: '访问我的个人资料',
+        myProfile: '我的个人资料',
+        home: '首页',
+        messages: '消息',
+        settings: '设置',
+        genotype_label: '基因型',
+        blood_label: '血型',
+        age_label: '年龄',
+        residence_label: '居住地',
+        region_label: '地区',
+        project_label: '项目',
+        findPartner: '寻找伴侣',
+        editProfile: '编辑个人资料',
+        compatiblePartners: '兼容的伴侣',
+        noPartners: '目前未找到伴侣',
+        searchOngoing: '搜索中...',
+        expandCommunity: '我们正在扩大社区。请稍后再来！',
+        details: '详情',
+        contact: '联系',
+        backProfile: '← 我的个人资料',
+        toMessages: '消息 →',
+        healthCommitment: '您的健康承诺',
+        popupMessageAS: '作为AS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
+        popupMessageSS: '作为SS档案，我们只向您展示AA伴侣。这一负责任的选择保证了您未来家庭的安宁，并保护您的后代免受镰状细胞病的影响。',
+        understood: '我明白',
+        inboxTitle: '收件箱',
+        emptyInbox: '空收件箱',
+        startConversation: '开始对话！',
+        findPartners: '寻找伴侣',
+        block: '屏蔽',
+        unblock: '解除屏蔽',
+        yourMessage: '您的消息...',
+        send: '发送',
+        blockedByUser: '无法对话',
+        blockedMessage: '此用户已屏蔽您。您无法向他发送消息。',
+        settingsTitle: '设置',
+        visibility: '个人资料可见性',
+        notifications: '推送通知',
+        language: '语言',
+        blockedUsers: '已屏蔽用户',
+        dangerZone: '⚠️ 危险区域',
+        deleteAccount: '删除我的帐户',
+        delete: '删除',
+        logout: '退出',
+        confirmDelete: '永久删除？',
+        noBlocked: '没有已屏蔽的用户',
+        thankYou: '感谢您的交流',
+        thanksMessage: '真爱基因感谢您',
+        newSearch: '新搜索',
+        logoutSuccess: '退出成功',
+        seeYouSoon: '再见！',
+        french: '法语',
+        english: '英语',
+        portuguese: '葡萄牙语',
+        spanish: '西班牙语',
+        arabic: '阿拉伯语',
+        chinese: '中文',
+        pageNotFound: '页面未找到',
+        pageNotFoundMessage: '您查找的页面不存在。',
+        project_life: '人生计划',
+        interestPopup: '{name} 被您的个人资料深深吸引，因为你们有良好的兼容性。您能花几分钟聊聊吗？',
+        acceptRequest: '✓ 接受',
+        rejectRequest: '✗ 拒绝',
+        rejectionPopup: '抱歉，{name} 没有对您的请求给予积极回应。继续搜索吧。',
+        gotIt: '明白了',
+        returnProfile: '📋 我的个人资料',
+        newMatch: '🔍 新搜索',
+        sendingRequest: '⏳ 您的请求正在发送中...',
+        requestSent: '✅ 请求已发送！',
+        january: '一月',
+        february: '二月',
+        march: '三月',
+        april: '四月',
+        may: '五月',
+        june: '六月',
+        july: '七月',
+        august: '八月',
+        september: '九月',
+        october: '十月',
+        november: '十一月',
+        december: '十二月',
+        day: '日',
+        month: '月',
+        year: '年',
+        
+        // QR Code translations
+        withCertificate: '使用医疗证书',
+        manualEntry: '手动输入',
+        scanAutomatic: '自动扫描您的数据',
+        freeEntry: '自由输入您的信息',
+        dataFromCertificate: '✅ 来自您证书的数据',
+        locationHelp: '帮助离您最近的人轻松联系您',
+        yourLocation: '📍 您的位置',
+        lifeProject: '👶 人生计划'
     }
-    // ... (les autres langues pt, es, ar, zh seraient ici avec les mêmes clés)
 };
 
 // Middleware de traduction
@@ -982,7 +1581,7 @@ const styles = `
         color: #333;
     }
     
-    /* Styles pour QR */
+    /* Styles pour QR (version simplifiée comme dans ton code) */
     .qr-scan-section {
         background: #1a2a44;
         color: white;
@@ -1096,8 +1695,14 @@ const styles = `
         font-size: 0.8rem;
         display: inline-block;
     }
+    .filter-container {
+        padding: 15px;
+        background: white;
+        margin: 10px 15px;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
     
-    /* Responsive */
     @media (max-width: 420px) {
         body { font-size: 15px; }
         .app-shell { max-width: 100%; }
@@ -1467,253 +2072,144 @@ app.get('/charte-engagement', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - TON CODE AVEC DATE UNIQUEMENT
+// INSCRIPTION QR - TON CODE SIMPLIFIÉ QUI FONCTIONNE
 // ============================================
 app.get('/signup-qr', (req, res) => {
-    const t = req.t;
-    
-    res.send(`<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>${t('appName')} - Inscription QR</title>
-    ${styles}
-    ${notifyScript}
-    <script src="https://unpkg.com/html5-qrcode@2.2.0/minified/html5-qrcode.min.js"></script>
-    <style>
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        #reader {
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        .locked {
-            background: #f0f0f0;
-            border-color: #4caf50;
-        }
-        .debug-box {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            word-break: break-all;
-            margin: 10px 0;
-            display: none;
-            border-left: 5px solid #ff416c;
-        }
-        .date-row {
-            display: flex;
-            gap: 5px;
-            margin: 15px 0;
-        }
-        .date-row select {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 15px;
-        }
-        .test-buttons {
-            display: flex;
-            gap: 5px;
-            margin: 15px 0;
-        }
-        .test-btn {
-            flex: 1;
-            background: #1a2a44;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="app-shell">
-        <div class="page-white">
-            <div class="card">
-                <h2>${t('withCertificate')}</h2>
-                <p>${t('scanAutomatic')}</p>
-                
-                <div id="reader"></div>
-                
-                <div class="debug-box" id="debug">
-                    <strong>Dernier scan:</strong> <span id="debugText"></span>
-                </div>
-                
-                <form id="regForm">
-                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="locked input-box">
-                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="locked input-box">
-                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="locked input-box">
-                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="locked input-box">
-                    
-                    <!-- DATE DE NAISSANCE - 3 CASES HORIZONTALES -->
-                    <div class="date-row">
-                        <select id="dobDay" disabled>
-                            <option value="">${t('day')}</option>
-                            ${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
-                        </select>
-                        <select id="dobMonth" disabled>
-                            <option value="">${t('month')}</option>
-                            <option value="1">${t('january')}</option><option value="2">${t('february')}</option><option value="3">${t('march')}</option>
-                            <option value="4">${t('april')}</option><option value="5">${t('may')}</option><option value="6">${t('june')}</option>
-                            <option value="7">${t('july')}</option><option value="8">${t('august')}</option><option value="9">${t('september')}</option>
-                            <option value="10">${t('october')}</option><option value="11">${t('november')}</option><option value="12">${t('december')}</option>
-                        </select>
-                        <select id="dobYear" disabled>
-                            <option value="">${t('year')}</option>
-                            ${Array.from({length:100},(_,i)=>{
-                                let y = new Date().getFullYear()-18-i;
-                                return `<option value="${y}">${y}</option>`;
-                            }).join('')}
-                        </select>
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+            <title>Genlove - Inscription QR</title>
+            ${styles}
+            <script src="https://unpkg.com/html5-qrcode"></script>
+            <style>
+                .qr-container {
+                    max-width: 500px;
+                    margin: 0 auto;
+                    font-family: 'Segoe UI', sans-serif;
+                    padding: 20px;
+                    background: white;
+                    border-radius: 20px;
+                }
+                #reader {
+                    width: 100%;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    background: #000;
+                    margin-bottom: 20px;
+                }
+                .certificate-box {
+                    background: #e9f7ef;
+                    padding: 15px;
+                    border-radius: 10px;
+                    margin-bottom: 15px;
+                    border-left: 5px solid #28a745;
+                }
+                .certificate-box p {
+                    color: #28a745;
+                    font-size: 12px;
+                    margin-bottom: 10px;
+                }
+                .date-row {
+                    display: flex;
+                    gap: 5px;
+                    margin-top: 5px;
+                }
+                .date-row input {
+                    flex: 1;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    background: #f9f9f9;
+                }
+                .btn-submit {
+                    width: 100%;
+                    padding: 15px;
+                    background: #ff416c;
+                    color: white;
+                    border: none;
+                    border-radius: 30px;
+                    margin-top: 20px;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+                .btn-submit:hover {
+                    background: #ff1a4f;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="app-shell">
+                <div class="page-white">
+                    <div class="qr-container">
+                        <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
+                        
+                        <!-- SCANNER -->
+                        <div id="reader"></div>
+                        
+                        <form action="/api/register-qr" method="POST">
+                            <input type="hidden" name="isVerified" value="true">
+                            
+                            <!-- DONNÉES DU CERTIFICAT -->
+                            <div class="certificate-box">
+                                <p>✔ Données extraites du certificat :</p>
+                                <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                
+                                <!-- DATE DE NAISSANCE - 3 CASES -->
+                                <div class="date-row">
+                                    <input type="text" id="d" placeholder="JJ" readonly>
+                                    <input type="text" id="m" placeholder="MM" readonly>
+                                    <input type="text" id="y" placeholder="AAAA" readonly>
+                                </div>
+                                <input type="hidden" id="dob" name="dob">
+                            </div>
+
+                            <!-- CHAMPS MANUELS -->
+                            <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                            <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                            
+                            <label style="display:block; margin:10px 0 5px;">Projet de vie : Désir d'enfant ?</label>
+                            <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                                <option value="Oui">Oui</option>
+                                <option value="Non">Non</option>
+                            </select>
+
+                            <button type="submit" class="btn-submit">Finaliser mon inscription certifiée ✅</button>
+                        </form>
+                        
+                        <a href="/" class="back-link" style="display:block; text-align:center; margin-top:20px;">← Retour à l'accueil</a>
                     </div>
-                    
-                    <!-- Message d'aide -->
-                    <div class="info-message">
-                        <span class="info-icon">📍</span>
-                        <p>${t('locationHelp')}</p>
-                    </div>
-                    
-                    <input type="text" id="residence" placeholder="${t('city')}" class="input-box" required>
-                    <input type="text" id="region" placeholder="${t('region')}" class="input-box" required>
-                    <select id="desireChild" class="input-box" required>
-                        <option value="">${t('desireChild')}</option>
-                        <option value="Oui">${t('yes')}</option>
-                        <option value="Non">${t('no')}</option>
-                    </select>
-                    
-                    <input type="hidden" id="qrVerified" value="false">
-                    
-                    <button type="submit" id="submitBtn" disabled class="btn-pink">${t('createProfile')}</button>
-                </form>
-                
-                <!-- Boutons de test SANS simulation de nom -->
-                <div class="test-buttons">
-                    <button class="test-btn" onclick="testScan()">Tester le scan</button>
                 </div>
-                
-                <a href="/" class="back-link">← ${t('backHome')}</a>
             </div>
-        </div>
-    </div>
-    
-    <script>
-        // TON CODE DE SCAN - EXACTEMENT LE MÊME
-        const scanner = new Html5Qrcode("reader");
-        
-        scanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: 250 },
-            (text) => {
-                document.getElementById('debug').style.display = 'block';
-                document.getElementById('debugText').innerText = text;
-                
-                let nom = '', geno = '', gs = '', dob = '';
-                
-                if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
-                    const parts = text.split('|');
-                    parts.forEach(p => {
-                        if(p.startsWith('NOM:')) nom = p.split(':')[1];
-                        if(p.startsWith('GENO:')) geno = p.split(':')[1];
-                        if(p.startsWith('GS:')) gs = p.split(':')[1];
-                        if(p.startsWith('DOB:')) dob = p.split(':')[1];
-                    });
-                }
-                
-                try {
-                    const json = JSON.parse(text);
-                    if (json.patientName) nom = json.patientName;
-                    if (json.genotype) geno = json.genotype;
-                    if (json.bloodGroup) gs = json.bloodGroup;
-                    if (json.dateOfBirth) dob = json.dateOfBirth;
-                } catch(e) {}
-                
-                if (nom && geno && gs) {
-                    const parts = nom.split(' ');
-                    document.getElementById('firstName').value = parts[0] || '';
-                    document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
-                    document.getElementById('genotype').value = geno;
-                    document.getElementById('bloodGroup').value = gs;
-                    
-                    if (dob) {
-                        const date = new Date(dob);
-                        document.getElementById('dobDay').value = date.getDate();
-                        document.getElementById('dobMonth').value = date.getMonth() + 1;
-                        document.getElementById('dobYear').value = date.getFullYear();
-                        document.getElementById('dobDay').disabled = false;
-                        document.getElementById('dobMonth').disabled = false;
-                        document.getElementById('dobYear').disabled = false;
-                    }
-                    
-                    document.getElementById('qrVerified').value = 'true';
-                    document.getElementById('submitBtn').disabled = false;
-                    
-                    scanner.stop();
-                    document.getElementById('reader').style.display = 'none';
-                    alert("✅ ${t('scanAutomatic')}");
-                }
-            },
-            (error) => {}
-        ).catch(err => {
-            alert("❌ ${t('scanAutomatic')}: " + err);
-        });
 
-        function testScan() {
-            alert("Le scanner est actif. Veuillez scanner un vrai QR code.");
-        }
-
-        document.getElementById('regForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const day = document.getElementById('dobDay').value;
-            const month = document.getElementById('dobMonth').value;
-            const year = document.getElementById('dobYear').value;
-            
-            if (!day || !month || !year) {
-                alert("${t('dob')} ${t('required')}");
-                return;
-            }
-            
-            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
-            
-            const data = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                dob: dob,
-                genotype: document.getElementById('genotype').value,
-                bloodGroup: document.getElementById('bloodGroup').value,
-                residence: document.getElementById('residence').value,
-                region: document.getElementById('region').value,
-                desireChild: document.getElementById('desireChild').value,
-                qrVerified: true
-            };
-            
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            
-            if(res.ok) {
-                alert("🎉 ${t('createProfile')}");
-                window.location.href = '/profile';
-            } else {
-                alert("❌ ${t('createProfile')}");
-            }
-        };
-    </script>
-</body>
-</html>`);
+            <script>
+                const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+                scanner.render((text) => {
+                    // Format QR : Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
+                    const data = text.split('|');
+                    document.getElementById('fn').value = data[0] || '';
+                    document.getElementById('ln').value = data[1] || '';
+                    document.getElementById('gt').value = data[2] || '';
+                    document.getElementById('bg').value = data[3] || '';
+                    document.getElementById('dob').value = data[4] || '';
+                    
+                    const dateParts = (data[4] || '').split('/');
+                    document.getElementById('d').value = dateParts[0] || '';
+                    document.getElementById('m').value = dateParts[1] || '';
+                    document.getElementById('y').value = dateParts[2] || '';
+                    
+                    scanner.clear();
+                    alert("Certificat validé avec succès !");
+                });
+            </script>
+        </body>
+        </html>
+    `);
 });
 
 // ============================================
@@ -1730,8 +2226,8 @@ app.get('/profile', requireAuth, async (req, res) => {
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
         
         const verificationBadge = user.qrVerified ? 
-            '<span class="verified-badge">✅ ${t('withCertificate')}</span>' : 
-            '<span class="unverified-badge">📝 ${t('manualEntry')}</span>';
+            '<span class="verified-badge">✅ Certifié par laboratoire</span>' : 
+            '<span class="unverified-badge">📝 Auto-déclaré</span>';
         
         res.send(`<!DOCTYPE html>
 <html>
@@ -1745,6 +2241,35 @@ app.get('/profile', requireAuth, async (req, res) => {
 <body>
     <div class="app-shell">
         <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+        
+        <div id="request-popup">
+            <div class="popup-card">
+                <div class="popup-icon">💌</div>
+                <div class="popup-message" id="request-message"></div>
+                <div class="popup-buttons">
+                    <button class="accept-btn" onclick="acceptRequest()">${t('acceptRequest')}</button>
+                    <button class="reject-btn" onclick="rejectRequest()">${t('rejectRequest')}</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="rejection-popup">
+            <div class="popup-card">
+                <div class="popup-icon">🌸</div>
+                <div class="popup-message" id="rejection-message"></div>
+                <div class="action-buttons">
+                    <button class="btn-pink" onclick="goToProfile()" style="flex:1;">${t('returnProfile')}</button>
+                    <button class="btn-dark" onclick="goToMatching()" style="flex:1;">${t('newMatch')}</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loading-popup">
+            <div class="popup-card">
+                <div class="spinner"></div>
+                <div class="popup-message" id="loading-message">${t('sendingRequest')}</div>
+            </div>
+        </div>
         
         <div class="page-white">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -2100,11 +2625,11 @@ app.get('/matching', requireAuth, async (req, res) => {
                 '<b>${t('age_label')} :</b> ' + age + ' ans<br><br>' +
                 '<b>${t('project_label')} :</b><br>' +
                 '<i>' + (partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}') + '</i>' +
-                (partner.qrVerified ? '<br><br><span style="color:#4caf50;">✅ ${t('withCertificate')}</span>' : '');
+                (partner.qrVerified ? '<br><br><span style="color:#4caf50;">✅ Certifié par laboratoire</span>' : '');
             
             let msg = "";
             if(myGt === "AA" && partner.genotype === "AA") {
-                msg = "<b>💞 ${t('interestPopup').replace('{name}', '')}</b> Félicitations ! Votre compatibilité génétique est idéale.";
+                msg = "<b>💞 L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale.";
             }
             else if(myGt === "AA" && partner.genotype === "AS") {
                 msg = "<b>🛡️ L'Union Protectrice :</b> Excellent choix. En tant que AA, vous jouez un rôle protecteur.";
@@ -2119,7 +2644,7 @@ app.get('/matching', requireAuth, async (req, res) => {
                 msg = "<b>🌈 L'Union Espoir :</b> Vous avez fait le choix le plus sûr.";
             }
             else {
-                msg = "<b>💬 ${t('compatiblePartners')}</b>";
+                msg = "<b>💬 Compatibilité standard :</b> Vous pouvez échanger avec ce profil.";
             }
             
             document.getElementById('pop-msg').innerHTML = msg;
@@ -2801,6 +3326,29 @@ app.post('/api/register', async (req, res) => {
             ...req.body,
             qrVerified: req.body.qrVerified || false,
             verificationBadge: req.body.qrVerified ? 'lab' : 'self'
+        };
+        
+        const user = new User(userData);
+        await user.save();
+        
+        req.session.userId = user._id;
+        req.session.isVerified = false;
+        await new Promise(resolve => req.session.save(resolve));
+        
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/register-qr', async (req, res) => {
+    try {
+        const userData = {
+            ...req.body,
+            qrVerified: true,
+            verificationBadge: 'lab',
+            verifiedAt: new Date(),
+            verifiedBy: 'QR Scan'
         };
         
         const user = new User(userData);
