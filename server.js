@@ -2066,51 +2066,56 @@ app.get('/charte-engagement', (req, res) => {
 });
 
 // ============================================
-// PAGE DE CHOIX D'INSCRIPTION
-// ============================================
-app.get('/signup-choice', (req, res) => {
-    const t = req.t;
-    res.send(`<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>${t('appName')} - ${t('signupTitle')}</title>
-    ${styles}
-    ${notifyScript}
-</head>
-<body>
-    <div class="app-shell">
-        <div class="page-white choice-screen">
-            <h2>${t('signupTitle')}</h2>
-            <p style="font-size: 1.2rem; margin-bottom: 30px;">${t('signupSub')}</p>
-            
-            <div class="options">
-                <div class="option-card" onclick="window.location.href='/signup-qr'">
-                    <div class="icon">📱</div>
-                    <h3>${t('withCertificate')}</h3>
-                    <p>${t('scanAutomatic')}</p>
-                </div>
-                
-                <div class="option-card manual" onclick="window.location.href='/signup-manual'">
-                    <div class="icon">📝</div>
-                    <h3>${t('manualEntry')}</h3>
-                    <p>${t('freeEntry')}</p>
-                </div>
+// --- PAGE GÉNÉRATEUR DE QR CODE ---
+app.get('/generator', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Générateur QR - Genlove</title>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+            <style>
+                body { font-family: Arial; padding: 20px; max-width: 400px; margin: 0 auto; background: #f4f4f9; }
+                .card { background: white; padding: 20px; border-radius: 15px; }
+                select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; }
+                #qrcode { display: flex; justify-content: center; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2>Générateur de QR code</h2>
+                <select id="genotype">
+                    <option value="AA">AA</option>
+                    <option value="AS">AS</option>
+                    <option value="SS">SS</option>
+                </select>
+                <select id="bloodGroup">
+                    <option value="O+">O+</option>
+                    <option value="A+">A+</option>
+                    <option value="B+">B+</option>
+                    <option value="AB+">AB+</option>
+                </select>
+                <button onclick="generateQR()">Générer QR</button>
+                <div id="qrcode"></div>
+                <p><a href="/signup">→ Aller à l'inscription</a></p>
             </div>
-            
-            <a href="/charte-engagement" class="back-link">← ${t('backCharter')}</a>
-        </div>
-    </div>
-</body>
-</html>`);
+            <script>
+                function generateQR() {
+                    const data = "NOM:João Silva|GENO:" + document.getElementById('genotype').value + "|GS:" + document.getElementById('bloodGroup').value;
+                    
+                    QRCode.toCanvas(document.createElement('canvas'), data, { width: 250 }, (err, canvas) => {
+                        document.getElementById('qrcode').innerHTML = '';
+                        document.getElementById('qrcode').appendChild(canvas);
+                    });
+                }
+            </script>
+        </body>
+        </html>
+    `);
 });
 
-// ============================================
-//  ============================================
-// ============================================
-// INSCRIPTION AVEC QR CODE - Version avec TON code qui fonctionne
-// ============================================
+// --- PAGE D'INSCRIPTION AVEC SCAN QR CORRIGÉE ---
 app.get('/signup', (req, res) => {
     res.send(`
 <!DOCTYPE html>
@@ -2317,6 +2322,7 @@ app.get('/signup', (req, res) => {
 </html>
     `);
 });
+
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
