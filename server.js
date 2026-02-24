@@ -2108,72 +2108,314 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 // INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
 // ============================================
-<script>
-    let scannerInstance = null;
-
-    function waitForLibrary() {
-        if (typeof Html5Qrcode !== "undefined") {
-            startScanner();
-        } else {
-            setTimeout(waitForLibrary, 300);
-        }
-    }
-
-    waitForLibrary();
-
-    function startScanner() {
-        const html5QrCode = new Html5Qrcode("reader");
-        scannerInstance = html5QrCode;
-
-        Html5Qrcode.getCameras().then(devices => {
-            if (devices && devices.length) {
-                html5QrCode.start(
-                    devices[0].id,
-                    {
-                        fps: 10,
-                        qrbox: 250
-                    },
-                    onScanSuccess,
-                    onScanFailure
-                );
-            }
-        }).catch(err => {
-            alert("Erreur caméra : " + err);
-        });
-    }
-
-    function onScanSuccess(decodedText) {
-        try {
-            // 🔹 On suppose que le QR contient un JSON
-            const data = JSON.parse(decodedText);
-
-            document.getElementById('fn').value = data.firstName || "";
-            document.getElementById('ln').value = data.lastName || "";
-            document.getElementById('gt').value = data.genotype || "";
-            document.getElementById('bg').value = data.bloodGroup || "";
-            document.getElementById('dob').value = data.dob || "";
-
-            if (data.dob) {
-                const parts = data.dob.split('/');
-                if (parts.length === 3) {
-                    document.getElementById('d').value = parts[0];
-                    document.getElementById('m').value = parts[1];
-                    document.getElementById('y').value = parts[2];
+app.get('/signup-qr', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Inscription Certifiée</title>
+            <script src="https://unpkg.com/html5-qrcode"></script>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
                 }
-            }
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: linear-gradient(135deg, #1a2a44 0%, #ff416c 100%);
+                    min-height: 100vh;
+                    padding: 15px;
+                    color: #1a2a44;
+                }
+                .container {
+                    max-width: 500px;
+                    margin: 0 auto;
+                    background: rgba(255,255,255,0.95);
+                    border-radius: 25px;
+                    padding: 30px 25px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    backdrop-filter: blur(10px);
+                }
+                h3 {
+                    text-align: center;
+                    color: #1a2a44;
+                    margin-bottom: 30px;
+                    font-size: 24px;
+                    font-weight: 700;
+                }
+                #reader {
+                    width: 100%;
+                    height: 350px;
+                    border-radius: 20px;
+                    overflow: hidden;
+                    border: 3px dashed #ff416c;
+                    background: linear-gradient(45deg, #f9f9f9, #e3f2fd);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 25px;
+                    position: relative;
+                }
+                #reader::before {
+                    content: "📱 Pointez votre QR code ici";
+                    font-size: 16px;
+                    color: #666;
+                    position: absolute;
+                    z-index: 10;
+                }
+                .scan-success {
+                    border-color: #28a745 !important;
+                    background: linear-gradient(45deg, #e9f7ef, #d4edda) !important;
+                }
+                .form-section {
+                    background: #e9f7ef;
+                    padding: 20px;
+                    border-radius: 15px;
+                    margin-bottom: 25px;
+                    border: 2px solid #28a745;
+                    animation: slideIn 0.5s ease-out;
+                }
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .form-row {
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 10px;
+                }
+                .form-row input {
+                    flex: 1;
+                }
+                .form-row input:first-child { flex: 0.8; }
+                .form-row input:nth-child(2) { flex: 0.8; }
+                .form-row input:last-child { flex: 1.4; }
+                input[readonly] {
+                    background: #f8f9fa;
+                    color: #28a745;
+                    font-weight: 600;
+                }
+                .location-section {
+                    background: white;
+                    padding: 25px;
+                    border-radius: 15px;
+                    border: 2px solid #ddd;
+                    margin-bottom: 30px;
+                }
+                .location-section h4 {
+                    color: #ff416c;
+                    margin-bottom: 20px;
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+                input, select {
+                    width: 100%;
+                    padding: 15px;
+                    margin: 10px 0;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 12px;
+                    font-size: 16px;
+                    transition: all 0.3s ease;
+                }
+                input:focus, select:focus {
+                    outline: none;
+                    border-color: #ff416c;
+                    box-shadow: 0 0 0 3px rgba(255,65,108,0.1);
+                }
+                input[type="file"] {
+                    padding: 12px;
+                    background: #f8f9fa;
+                    border: 2px dashed #ddd;
+                }
+                .submit-btn {
+                    width: 100%;
+                    padding: 20px;
+                    background: linear-gradient(135deg, #1a2a44 0%, #ff416c 50%, #ff416c 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 30px;
+                    font-size: 18px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+                .submit-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 15px 30px rgba(26,42,68,0.4);
+                }
+                .submit-btn:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+                @media (max-width: 480px) {
+                    .container {
+                        padding: 20px 15px;
+                        margin: 10px;
+                        border-radius: 20px;
+                    }
+                    #reader {
+                        height: 300px;
+                    }
+                    h3 { font-size: 20px; }
+                }
+                @media (max-height: 700px) {
+                    #reader { height: 280px; }
+                    .container { padding: 20px 15px; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h3>📋 Inscription Certifiée</h3>
+                
+                <div id="reader"></div>
+                
+                <form action="/api/register-qr" method="POST" enctype="multipart/form-data" id="signupForm">
+                    <input type="hidden" name="isVerified" value="true">
+                    <input type="hidden" id="dob" name="dob">
+                    
+                    <div class="form-section" id="medicalData" style="display:none;">
+                        <h4>✔ Données Certifiées</h4>
+                        <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required>
+                        <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required>
+                        <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required>
+                        <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required>
+                        <div class="form-row">
+                            <input type="text" id="d" placeholder="JJ" readonly>
+                            <input type="text" id="m" placeholder="MM" readonly>
+                            <input type="text" id="y" placeholder="AAAA" readonly>
+                        </div>
+                    </div>
 
-            scannerInstance.stop();
-            alert("✅ Scan réussi et champs remplis !");
-        } catch (error) {
-            alert("❌ QR invalide ou format incorrect.");
-        }
-    }
+                    <div class="location-section">
+                        <h4>📍 Localisation</h4>
+                        <input type="file" name="profilePic" accept="image/*" required>
+                        <input type="text" name="residence" placeholder="Ville actuelle (ex: Luanda)" required>
+                        <input type="text" name="region" placeholder="Région (ex: Luanda)" required>
+                        
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+                        
+                        <label style="font-weight: 600; color: #1a2a44; margin-bottom: 10px; display: block;">
+                            👨‍👩‍👧 Projet de vie
+                        </label>
+                        <select name="desireChild">
+                            <option value="Oui">Oui, désir d'enfant</option>
+                            <option value="Non">Non, pas d'enfant</option>
+                        </select>
+                    </div>
 
-    function onScanFailure(error) {
-        // Ignoré pour éviter spam console
-    }
-</script>
+                    <button type="submit" class="submit-btn" disabled id="submitBtn">
+                        ✅ Finaliser Inscription Certifiée
+                    </button>
+                </form>
+            </div>
 
+            <script>
+                let html5QrcodeScanner = null;
+                let isScanning = false;
+
+                function onScanSuccess(decodedText) {
+                    try {
+                        console.log('QR Data:', decodedText);
+                        // Format: Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
+                        const data = decodedText.split('|');
+                        
+                        if (data.length >= 5) {
+                            // Remplir les champs
+                            document.getElementById('fn').value = data[0].trim();
+                            document.getElementById('ln').value = data[1].trim();
+                            document.getElementById('gt').value = data[2].trim();
+                            document.getElementById('bg').value = data[3].trim();
+                            document.getElementById('dob').value = data[4].trim();
+                            
+                            // Date de naissance
+                            const dateParts = data[4].split('/');
+                            if (dateParts.length === 3) {
+                                document.getElementById('d').value = dateParts[0];
+                                document.getElementById('m').value = dateParts[1];
+                                document.getElementById('y').value = dateParts[2];
+                            }
+                            
+                            // Afficher la section données médicales
+                            document.getElementById('medicalData').style.display = 'block';
+                            document.getElementById('reader').classList.add('scan-success');
+                            
+                            // Activer le bouton
+                            document.getElementById('submitBtn').disabled = false;
+                            
+                            // Arrêter le scanner
+                            if (html5QrcodeScanner) {
+                                html5QrcodeScanner.clear();
+                            }
+                            
+                            // Notification
+                            const successMsg = document.createElement('div');
+                            successMsg.style.cssText = 'position:fixed;top:20px;right:20px;background:#28a745;color:white;padding:15px 20px;border-radius:10px;z-index:1000;animation:slideInRight 0.5s ease-out;';
+                            successMsg.textContent = '✅ Données certifiées récupérées !';
+                            document.body.appendChild(successMsg);
+                            
+                            setTimeout(() => successMsg.remove(), 4000);
+                        } else {
+                            throw new Error('Format QR invalide');
+                        }
+                    } catch (err) {
+                        alert('❌ Erreur: ' + err.message + '
+Veuillez scanner un QR code valide.');
+                    }
+                }
+
+                function initScanner() {
+                    const config = {
+                        fps: 20,
+                        qrbox: { width: 280, height: 280 },
+                        aspectRatio: 1.0,
+                        disableFlip: false,
+                        rememberLastUsedCamera: true
+                    };
+
+                    html5QrcodeScanner = new Html5QrcodeScanner(
+                        "reader",
+                        config,
+                        false
+                    );
+                    
+                    html5QrcodeScanner.render(
+                        onScanSuccess,
+                        (error) => {
+                            console.warn('Scanner error:', error);
+                        }
+                    );
+                }
+
+                // Initialiser au chargement
+                window.addEventListener('load', () => {
+                    setTimeout(initScanner, 500);
+                });
+
+                // Responsive au redimensionnement
+                window.addEventListener('resize', () => {
+                    if (html5QrcodeScanner) {
+                        html5QrcodeScanner.clear();
+                        setTimeout(initScanner, 300);
+                    }
+                });
+            </script>
+            <style>
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            </style>
+        </body>
+        </html>
+    `);
+});
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
