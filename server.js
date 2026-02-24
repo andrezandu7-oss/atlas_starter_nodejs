@@ -2107,6 +2107,7 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
+// ============================================
 // INSCRIPTION QR - VERSION CORRIGÉE
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2121,6 +2122,105 @@ app.get('/signup-qr', (req, res) => {
     ${styles}
     ${notifyScript}
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        /* Styles pour garantir que le scanner est visible */
+        #reader {
+            width: 100%;
+            min-height: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            background: #000;
+            border: 2px solid #ff416c;
+        }
+        #reader video {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+        .qr-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 10px 0;
+        }
+        .debug-box {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 10px 0;
+            display: none;
+            border-left: 5px solid #ff416c;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0;
+        }
+        .test-btn {
+            flex: 1;
+            background: #1a2a44;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .test-btn:hover {
+            background: #ff416c;
+        }
+        .locked {
+            background: #e8f5e9 !important;
+            border-color: #4caf50 !important;
+        }
+        .custom-date-picker {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .date-part {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: #f8f9fa;
+        }
+        .date-part:disabled {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .photo-circle {
+            width: 110px;
+            height: 110px;
+            border: 4px solid #ff416c;
+            border-radius: 50%;
+            margin: 20px auto;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 10px 25px rgba(255,65,108,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .info-message {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 5px solid #2196f3;
+        }
+        .info-icon {
+            font-size: 1.5rem;
+        }
+    </style>
 </head>
 <body>
     <div class="app-shell">
@@ -2130,34 +2230,35 @@ app.get('/signup-qr', (req, res) => {
         </div>
         
         <div class="page-white">
-            <div class="qr-card" style="background: white; padding: 20px; border-radius: 20px;">
-                <h2>${t('withCertificate')}</h2>
-                <p>Scannez votre QR code médical</p>
+            <div class="qr-card">
+                <h2 style="text-align: center;">${t('withCertificate')}</h2>
+                <p style="text-align: center; margin-bottom: 20px;">Scannez votre QR code médical</p>
                 
-                <!-- Scanner QR (exactement comme ton code) -->
-                <div id="reader" style="width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px;"></div>
+                <!-- LE SCANNER - BIEN VISIBLE -->
+                <div id="reader"></div>
                 
                 <!-- Zone de débogage -->
-                <div class="debug-box" id="debug" style="display: none; background: #f0f0f0; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                <div class="debug-box" id="debug">
                     <strong>Dernier scan:</strong> <span id="debugText"></span>
                 </div>
                 
                 <!-- Photo (indépendante) -->
-                <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()" style="margin: 20px auto;">
+                <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
                     <span id="photoText">📷 Photo</span>
                 </div>
                 <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)" accept="image/*">
                 
+                <!-- Formulaire avec 5 champs QR + 3 cases date -->
                 <form id="regForm">
-                    <!-- 5 CHAMPS À REMPLIR AUTOMATIQUEMENT -->
-                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
-                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
-                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
-                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="input-box locked" style="background: #e8f5e9; border-color: #4caf50;">
+                    <!-- 4 premiers champs -->
+                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="input-box locked">
+                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="input-box locked">
+                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="input-box locked">
+                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="input-box locked">
                     
-                    <!-- DATE DE NAISSANCE - 3 CASES HORIZONTALES -->
+                    <!-- Date de naissance - 3 cases horizontales -->
                     <div class="input-label">${t('dob')}</div>
-                    <div class="custom-date-picker" id="datePicker">
+                    <div class="custom-date-picker">
                         <select id="dobDay" class="date-part" required disabled>
                             <option value="">Jour</option>
                             ${Array.from({length: 31}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
@@ -2187,7 +2288,7 @@ app.get('/signup-qr', (req, res) => {
                     </div>
                     
                     <!-- Message d'aide -->
-                    <div class="info-message" style="margin-top: 20px;">
+                    <div class="info-message">
                         <span class="info-icon">📍</span>
                         <p>${t('locationHelp')}</p>
                     </div>
@@ -2206,7 +2307,6 @@ app.get('/signup-qr', (req, res) => {
                     <input type="hidden" id="qrVerified" value="false">
                     <input type="hidden" id="verifiedBy" value="">
                     
-                    <!-- Serment -->
                     <div class="serment-container">
                         <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
                         <label for="oath" class="serment-text">${t('honorText')}</label>
@@ -2216,14 +2316,14 @@ app.get('/signup-qr', (req, res) => {
                 </form>
                 
                 <!-- Boutons de test -->
-                <div class="test-buttons" style="display: flex; gap: 5px; margin-top: 15px;">
-                    <button class="test-btn" onclick="simulateQR('AA', 'O+', '1990-05-15')" style="flex:1; background:#1a2a44; color:white; border:none; padding:10px; border-radius:30px;">AA/O+</button>
-                    <button class="test-btn" onclick="simulateQR('AS', 'A+', '1992-08-20')" style="flex:1; background:#1a2a44; color:white; border:none; padding:10px; border-radius:30px;">AS/A+</button>
-                    <button class="test-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')" style="flex:1; background:#1a2a44; color:white; border:none; padding:10px; border-radius:30px;">SS/B-</button>
+                <div class="test-buttons">
+                    <button class="test-btn" onclick="simulateQR('AA', 'O+', '1990-05-15')">AA/O+</button>
+                    <button class="test-btn" onclick="simulateQR('AS', 'A+', '1992-08-20')">AS/A+</button>
+                    <button class="test-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')">SS/B-</button>
                 </div>
                 
                 <a href="/generator" target="_blank" style="display:block; text-align:center; margin:15px 0; color:#ff416c;">📱 Générer un vrai QR code</a>
-                <a href="/signup-choice" class="back-link" style="display:block; text-align:center; margin-top:15px; color:#666;">← Retour</a>
+                <a href="/signup-choice" class="back-link" style="display:block; text-align:center; margin-top:15px;">← Retour</a>
             </div>
         </div>
     </div>
@@ -2238,8 +2338,11 @@ app.get('/signup-qr', (req, res) => {
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             (text) => {
+                // Afficher ce qui a été scanné
                 document.getElementById('debug').style.display = 'block';
                 document.getElementById('debugText').innerText = text;
+                
+                console.log("QR scanné:", text);
                 
                 let nom = '', geno = '', gs = '', dob = '';
                 
@@ -2263,21 +2366,22 @@ app.get('/signup-qr', (req, res) => {
                     if (json.dateOfBirth) dob = json.dateOfBirth;
                 } catch(e) {}
                 
+                // Si on a trouvé les données
                 if (nom && geno && gs) {
-                    const parts = nom.split(' ');
-                    document.getElementById('firstName').value = parts[0] || '';
-                    document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
+                    const nameParts = nom.split(' ');
+                    document.getElementById('firstName').value = nameParts[0] || '';
+                    document.getElementById('lastName').value = nameParts.slice(1).join(' ') || '';
                     document.getElementById('genotype').value = geno;
                     document.getElementById('bloodGroup').value = gs;
                     
-                    // Remplir la date si présente
+                    // Remplir la date de naissance
                     if (dob) {
                         const date = new Date(dob);
                         document.getElementById('dobDay').value = date.getDate();
                         document.getElementById('dobMonth').value = date.getMonth() + 1;
                         document.getElementById('dobYear').value = date.getFullYear();
                         
-                        // Activer les selects
+                        // Activer les selects de date
                         document.getElementById('dobDay').disabled = false;
                         document.getElementById('dobMonth').disabled = false;
                         document.getElementById('dobYear').disabled = false;
@@ -2292,7 +2396,7 @@ app.get('/signup-qr', (req, res) => {
                     alert("✅ Scan réussi !");
                 }
             },
-            (error) => {}
+            (error) => {} // Ignorer les erreurs
         ).catch(err => {
             alert("❌ Erreur caméra: " + err);
         });
@@ -2315,6 +2419,7 @@ app.get('/signup-qr', (req, res) => {
             document.getElementById('qrVerified').value = 'true';
             document.getElementById('verifiedBy').value = 'Test';
             document.getElementById('submitBtn').disabled = false;
+            
             scanner.stop();
             document.getElementById('reader').style.display = 'none';
         }
@@ -2335,13 +2440,12 @@ app.get('/signup-qr', (req, res) => {
             
             document.getElementById('loader').style.display = 'flex';
             
-            // Récupérer la date
             const day = document.getElementById('dobDay').value;
             const month = document.getElementById('dobMonth').value;
             const year = document.getElementById('dobYear').value;
             
             if (!day || !month || !year) {
-                alert('Veuillez remplir la date de naissance');
+                alert("Veuillez remplir la date de naissance");
                 document.getElementById('loader').style.display = 'none';
                 return;
             }
