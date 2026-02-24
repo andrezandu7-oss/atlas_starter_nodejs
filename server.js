@@ -2107,7 +2107,7 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
-// INSCRIPTION QR - LE SCANNER EST LE PATRON
+// INSCRIPTION QR - TON CODE + 3 CASES DATE UNIQUEMENT
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const t = req.t;
@@ -2116,24 +2116,12 @@ app.get('/signup-qr', (req, res) => {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genlove - Inscription QR</title>
     ${styles}
-    ${notifyScript}
-    <!-- LE SCANNER D'ABORD -->
     <script src="https://unpkg.com/html5-qrcode@2.2.0/minified/html5-qrcode.min.js"></script>
     <style>
-        /* Style minimum - le scanner décide */
-        #reader {
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        .locked {
-            background: #e8f5e9;
-            border-color: #4caf50;
-        }
+        /* Styles minimaux - juste pour la date */
         .date-row {
             display: flex;
             gap: 5px;
@@ -2144,6 +2132,10 @@ app.get('/signup-qr', (req, res) => {
             padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 15px;
+        }
+        .locked {
+            background: #e8f5e9;
+            border-color: #4caf50;
         }
         .test-buttons {
             display: flex;
@@ -2165,21 +2157,20 @@ app.get('/signup-qr', (req, res) => {
     <div class="app-shell">
         <div class="page-white">
             <div style="background: white; padding: 20px; border-radius: 20px;">
-                <h2>${t('withCertificate')}</h2>
+                <h2>Inscription avec certificat</h2>
                 <p>Scannez votre QR code médical</p>
                 
-                <!-- LE SCANNER - ROI DE LA PAGE -->
+                <!-- LE SCANNER - IDENTIQUE À TON CODE -->
                 <div id="reader"></div>
                 
-                <!-- Formulaire qui s'adapte au scanner -->
+                <!-- Formulaire avec TES champs + MA date -->
                 <form id="regForm">
-                    <!-- 4 champs verrouillés -->
-                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="locked input-box">
-                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="locked input-box">
-                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="locked input-box">
-                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="locked input-box">
+                    <input type="text" id="firstName" placeholder="Prénom" readonly class="locked input-box">
+                    <input type="text" id="lastName" placeholder="Nom" readonly class="locked input-box">
+                    <input type="text" id="genotype" placeholder="Génotype" readonly class="locked input-box">
+                    <input type="text" id="bloodGroup" placeholder="Groupe sanguin" readonly class="locked input-box">
                     
-                    <!-- Date - 3 cases -->
+                    <!-- 3 CASES DATE AJOUTÉES ICI -->
                     <div class="date-row">
                         <select id="dobDay" disabled>
                             <option value="">Jour</option>
@@ -2201,73 +2192,71 @@ app.get('/signup-qr', (req, res) => {
                         </select>
                     </div>
                     
-                    <!-- Champs manuels -->
-                    <input type="text" id="residence" placeholder="${t('city')}" class="input-box" required>
-                    <input type="text" id="region" placeholder="${t('region')}" class="input-box" required>
+                    <!-- TES CHAMPS MANUELS -->
+                    <input type="text" id="residence" placeholder="Ville" class="input-box" required>
+                    <input type="text" id="region" placeholder="Région" class="input-box" required>
                     <select id="desireChild" class="input-box" required>
-                        <option value="">${t('desireChild')}</option>
-                        <option value="Oui">${t('yes')}</option>
-                        <option value="Non">${t('no')}</option>
+                        <option value="">Désir d'enfant ?</option>
+                        <option value="Oui">Oui</option>
+                        <option value="Non">Non</option>
                     </select>
                     
-                    <button type="submit" id="submitBtn" disabled class="btn-pink">${t('createProfile')}</button>
+                    <button type="submit" id="submitBtn" disabled class="btn-pink">S'inscrire</button>
                 </form>
                 
-                <!-- Boutons test -->
+                <!-- TES BOUTONS TEST -->
                 <div class="test-buttons">
                     <button class="test-btn" onclick="simulateQR('AA','O+','1990-05-15')">AA/O+</button>
                     <button class="test-btn" onclick="simulateQR('AS','A+','1992-08-20')">AS/A+</button>
                     <button class="test-btn" onclick="simulateQR('SS','B-','1988-12-10')">SS/B-</button>
                 </div>
                 
-                <a href="/signup-choice" class="back-link">← ${t('backCharter')}</a>
+                <a href="/signup-choice" class="back-link">← Retour</a>
             </div>
         </div>
     </div>
     
     <script>
-        let photoBase64 = "";
-        
-        // LE SCANNER - ROI
+        // TON CODE DE SCAN - EXACTEMENT COMME DANS TON EXEMPLE
         const scanner = new Html5Qrcode("reader");
         
         scanner.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
-            function(text) {
+            (text) => {
                 let nom = '', geno = '', gs = '', dob = '';
                 
-                // Format NOM:...|GENO:...|GS:...|DOB:...
                 if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
-                    text.split('|').forEach(p => {
-                        if (p.startsWith('NOM:')) nom = p.split(':')[1];
-                        if (p.startsWith('GENO:')) geno = p.split(':')[1];
-                        if (p.startsWith('GS:')) gs = p.split(':')[1];
-                        if (p.startsWith('DOB:')) dob = p.split(':')[1];
+                    const parts = text.split('|');
+                    parts.forEach(p => {
+                        if(p.startsWith('NOM:')) nom = p.split(':')[1];
+                        if(p.startsWith('GENO:')) geno = p.split(':')[1];
+                        if(p.startsWith('GS:')) gs = p.split(':')[1];
+                        if(p.startsWith('DOB:')) dob = p.split(':')[1];
                     });
                 }
                 
-                // Format JSON
                 try {
-                    let j = JSON.parse(text);
-                    if (j.patientName) nom = j.patientName;
-                    if (j.genotype) geno = j.genotype;
-                    if (j.bloodGroup) gs = j.bloodGroup;
-                    if (j.dateOfBirth) dob = j.dateOfBirth;
+                    const json = JSON.parse(text);
+                    if (json.patientName) nom = json.patientName;
+                    if (json.genotype) geno = json.genotype;
+                    if (json.bloodGroup) gs = json.bloodGroup;
+                    if (json.dateOfBirth) dob = json.dateOfBirth;
                 } catch(e) {}
                 
                 if (nom && geno && gs) {
-                    let p = nom.split(' ');
-                    document.getElementById('firstName').value = p[0] || '';
-                    document.getElementById('lastName').value = p.slice(1).join(' ') || '';
+                    const parts = nom.split(' ');
+                    document.getElementById('firstName').value = parts[0] || '';
+                    document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
                     document.getElementById('genotype').value = geno;
                     document.getElementById('bloodGroup').value = gs;
                     
+                    // AJOUT: remplir la date
                     if (dob) {
-                        let d = new Date(dob);
-                        document.getElementById('dobDay').value = d.getDate();
-                        document.getElementById('dobMonth').value = d.getMonth()+1;
-                        document.getElementById('dobYear').value = d.getFullYear();
+                        const date = new Date(dob);
+                        document.getElementById('dobDay').value = date.getDate();
+                        document.getElementById('dobMonth').value = date.getMonth() + 1;
+                        document.getElementById('dobYear').value = date.getFullYear();
                         document.getElementById('dobDay').disabled = false;
                         document.getElementById('dobMonth').disabled = false;
                         document.getElementById('dobYear').disabled = false;
@@ -2279,37 +2268,50 @@ app.get('/signup-qr', (req, res) => {
                     alert("✅ Scan réussi !");
                 }
             },
-            function(err) {}
-        ).catch(function(err) {
+            (error) => {}
+        ).catch(err => {
             alert("❌ Erreur caméra: " + err);
         });
-        
-        // Fonctions qui s'adaptent au scanner
-        function simulateQR(g,b,d) {
+
+        // TES FONCTIONS DE TEST (adaptées avec date)
+        function simulateQR(genotype, bloodGroup, dob) {
             document.getElementById('firstName').value = 'João';
             document.getElementById('lastName').value = 'Silva';
-            document.getElementById('genotype').value = g;
-            document.getElementById('bloodGroup').value = b;
-            let dt = new Date(d);
-            document.getElementById('dobDay').value = dt.getDate();
-            document.getElementById('dobMonth').value = dt.getMonth()+1;
-            document.getElementById('dobYear').value = dt.getFullYear();
+            document.getElementById('genotype').value = genotype;
+            document.getElementById('bloodGroup').value = bloodGroup;
+            
+            const date = new Date(dob);
+            document.getElementById('dobDay').value = date.getDate();
+            document.getElementById('dobMonth').value = date.getMonth() + 1;
+            document.getElementById('dobYear').value = date.getFullYear();
             document.getElementById('dobDay').disabled = false;
             document.getElementById('dobMonth').disabled = false;
             document.getElementById('dobYear').disabled = false;
+            
             document.getElementById('submitBtn').disabled = false;
             scanner.stop();
             document.getElementById('reader').style.display = 'none';
         }
-        
-        document.getElementById('regForm').onsubmit = function(e) {
+
+        // TON ENVOI DE FORMULAIRE (adapté avec date)
+        document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
-            let data = {
+            
+            const day = document.getElementById('dobDay').value;
+            const month = document.getElementById('dobMonth').value;
+            const year = document.getElementById('dobYear').value;
+            
+            if (!day || !month || !year) {
+                alert("Veuillez remplir la date de naissance");
+                return;
+            }
+            
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            
+            const data = {
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
-                dob: document.getElementById('dobYear').value + '-' + 
-                     document.getElementById('dobMonth').value.padStart(2,'0') + '-' + 
-                     document.getElementById('dobDay').value.padStart(2,'0'),
+                dob: dob,
                 genotype: document.getElementById('genotype').value,
                 bloodGroup: document.getElementById('bloodGroup').value,
                 residence: document.getElementById('residence').value,
@@ -2317,16 +2319,19 @@ app.get('/signup-qr', (req, res) => {
                 desireChild: document.getElementById('desireChild').value,
                 qrVerified: true
             };
-            fetch('/api/register', {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify(data)
-            }).then(r=>{
-                if(r.ok) {
-                    alert("🎉 Compte créé !");
-                    window.location.href = '/profile';
-                } else alert("❌ Erreur");
+            
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
             });
+            
+            if(res.ok) {
+                alert("🎉 Compte créé !");
+                window.location.href = '/profile';
+            } else {
+                alert("❌ Erreur");
+            }
         };
     </script>
 </body>
