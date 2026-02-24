@@ -2072,151 +2072,146 @@ app.get('/charte-engagement', (req, res) => {
 });
 
 // ============================================
-// ============================================
-// INSCRIPTION QR - AVEC SCANNER FONCTIONNEL
+// INSCRIPTION QR - TON CODE SIMPLIFIÉ QUI FONCTIONNE
 // ============================================
 app.get('/signup-qr', (req, res) => {
-    const t = req.t;
-    
-    res.send(`<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>${t('appName')} - Inscription QR</title>
-    ${styles}
-    ${notifyScript}
-    <script src="https://unpkg.com/html5-qrcode@2.2.0/minified/html5-qrcode.min.js"></script>
-    <style>
-        #reader {
-            width: 100%;
-            border-radius: 20px;
-            overflow: hidden;
-            margin: 20px 0;
-            background: #000;
-            min-height: 300px;
-        }
-        .certificate-box {
-            background: #e8f5e9;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border-left: 5px solid #4caf50;
-        }
-        .date-row {
-            display: flex;
-            gap: 8px;
-            margin: 15px 0 5px;
-        }
-        .date-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            background: #f8f9fa;
-            text-align: center;
-        }
-        .info-message {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 5px solid #2196f3;
-        }
-    </style>
-</head>
-<body>
-    <div class="app-shell">
-        <div class="page-white">
-            <h2>${t('withCertificate')}</h2>
-            <p>Scannez votre QR code médical</p>
-            
-            <!-- SCANNER -->
-            <div id="reader"></div>
-            
-            <form action="/api/register-qr" method="POST">
-                <input type="hidden" name="isVerified" value="true">
-                
-                <!-- DONNÉES DU QR -->
-                <div class="certificate-box">
-                    <h4>✅ ${t('dataFromCertificate')}</h4>
-                    
-                    <div class="input-label">${t('firstName')}</div>
-                    <input type="text" id="fn" name="firstName" readonly class="input-box" required>
-                    
-                    <div class="input-label">${t('lastName')}</div>
-                    <input type="text" id="ln" name="lastName" readonly class="input-box" required>
-                    
-                    <div class="input-label">${t('genotype')}</div>
-                    <input type="text" id="gt" name="genotype" readonly class="input-box" required>
-                    
-                    <div class="input-label">${t('bloodGroup')}</div>
-                    <input type="text" id="bg" name="bloodGroup" readonly class="input-box" required>
-                    
-                    <!-- DATE -->
-                    <div class="input-label" style="margin-top:15px;">${t('dob')}</div>
-                    <div class="date-row">
-                        <input type="text" id="d" class="date-input" placeholder="JJ" readonly>
-                        <input type="text" id="m" class="date-input" placeholder="MM" readonly>
-                        <input type="text" id="y" class="date-input" placeholder="AAAA" readonly>
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+            <title>Genlove - Inscription QR</title>
+            ${styles}
+            <script src="https://unpkg.com/html5-qrcode"></script>
+            <style>
+                .qr-container {
+                    max-width: 500px;
+                    margin: 0 auto;
+                    font-family: 'Segoe UI', sans-serif;
+                    padding: 20px;
+                    background: white;
+                    border-radius: 20px;
+                }
+                #reader {
+                    width: 100%;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    background: #000;
+                    margin-bottom: 20px;
+                }
+                .certificate-box {
+                    background: #e9f7ef;
+                    padding: 15px;
+                    border-radius: 10px;
+                    margin-bottom: 15px;
+                    border-left: 5px solid #28a745;
+                }
+                .certificate-box p {
+                    color: #28a745;
+                    font-size: 12px;
+                    margin-bottom: 10px;
+                }
+                .date-row {
+                    display: flex;
+                    gap: 5px;
+                    margin-top: 5px;
+                }
+                .date-row input {
+                    flex: 1;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    background: #f9f9f9;
+                }
+                .btn-submit {
+                    width: 100%;
+                    padding: 15px;
+                    background: #ff416c;
+                    color: white;
+                    border: none;
+                    border-radius: 30px;
+                    margin-top: 20px;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+                .btn-submit:hover {
+                    background: #ff1a4f;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="app-shell">
+                <div class="page-white">
+                    <div class="qr-container">
+                        <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
+                        
+                        <!-- SCANNER -->
+                        <div id="reader"></div>
+                        
+                        <form action="/api/register-qr" method="POST">
+                            <input type="hidden" name="isVerified" value="true">
+                            
+                            <!-- DONNÉES DU CERTIFICAT -->
+                            <div class="certificate-box">
+                                <p>✔ Données extraites du certificat :</p>
+                                <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:10px; border:1px solid #ccc; border-radius:8px;">
+                                
+                                <!-- DATE DE NAISSANCE - 3 CASES -->
+                                <div class="date-row">
+                                    <input type="text" id="d" placeholder="JJ" readonly>
+                                    <input type="text" id="m" placeholder="MM" readonly>
+                                    <input type="text" id="y" placeholder="AAAA" readonly>
+                                </div>
+                                <input type="hidden" id="dob" name="dob">
+                            </div>
+
+                            <!-- CHAMPS MANUELS -->
+                            <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                            <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                            
+                            <label style="display:block; margin:10px 0 5px;">Projet de vie : Désir d'enfant ?</label>
+                            <select name="desireChild" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                                <option value="Oui">Oui</option>
+                                <option value="Non">Non</option>
+                            </select>
+
+                            <button type="submit" class="btn-submit">Finaliser mon inscription certifiée ✅</button>
+                        </form>
+                        
+                        <a href="/" class="back-link" style="display:block; text-align:center; margin-top:20px;">← Retour à l'accueil</a>
                     </div>
-                    <input type="hidden" id="dob" name="dob">
                 </div>
-                
-                <!-- MESSAGE D'AIDE -->
-                <div class="info-message">
-                    <span class="info-icon">📍</span>
-                    <p>${t('locationHelp')}</p>
-                </div>
-                
-                <!-- CHAMPS MANUELS -->
-                <div class="input-label">${t('city')}</div>
-                <input type="text" name="residence" class="input-box" required>
-                
-                <div class="input-label">${t('region')}</div>
-                <input type="text" name="region" class="input-box" required>
-                
-                <div class="input-label">${t('desireChild')}</div>
-                <select name="desireChild" class="input-box" required>
-                    <option value="">${t('desireChild')}</option>
-                    <option value="Oui">${t('yes')}</option>
-                    <option value="Non">${t('no')}</option>
-                </select>
-                
-                <button type="submit" class="btn-pink">${t('createProfile')}</button>
-            </form>
-            
-            <a href="/" class="back-link">← ${t('backHome')}</a>
-        </div>
-    </div>
-    
-    <script>
-        const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-        
-        scanner.render((text) => {
-            const data = text.split('|');
-            document.getElementById('fn').value = data[0] || '';
-            document.getElementById('ln').value = data[1] || '';
-            document.getElementById('gt').value = data[2] || '';
-            document.getElementById('bg').value = data[3] || '';
-            document.getElementById('dob').value = data[4] || '';
-            
-            const dateParts = (data[4] || '').split('/');
-            document.getElementById('d').value = dateParts[0] || '';
-            document.getElementById('m').value = dateParts[1] || '';
-            document.getElementById('y').value = dateParts[2] || '';
-            
-            scanner.clear();
-            alert("✅ Certificat validé !");
-        });
-    </script>
-</body>
-</html>`);
+            </div>
+
+            <script>
+                const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+                scanner.render((text) => {
+                    // Format QR : Prénom|Nom|Génotype|Groupe|JJ/MM/AAAA
+                    const data = text.split('|');
+                    document.getElementById('fn').value = data[0] || '';
+                    document.getElementById('ln').value = data[1] || '';
+                    document.getElementById('gt').value = data[2] || '';
+                    document.getElementById('bg').value = data[3] || '';
+                    document.getElementById('dob').value = data[4] || '';
+                    
+                    const dateParts = (data[4] || '').split('/');
+                    document.getElementById('d').value = dateParts[0] || '';
+                    document.getElementById('m').value = dateParts[1] || '';
+                    document.getElementById('y').value = dateParts[2] || '';
+                    
+                    scanner.clear();
+                    alert("Certificat validé avec succès !");
+                });
+            </script>
+        </body>
+        </html>
+    `);
 });
+
 // ============================================
 // PROFIL
 // ============================================
