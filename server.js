@@ -2108,73 +2108,38 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 // ============================================
 // ============================================
-// INSCRIPTION QR - VERSION CORRIGÉE
+// INSCRIPTION QR - VERSION AVEC DATE (3 CASES)
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const t = req.t;
     
     res.send(`<!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>${t('appName')} - Inscription QR</title>
+    <title>Genlove - Inscription QR</title>
     ${styles}
     ${notifyScript}
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <style>
-        /* Styles pour garantir que le scanner est visible */
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
         #reader {
             width: 100%;
-            min-height: 300px;
             border-radius: 12px;
             overflow: hidden;
-            margin: 20px 0;
-            background: #000;
-            border: 2px solid #ff416c;
-        }
-        #reader video {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-        }
-        .qr-card {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            margin: 10px 0;
-        }
-        .debug-box {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            word-break: break-all;
-            margin: 10px 0;
-            display: none;
-            border-left: 5px solid #ff416c;
-        }
-        .test-buttons {
-            display: flex;
-            gap: 5px;
-            margin: 15px 0;
-        }
-        .test-btn {
-            flex: 1;
-            background: #1a2a44;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .test-btn:hover {
-            background: #ff416c;
+            margin-bottom: 20px;
         }
         .locked {
-            background: #e8f5e9 !important;
-            border-color: #4caf50 !important;
+            background: #f0f0f0;
+            border-color: #4caf50;
         }
         .custom-date-picker {
             display: flex;
@@ -2189,9 +2154,33 @@ app.get('/signup-qr', (req, res) => {
             font-size: 1rem;
             background: #f8f9fa;
         }
-        .date-part:disabled {
-            background: #e8f5e9;
-            border-color: #4caf50;
+        .debug-box {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 10px 0;
+            display: none;
+            border-left: 5px solid #ff416c;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 15px;
+        }
+        .test-btn {
+            flex: 1;
+            background: #1a2a44;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .test-btn:hover {
+            background: #ff416c;
         }
         .photo-circle {
             width: 110px;
@@ -2201,40 +2190,20 @@ app.get('/signup-qr', (req, res) => {
             margin: 20px auto;
             background-size: cover;
             background-position: center;
-            box-shadow: 0 10px 25px rgba(255,65,108,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
         }
-        .info-message {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 5px solid #2196f3;
-        }
-        .info-icon {
-            font-size: 1.5rem;
-        }
     </style>
 </head>
 <body>
     <div class="app-shell">
-        <div id="loader">
-            <div class="spinner"></div>
-            <h3>Création de votre profil...</h3>
-        </div>
-        
         <div class="page-white">
-            <div class="qr-card">
-                <h2 style="text-align: center;">${t('withCertificate')}</h2>
-                <p style="text-align: center; margin-bottom: 20px;">Scannez votre QR code médical</p>
+            <div class="card">
+                <h2>Inscription avec certificat</h2>
+                <p>Scannez votre QR code médical</p>
                 
-                <!-- LE SCANNER - BIEN VISIBLE -->
                 <div id="reader"></div>
                 
                 <!-- Zone de débogage -->
@@ -2242,22 +2211,21 @@ app.get('/signup-qr', (req, res) => {
                     <strong>Dernier scan:</strong> <span id="debugText"></span>
                 </div>
                 
-                <!-- Photo (indépendante) -->
+                <!-- Photo (optionnelle) -->
                 <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
                     <span id="photoText">📷 Photo</span>
                 </div>
                 <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)" accept="image/*">
                 
-                <!-- Formulaire avec 5 champs QR + 3 cases date -->
                 <form id="regForm">
-                    <!-- 4 premiers champs -->
-                    <input type="text" id="firstName" placeholder="${t('firstName')}" readonly class="input-box locked">
-                    <input type="text" id="lastName" placeholder="${t('lastName')}" readonly class="input-box locked">
-                    <input type="text" id="genotype" placeholder="${t('genotype')}" readonly class="input-box locked">
-                    <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly class="input-box locked">
+                    <!-- 4 champs du QR -->
+                    <input type="text" id="firstName" placeholder="Prénom" readonly class="locked input-box">
+                    <input type="text" id="lastName" placeholder="Nom" readonly class="locked input-box">
+                    <input type="text" id="genotype" placeholder="Génotype" readonly class="locked input-box">
+                    <input type="text" id="bloodGroup" placeholder="Groupe sanguin" readonly class="locked input-box">
                     
-                    <!-- Date de naissance - 3 cases horizontales -->
-                    <div class="input-label">${t('dob')}</div>
+                    <!-- DATE DE NAISSANCE - 3 CASES HORIZONTALES -->
+                    <div style="margin: 15px 0 5px 0; font-weight: bold;">Date de naissance</div>
                     <div class="custom-date-picker">
                         <select id="dobDay" class="date-part" required disabled>
                             <option value="">Jour</option>
@@ -2287,32 +2255,18 @@ app.get('/signup-qr', (req, res) => {
                         </select>
                     </div>
                     
-                    <!-- Message d'aide -->
-                    <div class="info-message">
-                        <span class="info-icon">📍</span>
-                        <p>${t('locationHelp')}</p>
-                    </div>
-                    
                     <!-- Champs manuels -->
-                    <input type="text" id="residence" placeholder="${t('city')}" class="input-box" required>
-                    <input type="text" id="region" placeholder="${t('region')}" class="input-box" required>
-                    
+                    <input type="text" id="residence" placeholder="Ville" class="input-box" required>
+                    <input type="text" id="region" placeholder="Région" class="input-box" required>
                     <select id="desireChild" class="input-box" required>
-                        <option value="">${t('desireChild')}</option>
-                        <option value="Oui">${t('yes')}</option>
-                        <option value="Non">${t('no')}</option>
+                        <option value="">Désir d'enfant ?</option>
+                        <option value="Oui">Oui</option>
+                        <option value="Non">Non</option>
                     </select>
                     
-                    <input type="hidden" id="gender" value="Non spécifié">
                     <input type="hidden" id="qrVerified" value="false">
-                    <input type="hidden" id="verifiedBy" value="">
                     
-                    <div class="serment-container">
-                        <input type="checkbox" id="oath" style="width:20px;height:20px;" required>
-                        <label for="oath" class="serment-text">${t('honorText')}</label>
-                    </div>
-                    
-                    <button type="submit" class="btn-pink" id="submitBtn" disabled>${t('createProfile')}</button>
+                    <button type="submit" id="submitBtn" disabled class="btn-pink">S'inscrire</button>
                 </form>
                 
                 <!-- Boutons de test -->
@@ -2322,7 +2276,6 @@ app.get('/signup-qr', (req, res) => {
                     <button class="test-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')">SS/B-</button>
                 </div>
                 
-                <a href="/generator" target="_blank" style="display:block; text-align:center; margin:15px 0; color:#ff416c;">📱 Générer un vrai QR code</a>
                 <a href="/signup-choice" class="back-link" style="display:block; text-align:center; margin-top:15px;">← Retour</a>
             </div>
         </div>
@@ -2331,18 +2284,15 @@ app.get('/signup-qr', (req, res) => {
     <script>
         let photoBase64 = "";
         
-        // TON CODE DE SCAN - EXACTEMENT COMME DANS TON EXEMPLE
+        // TON CODE DE SCAN - EXACTEMENT LE MÊME
         const scanner = new Html5Qrcode("reader");
         
         scanner.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             (text) => {
-                // Afficher ce qui a été scanné
                 document.getElementById('debug').style.display = 'block';
                 document.getElementById('debugText').innerText = text;
-                
-                console.log("QR scanné:", text);
                 
                 let nom = '', geno = '', gs = '', dob = '';
                 
@@ -2366,29 +2316,27 @@ app.get('/signup-qr', (req, res) => {
                     if (json.dateOfBirth) dob = json.dateOfBirth;
                 } catch(e) {}
                 
-                // Si on a trouvé les données
                 if (nom && geno && gs) {
-                    const nameParts = nom.split(' ');
-                    document.getElementById('firstName').value = nameParts[0] || '';
-                    document.getElementById('lastName').value = nameParts.slice(1).join(' ') || '';
+                    const parts = nom.split(' ');
+                    document.getElementById('firstName').value = parts[0] || '';
+                    document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
                     document.getElementById('genotype').value = geno;
                     document.getElementById('bloodGroup').value = gs;
                     
-                    // Remplir la date de naissance
+                    // Remplir la date si présente
                     if (dob) {
                         const date = new Date(dob);
                         document.getElementById('dobDay').value = date.getDate();
                         document.getElementById('dobMonth').value = date.getMonth() + 1;
                         document.getElementById('dobYear').value = date.getFullYear();
                         
-                        // Activer les selects de date
+                        // Activer les selects
                         document.getElementById('dobDay').disabled = false;
                         document.getElementById('dobMonth').disabled = false;
                         document.getElementById('dobYear').disabled = false;
                     }
                     
                     document.getElementById('qrVerified').value = 'true';
-                    document.getElementById('verifiedBy').value = 'QR Scan';
                     document.getElementById('submitBtn').disabled = false;
                     
                     scanner.stop();
@@ -2396,7 +2344,7 @@ app.get('/signup-qr', (req, res) => {
                     alert("✅ Scan réussi !");
                 }
             },
-            (error) => {} // Ignorer les erreurs
+            (error) => {}
         ).catch(err => {
             alert("❌ Erreur caméra: " + err);
         });
@@ -2417,7 +2365,6 @@ app.get('/signup-qr', (req, res) => {
             document.getElementById('dobYear').disabled = false;
             
             document.getElementById('qrVerified').value = 'true';
-            document.getElementById('verifiedBy').value = 'Test';
             document.getElementById('submitBtn').disabled = false;
             
             scanner.stop();
@@ -2435,10 +2382,8 @@ app.get('/signup-qr', (req, res) => {
             reader.readAsDataURL(e.target.files[0]);
         }
 
-        document.getElementById('regForm').addEventListener('submit', async function(e) {
+        document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
-            
-            document.getElementById('loader').style.display = 'flex';
             
             const day = document.getElementById('dobDay').value;
             const month = document.getElementById('dobMonth').value;
@@ -2446,48 +2391,38 @@ app.get('/signup-qr', (req, res) => {
             
             if (!day || !month || !year) {
                 alert("Veuillez remplir la date de naissance");
-                document.getElementById('loader').style.display = 'none';
                 return;
             }
             
             const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
             
-            const userData = {
+            const data = {
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
-                gender: document.getElementById('gender').value,
                 dob: dob,
-                residence: document.getElementById('residence').value,
-                region: document.getElementById('region').value,
                 genotype: document.getElementById('genotype').value,
                 bloodGroup: document.getElementById('bloodGroup').value,
+                residence: document.getElementById('residence').value,
+                region: document.getElementById('region').value,
                 desireChild: document.getElementById('desireChild').value,
                 photo: photoBase64 || "",
-                language: '${req.lang}',
-                isPublic: true,
                 qrVerified: true,
-                verifiedBy: document.getElementById('verifiedBy').value,
-                verifiedAt: new Date(),
-                verificationBadge: 'lab'
+                verifiedBy: 'QR Scan'
             };
             
             const res = await fetch('/api/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(userData)
+                body: JSON.stringify(data)
             });
             
-            const data = await res.json();
-            
-            setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                if (data.success) {
-                    window.location.href = '/profile';
-                } else {
-                    alert("Erreur: " + (data.error || "Inconnue"));
-                }
-            }, 2000);
-        });
+            if(res.ok) {
+                alert("🎉 Compte créé !");
+                window.location.href = '/profile';
+            } else {
+                alert("❌ Erreur lors de l'inscription");
+            }
+        };
     </script>
 </body>
 </html>`);
