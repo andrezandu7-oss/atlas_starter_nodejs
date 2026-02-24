@@ -2107,71 +2107,46 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
-// ============================================
-// ============================================
-// INSCRIPTION QR - VERSION FINALE SIMPLIFIÉE
+// INSCRIPTION QR - TON CODE + DATE UNIQUEMENT
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Genlove - Inscription QR</title>
     ${styles}
+    ${notifyScript}
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4e9da;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-        }
-        #reader {
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            box-sizing: border-box;
-        }
-        .locked {
-            background: #e8f5e9;
-            border-color: #4caf50;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background: #ff416c;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            margin: 10px 0;
-        }
-        button:disabled {
-            background: #ccc;
-        }
-        .date-row {
+        /* UNIQUEMENT les styles pour la date - NE PAS TOUCHER AU SCANNER */
+        .custom-date-picker {
             display: flex;
             gap: 5px;
             margin: 10px 0;
         }
-        .date-row select {
+        .date-part {
             flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: #f8f9fa;
+        }
+        .locked {
+            background: #f0f0f0;
+            border-color: #4caf50;
+        }
+        .debug-box {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 10px 0;
+            display: none;
+            border-left: 5px solid #ff416c;
         }
         .test-buttons {
             display: flex;
@@ -2179,95 +2154,109 @@ app.get('/signup-qr', (req, res) => {
             margin: 15px 0;
         }
         .test-btn {
+            flex: 1;
             background: #1a2a44;
             color: white;
             border: none;
             padding: 10px;
             border-radius: 30px;
             cursor: pointer;
-            flex: 1;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            color: #666;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 style="text-align:center;">Inscription QR</h2>
-        <p style="text-align:center;">Scannez votre QR code médical</p>
-        
-        <!-- SCANNER -->
-        <div id="reader"></div>
-        
-        <!-- Formulaire -->
-        <form id="regForm">
-            <!-- Champs QR -->
-            <input type="text" id="firstName" placeholder="Prénom" readonly class="locked">
-            <input type="text" id="lastName" placeholder="Nom" readonly class="locked">
-            <input type="text" id="genotype" placeholder="Génotype" readonly class="locked">
-            <input type="text" id="bloodGroup" placeholder="Groupe sanguin" readonly class="locked">
-            
-            <!-- Date de naissance - 3 cases -->
-            <div class="date-row">
-                <select id="dobDay" disabled>
-                    <option value="">Jour</option>
-                    ${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
-                </select>
-                <select id="dobMonth" disabled>
-                    <option value="">Mois</option>
-                    <option value="1">Jan</option><option value="2">Fév</option><option value="3">Mar</option>
-                    <option value="4">Avr</option><option value="5">Mai</option><option value="6">Juin</option>
-                    <option value="7">Juil</option><option value="8">Aoû</option><option value="9">Sep</option>
-                    <option value="10">Oct</option><option value="11">Nov</option><option value="12">Déc</option>
-                </select>
-                <select id="dobYear" disabled>
-                    <option value="">Année</option>
-                    ${Array.from({length:100},(_,i)=>{
-                        let y = new Date().getFullYear()-18-i;
-                        return `<option value="${y}">${y}</option>`;
-                    }).join('')}
-                </select>
+    <div class="app-shell">
+        <div class="page-white">
+            <div style="background: white; padding: 20px; border-radius: 20px;">
+                <h2>Inscription avec certificat</h2>
+                <p>Scannez votre QR code médical</p>
+                
+                <!-- LE SCANNER - INTACT -->
+                <div id="reader"></div>
+                
+                <!-- Zone de débogage -->
+                <div class="debug-box" id="debug">
+                    <strong>Dernier scan:</strong> <span id="debugText"></span>
+                </div>
+                
+                <!-- Photo (optionnelle) -->
+                <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
+                    <span id="photoText">📷 Photo</span>
+                </div>
+                <input type="file" id="photoInput" style="display:none" onchange="previewPhoto(event)" accept="image/*">
+                
+                <form id="regForm">
+                    <!-- 4 champs du QR -->
+                    <input type="text" id="firstName" placeholder="Prénom" readonly class="locked input-box">
+                    <input type="text" id="lastName" placeholder="Nom" readonly class="locked input-box">
+                    <input type="text" id="genotype" placeholder="Génotype" readonly class="locked input-box">
+                    <input type="text" id="bloodGroup" placeholder="Groupe sanguin" readonly class="locked input-box">
+                    
+                    <!-- DATE DE NAISSANCE - 3 CASES HORIZONTALES (AJOUT UNIQUE) -->
+                    <div style="margin: 15px 0 5px 0;">Date de naissance</div>
+                    <div class="custom-date-picker">
+                        <select id="dobDay" class="date-part" required disabled>
+                            <option value="">Jour</option>
+                            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                        </select>
+                        <select id="dobMonth" class="date-part" required disabled>
+                            <option value="">Mois</option>
+                            <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option>
+                            <option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option>
+                            <option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option>
+                            <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+                        </select>
+                        <select id="dobYear" class="date-part" required disabled>
+                            <option value="">Année</option>
+                            ${Array.from({length: 100}, (_, i) => {
+                                const year = new Date().getFullYear() - 18 - i;
+                                return `<option value="${year}">${year}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
+                    
+                    <!-- Champs manuels -->
+                    <input type="text" id="residence" placeholder="Ville" class="input-box" required>
+                    <input type="text" id="region" placeholder="Région" class="input-box" required>
+                    <select id="desireChild" class="input-box" required>
+                        <option value="">Désir d'enfant ?</option>
+                        <option value="Oui">Oui</option>
+                        <option value="Non">Non</option>
+                    </select>
+                    
+                    <button type="submit" id="submitBtn" disabled class="btn-pink">S'inscrire</button>
+                </form>
+                
+                <!-- Boutons de test -->
+                <div class="test-buttons">
+                    <button class="test-btn" onclick="simulateQR('AA', 'O+', '1990-05-15')">AA/O+</button>
+                    <button class="test-btn" onclick="simulateQR('AS', 'A+', '1992-08-20')">AS/A+</button>
+                    <button class="test-btn" onclick="simulateQR('SS', 'B-', '1988-12-10')">SS/B-</button>
+                </div>
+                
+                <a href="/signup-choice" class="back-link">← Retour</a>
             </div>
-            
-            <!-- Champs manuels -->
-            <input type="text" id="residence" placeholder="Ville" required>
-            <input type="text" id="region" placeholder="Région" required>
-            <select id="desireChild" required>
-                <option value="">Désir d'enfant ?</option>
-                <option value="Oui">Oui</option>
-                <option value="Non">Non</option>
-            </select>
-            
-            <button type="submit" id="submitBtn" disabled>S'inscrire</button>
-        </form>
-        
-        <!-- Boutons test -->
-        <div class="test-buttons">
-            <button class="test-btn" onclick="testQR('AA','O+','1990-05-15')">AA/O+</button>
-            <button class="test-btn" onclick="testQR('AS','A+','1992-08-20')">AS/A+</button>
-            <button class="test-btn" onclick="testQR('SS','B-','1988-12-10')">SS/B-</button>
         </div>
-        
-        <a href="/signup-choice" class="back-link">← Retour</a>
     </div>
     
     <script>
-        // === CODE SCAN QUI MARCHE ===
+        let photoBase64 = "";
+        
+        // TON CODE DE SCAN - EXACTEMENT LE MÊME
         const scanner = new Html5Qrcode("reader");
         
         scanner.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             (text) => {
+                document.getElementById('debug').style.display = 'block';
+                document.getElementById('debugText').innerText = text;
+                
                 let nom = '', geno = '', gs = '', dob = '';
                 
-                // Format NOM:...|GENO:...|GS:...|DOB:...
                 if (text.includes('NOM:') && text.includes('GENO:') && text.includes('GS:')) {
-                    text.split('|').forEach(p => {
+                    const parts = text.split('|');
+                    parts.forEach(p => {
                         if(p.startsWith('NOM:')) nom = p.split(':')[1];
                         if(p.startsWith('GENO:')) geno = p.split(':')[1];
                         if(p.startsWith('GS:')) gs = p.split(':')[1];
@@ -2275,82 +2264,113 @@ app.get('/signup-qr', (req, res) => {
                     });
                 }
                 
-                // Format JSON
                 try {
-                    const j = JSON.parse(text);
-                    if (j.patientName) nom = j.patientName;
-                    if (j.genotype) geno = j.genotype;
-                    if (j.bloodGroup) gs = j.bloodGroup;
-                    if (j.dateOfBirth) dob = j.dateOfBirth;
+                    const json = JSON.parse(text);
+                    if (json.patientName) nom = json.patientName;
+                    if (json.genotype) geno = json.genotype;
+                    if (json.bloodGroup) gs = json.bloodGroup;
+                    if (json.dateOfBirth) dob = json.dateOfBirth;
                 } catch(e) {}
                 
                 if (nom && geno && gs) {
-                    const p = nom.split(' ');
-                    document.getElementById('firstName').value = p[0] || '';
-                    document.getElementById('lastName').value = p.slice(1).join(' ') || '';
+                    const parts = nom.split(' ');
+                    document.getElementById('firstName').value = parts[0] || '';
+                    document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
                     document.getElementById('genotype').value = geno;
                     document.getElementById('bloodGroup').value = gs;
                     
+                    // Remplir la date si présente
                     if (dob) {
-                        let d = new Date(dob);
-                        document.getElementById('dobDay').value = d.getDate();
-                        document.getElementById('dobMonth').value = d.getMonth()+1;
-                        document.getElementById('dobYear').value = d.getFullYear();
+                        const date = new Date(dob);
+                        document.getElementById('dobDay').value = date.getDate();
+                        document.getElementById('dobMonth').value = date.getMonth() + 1;
+                        document.getElementById('dobYear').value = date.getFullYear();
                         document.getElementById('dobDay').disabled = false;
                         document.getElementById('dobMonth').disabled = false;
                         document.getElementById('dobYear').disabled = false;
                     }
                     
                     document.getElementById('submitBtn').disabled = false;
+                    
                     scanner.stop();
                     document.getElementById('reader').style.display = 'none';
                     alert("✅ Scan réussi !");
                 }
             },
-            ()=>{}
-        ).catch(err => alert("❌ Erreur caméra: "+err));
-        
-        function testQR(g,b,d) {
+            (error) => {}
+        ).catch(err => {
+            alert("❌ Erreur caméra: " + err);
+        });
+
+        function simulateQR(genotype, bloodGroup, dob) {
             document.getElementById('firstName').value = 'João';
             document.getElementById('lastName').value = 'Silva';
-            document.getElementById('genotype').value = g;
-            document.getElementById('bloodGroup').value = b;
-            let dt = new Date(d);
-            document.getElementById('dobDay').value = dt.getDate();
-            document.getElementById('dobMonth').value = dt.getMonth()+1;
-            document.getElementById('dobYear').value = dt.getFullYear();
+            document.getElementById('genotype').value = genotype;
+            document.getElementById('bloodGroup').value = bloodGroup;
+            
+            const date = new Date(dob);
+            document.getElementById('dobDay').value = date.getDate();
+            document.getElementById('dobMonth').value = date.getMonth() + 1;
+            document.getElementById('dobYear').value = date.getFullYear();
             document.getElementById('dobDay').disabled = false;
             document.getElementById('dobMonth').disabled = false;
             document.getElementById('dobYear').disabled = false;
+            
             document.getElementById('submitBtn').disabled = false;
             scanner.stop();
             document.getElementById('reader').style.display = 'none';
         }
-        
+
+        function previewPhoto(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                photoBase64 = reader.result;
+                document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
+                document.getElementById('photoCircle').style.backgroundSize = 'cover';
+                document.getElementById('photoText').style.display = 'none';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
+            
+            const day = document.getElementById('dobDay').value;
+            const month = document.getElementById('dobMonth').value;
+            const year = document.getElementById('dobYear').value;
+            
+            if (!day || !month || !year) {
+                alert("Veuillez remplir la date de naissance");
+                return;
+            }
+            
+            const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            
             const data = {
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
-                dob: document.getElementById('dobYear').value+'-'+
-                     document.getElementById('dobMonth').value.padStart(2,'0')+'-'+
-                     document.getElementById('dobDay').value.padStart(2,'0'),
+                dob: dob,
                 genotype: document.getElementById('genotype').value,
                 bloodGroup: document.getElementById('bloodGroup').value,
                 residence: document.getElementById('residence').value,
                 region: document.getElementById('region').value,
                 desireChild: document.getElementById('desireChild').value,
+                photo: photoBase64 || "",
                 qrVerified: true
             };
-            let res = await fetch('/api/register', {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify(data)
+            
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
             });
+            
             if(res.ok) {
-                alert("✅ Compte créé !");
+                alert("🎉 Compte créé !");
                 window.location.href = '/profile';
-            } else alert("❌ Erreur");
+            } else {
+                alert("❌ Erreur lors de l'inscription");
+            }
         };
     </script>
 </body>
