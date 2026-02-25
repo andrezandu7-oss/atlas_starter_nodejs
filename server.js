@@ -2106,107 +2106,161 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// CAMERA QR + 4 CHAMPS EN BAS
-// ===========================
+// CAMERA QR + FORMULAIRE COMPLET
+// ===============================
 app.get('/signup-qr', (req, res) => {
     res.send(`
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
-            <style>
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    height: 100%;
-                    background: black;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    font-family: sans-serif;
-                }
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: sans-serif;
+    color: white;
+}
 
-                #reader {
-                    width: 280px;
-                    height: 280px;
-                }
+#reader {
+    width: 280px;
+    height: 280px;
+    margin-top: 30px;
+}
 
-                video {
-                    object-fit: cover !important;
-                }
+video { object-fit: cover !important; }
 
-                .form-container {
-                    width: 280px;
-                    margin-top: 20px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                }
+.form-container {
+    width: 280px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-                input {
-                    padding: 10px;
-                    border-radius: 8px;
-                    border: 1px solid #ccc;
-                    font-size: 14px;
-                }
-            </style>
-        </head>
-        <body>
-            <div id="reader"></div>
+input, select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    color: black;
+}
 
-            <div class="form-container">
-                <input type="text" placeholder="Prénom">
-                <input type="text" placeholder="Nom">
-                <input type="text" placeholder="Génotype">
-                <input type="text" placeholder="Groupe sanguin">
-            </div>
+.section-title {
+    margin-top: 30px;
+    font-weight: bold;
+    font-size: 16px;
+}
 
-            <script>
-                const html5QrCode = new Html5Qrcode("reader");
+.sub-text {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
 
-                async function startRearCamera() {
-                    try {
-                        const devices = await Html5Qrcode.getCameras();
-                        if (!devices || devices.length === 0) return;
+.date-row {
+    display: flex;
+    gap: 8px;
+}
 
-                        let rearCamera = devices.find(device =>
-                            device.label.toLowerCase().includes("back") ||
-                            device.label.toLowerCase().includes("rear") ||
-                            device.label.toLowerCase().includes("environment")
-                        );
+.date-row input {
+    flex: 1;
+    text-align: center;
+}
 
-                        if (!rearCamera) rearCamera = devices[devices.length - 1];
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    margin-top: 15px;
+}
+</style>
+</head>
+<body>
 
-                        await html5QrCode.start(
-                            rearCamera.id,
-                            {
-                                fps: 20,
-                                aspectRatio: 1.0,
-                                videoConstraints: {
-                                    width: { ideal: 720 },
-                                    height: { ideal: 720 },
-                                    facingMode: "environment"
-                                },
-                                qrbox: { width: 250, height: 250 }
-                            },
-                            (decodedText) => {
-                                console.log(decodedText);
-                            }
-                        );
+<div id="reader"></div>
 
-                    } catch (err) {
-                        console.error(err);
-                    }
-                }
+<div class="form-container">
+    <input type="text" placeholder="Prénom">
+    <input type="text" placeholder="Nom">
+    <input type="text" placeholder="Génotype">
+    <input type="text" placeholder="Groupe sanguin">
 
-                startRearCamera();
-            </script>
-        </body>
-        </html>
-    `);
+    <div class="section-title">
+        Aidez vos partenaires à en savoir un peu plus sur vous
+    </div>
+
+    <div class="sub-text">
+        Veuillez remplir les cases ci-dessous :
+    </div>
+
+    <input type="file" accept="image/*">
+    <input type="text" placeholder="Région actuelle" required>
+
+    <div class="date-row">
+        <input type="number" placeholder="j" min="1" max="31" required>
+        <input type="number" placeholder="m" min="1" max="12" required>
+        <input type="number" placeholder="a" min="1900" max="2100" required>
+    </div>
+
+    <div class="checkbox-container">
+        <input type="checkbox" required>
+        <label>
+            Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité
+        </label>
+    </div>
+</div>
+
+<script>
+const html5QrCode = new Html5Qrcode("reader");
+
+async function startRearCamera() {
+    try {
+        const devices = await Html5Qrcode.getCameras();
+        if (!devices || devices.length === 0) return;
+
+        let rearCamera = devices.find(device =>
+            device.label.toLowerCase().includes("back") ||
+            device.label.toLowerCase().includes("rear") ||
+            device.label.toLowerCase().includes("environment")
+        );
+
+        if (!rearCamera) rearCamera = devices[devices.length - 1];
+
+        await html5QrCode.start(
+            rearCamera.id,
+            {
+                fps: 20,
+                aspectRatio: 1.0,
+                videoConstraints: {
+                    width: { ideal: 720 },
+                    height: { ideal: 720 },
+                    facingMode: "environment"
+                },
+                qrbox: { width: 250, height: 250 }
+            },
+            (decodedText) => {
+                console.log(decodedText);
+            }
+        );
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+startRearCamera();
+</script>
+
+</body>
+</html>
+`);
 });
 // ============================================
 // INSCRIPTION MANUELLE
