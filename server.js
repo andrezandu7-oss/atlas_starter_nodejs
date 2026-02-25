@@ -2223,6 +2223,19 @@ input[readonly] {
     opacity: 1;
 }
 
+/* Style pour le titre de la date */
+.date-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    margin-top: 10px;
+}
+
+.date-title:first-of-type {
+    margin-top: 0;
+}
+
 /* Date row */
 .date-row {
     display: flex;
@@ -2339,6 +2352,9 @@ button:not(:disabled):hover {
     
     <input type="text" placeholder="Région actuelle" id="region" required>
 
+    <!-- Titre pour la date de naissance -->
+    <div class="date-title">📅 Date de naissance</div>
+    
     <div class="date-row">
         <input type="number" placeholder="j" min="1" max="31" id="day" required>
         <input type="number" placeholder="m" min="1" max="12" id="month" required>
