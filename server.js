@@ -2105,9 +2105,8 @@ app.get('/signup-choice', (req, res) => {
 </html>`);
 });
 
-// ============================================
-// CAMERA QR - CARRÉ 70% LARGEUR - ARRIÈRE UNIQUEMENT
-// ==================================================
+// ============================================// CAMERA QR - FORMAT CARRÉ STANDARD ANDROID
+// ==========================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -2127,10 +2126,12 @@ app.get('/signup-qr', (req, res) => {
                     align-items: center;
                     overflow: hidden;
                 }
+
                 #reader {
-                    width: 70vw;   /* 👈 70% largeur écran */
-                    height: 70vw;  /* 👈 carré parfait */
+                    width: 280px;   /* 👈 dimension carrée standard */
+                    height: 280px;  /* 👈 carré parfait fixe */
                 }
+
                 video {
                     object-fit: cover !important;
                 }
@@ -2159,10 +2160,13 @@ app.get('/signup-qr', (req, res) => {
                             rearCamera.id,
                             {
                                 fps: 20,
-                                qrbox: (viewWidth, viewHeight) => {
-                                    const size = Math.min(viewWidth, viewHeight) * 0.9;
-                                    return { width: size, height: size };
-                                }
+                                aspectRatio: 1.0, // 👈 forcer format carré
+                                videoConstraints: {
+                                    width: { ideal: 720 },
+                                    height: { ideal: 720 },
+                                    facingMode: "environment"
+                                },
+                                qrbox: { width: 250, height: 250 }
                             },
                             (decodedText) => {
                                 console.log(decodedText);
