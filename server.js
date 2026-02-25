@@ -2108,172 +2108,151 @@ app.get('/signup-choice', (req, res) => {
 // ============================================ 
 // INSCRIPTION PAR CODE QR 
 app.get('/signup-qr', (req, res) => {
-    res.send(`
+res.send(`
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
+
 <style>
-body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-    background-color: #f9fafb;
-    color: #111827;
+body{
+    margin:0;
+    font-family:sans-serif;
+    background:#f9fafb;
+    color:#111827;
 }
-
-/* Container scrollable */
-.container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
+.container{
+    max-width:400px;
+    margin:0 auto;
+    padding:20px;
 }
-
-/* QR Scanner carré */
-#reader {
-    width: 70vw;
-    height: 70vw; /* carré parfait */
-    max-width: 300px;
-    max-height: 300px;
-    margin: 0 auto 20px;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    background-color: #ffffff;
-    position: relative;
-    border: 3px solid transparent;
-    transition: border 0.3s ease;
+#reader{
+    width:70vw;
+    height:70vw;
+    max-width:300px;
+    max-height:300px;
+    margin:0 auto 20px;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+    background:#fff;
+    position:relative;
+    border:3px solid transparent;
 }
-
-#qr-success {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(16,185,129,0.9);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 14px;
-    display: none;
+#qr-success{
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#10b981;
+    color:white;
+    padding:6px 12px;
+    border-radius:12px;
+    font-size:14px;
+    display:none;
 }
-
-/* Form Fields */
-input[type="text"], input[type="number"], select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-    box-sizing: border-box;
-    transition: background-color 0.5s ease;
+input[type="text"],input[type="number"]{
+    width:100%;
+    padding:12px;
+    margin-bottom:12px;
+    border-radius:12px;
+    border:1px solid #d1d5db;
+    font-size:14px;
 }
-
-/* Photo rectangle vertical */
-.photo-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 180px;
-    width: 120px;
-    background-color: #f3f4f6;
-    border: 2px dashed #d1d5db;
-    color: #9ca3af;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 8px;
-    margin: 0 auto 20px;
+.photo-box{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:180px;
+    width:120px;
+    background:#f3f4f6;
+    border:2px dashed #d1d5db;
+    color:#9ca3af;
+    cursor:pointer;
+    border-radius:8px;
+    margin:0 auto 20px;
 }
-
-/* Date row */
-.date-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
+.date-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
 }
-
-.date-row input {
-    flex: 1;
-    text-align: center;
+.date-row input{
+    flex:1;
+    text-align:center;
 }
-
-.checkbox-container {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
-    margin-bottom: 20px;
+.checkbox-container{
+    display:flex;
+    gap:8px;
+    font-size:13px;
+    margin-bottom:20px;
 }
-
-/* Bouton final */
-button {
-    width: 100%;
-    padding: 16px;
-    border-radius: 25px;
-    border: none;
-    font-weight: bold;
-    font-size: 16px;
-    color: white;
-    background-color: #db2777;
-    cursor: pointer;
+button{
+    width:100%;
+    padding:16px;
+    border-radius:25px;
+    border:none;
+    font-weight:bold;
+    font-size:16px;
+    color:white;
+    background:#e91e63;
+    cursor:pointer;
 }
-
-button:disabled {
-    background-color: #f9a8d4;
-    cursor: not-allowed;
+button:disabled{
+    background:#f8bbd0;
+    cursor:not-allowed;
 }
-
-.section-title {
-    font-weight: bold;
-    font-size: 16px;
-    text-align: center;
-    margin-bottom: 6px;
+.section-title{
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:6px;
 }
-
-.sub-text {
-    font-size: 14px;
-    color: #6b7280;
-    text-align: center;
-    margin-bottom: 20px;
+.sub-text{
+    font-size:14px;
+    color:#6b7280;
+    text-align:center;
+    margin-bottom:20px;
 }
 </style>
 </head>
+
 <body>
 <div class="container">
 
-    <!-- QR Scanner -->
-    <div id="reader">
-        <div id="qr-success">QR scanné !</div>
-    </div>
+<div id="reader">
+    <div id="qr-success">QR scanné !</div>
+</div>
 
-    <!-- Form Fields éditables -->
-    <input type="text" placeholder="Prénom" id="firstName">
-    <input type="text" placeholder="Nom" id="lastName">
-    <input type="text" placeholder="Génotype" id="genotype">
-    <input type="text" placeholder="Groupe sanguin" id="bloodGroup">
+<input type="text" placeholder="Prénom" id="firstName">
+<input type="text" placeholder="Nom" id="lastName">
+<input type="text" placeholder="Génotype" id="genotype">
+<input type="text" placeholder="Groupe sanguin" id="bloodGroup">
 
-    <div class="section-title">Aidez vos partenaires à en savoir un peu plus sur vous</div>
-    <div class="sub-text">Veuillez remplir les cases ci-dessous :</div>
+<div class="section-title">
+Aidez vos partenaires à en savoir un peu plus sur vous
+</div>
+<div class="sub-text">
+Veuillez remplir les cases ci-dessous :
+</div>
 
-    <div class="photo-box" id="photoBox">Ajouter photo</div>
-    <input type="text" placeholder="Région actuelle" id="region" required>
+<div class="photo-box" id="photoBox">Ajouter photo</div>
 
-    <div class="date-row">
-        <input type="number" placeholder="j" min="1" max="31" id="day" required>
-        <input type="number" placeholder="m" min="1" max="12" id="month" required>
-        <input type="number" placeholder="a" min="1900" max="2100" id="year" required>
-    </div>
+<input type="text" placeholder="Région actuelle" id="region" required>
 
-    <div class="checkbox-container">
-        <input type="checkbox" id="honorCheckbox" required>
-        <label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
-    </div>
+<div class="date-row">
+<input type="number" placeholder="j" id="day" required>
+<input type="number" placeholder="m" id="month" required>
+<input type="number" placeholder="a" id="year" required>
+</div>
 
-    <button id="submitBtn" disabled>Valider le profil</button>
+<div class="checkbox-container">
+<input type="checkbox" id="honorCheckbox">
+<label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
+</div>
+
+<button id="submitBtn" disabled>Valider le profil</button>
 
 </div>
 
@@ -2281,80 +2260,83 @@ button:disabled {
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
 
-async function startRearCamera() {
-    try {
+async function startScanner(){
+    try{
         const devices = await Html5Qrcode.getCameras();
-        if (!devices || devices.length === 0) return;
-        let rearCamera = devices.find(d => d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("rear") || d.label.toLowerCase().includes("environment"));
-        if (!rearCamera) rearCamera = devices[devices.length - 1];
+        if(!devices.length) return;
 
-        await html5QrCode.start(rearCamera.id, {
-            fps: 20,
-            aspectRatio: 1.0,
-            videoConstraints: { width: {ideal:720}, height:{ideal:720}, facingMode:"environment" },
-            qrbox: { width: 250, height: 250 }
-        }, (decodedText)=>{
-            if (hasScanned) return;
-            hasScanned = true;
-
-            const data = decodedText.trim().split('|');
-            if(data.length>=4){
-                const fields = ['firstName','lastName','genotype','bloodGroup'];
-                fields.forEach((id,i)=>{
-                    const el = document.getElementById(id);
-                    el.value = data[i].trim();
-                    el.style.backgroundColor = "#d1fae5";
-                    setTimeout(()=>{ el.style.backgroundColor = "#fff"; }, 1000);
-                });
+        let cameraId = devices[0].id;
+        devices.forEach(d=>{
+            const label=d.label.toLowerCase();
+            if(label.includes("back")||label.includes("rear")||label.includes("environment")){
+                cameraId=d.id;
             }
-
-            const readerDiv = document.getElementById('reader');
-            const successDiv = document.getElementById('qr-success');
-            readerDiv.style.border = "3px solid #10b981";
-            successDiv.style.display = "block";
-            setTimeout(()=>{ readerDiv.style.border="3px solid transparent"; successDiv.style.display="none"; },1500);
         });
-    } catch(e){console.error(e);}
+
+        await html5QrCode.start(
+            cameraId,
+            {
+                fps:15,
+                qrbox:(w,h)=>{
+                    const size=Math.min(w,h)*0.8;
+                    return {width:size,height:size};
+                }
+            },
+            (decodedText)=>{
+                if(hasScanned) return;
+                hasScanned=true;
+
+                const data=decodedText.trim().split('|');
+                if(data.length>=4){
+                    document.getElementById('firstName').value=data[0];
+                    document.getElementById('lastName').value=data[1];
+                    document.getElementById('genotype').value=data[2];
+                    document.getElementById('bloodGroup').value=data[3];
+                }
+
+                document.getElementById('qr-success').style.display="block";
+                html5QrCode.stop();
+            }
+        );
+    }catch(e){console.log(e);}
 }
-startRearCamera();
+startScanner();
 
-// Button enable logic
-const submitBtn = document.getElementById('submitBtn');
-const regionInput = document.getElementById('region');
-const dayInput = document.getElementById('day');
-const monthInput = document.getElementById('month');
-const yearInput = document.getElementById('year');
-const honorCheckbox = document.getElementById('honorCheckbox');
+/* Activation bouton */
+const submitBtn=document.getElementById('submitBtn');
+const region=document.getElementById('region');
+const day=document.getElementById('day');
+const month=document.getElementById('month');
+const year=document.getElementById('year');
+const honor=document.getElementById('honorCheckbox');
 
-function checkFormValidity(){
-    if(regionInput.value.trim()!=="" && dayInput.value.trim()!=="" && monthInput.value.trim()!=="" && yearInput.value.trim()!=="" && honorCheckbox.checked){
+function checkForm(){
+    if(region.value && day.value && month.value && year.value && honor.checked){
         submitBtn.disabled=false;
     }else{
         submitBtn.disabled=true;
     }
 }
+region.oninput=checkForm;
+day.oninput=checkForm;
+month.oninput=checkForm;
+year.oninput=checkForm;
+honor.onchange=checkForm;
 
-regionInput.addEventListener('input', checkFormValidity);
-dayInput.addEventListener('input', checkFormValidity);
-monthInput.addEventListener('input', checkFormValidity);
-yearInput.addEventListener('input', checkFormValidity);
-honorCheckbox.addEventListener('change', checkFormValidity);
-
-// Photo box click
-const photoBox = document.getElementById('photoBox');
-photoBox.addEventListener('click', ()=>{
-    const fileInput = document.createElement('input');
-    fileInput.type='file';
-    fileInput.accept='image/*';
-    fileInput.onchange=e=>{
+/* Photo */
+document.getElementById('photoBox').onclick=()=>{
+    const input=document.createElement('input');
+    input.type='file';
+    input.accept='image/*';
+    input.onchange=e=>{
         if(e.target.files.length>0){
-            photoBox.textContent=e.target.files[0].name;
-            photoBox.style.color="#111827";
+            document.getElementById('photoBox').textContent=e.target.files[0].name;
         }
     };
-    fileInput.click();
-});
+    input.click();
+};
 </script>
+
 </body>
 </html>
 `);
