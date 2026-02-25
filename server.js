@@ -2106,7 +2106,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - VERSION FULL-SCREEN MOBILE
+// INSCRIPTION QR - VERSION FINALE OPTIMISÉE
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
@@ -2117,7 +2117,6 @@ app.get('/signup-qr', (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
             <style>
-                /* Suppression des bordures et textes inutiles de la bibliothèque pour le plein écran */
                 #reader__dashboard { display: none !important; }
                 #reader { border: none !important; }
                 video { object-fit: cover !important; }
@@ -2128,22 +2127,19 @@ app.get('/signup-qr', (req, res) => {
                 <h3 style="text-align:center; color:#374151;">Scannez le certificat</h3>
                 
                 <div id="reader" style="width:100%; aspect-ratio: 1/1; border-radius:20px; overflow:hidden; background:#000; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                    <div id="status" style="position:absolute; top:15px; left:15px; color:white; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; z-index:10; font-size:14px; display:none;">
-                        Alignez le QR code ici
-                    </div>
+                    <div id="status" style="position:absolute; top:15px; left:15px; color:white; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; z-index:10; font-size:14px; display:none;">📱 Alignez le QR code</div>
                 </div>
                 
                 <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:20px;">
                     <input type="hidden" name="isVerified" value="true">
                     
                     <div id="certData" style="background:#ecfdf5; padding:15px; border-radius:15px; margin-bottom:15px; display:none; border:2px solid #10b981;">
-                        <p style="color:#059669; font-weight:bold; margin-top:0;">✔ Certificat Identifié</p>
-                        <input type="text" id="fn" name="firstName" readonly required style="width:100%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
-                        <input type="text" id="ln" name="lastName" readonly required style="width:100%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
-                        <div style="display:flex; gap:8px;">
-                            <input type="text" id="gt" name="genotype" readonly required style="width:50%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; font-weight:bold; color:#1f2937;">
-                            <input type="text" id="bg" name="bloodGroup" readonly required style="width:50%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; font-weight:bold; color:#1f2937;">
-                        </div>
+                        <p style="color:#059669; font-weight:bold; margin-top:0;">✔ Données extraites :</p>
+                        
+                        <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                        <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                        <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                        <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
                         <input type="hidden" id="dob" name="dob">
                     </div>
 
@@ -2156,7 +2152,7 @@ app.get('/signup-qr', (req, res) => {
                         <option value="Non">Non</option>
                     </select>
 
-                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#d1d5db; color:#6b7280; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Scanner d'abord</button>
+                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#d1d5db; color:#6b7280; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Veuillez scanner le QR</button>
                 </form>
             </div>
 
@@ -2166,8 +2162,6 @@ app.get('/signup-qr', (req, res) => {
 
                 function initScanner() {
                     document.getElementById('status').style.display = 'block';
-                    
-                    // Ajustement pour occuper toute la zone noire
                     scanner = new Html5QrcodeScanner("reader", { 
                         fps: 20, 
                         qrbox: (viewWidth, viewHeight) => {
@@ -2184,7 +2178,7 @@ app.get('/signup-qr', (req, res) => {
                 function processQRData(text) {
                     try {
                         const data = text.trim().split('|');
-                        if (data.length < 5) throw new Error('Données incomplètes');
+                        if (data.length < 5) throw new Error('Format invalide');
 
                         document.getElementById('fn').value = data[0].trim();
                         document.getElementById('ln').value = data[1].trim();
@@ -2194,14 +2188,15 @@ app.get('/signup-qr', (req, res) => {
 
                         document.getElementById('certData').style.display = 'block';
                         document.getElementById('submitBtn').disabled = false;
-                        document.getElementById('submitBtn').textContent = 'Finaliser l\\'inscription';
+                        document.getElementById('submitBtn').textContent = 'Finaliser l\\'inscription ✅';
                         document.getElementById('submitBtn').style.background = '#059669';
                         document.getElementById('submitBtn').style.color = 'white';
+                        document.getElementById('submitBtn').style.cursor = 'pointer';
 
                         scanner.clear();
                         isScanning = false;
                     } catch (e) {
-                        console.error(e);
+                        alert('Erreur de lecture : ' + e.message);
                     }
                 }
 
