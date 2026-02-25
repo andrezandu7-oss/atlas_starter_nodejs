@@ -2105,9 +2105,7 @@ app.get('/signup-choice', (req, res) => {
 </html>`);
 });
 
-// ============================================
-// ============================================
-// ============================================
+// ============================================// ============================================
 // INSCRIPTION QR - VERSION CORRIGÉE
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2522,6 +2520,7 @@ app.post('/api/register-qr', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
@@ -4012,30 +4011,42 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// DÉMARRAGE
-// ============================================
-app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 Genlove démarré sur http://localhost:${port}`);
-    console.log(`📱 Routes disponibles:`);
-    console.log(`   - Accueil: /`);
-    console.log(`   - Charte: /charte-engagement`);
-    console.log(`   - Choix inscription: /signup-choice`);
-    console.log(`   - Inscription QR: /signup-qr`);
-    console.log(`   - Inscription manuelle: /signup-manual`);
-    console.log(`   - Générateur QR: /generator`);
-    console.log(`   - Login: /login`);
-    console.log(`   - Profil: /profile`);
-    console.log(`   - Matching: /matching`);
-    console.log(`   - Messages: /inbox`);
-    console.log(`   - Chat: /chat`);
-    console.log(`   - Paramètres: /settings`);
-    console.log(`   - Édition profil: /edit-profile`);
-    console.log(`   - Liste bloqués: /blocked-list`);
+// REMPLACEZ la fin de votre fichier (tout en bas) :
+
+// ===============================================
+// DEMARRAGE - VERSION CORRIGÉE POUR RENDER
+// ===============================================
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Genlove démarré sur le port ${PORT}`);
+  console.log('📋 Routes disponibles:');
+  console.log('   - Accueil: /');
+  console.log('   - Charte: /charte-engagement');
+  console.log('   - Choix inscription: /signup-choice');
+  console.log('   - Inscription QR: /signup-qr');
+  console.log('   - Inscription manuelle: /signup-manual');
+  console.log('   - Login: /login');
+  console.log('   - Profil: /profile');
+  console.log('   - Matching: /matching');
+  console.log('   - Messages: /inbox');
+  console.log('   - Chat: /chat');
+  console.log('   - Paramètres: /settings');
+  console.log('   - Edition profil: /edit-profile');
+  console.log('   - Liste bloqués: /blocked-list');
+}).on('error', (err) => {
+  console.error('❌ Erreur démarrage:', err);
+  process.exit(1);
 });
 
 process.on('SIGINT', () => {
-    mongoose.connection.close(() => {
-        console.log('📦 Déconnexion MongoDB');
-        process.exit(0);
-    });
+  mongoose.connection.close(() => {
+    console.log('🔌 Déconnexion MongoDB');
+    process.exit(0);
+  });
 });
+
+// IMPORTANT: Pour Render, ajoutez aussi cette ligne au début du fichier
+// (après les require) pour forcer le port :
+process.env.PORT = process.env.PORT || 3000;
+
