@@ -2246,7 +2246,7 @@ button:disabled {
 <div class="container">
 
     <!-- QR Scanner -->
-    <div id="reader">
+    <div id="reader" style="position: relative;">
         <div id="qr-success">QR scanné !</div>
     </div>
 
@@ -2280,42 +2280,123 @@ button:disabled {
 <script>
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
+let scanTimeout = null;
 
 async function startRearCamera() {
     try {
         const devices = await Html5Qrcode.getCameras();
-        if (!devices || devices.length === 0) return;
-        let rearCamera = devices.find(d => d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("rear") || d.label.toLowerCase().includes("environment"));
+        if (!devices || devices.length === 0) {
+            console.error("Aucune caméra trouvée");
+            return;
+        }
+        
+        // Priorité à la caméra arrière
+        let rearCamera = devices.find(d => 
+            d.label.toLowerCase().includes("back") || 
+            d.label.toLowerCase().includes("rear") || 
+            d.label.toLowerCase().includes("environment") ||
+            d.label.toLowerCase().includes("arrière")
+        );
+        
         if (!rearCamera) rearCamera = devices[devices.length - 1];
 
-        await html5QrCode.start(rearCamera.id, {
-            fps: 20,
-            aspectRatio: 1.0,
-            videoConstraints: { width: {ideal:720}, height:{ideal:720}, facingMode:"environment" },
-            qrbox: { width: 250, height: 250 }
-        }, (decodedText)=>{
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
             if (hasScanned) return;
+            
+            // Annuler le timeout précédent s'il existe
+            if (scanTimeout) {
+                clearTimeout(scanTimeout);
+            }
+            
             hasScanned = true;
-
+            
+            // Arrêter le scan après une lecture réussie
+            html5QrCode.stop().catch(err => console.log(err));
+            
+            // Traiter les données du QR code
             const data = decodedText.trim().split('|');
-            if(data.length>=4){
-                const fields = ['firstName','lastName','genotype','bloodGroup'];
-                fields.forEach((id,i)=>{
+            console.log("Données scannées:", data);
+            
+            if(data.length >= 4) {
+                // Remplir les 4 premiers champs avec les données du QR code
+                const fields = ['firstName', 'lastName', 'genotype', 'bloodGroup'];
+                fields.forEach((id, i) => {
                     const el = document.getElementById(id);
-                    el.value = data[i].trim();
-                    el.style.backgroundColor = "#d1fae5";
-                    setTimeout(()=>{ el.style.backgroundColor = "#fff"; }, 1000);
+                    if (el && data[i]) {
+                        el.value = data[i].trim();
+                        el.style.backgroundColor = "#d1fae5";
+                        setTimeout(() => { 
+                            el.style.backgroundColor = "#fff"; 
+                        }, 1000);
+                    }
                 });
+                
+                // Si le QR code contient plus d'informations, remplir automatiquement
+                if (data.length >= 7) {
+                    // Format attendu: Prénom|Nom|Génotype|Groupe|Région|Jour|Mois|Année
+                    const regionEl = document.getElementById('region');
+                    if (regionEl && data[4]) {
+                        regionEl.value = data[4].trim();
+                    }
+                    
+                    if (data.length >= 7) {
+                        const dayEl = document.getElementById('day');
+                        const monthEl = document.getElementById('month');
+                        const yearEl = document.getElementById('year');
+                        
+                        if (dayEl && data[5]) dayEl.value = data[5].trim();
+                        if (monthEl && data[6]) monthEl.value = data[6].trim();
+                        if (yearEl && data[7]) yearEl.value = data[7].trim();
+                    }
+                }
             }
 
+            // Animation de succès
             const readerDiv = document.getElementById('reader');
             const successDiv = document.getElementById('qr-success');
             readerDiv.style.border = "3px solid #10b981";
             successDiv.style.display = "block";
-            setTimeout(()=>{ readerDiv.style.border="3px solid transparent"; successDiv.style.display="none"; },1500);
-        });
-    } catch(e){console.error(e);}
+            
+            // Réinitialiser après 3 secondes pour permettre un nouveau scan
+            scanTimeout = setTimeout(() => { 
+                readerDiv.style.border = "3px solid transparent"; 
+                successDiv.style.display = "none";
+                hasScanned = false;
+                // Redémarrer la caméra
+                startRearCamera();
+            }, 3000);
+            
+            // Vérifier la validité du formulaire après remplissage
+            checkFormValidity();
+        };
+
+        const qrCodeErrorCallback = (error) => {
+            // Ignorer les erreurs de lecture (s'affiche quand aucun QR n'est détecté)
+            if (!error.includes("NotFoundException")) {
+                console.log("Erreur de scan:", error);
+            }
+        };
+
+        // Configuration du scanner
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            videoConstraints: { 
+                width: { min: 640, ideal: 720, max: 1080 },
+                height: { min: 640, ideal: 720, max: 1080 },
+                facingMode: "environment"
+            }
+        };
+
+        await html5QrCode.start(rearCamera.id, config, qrCodeSuccessCallback, qrCodeErrorCallback);
+        
+    } catch(e) {
+        console.error("Erreur lors du démarrage de la caméra:", e);
+    }
 }
+
+// Démarrer la caméra au chargement de la page
 startRearCamera();
 
 // Button enable logic
@@ -2325,20 +2406,39 @@ const dayInput = document.getElementById('day');
 const monthInput = document.getElementById('month');
 const yearInput = document.getElementById('year');
 const honorCheckbox = document.getElementById('honorCheckbox');
+const firstNameInput = document.getElementById('firstName');
+const lastNameInput = document.getElementById('lastName');
+const genotypeInput = document.getElementById('genotype');
+const bloodGroupInput = document.getElementById('bloodGroup');
 
-function checkFormValidity(){
-    if(regionInput.value.trim()!=="" && dayInput.value.trim()!=="" && monthInput.value.trim()!=="" && yearInput.value.trim()!=="" && honorCheckbox.checked){
-        submitBtn.disabled=false;
-    }else{
-        submitBtn.disabled=true;
+function checkFormValidity() {
+    // Vérifier que tous les champs requis sont remplis
+    const allFieldsFilled = 
+        firstNameInput.value.trim() !== "" &&
+        lastNameInput.value.trim() !== "" &&
+        genotypeInput.value.trim() !== "" &&
+        bloodGroupInput.value.trim() !== "" &&
+        regionInput.value.trim() !== "" && 
+        dayInput.value.trim() !== "" && 
+        monthInput.value.trim() !== "" && 
+        yearInput.value.trim() !== "" && 
+        honorCheckbox.checked;
+    
+    if(allFieldsFilled) {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
     }
 }
 
-regionInput.addEventListener('input', checkFormValidity);
-dayInput.addEventListener('input', checkFormValidity);
-monthInput.addEventListener('input', checkFormValidity);
-yearInput.addEventListener('input', checkFormValidity);
+// Ajouter les écouteurs d'événements pour tous les champs
+[firstNameInput, lastNameInput, genotypeInput, bloodGroupInput, regionInput, dayInput, monthInput, yearInput].forEach(input => {
+    input.addEventListener('input', checkFormValidity);
+});
 honorCheckbox.addEventListener('change', checkFormValidity);
+
+// Vérification initiale
+checkFormValidity();
 
 // Photo box click
 const photoBox = document.getElementById('photoBox');
@@ -2353,6 +2453,16 @@ photoBox.addEventListener('click', ()=>{
         }
     };
     fileInput.click();
+});
+
+// Nettoyer les ressources quand on quitte la page
+window.addEventListener('beforeunload', () => {
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(err => console.log(err));
+    }
+    if (scanTimeout) {
+        clearTimeout(scanTimeout);
+    }
 });
 </script>
 </body>
