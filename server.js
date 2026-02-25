@@ -2180,7 +2180,7 @@ input[readonly] {
     opacity: 0.9;
 }
 
-/* Photo rectangle vertical */
+/* Photo box avec aperçu */
 .photo-box {
     display: flex;
     align-items: center;
@@ -2194,6 +2194,33 @@ input[readonly] {
     cursor: pointer;
     border-radius: 8px;
     margin: 0 auto 20px;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.photo-box.has-image {
+    border: 2px solid #10b981;
+    color: transparent;
+}
+
+.photo-box.has-image::after {
+    content: "✏️";
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    padding: 5px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.photo-box.has-image:hover::after {
+    opacity: 1;
 }
 
 /* Date row */
@@ -2227,11 +2254,16 @@ button {
     color: white;
     background-color: #db2777;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 button:disabled {
     background-color: #f9a8d4;
     cursor: not-allowed;
+}
+
+button:not(:disabled):hover {
+    background-color: #be185d;
 }
 
 .section-title {
@@ -2246,6 +2278,40 @@ button:disabled {
     color: #6b7280;
     text-align: center;
     margin-bottom: 20px;
+}
+
+/* Loader pour la validation */
+.loader {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Message de succès */
+.success-message {
+    background-color: #10b981;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 16px;
+    display: none;
+}
+
+.success-message a {
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
 }
 </style>
 </head>
@@ -2266,7 +2332,11 @@ button:disabled {
     <div class="section-title">Aidez vos partenaires à en savoir un peu plus sur vous</div>
     <div class="sub-text">Veuillez remplir les cases ci-dessous :</div>
 
-    <div class="photo-box" id="photoBox">Ajouter photo</div>
+    <!-- Photo box avec aperçu -->
+    <div class="photo-box" id="photoBox">
+        <span id="photoPlaceholder">Ajouter photo</span>
+    </div>
+    
     <input type="text" placeholder="Région actuelle" id="region" required>
 
     <div class="date-row">
@@ -2280,7 +2350,15 @@ button:disabled {
         <label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
     </div>
 
-    <button id="submitBtn" disabled>Valider le profil</button>
+    <button id="submitBtn" disabled>
+        <span id="buttonText">Valider le profil</span>
+    </button>
+
+    <!-- Message de succès (caché par défaut) -->
+    <div id="successMessage" class="success-message">
+        ✅ Profil validé avec succès ! 
+        <a href="/profile" id="profileLink">Voir mon profil</a>
+    </div>
 
 </div>
 
@@ -2288,6 +2366,7 @@ button:disabled {
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
 let scanTimeout = null;
+let selectedPhotoFile = null;
 
 async function startRearCamera() {
     try {
@@ -2417,9 +2496,13 @@ const firstNameInput = document.getElementById('firstName');
 const lastNameInput = document.getElementById('lastName');
 const genotypeInput = document.getElementById('genotype');
 const bloodGroupInput = document.getElementById('bloodGroup');
+const photoBox = document.getElementById('photoBox');
+const photoPlaceholder = document.getElementById('photoPlaceholder');
+const successMessage = document.getElementById('successMessage');
+const buttonText = document.getElementById('buttonText');
 
 function checkFormValidity() {
-    // Vérifier que tous les champs sont remplis
+    // Vérifier que tous les champs sont remplis (photo optionnelle mais recommandée)
     const allFieldsFilled = 
         firstNameInput.value.trim() !== "" &&
         lastNameInput.value.trim() !== "" &&
@@ -2447,20 +2530,90 @@ honorCheckbox.addEventListener('change', checkFormValidity);
 // Vérification initiale
 checkFormValidity();
 
-// Photo box click
-const photoBox = document.getElementById('photoBox');
+// Photo box avec aperçu
 photoBox.addEventListener('click', ()=>{
     const fileInput = document.createElement('input');
-    fileInput.type='file';
-    fileInput.accept='image/*';
-    fileInput.onchange=e=>{
-        if(e.target.files.length>0){
-            photoBox.textContent=e.target.files[0].name;
-            photoBox.style.color="#111827";
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = e => {
+        if(e.target.files.length > 0) {
+            selectedPhotoFile = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                // Afficher l'aperçu de l'image
+                photoBox.style.backgroundImage = \`url('\${event.target.result}')\`;
+                photoBox.classList.add('has-image');
+                photoPlaceholder.style.display = 'none';
+            };
+            
+            reader.readAsDataURL(selectedPhotoFile);
         }
     };
     fileInput.click();
 });
+
+// Validation du profil
+submitBtn.addEventListener('click', async function() {
+    // Désactiver le bouton pendant la validation
+    submitBtn.disabled = true;
+    const originalText = buttonText.textContent;
+    buttonText.innerHTML = '<span class="loader"></span> Validation...';
+    
+    try {
+        // Préparer les données du formulaire
+        const formData = {
+            firstName: firstNameInput.value,
+            lastName: lastNameInput.value,
+            genotype: genotypeInput.value,
+            bloodGroup: bloodGroupInput.value,
+            region: regionInput.value,
+            birthDate: {
+                day: dayInput.value,
+                month: monthInput.value,
+                year: yearInput.value
+            },
+            honorConfirmed: honorCheckbox.checked,
+            photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : null
+        };
+        
+        // Simuler un appel API (à remplacer par votre vraie API)
+        console.log("Données du profil à sauvegarder:", formData);
+        
+        // Simulation d'une requête API
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Afficher le message de succès
+        successMessage.style.display = 'block';
+        
+        // Option 1: Redirection automatique après 2 secondes
+        setTimeout(() => {
+            window.location.href = '/profile';
+        }, 2000);
+        
+        // Option 2: Redirection au clic sur le lien
+        document.getElementById('profileLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = '/profile';
+        });
+        
+    } catch (error) {
+        console.error("Erreur lors de la validation:", error);
+        alert("Une erreur est survenue. Veuillez réessayer.");
+        submitBtn.disabled = false;
+        buttonText.textContent = originalText;
+    }
+});
+
+// Fonction utilitaire pour convertir un fichier en base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
 
 // Nettoyer les ressources quand on quitte la page
 window.addEventListener('beforeunload', () => {
