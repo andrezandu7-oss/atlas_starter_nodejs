@@ -2122,7 +2122,6 @@ html, body {
     background-color: #f9fafb;
     font-family: sans-serif;
     color: #111827;
-    height: 100%;
 }
 
 body {
@@ -2138,16 +2137,15 @@ body {
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* QR Scanner carré visible */
+/* QR Scanner carré */
 #reader {
     width: 70vw;
-    height: 70vw;
+    height: 70vw; /* carré */
     max-width: 300px;
     max-height: 300px;
     margin: auto;
@@ -2184,11 +2182,12 @@ input[type="text"], input[type="number"], select {
     transition: background-color 0.5s ease;
 }
 
+/* Photo rectangle vertical type passeport */
 .photo-box {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 150px;
+    height: 180px;
     width: 120px;
     background-color: #f3f4f6;
     border: 2px dashed #d1d5db;
@@ -2196,7 +2195,7 @@ input[type="text"], input[type="number"], select {
     font-size: 14px;
     cursor: pointer;
     border-radius: 8px;
-    margin: auto;
+    margin: 0 auto;
 }
 
 /* Date row */
@@ -2217,8 +2216,9 @@ input[type="text"], input[type="number"], select {
     font-size: 13px;
 }
 
+/* Bouton final */
 button {
-    width: calc(100% - 40px);
+    width: 100%;
     padding: 16px;
     border-radius: 25px;
     border: none;
@@ -2227,12 +2227,7 @@ button {
     color: white;
     background-color: #db2777;
     cursor: pointer;
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 400px;
-    z-index: 100;
+    margin-top: 20px;
 }
 
 button:disabled {
@@ -2283,9 +2278,9 @@ button:disabled {
         <input type="checkbox" id="honorCheckbox" required>
         <label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
     </div>
-</div>
 
-<button id="submitBtn" disabled>Valider le profil</button>
+    <button id="submitBtn" disabled>Valider le profil</button>
+</div>
 
 <script>
 const html5QrCode = new Html5Qrcode("reader");
@@ -2313,13 +2308,11 @@ async function startRearCamera() {
                 fields.forEach((id,i)=>{
                     const el = document.getElementById(id);
                     el.value = data[i].trim();
-                    // Effet fond vert clair
                     el.style.backgroundColor = "#d1fae5";
                     setTimeout(()=>{ el.style.backgroundColor = "#fff"; }, 1000);
                 });
             }
 
-            // Animation QR scanné
             const readerDiv = document.getElementById('reader');
             const successDiv = document.getElementById('qr-success');
             readerDiv.style.border = "3px solid #10b981";
