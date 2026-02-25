@@ -2106,122 +2106,112 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - VERSION OPTIMISÉE POUR LE CENTRAGE
+// INSCRIPTION QR - VERSION FULL-SCREEN MOBILE
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
-        <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
-        <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
-            <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
-            <div id="reader" style="width:100%; min-height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;">
-                <div id="status" style="position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; z-index:10; display:none;">📱 Positionnez le QR code au centre</div>
-            </div>
-            
-            <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:25px;">
-                <input type="hidden" name="isVerified" value="true">
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
+            <style>
+                /* Suppression des bordures et textes inutiles de la bibliothèque pour le plein écran */
+                #reader__dashboard { display: none !important; }
+                #reader { border: none !important; }
+                video { object-fit: cover !important; }
+            </style>
+        </head>
+        <body style="margin:0; padding:0; font-family:sans-serif; background:#f9fafb;">
+            <div style="max-width:500px; margin:auto; padding:15px;">
+                <h3 style="text-align:center; color:#374151;">Scannez le certificat</h3>
                 
-                <div id="certData" style="background:#e8f5e8; padding:20px; border-radius:12px; margin-bottom:20px; display:none; border:2px solid #28a745;">
-                    <p style="color:#28a745; font-weight:500;">✔ Données extraites du certificat</p>
-                    
-                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center;">
-                        <span style="align-self:center;">/</span>
-                        <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center;">
-                        <span style="align-self:center;">/</span>
-                        <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px;">
+                <div id="reader" style="width:100%; aspect-ratio: 1/1; border-radius:20px; overflow:hidden; background:#000; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div id="status" style="position:absolute; top:15px; left:15px; color:white; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; z-index:10; font-size:14px; display:none;">
+                        Alignez le QR code ici
                     </div>
-                    <input type="hidden" id="dob" name="dob">
                 </div>
-
-                <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
-                <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
                 
-                <label style="display:block; margin:15px 0 5px;">Projet de vie :</label>
-                <select name="desireChild" style="width:100%; padding:14px; border:1px solid #ddd; border-radius:8px;">
-                    <option value="">Choisir...</option>
-                    <option value="Oui">Oui</option>
-                    <option value="Non">Non</option>
-                    <option value="Undecided">Undecided</option>
-                </select>
-
-                <button type="submit" id="submitBtn" disabled style="width:100%; padding:16px; background:#9ca3af; color:#6b7280; border:none; border-radius:30px; margin-top:20px; font-weight:bold; cursor:not-allowed;">Compléter les informations</button>
-            </form>
-        </div>
-
-        <script>
-            let scanner = null;
-            let isScanning = true;
-
-            function initScanner() {
-                document.getElementById('status').style.display = 'block';
-                
-                // ✅ AJUSTEMENT CAMÉRA : Ratio 1:1 et QRBox carrée pour un meilleur centrage
-                scanner = new Html5QrcodeScanner("reader", { 
-                    fps: 15, 
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0,
-                    showTorchButtonIfSupported: true
-                });
-
-                scanner.render((decodedText) => {
-                    if (isScanning) {
-                        processQRData(decodedText);
-                    }
-                });
-            }
-
-            function processQRData(text) {
-                try {
-                    const data = text.trim().split('|');
-                    if (data.length !== 5) throw new Error('Format invalide');
-
-                    document.getElementById('fn').value = data[0].trim();
-                    document.getElementById('ln').value = data[1].trim();
-                    document.getElementById('gt').value = data[2].trim();
-                    document.getElementById('bg').value = data[3].trim();
-                    document.getElementById('dob').value = data[4].trim();
+                <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:20px;">
+                    <input type="hidden" name="isVerified" value="true">
                     
-                    const dateParts = data[4].split('/');
-                    document.getElementById('d').value = dateParts[0];
-                    document.getElementById('m').value = dateParts[1];
-                    document.getElementById('y').value = dateParts[2];
+                    <div id="certData" style="background:#ecfdf5; padding:15px; border-radius:15px; margin-bottom:15px; display:none; border:2px solid #10b981;">
+                        <p style="color:#059669; font-weight:bold; margin-top:0;">✔ Certificat Identifié</p>
+                        <input type="text" id="fn" name="firstName" readonly required style="width:100%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                        <input type="text" id="ln" name="lastName" readonly required style="width:100%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="gt" name="genotype" readonly required style="width:50%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; font-weight:bold; color:#1f2937;">
+                            <input type="text" id="bg" name="bloodGroup" readonly required style="width:50%; margin:4px 0; padding:12px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; font-weight:bold; color:#1f2937;">
+                        </div>
+                        <input type="hidden" id="dob" name="dob">
+                    </div>
 
-                    document.getElementById('certData').style.display = 'block';
-                    document.getElementById('submitBtn').disabled = false;
-                    document.getElementById('submitBtn').textContent = 'Finaliser inscription certifiée ✅';
-                    document.getElementById('submitBtn').style.background = '#10b981';
-                    document.getElementById('submitBtn').style.color = 'white';
-                    document.getElementById('submitBtn').style.cursor = 'pointer';
+                    <input type="text" name="residence" placeholder="Ville de résidence" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                    <input type="text" name="region" placeholder="Région / Province" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                    
+                    <select name="desireChild" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; background:white; box-sizing:border-box;">
+                        <option value="">Projet d'enfants ?</option>
+                        <option value="Oui">Oui</option>
+                        <option value="Non">Non</option>
+                    </select>
 
-                    scanner.clear();
-                    isScanning = false;
-                    alert('Certificat validé ! ✅');
+                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#d1d5db; color:#6b7280; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Scanner d'abord</button>
+                </form>
+            </div>
 
-                } catch (error) {
-                    alert('Erreur: ' + error.message);
+            <script>
+                let scanner = null;
+                let isScanning = true;
+
+                function initScanner() {
+                    document.getElementById('status').style.display = 'block';
+                    
+                    // Ajustement pour occuper toute la zone noire
+                    scanner = new Html5QrcodeScanner("reader", { 
+                        fps: 20, 
+                        qrbox: (viewWidth, viewHeight) => {
+                            return { width: viewWidth * 0.8, height: viewHeight * 0.8 };
+                        },
+                        aspectRatio: 1.0
+                    });
+
+                    scanner.render((decodedText) => {
+                        if (isScanning) processQRData(decodedText);
+                    });
                 }
-            }
 
-            document.getElementById('certForm').addEventListener('submit', (e) => {
-                const residence = document.querySelector('[name="residence"]').value;
-                const region = document.querySelector('[name="region"]').value;
-                const desireChild = document.querySelector('[name="desireChild"]').value;
-                
-                if (!residence || !region || !desireChild) {
-                    e.preventDefault();
-                    alert('Complétez tous les champs');
+                function processQRData(text) {
+                    try {
+                        const data = text.trim().split('|');
+                        if (data.length < 5) throw new Error('Données incomplètes');
+
+                        document.getElementById('fn').value = data[0].trim();
+                        document.getElementById('ln').value = data[1].trim();
+                        document.getElementById('gt').value = data[2].trim();
+                        document.getElementById('bg').value = data[3].trim();
+                        document.getElementById('dob').value = data[4].trim();
+
+                        document.getElementById('certData').style.display = 'block';
+                        document.getElementById('submitBtn').disabled = false;
+                        document.getElementById('submitBtn').textContent = 'Finaliser l\\'inscription';
+                        document.getElementById('submitBtn').style.background = '#059669';
+                        document.getElementById('submitBtn').style.color = 'white';
+
+                        scanner.clear();
+                        isScanning = false;
+                    } catch (e) {
+                        console.error(e);
+                    }
                 }
-            });
 
-            window.addEventListener('load', initScanner);
-        </script>
+                window.addEventListener('load', initScanner);
+            </script>
+        </body>
+        </html>
     `);
 });
+
 
 // ============================================
 // INSCRIPTION MANUELLE
