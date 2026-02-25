@@ -2108,14 +2108,13 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 // INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
 // ============================================
-app.get('/signup-qr', (req, res) => {
+:app.get('/signup-qr', (req, res) => {
     res.send(`
         <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
         <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
             <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
-            <div id="reader" style="width:100%; height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;">
-                <div id="status" style="position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; display:none;">📱 Positionnez le QR code</div>
-            </div>
+            <div id="reader" style="width:100%; height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;"></div>
+            <div id="status" style="text-align:center; margin:10px 0; color:#666;">📱 Positionnez le QR code dans le cadre</div>
             
             <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:25px;">
                 <input type="hidden" name="isVerified" value="true">
@@ -2123,17 +2122,17 @@ app.get('/signup-qr', (req, res) => {
                 <div id="certData" style="background:#e8f5e8; padding:20px; border-radius:12px; margin-bottom:20px; display:none; border:2px solid #28a745;">
                     <p style="color:#28a745; font-weight:500;">✔ Données extraites du certificat</p>
                     
-                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px; background:white;">
+                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px; background:white;">
+                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px; background:white;">
+                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px; background:white;">
                     
                     <div style="display:flex; gap:10px; margin-top:10px;">
-                        <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center;">
+                        <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center; border:1px solid #ccc; border-radius:8px; background:white;">
                         <span style="align-self:center;">/</span>
-                        <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center;">
+                        <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center; border:1px solid #ccc; border-radius:8px; background:white;">
                         <span style="align-self:center;">/</span>
-                        <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px;">
+                        <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px; border:1px solid #ccc; border-radius:8px; background:white;">
                     </div>
                     <input type="hidden" id="dob" name="dob">
                 </div>
@@ -2155,58 +2154,215 @@ app.get('/signup-qr', (req, res) => {
 
         <script>
             let scanner = null;
-            let isScanning = true;
-
+            let isScanActive = true;
+            
+            // Structure attendue pour les 5 données
+            const EXPECTED_FIELDS = 5;
+            const FIELD_NAMES = ['Prénom', 'Nom', 'Génotype', 'Groupe sanguin', 'Date naissance'];
+            
             function initScanner() {
-                document.getElementById('status').style.display = 'block';
-                
-                // ✅ EXACTEMENT COMME TON CODE ORIGINAL
-                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-
-                scanner.render((decodedText) => {
-                    if (isScanning) {
-                        processQRData(decodedText);
-                    }
-                });
-            }
-
-            function processQRData(text) {
                 try {
-                    const data = text.trim().split('|');
-                    if (data.length !== 5) throw new Error('Format invalide');
-
-                    // Validation simple
-                    if (!data[0] || !data[1] || !data[2] || !data[3] || !data[4]) {
-                        throw new Error('Données incomplètes');
-                    }
-
-                    // ✅ REMPLISSAGE IDENTIQUE À TON CODE
-                    document.getElementById('fn').value = data[0].trim();
-                    document.getElementById('ln').value = data[1].trim();
-                    document.getElementById('gt').value = data[2].trim();
-                    document.getElementById('bg').value = data[3].trim();
-                    document.getElementById('dob').value = data[4].trim();
+                    scanner = new Html5QrcodeScanner("reader", { 
+                        fps: 10, 
+                        qrbox: 250,
+                        aspectRatio: 1.0,
+                        showTorchButtonIfSupported: true
+                    });
                     
-                    const dateParts = data[4].split('/');
+                    scanner.render(onScanSuccess, onScanError);
+                } catch (error) {
+                    console.error("Erreur scanner:", error);
+                    document.getElementById('status').innerHTML = '❌ Erreur de démarrage caméra';
+                }
+            }
+            
+            function stopScanner() {
+                if (scanner && isScanActive) {
+                    try {
+                        scanner.clear();
+                        isScanActive = false;
+                        document.getElementById('status').innerHTML = '✅ Scan terminé - Données extraites';
+                        console.log('Scanner arrêté automatiquement');
+                    } catch (error) {
+                        console.error('Erreur arrêt scanner:', error);
+                    }
+                }
+            }
+            
+            function validateQRData(data) {
+                // Vérifier que nous avons exactement 5 éléments
+                if (data.length !== EXPECTED_FIELDS) {
+                    return {
+                        valid: false,
+                        message: \`Format invalide: \${data.length} champs trouvés, \${EXPECTED_FIELDS} requis\`
+                    };
+                }
+                
+                // Vérifier qu'aucun champ n'est vide
+                for (let i = 0; i < data.length; i++) {
+                    if (!data[i] || data[i].trim() === '') {
+                        return {
+                            valid: false,
+                            message: \`Champ \${FIELD_NAMES[i]} vide\`
+                        };
+                    }
+                }
+                
+                // Validation spécifique pour la date (dernier champ)
+                const dateStr = data[4].trim();
+                const dateParts = dateStr.split('/');
+                
+                if (dateParts.length !== 3) {
+                    return {
+                        valid: false,
+                        message: 'Format date invalide: utilisez JJ/MM/AAAA'
+                    };
+                }
+                
+                // Vérifier que les parties de date sont des nombres valides
+                const day = parseInt(dateParts[0], 10);
+                const month = parseInt(dateParts[1], 10);
+                const year = parseInt(dateParts[2], 10);
+                
+                if (isNaN(day) || isNaN(month) || isNaN(year) || 
+                    day < 1 || day > 31 || 
+                    month < 1 || month > 12 || 
+                    year < 1900 || year > 2100) {
+                    return {
+                        valid: false,
+                        message: 'Date invalide: valeurs hors limites'
+                    };
+                }
+                
+                return { valid: true };
+            }
+            
+            function extractOnlyFiveFields(decodedText) {
+                // Nettoyer le texte décodé
+                let cleanText = decodedText.trim();
+                
+                // Remplacer les séparateurs courants par |
+                cleanText = cleanText.replace(/[;,，、\s]+/g, '|');
+                
+                // Séparer par |
+                let parts = cleanText.split('|').map(p => p.trim()).filter(p => p !== '');
+                
+                // Si nous avons plus de 5 champs, essayer de détecter le format réel
+                if (parts.length > EXPECTED_FIELDS) {
+                    console.log('Plus de 5 champs détectés, tentative d\'extraction...');
+                    
+                    // Stratégie 1: Chercher un motif de date (JJ/MM/AAAA)
+                    let dateIndex = -1;
+                    for (let i = 0; i < parts.length; i++) {
+                        if (parts[i].match(/^\\d{1,2}\\/\\d{1,2}\\/\\d{4}$/)) {
+                            dateIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (dateIndex >= 0) {
+                        // Si on trouve une date, prendre les 4 champs avant et la date
+                        if (dateIndex >= 4) {
+                            parts = [
+                                parts[dateIndex - 4],
+                                parts[dateIndex - 3],
+                                parts[dateIndex - 2],
+                                parts[dateIndex - 1],
+                                parts[dateIndex]
+                            ];
+                        }
+                    } else {
+                        // Stratégie 2: Prendre les 5 premiers champs non vides
+                        parts = parts.slice(0, EXPECTED_FIELDS);
+                    }
+                }
+                
+                // Si nous avons moins de 5 champs, c'est invalide
+                if (parts.length !== EXPECTED_FIELDS) {
+                    throw new Error(\`Impossible d'extraire les 5 champs requis. Trouvé: \${parts.length}\`);
+                }
+                
+                return parts;
+            }
+            
+            function onScanSuccess(decodedText, decodedResult) {
+                // Vérifier si le scan est toujours actif
+                if (!isScanActive) return;
+                
+                try {
+                    console.log('QR scanné:', decodedText);
+                    
+                    // Extraire uniquement les 5 champs requis
+                    const data = extractOnlyFiveFields(decodedText);
+                    
+                    // Valider les données extraites
+                    const validation = validateQRData(data);
+                    if (!validation.valid) {
+                        throw new Error(validation.message);
+                    }
+                    
+                    // Nettoyer les données
+                    const firstName = data[0].trim();
+                    const lastName = data[1].trim();
+                    const genotype = data[2].trim();
+                    const bloodGroup = data[3].trim();
+                    const dob = data[4].trim();
+                    
+                    // Valider le génotype (optionnel mais recommandé)
+                    const validGenotypes = ['AA', 'AS', 'SS', 'AC', 'CC'];
+                    if (!validGenotypes.includes(genotype.toUpperCase())) {
+                        console.warn('Génotype non standard:', genotype);
+                    }
+                    
+                    // Valider le groupe sanguin (optionnel)
+                    const validBloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+                    if (!validBloodGroups.includes(bloodGroup)) {
+                        console.warn('Groupe sanguin non standard:', bloodGroup);
+                    }
+                    
+                    // Remplir les champs
+                    document.getElementById('fn').value = firstName;
+                    document.getElementById('ln').value = lastName;
+                    document.getElementById('gt').value = genotype;
+                    document.getElementById('bg').value = bloodGroup;
+                    document.getElementById('dob').value = dob;
+                    
+                    // Remplir les champs de date individuels
+                    const dateParts = dob.split('/');
                     document.getElementById('d').value = dateParts[0];
                     document.getElementById('m').value = dateParts[1];
                     document.getElementById('y').value = dateParts[2];
-
-                    // Activation formulaire
+                    
+                    // Afficher les données extraites
                     document.getElementById('certData').style.display = 'block';
-                    document.getElementById('submitBtn').disabled = false;
-                    document.getElementById('submitBtn').textContent = 'Finaliser inscription certifiée ✅';
-                    document.getElementById('submitBtn').style.background = '#10b981';
-                    document.getElementById('submitBtn').style.color = 'white';
-                    document.getElementById('submitBtn').style.cursor = 'pointer';
-
-                    scanner.clear();
-                    isScanning = false;
-                    alert('Certificat validé ! ✅');
-
+                    
+                    // Activer le bouton de soumission
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Finaliser inscription certifiée ✅';
+                    submitBtn.style.background = '#10b981';
+                    submitBtn.style.color = 'white';
+                    submitBtn.style.cursor = 'pointer';
+                    
+                    // Arrêter le scan
+                    stopScanner();
+                    
+                    // Message de succès avec les données extraites
+                    document.getElementById('status').innerHTML = \`✅ QR validé: \${firstName} \${lastName}\`;
+                    
                 } catch (error) {
-                    alert('Erreur: ' + error.message);
+                    onScanError(error.message);
                 }
+            }
+            
+            function onScanError(errorMessage) {
+                if (!isScanActive) return;
+                
+                console.warn("Erreur scan:", errorMessage);
+                document.getElementById('status').innerHTML = '❌ ' + errorMessage;
+                
+                // Réinitialiser l'affichage mais garder le scanner actif
+                document.getElementById('certData').style.display = 'none';
             }
 
             document.getElementById('certForm').addEventListener('submit', (e) => {
@@ -2216,7 +2372,7 @@ app.get('/signup-qr', (req, res) => {
                 
                 if (!residence || !region || !desireChild) {
                     e.preventDefault();
-                    alert('Complétez tous les champs');
+                    alert('Veuillez compléter tous les champs');
                 }
             });
 
