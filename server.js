@@ -2106,7 +2106,6 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// CAMERA QR + FORM MODERNE MOBILE
 app.get('/signup-qr', (req, res) => {
     res.send(`
 <!DOCTYPE html>
@@ -2250,7 +2249,7 @@ button:disabled {
         <div id="qr-success">QR scanné !</div>
     </div>
 
-    <!-- Form Fields -->
+    <!-- Form Fields éditables -->
     <input type="text" placeholder="Prénom" id="firstName">
     <input type="text" placeholder="Nom" id="lastName">
     <input type="text" placeholder="Génotype" id="genotype">
