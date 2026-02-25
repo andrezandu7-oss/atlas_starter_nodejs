@@ -2105,8 +2105,9 @@ app.get('/signup-choice', (req, res) => {
 </html>`);
 });
 
-// ============================================// CAMERA QR - FORMAT CARRÉ STANDARD ANDROID
-// ==========================================
+// ============================================
+// CAMERA QR + 4 CHAMPS EN BAS
+// ===========================
 app.get('/signup-qr', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -2122,23 +2123,46 @@ app.get('/signup-qr', (req, res) => {
                     height: 100%;
                     background: black;
                     display: flex;
-                    justify-content: center;
+                    flex-direction: column;
                     align-items: center;
-                    overflow: hidden;
+                    justify-content: center;
+                    font-family: sans-serif;
                 }
 
                 #reader {
-                    width: 280px;   /* 👈 dimension carrée standard */
-                    height: 280px;  /* 👈 carré parfait fixe */
+                    width: 280px;
+                    height: 280px;
                 }
 
                 video {
                     object-fit: cover !important;
                 }
+
+                .form-container {
+                    width: 280px;
+                    margin-top: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                input {
+                    padding: 10px;
+                    border-radius: 8px;
+                    border: 1px solid #ccc;
+                    font-size: 14px;
+                }
             </style>
         </head>
         <body>
             <div id="reader"></div>
+
+            <div class="form-container">
+                <input type="text" placeholder="Prénom">
+                <input type="text" placeholder="Nom">
+                <input type="text" placeholder="Génotype">
+                <input type="text" placeholder="Groupe sanguin">
+            </div>
 
             <script>
                 const html5QrCode = new Html5Qrcode("reader");
@@ -2160,7 +2184,7 @@ app.get('/signup-qr', (req, res) => {
                             rearCamera.id,
                             {
                                 fps: 20,
-                                aspectRatio: 1.0, // 👈 forcer format carré
+                                aspectRatio: 1.0,
                                 videoConstraints: {
                                     width: { ideal: 720 },
                                     height: { ideal: 720 },
