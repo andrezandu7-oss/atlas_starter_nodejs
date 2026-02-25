@@ -2106,93 +2106,132 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - ALLUMAGE AUTOMATIQUE GARANTI
+// INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
-            <style>
-                #reader__dashboard { display: none !important; }
-                #reader { border: none !important; background: #000; }
-                video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
-                .input-field { width:100%; margin:4px 0 12px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; background:#fff; font-size:16px; }
-                label { font-size:13px; color:#6b7280; font-weight:bold; margin-left:5px; }
-            </style>
-        </head>
-        <body style="margin:0; padding:15px; font-family:sans-serif; background:#f9fafb;">
-            <div style="max-width:500px; margin:auto;">
-                <h3 style="text-align:center; color:#374151;">Scannez le certificat</h3>
-                
-                <div id="reader" style="width:100%; aspect-ratio: 1/1; border-radius:20px; overflow:hidden; background:#000; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
-                
-                <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:20px;">
-                    <input type="hidden" name="isVerified" value="true">
-                    
-                    <label>1. Prénom</label>
-                    <input type="text" id="fn" name="firstName" placeholder="..." readonly required class="input-field">
-                    
-                    <label>2. Nom</label>
-                    <input type="text" id="ln" name="lastName" placeholder="..." readonly required class="input-field">
-                    
-                    <label>3. Génotype</label>
-                    <input type="text" id="gt" name="genotype" placeholder="..." readonly required class="input-field">
-                    
-                    <label>4. Groupe sanguin</label>
-                    <input type="text" id="bg" name="bloodGroup" placeholder="..." readonly required class="input-field">
-                    
-                    <input type="hidden" id="dob" name="dob">
-
-                    <input type="text" name="residence" placeholder="Ville de résidence" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
-                    
-                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#d1d5db; color:#6b7280; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Veuillez scanner</button>
-                </form>
+        <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
+        <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
+            <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
+            <div id="reader" style="width:100%; height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;">
+                <div id="status" style="position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; display:none;">📱 Positionnez le QR code</div>
             </div>
+            
+            <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:25px;">
+                <input type="hidden" name="isVerified" value="true">
+                
+                <div id="certData" style="background:#e8f5e8; padding:20px; border-radius:12px; margin-bottom:20px; display:none; border:2px solid #28a745;">
+                    <p style="color:#28a745; font-weight:500;">✔ Données extraites du certificat</p>
+                    
+                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+                    
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center;">
+                        <span style="align-self:center;">/</span>
+                        <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center;">
+                        <span style="align-self:center;">/</span>
+                        <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px;">
+                    </div>
+                    <input type="hidden" id="dob" name="dob">
+                </div>
 
-            <script>
-                function startCamera() {
-                    const html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                        fps: 20, 
-                        qrbox: (w, h) => { return { width: w * 0.8, height: h * 0.8 }; },
-                        aspectRatio: 1.0,
-                        showTorchButtonIfSupported: true
-                    });
+                <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
+                <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
+                
+                <label style="display:block; margin:15px 0 5px;">Projet de vie :</label>
+                <select name="desireChild" style="width:100%; padding:14px; border:1px solid #ddd; border-radius:8px;">
+                    <option value="">Choisir...</option>
+                    <option value="Oui">Oui</option>
+                    <option value="Non">Non</option>
+                    <option value="Undecided">Undecided</option>
+                </select>
 
-                    html5QrcodeScanner.render((text) => {
-                        const data = text.split('|');
-                        if(data.length >= 4) {
-                            document.getElementById('fn').value = data[0].trim();
-                            document.getElementById('ln').value = data[1].trim();
-                            document.getElementById('gt').value = data[2].trim();
-                            document.getElementById('bg').value = data[3].trim();
-                            document.getElementById('dob').value = data[4] ? data[4].trim() : "";
+                <button type="submit" id="submitBtn" disabled style="width:100%; padding:16px; background:#9ca3af; color:#6b7280; border:none; border-radius:30px; margin-top:20px; font-weight:bold; cursor:not-allowed;">Compléter les informations</button>
+            </form>
+        </div>
 
-                            document.querySelectorAll('.input-field').forEach(el => el.style.background = '#f0fdf4');
-                            const btn = document.getElementById('submitBtn');
-                            btn.disabled = false;
-                            btn.style.background = '#059669';
-                            btn.style.color = '#fff';
-                            btn.textContent = 'Finaliser l\\'inscription ✅';
+        <script>
+            let scanner = null;
+            let isScanning = true;
 
-                            html5QrcodeScanner.clear();
-                        }
-                    });
-                }
+            function initScanner() {
+                document.getElementById('status').style.display = 'block';
 
-                // ALLUMAGE AUTOMATIQUE : On attend que la fenêtre soit prête + 200ms
-                window.addEventListener('load', () => {
-                    setTimeout(startCamera, 200);
+                // ✅ AJUSTEMENT CAMÉRA UNIQUEMENT (centrage + caméra arrière)
+                const readerWidth = document.getElementById("reader").offsetWidth;
+                const qrSize = Math.floor(readerWidth * 0.7);
+
+                scanner = new Html5QrcodeScanner("reader", {
+                    fps: 15,
+                    qrbox: { width: qrSize, height: qrSize },
+                    aspectRatio: 1.0,
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+                    videoConstraints: {
+                        facingMode: { exact: "environment" }
+                    }
                 });
-            </script>
-        </body>
-        </html>
+
+                scanner.render((decodedText) => {
+                    if (isScanning) {
+                        processQRData(decodedText);
+                    }
+                });
+            }
+
+            function processQRData(text) {
+                try {
+                    const data = text.trim().split('|');
+                    if (data.length !== 5) throw new Error('Format invalide');
+
+                    if (!data[0] || !data[1] || !data[2] || !data[3] || !data[4]) {
+                        throw new Error('Données incomplètes');
+                    }
+
+                    document.getElementById('fn').value = data[0].trim();
+                    document.getElementById('ln').value = data[1].trim();
+                    document.getElementById('gt').value = data[2].trim();
+                    document.getElementById('bg').value = data[3].trim();
+                    document.getElementById('dob').value = data[4].trim();
+                    
+                    const dateParts = data[4].split('/');
+                    document.getElementById('d').value = dateParts[0];
+                    document.getElementById('m').value = dateParts[1];
+                    document.getElementById('y').value = dateParts[2];
+
+                    document.getElementById('certData').style.display = 'block';
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').textContent = 'Finaliser inscription certifiée ✅';
+                    document.getElementById('submitBtn').style.background = '#10b981';
+                    document.getElementById('submitBtn').style.color = 'white';
+                    document.getElementById('submitBtn').style.cursor = 'pointer';
+
+                    scanner.clear();
+                    isScanning = false;
+                    alert('Certificat validé ! ✅');
+
+                } catch (error) {
+                    alert('Erreur: ' + error.message);
+                }
+            }
+
+            document.getElementById('certForm').addEventListener('submit', (e) => {
+                const residence = document.querySelector('[name="residence"]').value;
+                const region = document.querySelector('[name="region"]').value;
+                const desireChild = document.querySelector('[name="desireChild"]').value;
+                
+                if (!residence || !region || !desireChild) {
+                    e.preventDefault();
+                    alert('Complétez tous les champs');
+                }
+            });
+
+            window.addEventListener('load', initScanner);
+        </script>
     `);
 });
-
 
 // ============================================
 // INSCRIPTION MANUELLE
