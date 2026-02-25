@@ -2173,6 +2173,13 @@ input[type="text"], input[type="number"], select {
     transition: background-color 0.5s ease;
 }
 
+/* Style pour les champs en lecture seule */
+input[readonly] {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
 /* Photo rectangle vertical */
 .photo-box {
     display: flex;
@@ -2250,11 +2257,11 @@ button:disabled {
         <div id="qr-success">QR scanné !</div>
     </div>
 
-    <!-- Form Fields éditables -->
-    <input type="text" placeholder="Prénom" id="firstName">
-    <input type="text" placeholder="Nom" id="lastName">
-    <input type="text" placeholder="Génotype" id="genotype">
-    <input type="text" placeholder="Groupe sanguin" id="bloodGroup">
+    <!-- Form Fields (deviennent readonly après scan) -->
+    <input type="text" placeholder="Prénom" id="firstName" readonly>
+    <input type="text" placeholder="Nom" id="lastName" readonly>
+    <input type="text" placeholder="Génotype" id="genotype" readonly>
+    <input type="text" placeholder="Groupe sanguin" id="bloodGroup" readonly>
 
     <div class="section-title">Aidez vos partenaires à en savoir un peu plus sur vous</div>
     <div class="sub-text">Veuillez remplir les cases ci-dessous :</div>
@@ -2326,7 +2333,7 @@ async function startRearCamera() {
                         el.value = data[i].trim();
                         el.style.backgroundColor = "#d1fae5";
                         setTimeout(() => { 
-                            el.style.backgroundColor = "#fff"; 
+                            el.style.backgroundColor = "#f3f4f6"; // Gris pour readonly
                         }, 1000);
                     }
                 });
@@ -2412,7 +2419,7 @@ const genotypeInput = document.getElementById('genotype');
 const bloodGroupInput = document.getElementById('bloodGroup');
 
 function checkFormValidity() {
-    // Vérifier que tous les champs requis sont remplis
+    // Vérifier que tous les champs sont remplis
     const allFieldsFilled = 
         firstNameInput.value.trim() !== "" &&
         lastNameInput.value.trim() !== "" &&
@@ -2431,8 +2438,8 @@ function checkFormValidity() {
     }
 }
 
-// Ajouter les écouteurs d'événements pour tous les champs
-[firstNameInput, lastNameInput, genotypeInput, bloodGroupInput, regionInput, dayInput, monthInput, yearInput].forEach(input => {
+// Ajouter les écouteurs d'événements pour les champs modifiables uniquement
+[regionInput, dayInput, monthInput, yearInput].forEach(input => {
     input.addEventListener('input', checkFormValidity);
 });
 honorCheckbox.addEventListener('change', checkFormValidity);
@@ -2469,7 +2476,6 @@ window.addEventListener('beforeunload', () => {
 </html>
 `);
 });
-
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
