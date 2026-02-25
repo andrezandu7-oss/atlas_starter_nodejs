@@ -2108,122 +2108,57 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 // INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
 // ============================================
-app.get('/signup-qr', (req, res) => {
-    res.send(`
-        <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
-        <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
-            <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
-            <div id="reader" style="width:100%; height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;">
-                <div id="status" style="position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; display:none;">📱 Positionnez le QR code</div>
-            </div>
-            
-            <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:25px;">
-                <input type="hidden" name="isVerified" value="true">
-                
-                <div id="certData" style="background:#e8f5e8; padding:20px; border-radius:12px; margin-bottom:20px; display:none; border:2px solid #28a745;">
-                    <p style="color:#28a745; font-weight:500;">✔ Données extraites du certificat</p>
-                    
-                    <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
-                    
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center;">
-                        <span style="align-self:center;">/</span>
-                        <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center;">
-                        <span style="align-self:center;">/</span>
-                        <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px;">
-                    </div>
-                    <input type="hidden" id="dob" name="dob">
-                </div>
+<script>
+    let html5QrCode;
+    let isScanning = true;
 
-                <input type="text" name="residence" placeholder="Résidence actuelle" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
-                <input type="text" name="region" placeholder="Région" required style="width:100%; margin:10px 0; padding:14px; border:1px solid #ddd; border-radius:8px;">
-                
-                <label style="display:block; margin:15px 0 5px;">Projet de vie :</label>
-                <select name="desireChild" style="width:100%; padding:14px; border:1px solid #ddd; border-radius:8px;">
-                    <option value="">Choisir...</option>
-                    <option value="Oui">Oui</option>
-                    <option value="Non">Non</option>
-                    <option value="Undecided">Undecided</option>
-                </select>
+    function initScanner() {
+        document.getElementById('status').style.display = 'block';
 
-                <button type="submit" id="submitBtn" disabled style="width:100%; padding:16px; background:#9ca3af; color:#6b7280; border:none; border-radius:30px; margin-top:20px; font-weight:bold; cursor:not-allowed;">Compléter les informations</button>
-            </form>
-        </div>
+        html5QrCode = new Html5Qrcode("reader");
 
-        <script>
-            let scanner = null;
-            let isScanning = true;
+        Html5Qrcode.getCameras().then(devices => {
+            if (!devices || !devices.length) {
+                alert("Aucune caméra détectée");
+                return;
+            }
 
-            function initScanner() {
-                document.getElementById('status').style.display = 'block';
-                
-                // ✅ EXACTEMENT COMME TON CODE ORIGINAL
-                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            // 📱 priorité caméra arrière
+            const backCamera = devices.find(d =>
+                d.label.toLowerCase().includes('back') ||
+                d.label.toLowerCase().includes('rear')
+            );
 
-                scanner.render((decodedText) => {
+            const cameraId = backCamera ? backCamera.id : devices[0].id;
+
+            html5QrCode.start(
+                cameraId,
+                {
+                    fps: 15, // plus fluide
+                    qrbox: (viewfinderWidth, viewfinderHeight) => {
+                        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                        const qrSize = Math.floor(minEdge * 0.8);
+                        return { width: qrSize, height: qrSize };
+                    },
+                    aspectRatio: 1.0,
+                    disableFlip: false
+                },
+                (decodedText) => {
+                    console.log("QR détecté :", decodedText); // debug
                     if (isScanning) {
                         processQRData(decodedText);
                     }
-                });
-            }
-
-            function processQRData(text) {
-                try {
-                    const data = text.trim().split('|');
-                    if (data.length !== 5) throw new Error('Format invalide');
-
-                    // Validation simple
-                    if (!data[0] || !data[1] || !data[2] || !data[3] || !data[4]) {
-                        throw new Error('Données incomplètes');
-                    }
-
-                    // ✅ REMPLISSAGE IDENTIQUE À TON CODE
-                    document.getElementById('fn').value = data[0].trim();
-                    document.getElementById('ln').value = data[1].trim();
-                    document.getElementById('gt').value = data[2].trim();
-                    document.getElementById('bg').value = data[3].trim();
-                    document.getElementById('dob').value = data[4].trim();
-                    
-                    const dateParts = data[4].split('/');
-                    document.getElementById('d').value = dateParts[0];
-                    document.getElementById('m').value = dateParts[1];
-                    document.getElementById('y').value = dateParts[2];
-
-                    // Activation formulaire
-                    document.getElementById('certData').style.display = 'block';
-                    document.getElementById('submitBtn').disabled = false;
-                    document.getElementById('submitBtn').textContent = 'Finaliser inscription certifiée ✅';
-                    document.getElementById('submitBtn').style.background = '#10b981';
-                    document.getElementById('submitBtn').style.color = 'white';
-                    document.getElementById('submitBtn').style.cursor = 'pointer';
-
-                    scanner.clear();
-                    isScanning = false;
-                    alert('Certificat validé ! ✅');
-
-                } catch (error) {
-                    alert('Erreur: ' + error.message);
+                },
+                (errorMessage) => {
+                    // Ne rien afficher pour éviter spam console
                 }
-            }
+            );
 
-            document.getElementById('certForm').addEventListener('submit', (e) => {
-                const residence = document.querySelector('[name="residence"]').value;
-                const region = document.querySelector('[name="region"]').value;
-                const desireChild = document.querySelector('[name="desireChild"]').value;
-                
-                if (!residence || !region || !desireChild) {
-                    e.preventDefault();
-                    alert('Complétez tous les champs');
-                }
-            });
-
-            window.addEventListener('load', initScanner);
-        </script>
-    `);
-});
+        }).catch(err => {
+            alert("Erreur caméra : " + err);
+        });
+    }
+</script>
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
