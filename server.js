@@ -2106,7 +2106,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - VERSION FINALE (CAMÉRA OK + CASES VISIBLES)
+// INSCRIPTION QR - VERSION FINALE (LOGIQUE CAMÉRA CONSERVÉE + CASES VISIBLES)
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
@@ -2117,10 +2117,16 @@ app.get('/signup-qr', (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
             <style>
+                /* Ta logique CSS qui fonctionne */
                 #reader__dashboard { display: none !important; }
                 #reader { border: none !important; }
                 video { object-fit: cover !important; }
-                .input-field { width:100%; margin:4px 0 12px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; background:#fff; font-size:16px; }
+                
+                .input-field { 
+                    width:100%; margin:4px 0 12px 0; padding:14px; 
+                    border:1px solid #d1d5db; border-radius:10px; 
+                    box-sizing:border-box; background:#fff; font-size:16px; 
+                }
                 label { font-size:13px; color:#6b7280; font-weight:bold; margin-left:5px; }
             </style>
         </head>
@@ -2138,23 +2144,23 @@ app.get('/signup-qr', (req, res) => {
                     <input type="hidden" name="isVerified" value="true">
                     
                     <label>1. Prénom</label>
-                    <input type="text" id="fn" name="firstName" placeholder="..." readonly required class="input-field">
+                    <input type="text" id="fn" name="firstName" placeholder="En attente du scan..." readonly required class="input-field">
                     
                     <label>2. Nom</label>
-                    <input type="text" id="ln" name="lastName" placeholder="..." readonly required class="input-field">
+                    <input type="text" id="ln" name="lastName" placeholder="En attente du scan..." readonly required class="input-field">
                     
                     <label>3. Génotype</label>
-                    <input type="text" id="gt" name="genotype" placeholder="..." readonly required class="input-field">
+                    <input type="text" id="gt" name="genotype" placeholder="En attente du scan..." readonly required class="input-field">
                     
                     <label>4. Groupe sanguin</label>
-                    <input type="text" id="bg" name="bloodGroup" placeholder="..." readonly required class="input-field">
+                    <input type="text" id="bg" name="bloodGroup" placeholder="En attente du scan..." readonly required class="input-field">
                     
                     <input type="hidden" id="dob" name="dob">
 
                     <hr style="border:0; border-top:1px solid #eee; margin:10px 0 20px 0;">
 
-                    <input type="text" name="residence" placeholder="Ville de résidence" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
-                    <input type="text" name="region" placeholder="Région / Province" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                    <input type="text" name="residence" placeholder="Ville de résidence actuelle" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                    <input type="text" name="region" placeholder="Région" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
                     
                     <select name="desireChild" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; background:white; box-sizing:border-box;">
                         <option value="">Projet d'enfants ?</option>
@@ -2170,10 +2176,10 @@ app.get('/signup-qr', (req, res) => {
                 let scanner = null;
                 let isScanning = true;
 
+                // Fonction d'allumage identique à ton code
                 function initScanner() {
                     document.getElementById('status').style.display = 'block';
                     
-                    // Reprise stricte de ta config caméra fonctionnelle
                     scanner = new Html5QrcodeScanner("reader", { 
                         fps: 20, 
                         qrbox: (viewWidth, viewHeight) => {
@@ -2190,16 +2196,16 @@ app.get('/signup-qr', (req, res) => {
                 function processQRData(text) {
                     try {
                         const data = text.trim().split('|');
-                        if (data.length < 5) throw new Error('Données incomplètes');
+                        if (data.length < 5) throw new Error('Format invalide');
 
-                        // Remplissage des cases visibles
+                        // Remplissage automatique
                         document.getElementById('fn').value = data[0].trim();
                         document.getElementById('ln').value = data[1].trim();
                         document.getElementById('gt').value = data[2].trim();
                         document.getElementById('bg').value = data[3].trim();
                         document.getElementById('dob').value = data[4].trim();
 
-                        // Style de succès
+                        // Style visuel de succès
                         document.querySelectorAll('.input-field').forEach(el => {
                             el.style.background = '#f0fdf4';
                             el.style.borderColor = '#10b981';
@@ -2218,12 +2224,14 @@ app.get('/signup-qr', (req, res) => {
                     }
                 }
 
+                // Déclencheur sur le chargement de la fenêtre (Ta méthode)
                 window.addEventListener('load', initScanner);
             </script>
         </body>
         </html>
     `);
 });
+
 
 // ============================================
 // INSCRIPTION MANUELLE
