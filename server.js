@@ -2106,7 +2106,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// CAMERA QR - CARRÉ PLEIN ÉCRAN MOBILE, ARRIÈRE UNIQUEMENT
+// INSCRIPTION QR - VERSION CARRÉ COMPACT (LARGEUR RÉFÉRENCE)
 // ========================================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
@@ -2117,33 +2117,55 @@ app.get('/signup-qr', (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
             <style>
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    height: 100%;
-                    background: black;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    overflow: hidden;
+                /* Carré compact basé sur la largeur */
+                #reader { 
+                    width: 75%; /* Largeur de référence réduite */
+                    margin: 0 auto; /* Centrage horizontal */
+                    aspect-ratio: 1/1; /* Force le carré parfait */
+                    border-radius: 20px; 
+                    overflow: hidden; 
+                    background: black; 
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                 }
-                #reader {
-                    width: 100vw;
-                    height: 100vw; /* 👈 hauteur = largeur pour carré parfait */
-                    max-height: 100vh; /* 👈 éviter que ça dépasse l'écran */
-                }
-                video {
-                    object-fit: cover !important;
-                }
+                video { object-fit: cover !important; }
+                .input-field { width:100%; margin:4px 0 12px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; background:#fff; font-size:16px; }
+                label { font-size:13px; color:#6b7280; font-weight:bold; margin-left:5px; }
             </style>
         </head>
-        <body>
-            <div id="reader"></div>
+        <body style="margin:0; padding:15px; font-family:sans-serif; background:#f9fafb;">
+            <div style="max-width:500px; margin:auto;">
+                <h3 style="text-align:center; color:#374151;">Scannez le certificat</h3>
+                
+                <div id="reader"></div>
+                
+                <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:20px;">
+                    <input type="hidden" name="isVerified" value="true">
+                    
+                    <label>1. Prénom</label>
+                    <input type="text" id="fn" name="firstName" placeholder="..." readonly required class="input-field">
+                    
+                    <label>2. Nom</label>
+                    <input type="text" id="ln" name="lastName" placeholder="..." readonly required class="input-field">
+                    
+                    <label>3. Génotype</label>
+                    <input type="text" id="gt" name="genotype" placeholder="..." readonly required class="input-field">
+                    
+                    <label>4. Groupe sanguin</label>
+                    <input type="text" id="bg" name="bloodGroup" placeholder="..." readonly required class="input-field">
+                    
+                    <input type="hidden" id="dob" name="dob">
+
+                    <input type="text" name="residence" placeholder="Ville de résidence" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                    
+                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#d1d5db; color:#6b7280; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Scanner pour activer</button>
+                </form>
+            </div>
 
             <script>
                 const html5QrCode = new Html5Qrcode("reader");
+                let isScanning = true;
 
-                async function startRearCamera() {
+                async function startCamera() {
                     try {
                         const devices = await Html5Qrcode.getCameras();
                         if (!devices || devices.length === 0) return;
@@ -2160,22 +2182,46 @@ app.get('/signup-qr', (req, res) => {
                             rearCamera.id,
                             {
                                 fps: 20,
-                                qrbox: (viewWidth, viewHeight) => {
-                                    const size = Math.min(viewWidth, viewHeight) * 0.9;
-                                    return { width: size, height: size };
-                                }
+                                qrbox: (w, h) => { return { width: w * 0.8, height: h * 0.8 }; },
+                                aspectRatio: 1.0 // Carré parfait
                             },
                             (decodedText) => {
-                                console.log(decodedText);
+                                if (isScanning) processQRData(decodedText);
                             }
                         );
-
                     } catch (err) {
-                        console.error(err);
+                        console.error("Erreur caméra:", err);
                     }
                 }
 
-                startRearCamera();
+                function processQRData(text) {
+                    try {
+                        const data = text.split('|');
+                        if (data.length >= 4) {
+                            document.getElementById('fn').value = data[0].trim();
+                            document.getElementById('ln').value = data[1].trim();
+                            document.getElementById('gt').value = data[2].trim();
+                            document.getElementById('bg').value = data[3].trim();
+                            document.getElementById('dob').value = data[4] ? data[4].trim() : "";
+
+                            document.querySelectorAll('.input-field').forEach(el => {
+                                el.style.background = '#f0fdf4';
+                                el.style.borderColor = '#10b981';
+                            });
+                            
+                            const btn = document.getElementById('submitBtn');
+                            btn.disabled = false;
+                            btn.style.background = '#059669';
+                            btn.style.color = '#fff';
+                            btn.textContent = 'Finaliser l\\'inscription ✅';
+
+                            html5QrCode.stop();
+                            isScanning = false;
+                        }
+                    } catch (e) { console.error(e); }
+                }
+
+                startCamera();
             </script>
         </body>
         </html>
