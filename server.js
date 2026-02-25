@@ -2106,15 +2106,15 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
+// INSCRIPTION QR - VERSION OPTIMISÉE POUR LE CENTRAGE
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
         <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
         <div style="max-width:500px; margin:auto; font-family:sans-serif; padding:20px;">
             <h3 style="text-align:center;">Scannez le code QR du certificat</h3>
-            <div id="reader" style="width:100%; height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;">
-                <div id="status" style="position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; display:none;">📱 Positionnez le QR code</div>
+            <div id="reader" style="width:100%; min-height:300px; border-radius:15px; overflow:hidden; background:#000; position:relative;">
+                <div id="status" style="position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; z-index:10; display:none;">📱 Positionnez le QR code au centre</div>
             </div>
             
             <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:25px;">
@@ -2160,8 +2160,13 @@ app.get('/signup-qr', (req, res) => {
             function initScanner() {
                 document.getElementById('status').style.display = 'block';
                 
-                // ✅ EXACTEMENT COMME TON CODE ORIGINAL
-                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+                // ✅ AJUSTEMENT CAMÉRA : Ratio 1:1 et QRBox carrée pour un meilleur centrage
+                scanner = new Html5QrcodeScanner("reader", { 
+                    fps: 15, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    showTorchButtonIfSupported: true
+                });
 
                 scanner.render((decodedText) => {
                     if (isScanning) {
@@ -2175,12 +2180,6 @@ app.get('/signup-qr', (req, res) => {
                     const data = text.trim().split('|');
                     if (data.length !== 5) throw new Error('Format invalide');
 
-                    // Validation simple
-                    if (!data[0] || !data[1] || !data[2] || !data[3] || !data[4]) {
-                        throw new Error('Données incomplètes');
-                    }
-
-                    // ✅ REMPLISSAGE IDENTIQUE À TON CODE
                     document.getElementById('fn').value = data[0].trim();
                     document.getElementById('ln').value = data[1].trim();
                     document.getElementById('gt').value = data[2].trim();
@@ -2192,7 +2191,6 @@ app.get('/signup-qr', (req, res) => {
                     document.getElementById('m').value = dateParts[1];
                     document.getElementById('y').value = dateParts[2];
 
-                    // Activation formulaire
                     document.getElementById('certData').style.display = 'block';
                     document.getElementById('submitBtn').disabled = false;
                     document.getElementById('submitBtn').textContent = 'Finaliser inscription certifiée ✅';
@@ -2224,6 +2222,7 @@ app.get('/signup-qr', (req, res) => {
         </script>
     `);
 });
+
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
