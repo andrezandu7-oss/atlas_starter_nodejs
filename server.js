@@ -2116,39 +2116,29 @@ app.get('/signup-qr', (req, res) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
 <style>
-html, body {
+body {
     margin: 0;
     padding: 0;
-    background-color: #f9fafb;
     font-family: sans-serif;
+    background-color: #f9fafb;
     color: #111827;
 }
 
-body {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-}
-
+/* Container scrollable */
 .container {
-    width: 100%;
     max-width: 400px;
+    margin: 0 auto;
     padding: 20px;
     box-sizing: border-box;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
 }
 
 /* QR Scanner carré */
 #reader {
     width: 70vw;
-    height: 70vw; /* carré */
+    height: 70vw; /* carré parfait */
     max-width: 300px;
     max-height: 300px;
-    margin: auto;
+    margin: 0 auto 20px;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -2171,10 +2161,11 @@ body {
     display: none;
 }
 
-/* Form fields */
+/* Form Fields */
 input[type="text"], input[type="number"], select {
     width: 100%;
     padding: 12px;
+    margin-bottom: 12px;
     border-radius: 12px;
     border: 1px solid #d1d5db;
     font-size: 14px;
@@ -2182,7 +2173,7 @@ input[type="text"], input[type="number"], select {
     transition: background-color 0.5s ease;
 }
 
-/* Photo rectangle vertical type passeport */
+/* Photo rectangle vertical */
 .photo-box {
     display: flex;
     align-items: center;
@@ -2195,13 +2186,14 @@ input[type="text"], input[type="number"], select {
     font-size: 14px;
     cursor: pointer;
     border-radius: 8px;
-    margin: 0 auto;
+    margin: 0 auto 20px;
 }
 
 /* Date row */
 .date-row {
     display: flex;
     gap: 8px;
+    margin-bottom: 12px;
 }
 
 .date-row input {
@@ -2214,6 +2206,7 @@ input[type="text"], input[type="number"], select {
     align-items: flex-start;
     gap: 8px;
     font-size: 13px;
+    margin-bottom: 20px;
 }
 
 /* Bouton final */
@@ -2227,7 +2220,6 @@ button {
     color: white;
     background-color: #db2777;
     cursor: pointer;
-    margin-top: 20px;
 }
 
 button:disabled {
@@ -2239,12 +2231,14 @@ button:disabled {
     font-weight: bold;
     font-size: 16px;
     text-align: center;
+    margin-bottom: 6px;
 }
 
 .sub-text {
     font-size: 14px;
     color: #6b7280;
     text-align: center;
+    margin-bottom: 20px;
 }
 </style>
 </head>
@@ -2280,6 +2274,7 @@ button:disabled {
     </div>
 
     <button id="submitBtn" disabled>Valider le profil</button>
+
 </div>
 
 <script>
@@ -2318,7 +2313,6 @@ async function startRearCamera() {
             readerDiv.style.border = "3px solid #10b981";
             successDiv.style.display = "block";
             setTimeout(()=>{ readerDiv.style.border="3px solid transparent"; successDiv.style.display="none"; },1500);
-
         });
     } catch(e){console.error(e);}
 }
