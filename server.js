@@ -2106,77 +2106,76 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// CAMERA QR + FORM AUTO-REMPLISSAGE
-// ==================================
+// CAMERA QR + FORM MODERNE MOBILE
 app.get('/signup-qr', (req, res) => {
     res.send(`
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
 <style>
 html, body {
     margin: 0;
     padding: 0;
-    background: black;
+    background-color: #f9fafb;
+    font-family: sans-serif;
+    color: #111827;
+    height: 100%;
+}
+
+body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-family: sans-serif;
-    color: white;
 }
 
+.container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* QR Scanner */
 #reader {
-    width: 280px;
-    height: 280px;
-    margin-top: 30px;
+    width: 70vw;
+    height: 70vw;
+    max-width: 300px;
+    max-height: 300px;
+    margin: auto;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 video { object-fit: cover !important; }
 
-.form-container {
-    width: 280px;
-    margin-top: 20px;
+/* Form fields */
+input[type="text"], input[type="number"], select, .photo-box {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.photo-box {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    color: black;
-}
-
-input, select, button {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    background-color: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    color: #9ca3af;
     font-size: 14px;
-}
-
-button {
-    border: none;
-    font-weight: bold;
-    font-size: 16px;
-    color: white;
-    background-color: #059669;
     cursor: pointer;
-    margin-top: 15px;
-}
-
-button:disabled {
-    background-color: #d1d5db;
-    color: #6b7280;
-    cursor: not-allowed;
-}
-
-.section-title {
-    margin-top: 30px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.sub-text {
-    font-size: 14px;
-    margin-bottom: 10px;
 }
 
 .date-row {
@@ -2194,15 +2193,45 @@ button:disabled {
     align-items: flex-start;
     gap: 8px;
     font-size: 13px;
-    margin-top: 15px;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    border-radius: 25px;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+    background-color: #ec4899;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:disabled {
+    background-color: #f9a8d4;
+    cursor: not-allowed;
+}
+
+/* Title and subtitles */
+.section-title {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.sub-text {
+    font-size: 14px;
+    color: #6b7280;
 }
 </style>
 </head>
 <body>
+<div class="container">
 
-<div id="reader"></div>
+    <!-- QR Scanner -->
+    <div id="reader"></div>
 
-<div class="form-container">
+    <!-- Form Fields -->
     <input type="text" placeholder="Prénom" id="firstName">
     <input type="text" placeholder="Nom" id="lastName">
     <input type="text" placeholder="Génotype" id="genotype">
@@ -2211,12 +2240,11 @@ button:disabled {
     <div class="section-title">
         Aidez vos partenaires à en savoir un peu plus sur vous
     </div>
-
     <div class="sub-text">
         Veuillez remplir les cases ci-dessous :
     </div>
 
-    <input type="file" accept="image/*" id="profilePhoto">
+    <div class="photo-box" id="photoBox">Cliquez pour ajouter une photo</div>
     <input type="text" placeholder="Région actuelle" id="region" required>
 
     <div class="date-row">
@@ -2227,9 +2255,7 @@ button:disabled {
 
     <div class="checkbox-container">
         <input type="checkbox" id="honorCheckbox" required>
-        <label>
-            Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité
-        </label>
+        <label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
     </div>
 
     <button id="submitBtn" disabled>Valider le profil</button>
@@ -2239,61 +2265,36 @@ button:disabled {
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
 
+// Camera rear scan
 async function startRearCamera() {
     try {
         const devices = await Html5Qrcode.getCameras();
         if (!devices || devices.length === 0) return;
-
-        let rearCamera = devices.find(device =>
-            device.label.toLowerCase().includes("back") ||
-            device.label.toLowerCase().includes("rear") ||
-            device.label.toLowerCase().includes("environment")
-        );
-
+        let rearCamera = devices.find(d => d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("rear") || d.label.toLowerCase().includes("environment"));
         if (!rearCamera) rearCamera = devices[devices.length - 1];
 
-        await html5QrCode.start(
-            rearCamera.id,
-            {
-                fps: 20,
-                aspectRatio: 1.0,
-                videoConstraints: {
-                    width: { ideal: 720 },
-                    height: { ideal: 720 },
-                    facingMode: "environment"
-                },
-                qrbox: { width: 250, height: 250 }
-            },
-            (decodedText) => {
-                if (hasScanned) return;
-                hasScanned = true;
-
-                // ⚡ Auto-remplissage des 4 premières cases
-                try {
-                    const data = decodedText.trim().split('|');
-                    // On suppose le format QR : Prénom|Nom|Génotype|Groupe sanguin
-                    if (data.length >= 4) {
-                        document.getElementById('firstName').value = data[0].trim();
-                        document.getElementById('lastName').value = data[1].trim();
-                        document.getElementById('genotype').value = data[2].trim();
-                        document.getElementById('bloodGroup').value = data[3].trim();
-                    }
-                } catch(e) {
-                    console.error("Erreur auto-remplissage:", e);
-                }
-
-                console.log(decodedText);
+        await html5QrCode.start(rearCamera.id, {
+            fps: 20,
+            aspectRatio: 1.0,
+            videoConstraints: { width: {ideal:720}, height:{ideal:720}, facingMode:"environment" },
+            qrbox: { width: 250, height: 250 }
+        }, (decodedText)=>{
+            if (hasScanned) return;
+            hasScanned = true;
+            // Auto-fill
+            const data = decodedText.trim().split('|');
+            if (data.length>=4){
+                document.getElementById('firstName').value = data[0].trim();
+                document.getElementById('lastName').value = data[1].trim();
+                document.getElementById('genotype').value = data[2].trim();
+                document.getElementById('bloodGroup').value = data[3].trim();
             }
-        );
-
-    } catch (err) {
-        console.error(err);
-    }
+        });
+    } catch(e){console.error(e);}
 }
-
 startRearCamera();
 
-// ✅ Activation automatique du bouton
+// Button enable logic
 const submitBtn = document.getElementById('submitBtn');
 const regionInput = document.getElementById('region');
 const dayInput = document.getElementById('day');
@@ -2301,17 +2302,11 @@ const monthInput = document.getElementById('month');
 const yearInput = document.getElementById('year');
 const honorCheckbox = document.getElementById('honorCheckbox');
 
-function checkFormValidity() {
-    if (
-        regionInput.value.trim() !== "" &&
-        dayInput.value.trim() !== "" &&
-        monthInput.value.trim() !== "" &&
-        yearInput.value.trim() !== "" &&
-        honorCheckbox.checked
-    ) {
-        submitBtn.disabled = false;
-    } else {
-        submitBtn.disabled = true;
+function checkFormValidity(){
+    if(regionInput.value.trim()!=="" && dayInput.value.trim()!=="" && monthInput.value.trim()!=="" && yearInput.value.trim()!=="" && honorCheckbox.checked){
+        submitBtn.disabled=false;
+    }else{
+        submitBtn.disabled=true;
     }
 }
 
@@ -2320,8 +2315,22 @@ dayInput.addEventListener('input', checkFormValidity);
 monthInput.addEventListener('input', checkFormValidity);
 yearInput.addEventListener('input', checkFormValidity);
 honorCheckbox.addEventListener('change', checkFormValidity);
-</script>
 
+// Photo box click
+const photoBox = document.getElementById('photoBox');
+photoBox.addEventListener('click', ()=>{
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = e=>{
+        if(e.target.files.length>0){
+            photoBox.textContent = e.target.files[0].name;
+            photoBox.style.color="#111827";
+        }
+    };
+    fileInput.click();
+});
+</script>
 </body>
 </html>
 `);
