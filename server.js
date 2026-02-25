@@ -2117,115 +2117,50 @@ app.get('/signup-qr', (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
             <style>
-                /* Ta logique CSS qui fonctionne */
                 #reader__dashboard { display: none !important; }
-                #reader { border: none !important; }
-                video { object-fit: cover !important; }
-                
-                .input-field { 
-                    width:100%; margin:4px 0 12px 0; padding:14px; 
-                    border:1px solid #d1d5db; border-radius:10px; 
-                    box-sizing:border-box; background:#fff; font-size:16px; 
-                }
-                label { font-size:13px; color:#6b7280; font-weight:bold; margin-left:5px; }
+                #reader { border: none !important; background: #000; }
+                video { object-fit: cover !important; width: 100% !important; }
             </style>
         </head>
-        <body style="margin:0; padding:0; font-family:sans-serif; background:#f9fafb;">
-            <div style="max-width:500px; margin:auto; padding:15px;">
-                <h3 style="text-align:center; color:#374151;">Scannez le certificat</h3>
+        <body style="margin:0; padding:15px; font-family:sans-serif; background:#f9fafb;">
+            <h3 style="text-align:center;">Scannez le certificat</h3>
+            
+            <div id="reader" style="width:100%; aspect-ratio: 1/1; border-radius:20px; overflow:hidden; background:#000;"></div>
+
+            <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:20px;">
+                <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly style="width:100%; padding:14px; margin:5px 0; border-radius:10px; border:1px solid #ccc;">
+                <input type="text" id="ln" name="lastName" placeholder="Nom" readonly style="width:100%; padding:14px; margin:5px 0; border-radius:10px; border:1px solid #ccc;">
+                <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly style="width:100%; padding:14px; margin:5px 0; border-radius:10px; border:1px solid #ccc;">
+                <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly style="width:100%; padding:14px; margin:5px 0; border-radius:10px; border:1px solid #ccc;">
+                <input type="hidden" id="dob" name="dob">
                 
-                <div id="reader" style="width:100%; aspect-ratio: 1/1; border-radius:20px; overflow:hidden; background:#000; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                    <div id="status" style="position:absolute; top:15px; left:15px; color:white; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; z-index:10; font-size:14px; display:none;">
-                        Alignez le QR code ici
-                    </div>
-                </div>
-                
-                <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:20px;">
-                    <input type="hidden" name="isVerified" value="true">
-                    
-                    <label>1. Prénom</label>
-                    <input type="text" id="fn" name="firstName" placeholder="En attente du scan..." readonly required class="input-field">
-                    
-                    <label>2. Nom</label>
-                    <input type="text" id="ln" name="lastName" placeholder="En attente du scan..." readonly required class="input-field">
-                    
-                    <label>3. Génotype</label>
-                    <input type="text" id="gt" name="genotype" placeholder="En attente du scan..." readonly required class="input-field">
-                    
-                    <label>4. Groupe sanguin</label>
-                    <input type="text" id="bg" name="bloodGroup" placeholder="En attente du scan..." readonly required class="input-field">
-                    
-                    <input type="hidden" id="dob" name="dob">
-
-                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0 20px 0;">
-
-                    <input type="text" name="residence" placeholder="Ville de résidence actuelle" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
-                    <input type="text" name="region" placeholder="Région" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
-                    
-                    <select name="desireChild" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; background:white; box-sizing:border-box;">
-                        <option value="">Projet d'enfants ?</option>
-                        <option value="Oui">Oui</option>
-                        <option value="Non">Non</option>
-                    </select>
-
-                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#d1d5db; color:#6b7280; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Veuillez scanner le QR</button>
-                </form>
-            </div>
+                <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#ccc; border:none; border-radius:35px; margin-top:15px; font-weight:bold;">Veuillez scanner</button>
+            </form>
 
             <script>
-                let scanner = null;
-                let isScanning = true;
-
-                // Fonction d'allumage identique à ton code
+                // LA LOGIQUE DE TON PREMIER CODE SANS RIEN CHANGER
                 function initScanner() {
-                    document.getElementById('status').style.display = 'block';
-                    
-                    scanner = new Html5QrcodeScanner("reader", { 
+                    const scanner = new Html5QrcodeScanner("reader", { 
                         fps: 20, 
-                        qrbox: (viewWidth, viewHeight) => {
-                            return { width: viewWidth * 0.8, height: viewHeight * 0.8 };
-                        },
+                        qrbox: (w, h) => { return { width: w * 0.8, height: h * 0.8 }; },
                         aspectRatio: 1.0
                     });
 
-                    scanner.render((decodedText) => {
-                        if (isScanning) processQRData(decodedText);
+                    scanner.render((text) => {
+                        const data = text.split('|');
+                        document.getElementById('fn').value = data[0];
+                        document.getElementById('ln').value = data[1];
+                        document.getElementById('gt').value = data[2];
+                        document.getElementById('bg').value = data[3];
+                        document.getElementById('dob').value = data[4];
+                        
+                        document.getElementById('submitBtn').disabled = false;
+                        document.getElementById('submitBtn').style.background = '#059669';
+                        document.getElementById('submitBtn').style.color = '#fff';
+                        scanner.clear();
                     });
                 }
-
-                function processQRData(text) {
-                    try {
-                        const data = text.trim().split('|');
-                        if (data.length < 5) throw new Error('Format invalide');
-
-                        // Remplissage automatique
-                        document.getElementById('fn').value = data[0].trim();
-                        document.getElementById('ln').value = data[1].trim();
-                        document.getElementById('gt').value = data[2].trim();
-                        document.getElementById('bg').value = data[3].trim();
-                        document.getElementById('dob').value = data[4].trim();
-
-                        // Style visuel de succès
-                        document.querySelectorAll('.input-field').forEach(el => {
-                            el.style.background = '#f0fdf4';
-                            el.style.borderColor = '#10b981';
-                        });
-
-                        const btn = document.getElementById('submitBtn');
-                        btn.disabled = false;
-                        btn.textContent = 'Finaliser l\\'inscription ✅';
-                        btn.style.background = '#059669';
-                        btn.style.color = 'white';
-
-                        scanner.clear();
-                        isScanning = false;
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-
-                // Déclencheur sur le chargement de la fenêtre (Ta méthode)
-                window.addEventListener('load', initScanner);
+                window.onload = initScanner;
             </script>
         </body>
         </html>
