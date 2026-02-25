@@ -2106,59 +2106,348 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - VERSION SIMPLIFIÉE (COMME TON CODE)
 // ============================================
-<script>
-    let html5QrCode;
-    let isScanning = true;
-
-    function initScanner() {
-        document.getElementById('status').style.display = 'block';
-
-        html5QrCode = new Html5Qrcode("reader");
-
-        Html5Qrcode.getCameras().then(devices => {
-            if (!devices || !devices.length) {
-                alert("Aucune caméra détectée");
-                return;
-            }
-
-            // 📱 priorité caméra arrière
-            const backCamera = devices.find(d =>
-                d.label.toLowerCase().includes('back') ||
-                d.label.toLowerCase().includes('rear')
-            );
-
-            const cameraId = backCamera ? backCamera.id : devices[0].id;
-
-            html5QrCode.start(
-                cameraId,
-                {
-                    fps: 15, // plus fluide
-                    qrbox: (viewfinderWidth, viewfinderHeight) => {
-                        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                        const qrSize = Math.floor(minEdge * 0.8);
-                        return { width: qrSize, height: qrSize };
-                    },
-                    aspectRatio: 1.0,
-                    disableFlip: false
-                },
-                (decodedText) => {
-                    console.log("QR détecté :", decodedText); // debug
-                    if (isScanning) {
-                        processQRData(decodedText);
-                    }
-                },
-                (errorMessage) => {
-                    // Ne rien afficher pour éviter spam console
-                }
-            );
-
-        }).catch(err => {
-            alert("Erreur caméra : " + err);
-        });
+// INSCRIPTION QR - VERSION CORRIGÉE
+// ============================================
+app.get('/signup-qr', (req, res) => {
+  const t = req.t;
+  
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>${t('appName')} - Scan QR Code</title>
+  ${styles}
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <style>
+    #reader {
+      width: 100%;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      background: #000;
     }
-</script>
+    #reader video {
+      width: 100%;
+      object-fit: cover;
+    }
+    #status-message {
+      background: #1a2a44;
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 10px 0;
+      text-align: center;
+      font-weight: 500;
+    }
+    .camera-permission {
+      background: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="page-white">
+      <h2 style="color:#ff416c;">📱 Scan QR Code</h2>
+      <p style="font-size:1.1rem; margin-bottom:20px; text-align:center;">
+        Scannez le code QR de votre certificat médical
+      </p>
+      
+      <div id="status-message">
+        ⏳ Préparation de la caméra...
+      </div>
+      
+      <div id="camera-permission" class="camera-permission" style="display:none;">
+        Veuillez autoriser l'accès à la caméra pour scanner le QR code
+      </div>
+      
+      <div id="reader"></div>
+      
+      <form id="certForm" action="/api/register-qr" method="POST">
+        <input type="hidden" name="isVerified" value="true">
+        
+        <div id="certData" style="background:#e8f5e8; padding:20px; border-radius:12px; margin-bottom:20px; display:none; border:2px solid #28a745;">
+          <p style="color:#28a745; font-weight:500; margin-bottom:15px;">✓ Données extraites du certificat</p>
+          
+          <div class="input-label">Prénom</div>
+          <input type="text" id="fn" name="firstName" placeholder="Prénom" readonly required style="width:100%; margin:5px 0 15px; padding:12px; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;">
+          
+          <div class="input-label">Nom</div>
+          <input type="text" id="ln" name="lastName" placeholder="Nom" readonly required style="width:100%; margin:5px 0 15px; padding:12px; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;">
+          
+          <div class="input-label">Génotype</div>
+          <input type="text" id="gt" name="genotype" placeholder="Génotype" readonly required style="width:100%; margin:5px 0 15px; padding:12px; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;">
+          
+          <div class="input-label">Groupe sanguin</div>
+          <input type="text" id="bg" name="bloodGroup" placeholder="Groupe sanguin" readonly required style="width:100%; margin:5px 0 15px; padding:12px; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;">
+          
+          <div class="input-label">Date de naissance</div>
+          <div style="display:flex; gap:10px; margin:5px 0;">
+            <input type="text" id="d" placeholder="JJ" readonly style="width:25%; padding:12px; text-align:center; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;">
+            <span style="align-self:center;">/</span>
+            <input type="text" id="m" placeholder="MM" readonly style="width:25%; padding:12px; text-align:center; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;">
+            <span style="align-self:center;">/</span>
+            <input type="text" id="y" placeholder="AAAA" readonly style="width:35%; padding:12px; border:1px solid #ccc; border-radius:8px; background:#f9f9f9;">
+          </div>
+          <input type="hidden" id="dob" name="dob">
+        </div>
+        
+        <div class="info-message" style="margin:20px 0;">
+          <span class="info-icon">📍</span>
+          <p>${t('locationHelp')}</p>
+        </div>
+        
+        <div class="input-label">${t('city')}</div>
+        <input type="text" name="residence" placeholder="${t('city')}" required style="width:100%; margin:5px 0 15px; padding:14px; border:1px solid #ddd; border-radius:8px;">
+        
+        <div class="input-label">${t('region')}</div>
+        <input type="text" name="region" placeholder="${t('region')}" required style="width:100%; margin:5px 0 15px; padding:14px; border:1px solid #ddd; border-radius:8px;">
+        
+        <div class="input-label">${t('desireChild')}</div>
+        <select name="desireChild" required style="width:100%; padding:14px; border:1px solid #ddd; border-radius:8px; margin:5px 0 20px;">
+          <option value="">${t('desireChild')}</option>
+          <option value="Oui">${t('yes')}</option>
+          <option value="Non">${t('no')}</option>
+        </select>
+        
+        <button type="submit" id="submitBtn" disabled style="width:100%; padding:16px; background:#9ca3af; color:#6b7280; border:none; border-radius:30px; font-weight:bold; cursor:not-allowed;">
+          ${t('createProfile')}
+        </button>
+      </form>
+      
+      <div style="text-align:center; margin:20px 0;">
+        <a href="/signup-manual" class="btn-dark" style="text-decoration:none; display:inline-block;">${t('manualEntry')}</a>
+      </div>
+      
+      <a href="/signup-choice" class="back-link">← ${t('backCharter')}</a>
+    </div>
+  </div>
+  
+  <script>
+    let html5QrcodeScanner = null;
+    let isScanning = true;
+    
+    function initScanner() {
+      const statusMsg = document.getElementById('status-message');
+      const cameraPerm = document.getElementById('camera-permission');
+      
+      try {
+        // Vérifier si le navigateur supporte la caméra
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          statusMsg.innerHTML = '❌ Votre navigateur ne supporte pas l\\'accès à la caméra';
+          return;
+        }
+        
+        statusMsg.innerHTML = '📷 Demande d\\'accès à la caméra...';
+        
+        // Créer le scanner avec configuration améliorée
+        html5QrcodeScanner = new Html5Qrcode("reader", {
+          formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+          verbose: false,
+          fps: 10,
+          qrbox: 250,
+          aspectRatio: 1.0,
+          showTorchButtonIfSupported: true
+        });
+        
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+          if (isScanning) {
+            processQRData(decodedText);
+          }
+        };
+        
+        const config = {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          rememberLastUsedCamera: true,
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+        };
+        
+        // Démarrer le scan
+        html5QrcodeScanner.start(
+          { facingMode: "environment" },
+          config,
+          qrCodeSuccessCallback,
+          (errorMessage) => {
+            // Ignorer les erreurs de scan normales
+            console.log("Scan en cours...");
+          }
+        ).then(() => {
+          statusMsg.innerHTML = '✅ Caméra active - Positionnez le QR code';
+          cameraPerm.style.display = 'none';
+        }).catch((err) => {
+          console.error("Erreur caméra:", err);
+          statusMsg.innerHTML = '❌ Impossible d\\'accéder à la caméra';
+          cameraPerm.style.display = 'block';
+          
+          // Proposer une alternative
+          setTimeout(() => {
+            if (confirm("Impossible d'accéder à la caméra. Voulez-vous utiliser la saisie manuelle ?")) {
+              window.location.href = '/signup-manual';
+            }
+          }, 1000);
+        });
+        
+      } catch (error) {
+        console.error("Erreur d'initialisation:", error);
+        statusMsg.innerHTML = '❌ Erreur technique';
+        cameraPerm.style.display = 'block';
+      }
+    }
+    
+    function processQRData(text) {
+      try {
+        console.log("QR Code scanné:", text);
+        
+        // Nettoyer et parser les données
+        const data = text.trim().split('|'); // Utiliser | comme séparateur
+        
+        // Alternative: essayer différents séparateurs
+        let cleanData = [];
+        if (data.length === 5) {
+          cleanData = data;
+        } else {
+          // Essayer avec d'autres séparateurs courants
+          const separators = [',', ';', '\t', ' '];
+          for (let sep of separators) {
+            const testData = text.trim().split(sep);
+            if (testData.length === 5) {
+              cleanData = testData;
+              break;
+            }
+          }
+        }
+        
+        // Validation
+        if (cleanData.length !== 5) {
+          throw new Error('Format QR code invalide - 5 champs requis');
+        }
+        
+        // Vérifier que tous les champs sont présents
+        for (let i = 0; i < 5; i++) {
+          if (!cleanData[i] || cleanData[i].trim() === '') {
+            throw new Error('Données incomplètes dans le QR code');
+          }
+        }
+        
+        // Remplir les champs
+        document.getElementById('fn').value = cleanData[0].trim();
+        document.getElementById('ln').value = cleanData[1].trim();
+        document.getElementById('gt').value = cleanData[2].trim();
+        document.getElementById('bg').value = cleanData[3].trim();
+        
+        // Traiter la date
+        const dobValue = cleanData[4].trim();
+        document.getElementById('dob').value = dobValue;
+        
+        // Afficher la date formatée
+        if (dobValue.includes('-')) {
+          const dateParts = dobValue.split('-');
+          if (dateParts.length === 3) {
+            document.getElementById('y').value = dateParts[0];
+            document.getElementById('m').value = dateParts[1];
+            document.getElementById('d').value = dateParts[2];
+          }
+        } else if (dobValue.includes('/')) {
+          const dateParts = dobValue.split('/');
+          if (dateParts.length === 3) {
+            document.getElementById('d').value = dateParts[0];
+            document.getElementById('m').value = dateParts[1];
+            document.getElementById('y').value = dateParts[2];
+          }
+        }
+        
+        // Afficher les données et activer le formulaire
+        document.getElementById('certData').style.display = 'block';
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').style.background = '#ff416c';
+        document.getElementById('submitBtn').style.color = 'white';
+        document.getElementById('submitBtn').style.cursor = 'pointer';
+        document.getElementById('submitBtn').textContent = '✓ Finaliser mon inscription';
+        
+        // Arrêter le scan
+        if (html5QrcodeScanner && isScanning) {
+          isScanning = false;
+          html5QrcodeScanner.stop().then(() => {
+            document.getElementById('status-message').innerHTML = '✅ QR code scanné avec succès !';
+          }).catch(err => console.log("Erreur arrêt scan:", err));
+        }
+        
+        // Notification
+        alert('✅ Certificat valide ! Complétez les informations restantes.');
+        
+      } catch (error) {
+        console.error("Erreur traitement QR:", error);
+        alert('❌ Erreur: ' + error.message);
+      }
+    }
+    
+    // Gestionnaire de soumission du formulaire
+    document.getElementById('certForm').addEventListener('submit', function(e) {
+      const residence = document.querySelector('[name="residence"]').value;
+      const region = document.querySelector('[name="region"]').value;
+      const desireChild = document.querySelector('[name="desireChild"]').value;
+      
+      if (!residence || !region || !desireChild) {
+        e.preventDefault();
+        alert('Veuillez remplir tous les champs restants');
+        return;
+      }
+      
+      if (!document.getElementById('fn').value) {
+        e.preventDefault();
+        alert('Veuillez d\\'abord scanner un QR code valide');
+        return;
+      }
+    });
+    
+    // Initialisation au chargement de la page
+    window.addEventListener('load', function() {
+      // Petit délai pour que tout soit prêt
+      setTimeout(initScanner, 500);
+    });
+    
+    // Nettoyage à la fermeture
+    window.addEventListener('beforeunload', function() {
+      if (html5QrcodeScanner && isScanning) {
+        html5QrcodeScanner.stop().catch(err => {});
+      }
+    });
+  </script>
+</body>
+</html>`);
+});
+
+// Ajouter la route API pour l'inscription QR
+app.post('/api/register-qr', async (req, res) => {
+  try {
+    const userData = {
+      ...req.body,
+      qrVerified: true,
+      verificationBadge: 'lab',
+      language: req.body.language || 'fr',
+      isPublic: true
+    };
+    
+    const user = new User(userData);
+    await user.save();
+    
+    req.session.userId = user._id;
+    req.session.isVerified = true;
+    await new Promise(resolve => req.session.save(resolve));
+    
+    res.json({ success: true });
+  } catch(e) {
+    console.error("Erreur inscription QR:", e);
+    res.status(500).json({ error: e.message });
+  }
+});
 // ============================================
 // INSCRIPTION MANUELLE
 // ============================================
