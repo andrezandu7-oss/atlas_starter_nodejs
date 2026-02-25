@@ -2107,6 +2107,7 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
+// ============================================
 // INSCRIPTION QR - VERSION CORRIGÉE
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2149,6 +2150,17 @@ app.get('/signup-qr', (req, res) => {
       margin: 10px 0;
       text-align: center;
     }
+    .test-btn {
+      background: #1a2a44;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px 0;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -2166,6 +2178,10 @@ app.get('/signup-qr', (req, res) => {
       <div id="camera-permission" class="camera-permission" style="display:none;">
         Veuillez autoriser l'accès à la caméra pour scanner le QR code
       </div>
+      
+      <button onclick="testerCamera()" class="test-btn">
+        📋 Tester la caméra
+      </button>
       
       <div id="reader"></div>
       
@@ -2233,20 +2249,93 @@ app.get('/signup-qr', (req, res) => {
     let html5QrcodeScanner = null;
     let isScanning = true;
     
+    function testerCamera() {
+      const statusMsg = document.getElementById('status-message');
+      
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function(stream) {
+          alert('✅ Caméra fonctionnelle ! Vous pouvez scanner le QR code');
+          stream.getTracks().forEach(track => track.stop());
+          statusMsg.innerHTML = '✅ Caméra OK - Démarrage du scan...';
+          setTimeout(initScanner, 500);
+        })
+        .catch(function(err) {
+          console.error("Erreur test caméra:", err);
+          let message = '❌ Erreur caméra: ';
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            message += 'Accès refusé. Cliquez sur l\'icône 🔒 dans la barre d\'adresse et autorisez la caméra.';
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            message += 'Aucune caméra trouvée sur cet appareil.';
+          } else {
+            message += err.message;
+          }
+          alert(message);
+        });
+    }
+    
     function initScanner() {
       const statusMsg = document.getElementById('status-message');
       const cameraPerm = document.getElementById('camera-permission');
       
       try {
-        // Vérifier si le navigateur supporte la caméra
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          statusMsg.innerHTML = '❌ Votre navigateur ne supporte pas l\\'accès à la caméra';
+          statusMsg.innerHTML = '❌ Votre navigateur ne supporte pas l\'accès à la caméra';
+          showManualOption();
           return;
         }
         
-        statusMsg.innerHTML = '📷 Demande d\\'accès à la caméra...';
+        statusMsg.innerHTML = '📷 Demande d\'accès à la caméra...';
         
-        // Créer le scanner avec configuration améliorée
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+          .then(function(stream) {
+            stream.getTracks().forEach(track => track.stop());
+            
+            statusMsg.innerHTML = '✅ Caméra autorisée - Démarrage du scan...';
+            startScanner();
+          })
+          .catch(function(err) {
+            console.error("Erreur permission:", err);
+            
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+              statusMsg.innerHTML = '❌ Accès à la caméra refusé';
+              cameraPerm.style.display = 'block';
+              cameraPerm.innerHTML = `
+                <strong>📸 Accès à la caméra bloqué !</strong><br><br>
+                Pour utiliser le scan QR :<br>
+                1. Cliquez sur l'icône 🔒 dans la barre d'adresse<br>
+                2. Autorisez l'accès à la caméra<br>
+                3. Rafraîchissez la page<br><br>
+                <button onclick="window.location.reload()" class="btn-pink" style="padding:10px 20px;">
+                  ↻ Rafraîchir la page
+                </button>
+              `;
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+              statusMsg.innerHTML = '❌ Aucune caméra trouvée';
+              cameraPerm.style.display = 'block';
+              cameraPerm.innerHTML = `
+                <strong>📵 Aucune caméra détectée !</strong><br><br>
+                Voulez-vous utiliser la saisie manuelle ?<br><br>
+                <a href="/signup-manual" class="btn-pink" style="text-decoration:none; padding:10px 20px; display:inline-block;">
+                  ✍️ Saisie manuelle
+                </a>
+              `;
+            } else {
+              statusMsg.innerHTML = '❌ Erreur technique';
+              showManualOption();
+            }
+          });
+          
+      } catch (error) {
+        console.error("Erreur d'initialisation:", error);
+        statusMsg.innerHTML = '❌ Erreur technique';
+        showManualOption();
+      }
+    }
+    
+    function startScanner() {
+      const statusMsg = document.getElementById('status-message');
+      
+      try {
         html5QrcodeScanner = new Html5Qrcode("reader", {
           formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
           verbose: false,
@@ -2269,84 +2358,76 @@ app.get('/signup-qr', (req, res) => {
           supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
         };
         
-        // Démarrer le scan
         html5QrcodeScanner.start(
           { facingMode: "environment" },
           config,
           qrCodeSuccessCallback,
           (errorMessage) => {
             // Ignorer les erreurs de scan normales
-            console.log("Scan en cours...");
           }
         ).then(() => {
           statusMsg.innerHTML = '✅ Caméra active - Positionnez le QR code';
-          cameraPerm.style.display = 'none';
+          document.getElementById('camera-permission').style.display = 'none';
         }).catch((err) => {
-          console.error("Erreur caméra:", err);
-          statusMsg.innerHTML = '❌ Impossible d\\'accéder à la caméra';
-          cameraPerm.style.display = 'block';
-          
-          // Proposer une alternative
-          setTimeout(() => {
-            if (confirm("Impossible d'accéder à la caméra. Voulez-vous utiliser la saisie manuelle ?")) {
-              window.location.href = '/signup-manual';
-            }
-          }, 1000);
+          console.error("Erreur démarrage scanner:", err);
+          statusMsg.innerHTML = '❌ Impossible de démarrer le scan';
+          showManualOption();
         });
         
       } catch (error) {
-        console.error("Erreur d'initialisation:", error);
+        console.error("Erreur création scanner:", error);
         statusMsg.innerHTML = '❌ Erreur technique';
-        cameraPerm.style.display = 'block';
+        showManualOption();
       }
+    }
+    
+    function showManualOption() {
+      document.getElementById('camera-permission').style.display = 'block';
+      document.getElementById('camera-permission').innerHTML = `
+        <strong>📱 Problème d'accès à la caméra</strong><br><br>
+        <a href="/signup-manual" class="btn-pink" style="text-decoration:none; padding:10px 20px; display:inline-block;">
+          ✍️ Utiliser la saisie manuelle
+        </a>
+        <br><br>
+        <button onclick="window.location.reload()" class="btn-dark" style="padding:8px 15px;">
+          ↻ Réessayer
+        </button>
+      `;
     }
     
     function processQRData(text) {
       try {
         console.log("QR Code scanné:", text);
         
-        // Nettoyer et parser les données
-        const data = text.trim().split('|'); // Utiliser | comme séparateur
-        
-        // Alternative: essayer différents séparateurs
         let cleanData = [];
-        if (data.length === 5) {
-          cleanData = data;
-        } else {
-          // Essayer avec d'autres séparateurs courants
-          const separators = [',', ';', '\t', ' '];
-          for (let sep of separators) {
-            const testData = text.trim().split(sep);
-            if (testData.length === 5) {
-              cleanData = testData;
-              break;
-            }
+        const separators = ['|', ',', ';', '\t', ' '];
+        
+        for (let sep of separators) {
+          const testData = text.trim().split(sep);
+          if (testData.length === 5) {
+            cleanData = testData;
+            break;
           }
         }
         
-        // Validation
         if (cleanData.length !== 5) {
           throw new Error('Format QR code invalide - 5 champs requis');
         }
         
-        // Vérifier que tous les champs sont présents
         for (let i = 0; i < 5; i++) {
           if (!cleanData[i] || cleanData[i].trim() === '') {
             throw new Error('Données incomplètes dans le QR code');
           }
         }
         
-        // Remplir les champs
         document.getElementById('fn').value = cleanData[0].trim();
         document.getElementById('ln').value = cleanData[1].trim();
         document.getElementById('gt').value = cleanData[2].trim();
         document.getElementById('bg').value = cleanData[3].trim();
         
-        // Traiter la date
         const dobValue = cleanData[4].trim();
         document.getElementById('dob').value = dobValue;
         
-        // Afficher la date formatée
         if (dobValue.includes('-')) {
           const dateParts = dobValue.split('-');
           if (dateParts.length === 3) {
@@ -2363,7 +2444,6 @@ app.get('/signup-qr', (req, res) => {
           }
         }
         
-        // Afficher les données et activer le formulaire
         document.getElementById('certData').style.display = 'block';
         document.getElementById('submitBtn').disabled = false;
         document.getElementById('submitBtn').style.background = '#ff416c';
@@ -2371,7 +2451,6 @@ app.get('/signup-qr', (req, res) => {
         document.getElementById('submitBtn').style.cursor = 'pointer';
         document.getElementById('submitBtn').textContent = '✓ Finaliser mon inscription';
         
-        // Arrêter le scan
         if (html5QrcodeScanner && isScanning) {
           isScanning = false;
           html5QrcodeScanner.stop().then(() => {
@@ -2379,7 +2458,6 @@ app.get('/signup-qr', (req, res) => {
           }).catch(err => console.log("Erreur arrêt scan:", err));
         }
         
-        // Notification
         alert('✅ Certificat valide ! Complétez les informations restantes.');
         
       } catch (error) {
@@ -2388,7 +2466,6 @@ app.get('/signup-qr', (req, res) => {
       }
     }
     
-    // Gestionnaire de soumission du formulaire
     document.getElementById('certForm').addEventListener('submit', function(e) {
       const residence = document.querySelector('[name="residence"]').value;
       const region = document.querySelector('[name="region"]').value;
@@ -2402,18 +2479,15 @@ app.get('/signup-qr', (req, res) => {
       
       if (!document.getElementById('fn').value) {
         e.preventDefault();
-        alert('Veuillez d\\'abord scanner un QR code valide');
+        alert('Veuillez d\'abord scanner un QR code valide');
         return;
       }
     });
     
-    // Initialisation au chargement de la page
     window.addEventListener('load', function() {
-      // Petit délai pour que tout soit prêt
       setTimeout(initScanner, 500);
     });
     
-    // Nettoyage à la fermeture
     window.addEventListener('beforeunload', function() {
       if (html5QrcodeScanner && isScanning) {
         html5QrcodeScanner.stop().catch(err => {});
