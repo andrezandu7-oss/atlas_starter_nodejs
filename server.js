@@ -2128,7 +2128,8 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .container {
@@ -2137,12 +2138,13 @@ body {
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* QR Scanner */
+/* QR Scanner carré visible */
 #reader {
     width: 70vw;
     height: 70vw;
@@ -2151,33 +2153,53 @@ body {
     margin: auto;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background-color: #ffffff;
+    position: relative;
+    border: 3px solid transparent;
+    transition: border 0.3s ease;
 }
 
-video { object-fit: cover !important; }
+#qr-success {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(16,185,129,0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    display: none;
+}
 
 /* Form fields */
-input[type="text"], input[type="number"], select, .photo-box {
+input[type="text"], input[type="number"], select {
     width: 100%;
     padding: 12px;
     border-radius: 12px;
     border: 1px solid #d1d5db;
     font-size: 14px;
     box-sizing: border-box;
+    transition: background-color 0.5s ease;
 }
 
 .photo-box {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 120px;
+    height: 150px;
+    width: 120px;
     background-color: #f3f4f6;
     border: 2px dashed #d1d5db;
     color: #9ca3af;
     font-size: 14px;
     cursor: pointer;
+    border-radius: 8px;
+    margin: auto;
 }
 
+/* Date row */
 .date-row {
     display: flex;
     gap: 8px;
@@ -2196,16 +2218,21 @@ input[type="text"], input[type="number"], select, .photo-box {
 }
 
 button {
-    width: 100%;
+    width: calc(100% - 40px);
     padding: 16px;
     border-radius: 25px;
     border: none;
     font-weight: bold;
     font-size: 16px;
     color: white;
-    background-color: #ec4899;
+    background-color: #db2777;
     cursor: pointer;
-    margin-top: 10px;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 400px;
+    z-index: 100;
 }
 
 button:disabled {
@@ -2213,15 +2240,16 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Title and subtitles */
 .section-title {
     font-weight: bold;
     font-size: 16px;
+    text-align: center;
 }
 
 .sub-text {
     font-size: 14px;
     color: #6b7280;
+    text-align: center;
 }
 </style>
 </head>
@@ -2229,7 +2257,9 @@ button:disabled {
 <div class="container">
 
     <!-- QR Scanner -->
-    <div id="reader"></div>
+    <div id="reader">
+        <div id="qr-success">QR scanné !</div>
+    </div>
 
     <!-- Form Fields -->
     <input type="text" placeholder="Prénom" id="firstName">
@@ -2237,14 +2267,10 @@ button:disabled {
     <input type="text" placeholder="Génotype" id="genotype">
     <input type="text" placeholder="Groupe sanguin" id="bloodGroup">
 
-    <div class="section-title">
-        Aidez vos partenaires à en savoir un peu plus sur vous
-    </div>
-    <div class="sub-text">
-        Veuillez remplir les cases ci-dessous :
-    </div>
+    <div class="section-title">Aidez vos partenaires à en savoir un peu plus sur vous</div>
+    <div class="sub-text">Veuillez remplir les cases ci-dessous :</div>
 
-    <div class="photo-box" id="photoBox">Cliquez pour ajouter une photo</div>
+    <div class="photo-box" id="photoBox">Ajouter photo</div>
     <input type="text" placeholder="Région actuelle" id="region" required>
 
     <div class="date-row">
@@ -2257,15 +2283,14 @@ button:disabled {
         <input type="checkbox" id="honorCheckbox" required>
         <label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
     </div>
-
-    <button id="submitBtn" disabled>Valider le profil</button>
 </div>
+
+<button id="submitBtn" disabled>Valider le profil</button>
 
 <script>
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
 
-// Camera rear scan
 async function startRearCamera() {
     try {
         const devices = await Html5Qrcode.getCameras();
@@ -2281,14 +2306,26 @@ async function startRearCamera() {
         }, (decodedText)=>{
             if (hasScanned) return;
             hasScanned = true;
-            // Auto-fill
+
             const data = decodedText.trim().split('|');
-            if (data.length>=4){
-                document.getElementById('firstName').value = data[0].trim();
-                document.getElementById('lastName').value = data[1].trim();
-                document.getElementById('genotype').value = data[2].trim();
-                document.getElementById('bloodGroup').value = data[3].trim();
+            if(data.length>=4){
+                const fields = ['firstName','lastName','genotype','bloodGroup'];
+                fields.forEach((id,i)=>{
+                    const el = document.getElementById(id);
+                    el.value = data[i].trim();
+                    // Effet fond vert clair
+                    el.style.backgroundColor = "#d1fae5";
+                    setTimeout(()=>{ el.style.backgroundColor = "#fff"; }, 1000);
+                });
             }
+
+            // Animation QR scanné
+            const readerDiv = document.getElementById('reader');
+            const successDiv = document.getElementById('qr-success');
+            readerDiv.style.border = "3px solid #10b981";
+            successDiv.style.display = "block";
+            setTimeout(()=>{ readerDiv.style.border="3px solid transparent"; successDiv.style.display="none"; },1500);
+
         });
     } catch(e){console.error(e);}
 }
@@ -2320,11 +2357,11 @@ honorCheckbox.addEventListener('change', checkFormValidity);
 const photoBox = document.getElementById('photoBox');
 photoBox.addEventListener('click', ()=>{
     const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = e=>{
+    fileInput.type='file';
+    fileInput.accept='image/*';
+    fileInput.onchange=e=>{
         if(e.target.files.length>0){
-            photoBox.textContent = e.target.files[0].name;
+            photoBox.textContent=e.target.files[0].name;
             photoBox.style.color="#111827";
         }
     };
