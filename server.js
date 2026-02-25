@@ -2106,7 +2106,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION QR - VERSION VISIBLE ET FIX CAMÉRA
+// INSCRIPTION QR - VERSION FINALE (CAMÉRA OK + CASES VISIBLES)
 // ============================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
@@ -2118,126 +2118,112 @@ app.get('/signup-qr', (req, res) => {
             <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
             <style>
                 #reader__dashboard { display: none !important; }
-                #reader { border: none !important; background: #000; }
-                /* Force l'affichage de la vidéo */
-                #reader video { 
-                    width: 100% !important; 
-                    height: 100% !important; 
-                    object-fit: cover !important; 
-                    display: block !important;
-                }
-                .input-field { 
-                    width:100%; margin:8px 0; padding:14px; 
-                    border:1px solid #d1d5db; border-radius:10px; 
-                    box-sizing:border-box; background:#fff; 
-                    font-size: 16px;
-                }
+                #reader { border: none !important; }
+                video { object-fit: cover !important; }
+                .input-field { width:100%; margin:4px 0 12px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box; background:#fff; font-size:16px; }
+                label { font-size:13px; color:#6b7280; font-weight:bold; margin-left:5px; }
             </style>
         </head>
         <body style="margin:0; padding:0; font-family:sans-serif; background:#f9fafb;">
             <div style="max-width:500px; margin:auto; padding:15px;">
-                <h3 style="text-align:center; color:#374151;">Scannez votre certificat</h3>
+                <h3 style="text-align:center; color:#374151;">Scannez le certificat</h3>
                 
-                <div id="reader" style="width:100%; aspect-ratio: 1/1; border-radius:20px; overflow:hidden; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom:20px;">
-                    <div id="status" style="position:absolute; top:15px; left:15px; color:white; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; z-index:10; font-size:14px;">
-                        📷 Caméra prête...
+                <div id="reader" style="width:100%; aspect-ratio: 1/1; border-radius:20px; overflow:hidden; background:#000; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div id="status" style="position:absolute; top:15px; left:15px; color:white; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; z-index:10; font-size:14px; display:none;">
+                        Alignez le QR code ici
                     </div>
                 </div>
                 
-                <form id="certForm" action="/api/register-qr" method="POST">
+                <form id="certForm" action="/api/register-qr" method="POST" style="margin-top:20px;">
                     <input type="hidden" name="isVerified" value="true">
                     
-                    <div style="margin-bottom: 20px;">
-                        <label style="font-size:12px; color:#6b7280; margin-left:5px;">1. Prénom</label>
-                        <input type="text" id="fn" name="firstName" placeholder="En attente du scan..." readonly required class="input-field">
-                        
-                        <label style="font-size:12px; color:#6b7280; margin-left:5px;">2. Nom</label>
-                        <input type="text" id="ln" name="lastName" placeholder="En attente du scan..." readonly required class="input-field">
-                        
-                        <label style="font-size:12px; color:#6b7280; margin-left:5px;">3. Génotype</label>
-                        <input type="text" id="gt" name="genotype" placeholder="En attente du scan..." readonly required class="input-field">
-                        
-                        <label style="font-size:12px; color:#6b7280; margin-left:5px;">4. Groupe sanguin</label>
-                        <input type="text" id="bg" name="bloodGroup" placeholder="En attente du scan..." readonly required class="input-field">
-                        
-                        <input type="hidden" id="dob" name="dob">
-                    </div>
+                    <label>1. Prénom</label>
+                    <input type="text" id="fn" name="firstName" placeholder="..." readonly required class="input-field">
+                    
+                    <label>2. Nom</label>
+                    <input type="text" id="ln" name="lastName" placeholder="..." readonly required class="input-field">
+                    
+                    <label>3. Génotype</label>
+                    <input type="text" id="gt" name="genotype" placeholder="..." readonly required class="input-field">
+                    
+                    <label>4. Groupe sanguin</label>
+                    <input type="text" id="bg" name="bloodGroup" placeholder="..." readonly required class="input-field">
+                    
+                    <input type="hidden" id="dob" name="dob">
 
-                    <input type="text" name="residence" placeholder="Ville de résidence actuelle" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
-                    <input type="text" name="region" placeholder="Région" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0 20px 0;">
+
+                    <input type="text" name="residence" placeholder="Ville de résidence" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
+                    <input type="text" name="region" placeholder="Région / Province" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; box-sizing:border-box;">
                     
                     <select name="desireChild" required style="width:100%; margin:8px 0; padding:14px; border:1px solid #d1d5db; border-radius:10px; background:white; box-sizing:border-box;">
-                        <option value="">Avez-vous un projet d'enfants ?</option>
+                        <option value="">Projet d'enfants ?</option>
                         <option value="Oui">Oui</option>
                         <option value="Non">Non</option>
                     </select>
 
-                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#9ca3af; color:white; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Veuillez scanner le certificat</button>
+                    <button type="submit" id="submitBtn" disabled style="width:100%; padding:18px; background:#d1d5db; color:#6b7280; border:none; border-radius:35px; margin-top:15px; font-weight:bold; font-size:16px;">Veuillez scanner le QR</button>
                 </form>
             </div>
 
             <script>
+                let scanner = null;
                 let isScanning = true;
 
                 function initScanner() {
-                    // Utilisation de la version simplifiée pour éviter l'écran noir
-                    const html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                    document.getElementById('status').style.display = 'block';
+                    
+                    // Reprise stricte de ta config caméra fonctionnelle
+                    scanner = new Html5QrcodeScanner("reader", { 
                         fps: 20, 
-                        qrbox: { width: 250, height: 250 },
-                        aspectRatio: 1.0,
-                        rememberLastUsedCamera: true
+                        qrbox: (viewWidth, viewHeight) => {
+                            return { width: viewWidth * 0.8, height: viewHeight * 0.8 };
+                        },
+                        aspectRatio: 1.0
                     });
 
-                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                    scanner.render((decodedText) => {
+                        if (isScanning) processQRData(decodedText);
+                    });
+                }
 
-                    function onScanSuccess(decodedText) {
-                        if (!isScanning) return;
-                        
-                        try {
-                            const data = decodedText.trim().split('|');
-                            if (data.length < 5) throw new Error('Données incomplètes');
+                function processQRData(text) {
+                    try {
+                        const data = text.trim().split('|');
+                        if (data.length < 5) throw new Error('Données incomplètes');
 
-                            // Remplissage automatique des cases visibles
-                            document.getElementById('fn').value = data[0].trim();
-                            document.getElementById('ln').value = data[1].trim();
-                            document.getElementById('gt').value = data[2].trim();
-                            document.getElementById('bg').value = data[3].trim();
-                            document.getElementById('dob').value = data[4].trim();
+                        // Remplissage des cases visibles
+                        document.getElementById('fn').value = data[0].trim();
+                        document.getElementById('ln').value = data[1].trim();
+                        document.getElementById('gt').value = data[2].trim();
+                        document.getElementById('bg').value = data[3].trim();
+                        document.getElementById('dob').value = data[4].trim();
 
-                            // Feedback visuel (vert)
-                            document.querySelectorAll('.input-field').forEach(el => {
-                                el.style.borderColor = '#10b981';
-                                el.style.background = '#f0fdf4';
-                            });
+                        // Style de succès
+                        document.querySelectorAll('.input-field').forEach(el => {
+                            el.style.background = '#f0fdf4';
+                            el.style.borderColor = '#10b981';
+                        });
 
-                            document.getElementById('status').innerText = "✅ Scan réussi !";
-                            document.getElementById('status').style.background = "#10b981";
+                        const btn = document.getElementById('submitBtn');
+                        btn.disabled = false;
+                        btn.textContent = 'Finaliser l\\'inscription ✅';
+                        btn.style.background = '#059669';
+                        btn.style.color = 'white';
 
-                            const btn = document.getElementById('submitBtn');
-                            btn.disabled = false;
-                            btn.textContent = 'Finaliser l\\'inscription ✅';
-                            btn.style.background = '#059669';
-
-                            html5QrcodeScanner.clear();
-                            isScanning = false;
-                        } catch (e) {
-                            console.error("Erreur format QR:", e);
-                        }
-                    }
-
-                    function onScanFailure(error) {
-                        // On ne bloque pas pour les erreurs de lecture mineures
+                        scanner.clear();
+                        isScanning = false;
+                    } catch (e) {
+                        console.error(e);
                     }
                 }
 
-                // Lancement avec un petit délai pour garantir que le div est prêt
-                setTimeout(initScanner, 500);
+                window.addEventListener('load', initScanner);
             </script>
         </body>
         </html>
     `);
 });
-
 
 // ============================================
 // INSCRIPTION MANUELLE
