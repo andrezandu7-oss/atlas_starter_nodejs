@@ -2105,9 +2105,8 @@ app.get('/signup-choice', (req, res) => {
 </html>`);
 });
 
-// ============================================
-// CAMERA QR UNIQUEMENT - VERSION ULTRA MINIMALE
-// =============================================
+// ============================================// CAMERA QR - VERROUILLÉE UNIQUEMENT SUR CAMÉRA ARRIÈRE
+// =====================================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -2122,13 +2121,11 @@ app.get('/signup-qr', (req, res) => {
                     padding: 0;
                     height: 100%;
                     background: black;
+                    overflow: hidden;
                 }
                 #reader {
                     width: 100vw;
                     height: 100vh;
-                }
-                #reader__dashboard {
-                    display: none !important;
                 }
                 video {
                     object-fit: cover !important;
@@ -2139,17 +2136,44 @@ app.get('/signup-qr', (req, res) => {
             <div id="reader"></div>
 
             <script>
-                const scanner = new Html5QrcodeScanner("reader", {
-                    fps: 20,
-                    qrbox: (viewWidth, viewHeight) => {
-                        return { width: viewWidth * 0.8, height: viewHeight * 0.8 };
-                    },
-                    aspectRatio: 1.0
-                });
+                const html5QrCode = new Html5Qrcode("reader");
 
-                scanner.render((decodedText) => {
-                    console.log(decodedText);
-                });
+                async function startRearCamera() {
+                    try {
+                        const devices = await Html5Qrcode.getCameras();
+                        if (!devices || devices.length === 0) return;
+
+                        // Recherche explicite de la caméra arrière
+                        let rearCamera = devices.find(device =>
+                            device.label.toLowerCase().includes("back") ||
+                            device.label.toLowerCase().includes("rear") ||
+                            device.label.toLowerCase().includes("environment")
+                        );
+
+                        // Si non détectée par nom, on prend la dernière (souvent arrière sur mobile)
+                        if (!rearCamera) {
+                            rearCamera = devices[devices.length - 1];
+                        }
+
+                        await html5QrCode.start(
+                            rearCamera.id,
+                            {
+                                fps: 20,
+                                qrbox: (viewWidth, viewHeight) => {
+                                    return { width: viewWidth * 0.8, height: viewHeight * 0.8 };
+                                }
+                            },
+                            (decodedText) => {
+                                console.log(decodedText);
+                            }
+                        );
+
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+
+                startRearCamera();
             </script>
         </body>
         </html>
