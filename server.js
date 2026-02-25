@@ -2106,8 +2106,8 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// CAMERA QR + FORMULAIRE COMPLET
-// ===============================
+// CAMERA QR + FORM AUTO-REMPLISSAGE
+// ==================================
 app.get('/signup-qr', (req, res) => {
     res.send(`
 <!DOCTYPE html>
@@ -2142,14 +2142,30 @@ video { object-fit: cover !important; }
     display: flex;
     flex-direction: column;
     gap: 10px;
+    color: black;
 }
 
-input, select {
+input, select, button {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 14px;
-    color: black;
+}
+
+button {
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+    background-color: #059669;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button:disabled {
+    background-color: #d1d5db;
+    color: #6b7280;
+    cursor: not-allowed;
 }
 
 .section-title {
@@ -2187,10 +2203,10 @@ input, select {
 <div id="reader"></div>
 
 <div class="form-container">
-    <input type="text" placeholder="Prénom">
-    <input type="text" placeholder="Nom">
-    <input type="text" placeholder="Génotype">
-    <input type="text" placeholder="Groupe sanguin">
+    <input type="text" placeholder="Prénom" id="firstName">
+    <input type="text" placeholder="Nom" id="lastName">
+    <input type="text" placeholder="Génotype" id="genotype">
+    <input type="text" placeholder="Groupe sanguin" id="bloodGroup">
 
     <div class="section-title">
         Aidez vos partenaires à en savoir un peu plus sur vous
@@ -2200,25 +2216,28 @@ input, select {
         Veuillez remplir les cases ci-dessous :
     </div>
 
-    <input type="file" accept="image/*">
-    <input type="text" placeholder="Région actuelle" required>
+    <input type="file" accept="image/*" id="profilePhoto">
+    <input type="text" placeholder="Région actuelle" id="region" required>
 
     <div class="date-row">
-        <input type="number" placeholder="j" min="1" max="31" required>
-        <input type="number" placeholder="m" min="1" max="12" required>
-        <input type="number" placeholder="a" min="1900" max="2100" required>
+        <input type="number" placeholder="j" min="1" max="31" id="day" required>
+        <input type="number" placeholder="m" min="1" max="12" id="month" required>
+        <input type="number" placeholder="a" min="1900" max="2100" id="year" required>
     </div>
 
     <div class="checkbox-container">
-        <input type="checkbox" required>
+        <input type="checkbox" id="honorCheckbox" required>
         <label>
             Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité
         </label>
     </div>
+
+    <button id="submitBtn" disabled>Valider le profil</button>
 </div>
 
 <script>
 const html5QrCode = new Html5Qrcode("reader");
+let hasScanned = false;
 
 async function startRearCamera() {
     try {
@@ -2246,6 +2265,23 @@ async function startRearCamera() {
                 qrbox: { width: 250, height: 250 }
             },
             (decodedText) => {
+                if (hasScanned) return;
+                hasScanned = true;
+
+                // ⚡ Auto-remplissage des 4 premières cases
+                try {
+                    const data = decodedText.trim().split('|');
+                    // On suppose le format QR : Prénom|Nom|Génotype|Groupe sanguin
+                    if (data.length >= 4) {
+                        document.getElementById('firstName').value = data[0].trim();
+                        document.getElementById('lastName').value = data[1].trim();
+                        document.getElementById('genotype').value = data[2].trim();
+                        document.getElementById('bloodGroup').value = data[3].trim();
+                    }
+                } catch(e) {
+                    console.error("Erreur auto-remplissage:", e);
+                }
+
                 console.log(decodedText);
             }
         );
@@ -2256,6 +2292,34 @@ async function startRearCamera() {
 }
 
 startRearCamera();
+
+// ✅ Activation automatique du bouton
+const submitBtn = document.getElementById('submitBtn');
+const regionInput = document.getElementById('region');
+const dayInput = document.getElementById('day');
+const monthInput = document.getElementById('month');
+const yearInput = document.getElementById('year');
+const honorCheckbox = document.getElementById('honorCheckbox');
+
+function checkFormValidity() {
+    if (
+        regionInput.value.trim() !== "" &&
+        dayInput.value.trim() !== "" &&
+        monthInput.value.trim() !== "" &&
+        yearInput.value.trim() !== "" &&
+        honorCheckbox.checked
+    ) {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
+    }
+}
+
+regionInput.addEventListener('input', checkFormValidity);
+dayInput.addEventListener('input', checkFormValidity);
+monthInput.addEventListener('input', checkFormValidity);
+yearInput.addEventListener('input', checkFormValidity);
+honorCheckbox.addEventListener('change', checkFormValidity);
 </script>
 
 </body>
