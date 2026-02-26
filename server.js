@@ -2253,6 +2253,16 @@ input[readonly] {
     text-align: center;
 }
 
+/* Style pour les erreurs de date */
+.date-error {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: -8px;
+    margin-bottom: 12px;
+    display: none;
+    text-align: center;
+}
+
 /* Style pour le projet de vie (partie manuelle) */
 .life-project-container {
     margin-bottom: 20px;
@@ -2489,14 +2499,15 @@ button:not(:disabled):hover {
     <!-- Région -->
     <input type="text" placeholder="${t('region')}" id="region" required>
 
-    <!-- DATE DE NAISSANCE (PARTIE MANUELLE) -->
+    <!-- DATE DE NAISSANCE (PARTIE MANUELLE) AVEC VALIDATION -->
     <div class="date-title">📅 ${t('birthDate') || 'Date de naissance'}</div>
     
     <div class="date-row">
-        <input type="number" placeholder="${t('day') || 'Jour'}" min="1" max="31" id="day" required>
-        <input type="number" placeholder="${t('month') || 'Mois'}" min="1" max="12" id="month" required>
-        <input type="number" placeholder="${t('year') || 'Année'}" min="1900" max="2100" id="year" required>
+        <input type="number" placeholder="${t('day') || 'Jour'}" min="1" max="31" id="day" required oninput="validateDay()">
+        <input type="number" placeholder="${t('month') || 'Mois'}" min="1" max="12" id="month" required oninput="validateMonth()">
+        <input type="number" placeholder="${t('year') || 'Année'}" min="1900" max="2100" id="year" required oninput="validateYear()">
     </div>
+    <div id="dateError" class="date-error">Date invalide</div>
 
     <!-- Projet de vie (Désir d'enfant) -->
     <div class="life-project-container">
@@ -2656,6 +2667,7 @@ const regionInput = document.getElementById('region');
 const dayInput = document.getElementById('day');
 const monthInput = document.getElementById('month');
 const yearInput = document.getElementById('year');
+const dateError = document.getElementById('dateError');
 const desireChildRadios = document.getElementsByName('desireChild');
 const honorCheckbox = document.getElementById('honorCheckbox');
 const firstNameInput = document.getElementById('firstName');
@@ -2667,6 +2679,107 @@ const photoBox = document.getElementById('photoBox');
 const photoPlaceholder = document.getElementById('photoPlaceholder');
 const successMessage = document.getElementById('successMessage');
 const buttonText = document.getElementById('buttonText');
+
+// Fonction pour obtenir le nombre maximum de jours dans un mois
+function getMaxDays(month, year) {
+    if (!month || !year) return 31;
+    const m = parseInt(month);
+    const y = parseInt(year);
+    
+    // Mois de 31 jours
+    if ([1, 3, 5, 7, 8, 10, 12].includes(m)) return 31;
+    // Mois de 30 jours
+    if ([4, 6, 9, 11].includes(m)) return 30;
+    // Février
+    if (m === 2) {
+        // Année bissextile
+        if ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) return 29;
+        return 28;
+    }
+    return 31;
+}
+
+// Validation du jour
+function validateDay() {
+    const day = dayInput.value;
+    const month = monthInput.value;
+    const year = yearInput.value;
+    
+    if (day && month && year) {
+        const maxDays = getMaxDays(month, year);
+        if (parseInt(day) > maxDays) {
+            dayInput.value = maxDays;
+            dateError.style.display = 'block';
+            dateError.textContent = 'Le mois ' + month + ' ne peut pas avoir plus de ' + maxDays + ' jours';
+            setTimeout(() => dateError.style.display = 'none', 3000);
+        }
+    }
+    checkFormValidity();
+}
+
+// Validation du mois
+function validateMonth() {
+    const month = monthInput.value;
+    const day = dayInput.value;
+    const year = yearInput.value;
+    
+    if (month) {
+        const m = parseInt(month);
+        if (m < 1) monthInput.value = 1;
+        if (m > 12) monthInput.value = 12;
+    }
+    
+    if (day && month && year) {
+        const maxDays = getMaxDays(month, year);
+        if (parseInt(day) > maxDays) {
+            dayInput.value = maxDays;
+        }
+    }
+    checkFormValidity();
+}
+
+// Validation de l'année
+function validateYear() {
+    const year = yearInput.value;
+    const day = dayInput.value;
+    const month = monthInput.value;
+    
+    if (year) {
+        const y = parseInt(year);
+        if (y < 1900) yearInput.value = 1900;
+        if (y > 2100) yearInput.value = 2100;
+    }
+    
+    if (day && month && year) {
+        const maxDays = getMaxDays(month, year);
+        if (parseInt(day) > maxDays) {
+            dayInput.value = maxDays;
+        }
+    }
+    checkFormValidity();
+}
+
+// Validation de la date complète
+function isDateValid() {
+    const day = dayInput.value;
+    const month = monthInput.value;
+    const year = yearInput.value;
+    
+    if (!day || !month || !year) return false;
+    
+    const d = parseInt(day);
+    const m = parseInt(month);
+    const y = parseInt(year);
+    
+    if (isNaN(d) || isNaN(m) || isNaN(y)) return false;
+    if (m < 1 || m > 12) return false;
+    if (y < 1900 || y > 2100) return false;
+    
+    const maxDays = getMaxDays(month, year);
+    if (d < 1 || d > maxDays) return false;
+    
+    return true;
+}
 
 function extractValueFromPrefixed(input) {
     // Extrait la valeur après le préfixe "Label : "
@@ -2702,9 +2815,7 @@ function checkFormValidity() {
         genotypeValue !== "" &&
         bloodGroupValue !== "" &&
         regionInput.value.trim() !== "" && 
-        dayInput.value.trim() !== "" && 
-        monthInput.value.trim() !== "" && 
-        yearInput.value.trim() !== "" && 
+        isDateValid() && // Validation intelligente de la date
         desireChildSelected &&
         honorCheckbox.checked;
     
@@ -2714,6 +2825,7 @@ function checkFormValidity() {
 // Ajouter les écouteurs d'événements
 [regionInput, dayInput, monthInput, yearInput].forEach(input => {
     input.addEventListener('input', checkFormValidity);
+    input.addEventListener('change', checkFormValidity);
 });
 
 for (let radio of desireChildRadios) {
@@ -2756,8 +2868,8 @@ submitBtn.addEventListener('click', async function() {
         const month = monthInput.value;
         const year = yearInput.value;
         
-        if (!day || !month || !year) {
-            alert("${t('dob')} ${t('required')}");
+        if (!isDateValid()) {
+            alert("Date de naissance invalide. Veuillez vérifier le jour, le mois et l'année.");
             submitBtn.disabled = false;
             buttonText.textContent = originalText;
             return;
