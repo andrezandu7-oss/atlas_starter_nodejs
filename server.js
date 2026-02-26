@@ -2107,6 +2107,7 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
+// ============================================
 // INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2314,7 +2315,7 @@ button:not(:disabled):hover {
     to { transform: rotate(360deg); }
 }
 
-/* Message de succès (caché mais sans lien) */
+/* Message de succès (sans lien) */
 .success-message {
     background-color: #10b981;
     color: white;
@@ -2426,13 +2427,13 @@ button:not(:disabled):hover {
     
     <input type="text" placeholder="${t('region')}" id="region" required>
 
-    <!-- Titre pour la date de naissance - CORRIGÉ avec traduction -->
-    <div class="date-title">📅 ${t('birthDate')}</div>
+    <!-- Titre pour la date de naissance - CORRIGÉ avec fallback -->
+    <div class="date-title">📅 ${t('birthDate') || 'Date de naissance'}</div>
     
     <div class="date-row">
-        <input type="number" placeholder="${t('day')}" min="1" max="31" id="day" required>
-        <input type="number" placeholder="${t('month')}" min="1" max="12" id="month" required>
-        <input type="number" placeholder="${t('year')}" min="1900" max="2100" id="year" required>
+        <input type="number" placeholder="${t('day') || 'Jour'}" min="1" max="31" id="day" required>
+        <input type="number" placeholder="${t('month') || 'Mois'}" min="1" max="12" id="month" required>
+        <input type="number" placeholder="${t('year') || 'Année'}" min="1900" max="2100" id="year" required>
     </div>
 
     <div class="checkbox-container">
@@ -2444,7 +2445,7 @@ button:not(:disabled):hover {
         <span id="buttonText">${t('createProfile')}</span>
     </button>
 
-    <!-- Message de succès SANS lien (redirection automatique seulement) -->
+    <!-- Message de succès SANS lien -->
     <div id="successMessage" class="success-message">
         ✅ ${t('successMessage') || 'Profil validé avec succès !'}
     </div>
@@ -2684,14 +2685,10 @@ submitBtn.addEventListener('click', async function() {
         
         setTimeout(() => {
             if (data.success) {
-                // Afficher le message de succès (sans lien)
                 successMessage.style.display = 'block';
-                
-                // Redirection automatique après 2 secondes (SEULEMENT ça)
                 setTimeout(() => {
                     window.location.href = '/profile';
                 }, 2000);
-                
             } else {
                 alert("Erreur lors de l'inscription: " + (data.error || "Inconnue"));
                 submitBtn.disabled = false;
