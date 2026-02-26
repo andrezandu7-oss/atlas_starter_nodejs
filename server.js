@@ -2109,6 +2109,7 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 // ============================================
 // ============================================
+// ============================================
 // INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2179,14 +2180,21 @@ input[type="text"], input[type="number"], select {
     transition: background-color 0.5s ease;
 }
 
-/* Style pour les champs en lecture seule */
+/* Style pour les champs en lecture seule (partie automatique) */
 input[readonly] {
     background-color: #f3f4f6;
     cursor: not-allowed;
     opacity: 0.9;
 }
 
-/* Photo box avec aperçu */
+select[readonly] {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+/* Photo box avec aperçu (partie manuelle) */
 .photo-box {
     display: flex;
     align-items: center;
@@ -2229,7 +2237,7 @@ input[readonly] {
     opacity: 1;
 }
 
-/* Style pour le titre de la date */
+/* Style pour le titre de la date (partie manuelle) */
 .date-title {
     font-size: 14px;
     font-weight: 600;
@@ -2242,7 +2250,7 @@ input[readonly] {
     margin-top: 0;
 }
 
-/* Date row */
+/* Date row (partie manuelle) */
 .date-row {
     display: flex;
     gap: 8px;
@@ -2254,7 +2262,7 @@ input[readonly] {
     text-align: center;
 }
 
-/* Style pour le projet de vie */
+/* Style pour le projet de vie (partie manuelle) */
 .life-project-container {
     margin-bottom: 20px;
 }
@@ -2291,6 +2299,7 @@ input[readonly] {
     cursor: pointer;
 }
 
+/* Checkbox serment */
 .checkbox-container {
     display: flex;
     align-items: flex-start;
@@ -2322,6 +2331,7 @@ button:not(:disabled):hover {
     background-color: #be185d;
 }
 
+/* Sections */
 .section-title {
     font-weight: bold;
     font-size: 16px;
@@ -2337,7 +2347,7 @@ button:not(:disabled):hover {
     margin-bottom: 20px;
 }
 
-/* Loader pour la validation */
+/* Loader */
 .loader {
     display: inline-block;
     width: 20px;
@@ -2354,7 +2364,7 @@ button:not(:disabled):hover {
     to { transform: rotate(360deg); }
 }
 
-/* Message de succès (sans lien) */
+/* Message de succès */
 .success-message {
     background-color: #10b981;
     color: white;
@@ -2366,7 +2376,7 @@ button:not(:disabled):hover {
     font-weight: bold;
 }
 
-/* Sélecteur de langue compact */
+/* Sélecteur de langue */
 .language-selector-compact {
     position: relative;
     margin: 10px 0 20px;
@@ -2423,6 +2433,14 @@ button:not(:disabled):hover {
 .dropdown-item:hover {
     background: #f8f9fa;
 }
+
+/* Séparateur visuel entre les deux parties */
+.partition-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff416c, transparent);
+    margin: 25px 0 15px 0;
+    opacity: 0.3;
+}
 </style>
 </head>
 <body>
@@ -2450,13 +2468,32 @@ button:not(:disabled):hover {
         <div id="qr-success">${t('qrSuccess') || 'QR scanné !'}</div>
     </div>
 
-    <!-- Form Fields (lecture seule) -->
+    <!-- ============================================ -->
+    <!-- PREMIÈRE PARTIE : Remplissage automatique QR -->
+    <!-- ============================================ -->
+    <div style="margin-bottom: 10px;">
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ DONNÉES AUTOMATIQUES (CERTIFICAT)</span>
+    </div>
+    
     <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
     <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
+    
+    <!-- Genre -->
+    <select id="gender" readonly>
+        <option value="">${t('gender')}</option>
+        <option value="Homme">${t('male')}</option>
+        <option value="Femme">${t('female')}</option>
+    </select>
+    
     <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
     <input type="text" placeholder="${t('bloodGroup')}" id="bloodGroup" readonly>
 
-    <!-- Phrase encourageante -->
+    <!-- Séparateur visuel -->
+    <div class="partition-line"></div>
+
+    <!-- ============================================ -->
+    <!-- DEUXIÈME PARTIE : Saisie manuelle -->
+    <!-- ============================================ -->
     <div class="section-title">${t('sectionTitle') || 'Aidez vos partenaires à en savoir un peu plus sur vous'}</div>
     <div class="sub-text">${t('subText') || 'Veuillez remplir les cases ci-dessous :'}</div>
 
@@ -2468,7 +2505,7 @@ button:not(:disabled):hover {
     <!-- Région -->
     <input type="text" placeholder="${t('region')}" id="region" required>
 
-    <!-- Date de naissance -->
+    <!-- DATE DE NAISSANCE (PARTIE MANUELLE) -->
     <div class="date-title">📅 ${t('birthDate') || 'Date de naissance'}</div>
     
     <div class="date-row">
@@ -2477,7 +2514,7 @@ button:not(:disabled):hover {
         <input type="number" placeholder="${t('year') || 'Année'}" min="1900" max="2100" id="year" required>
     </div>
 
-    <!-- PROJET DE VIE (Désir d'enfant) - NOUVEAU -->
+    <!-- Projet de vie (Désir d'enfant) -->
     <div class="life-project-container">
         <div class="life-project-title">👶 ${t('desireChild') || 'Désir d\'enfant ?'}</div>
         <div class="life-project-options">
@@ -2565,8 +2602,9 @@ async function startRearCamera() {
             const data = decodedText.trim().split('|');
             console.log("Données scannées:", data);
             
-            if(data.length >= 4) {
-                const fields = ['firstName', 'lastName', 'genotype', 'bloodGroup'];
+            // FORMAT: Prénom|Nom|Genre|Génotype|Groupe sanguin
+            if(data.length >= 5) {
+                const fields = ['firstName', 'lastName', 'gender', 'genotype', 'bloodGroup'];
                 fields.forEach((id, i) => {
                     const el = document.getElementById(id);
                     if (el && data[i]) {
@@ -2577,23 +2615,6 @@ async function startRearCamera() {
                         }, 1000);
                     }
                 });
-                
-                if (data.length >= 7) {
-                    const regionEl = document.getElementById('region');
-                    if (regionEl && data[4]) {
-                        regionEl.value = data[4].trim();
-                    }
-                    
-                    if (data.length >= 7) {
-                        const dayEl = document.getElementById('day');
-                        const monthEl = document.getElementById('month');
-                        const yearEl = document.getElementById('year');
-                        
-                        if (dayEl && data[5]) dayEl.value = data[5].trim();
-                        if (monthEl && data[6]) monthEl.value = data[6].trim();
-                        if (yearEl && data[7]) yearEl.value = data[7].trim();
-                    }
-                }
             }
 
             const readerDiv = document.getElementById('reader');
@@ -2646,6 +2667,7 @@ const desireChildRadios = document.getElementsByName('desireChild');
 const honorCheckbox = document.getElementById('honorCheckbox');
 const firstNameInput = document.getElementById('firstName');
 const lastNameInput = document.getElementById('lastName');
+const genderInput = document.getElementById('gender');
 const genotypeInput = document.getElementById('genotype');
 const bloodGroupInput = document.getElementById('bloodGroup');
 const photoBox = document.getElementById('photoBox');
@@ -2666,6 +2688,7 @@ function checkFormValidity() {
     const allFieldsFilled = 
         firstNameInput.value.trim() !== "" &&
         lastNameInput.value.trim() !== "" &&
+        genderInput.value !== "" &&
         genotypeInput.value.trim() !== "" &&
         bloodGroupInput.value.trim() !== "" &&
         regionInput.value.trim() !== "" && 
@@ -2744,12 +2767,12 @@ submitBtn.addEventListener('click', async function() {
         const userData = {
             firstName: firstNameInput.value,
             lastName: lastNameInput.value,
+            gender: genderInput.value,
             genotype: genotypeInput.value,
             bloodGroup: bloodGroupInput.value,
             region: regionInput.value,
             residence: regionInput.value,
             dob: dob,
-            gender: '', // À remplir si ajouté plus tard
             desireChild: desireChildValue,
             photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : "",
             language: '${req.lang}',
