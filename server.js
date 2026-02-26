@@ -2107,9 +2107,6 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
-// ============================================
-// ============================================
-// ============================================
 // INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2185,13 +2182,6 @@ input[readonly] {
     background-color: #f3f4f6;
     cursor: not-allowed;
     opacity: 0.9;
-}
-
-select[readonly] {
-    background-color: #f3f4f6;
-    cursor: not-allowed;
-    opacity: 0.9;
-    pointer-events: none;
 }
 
 /* Photo box avec aperçu (partie manuelle) */
@@ -2478,12 +2468,8 @@ button:not(:disabled):hover {
     <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
     <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
     
-    <!-- Genre -->
-    <select id="gender" readonly>
-        <option value="">${t('gender')}</option>
-        <option value="Homme">${t('male')}</option>
-        <option value="Femme">${t('female')}</option>
-    </select>
+    <!-- Genre - CORRIGÉ : input text readonly au lieu de select -->
+    <input type="text" placeholder="${t('gender')}" id="gender" readonly>
     
     <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
     <input type="text" placeholder="${t('bloodGroup')}" id="bloodGroup" readonly>
@@ -2688,7 +2674,7 @@ function checkFormValidity() {
     const allFieldsFilled = 
         firstNameInput.value.trim() !== "" &&
         lastNameInput.value.trim() !== "" &&
-        genderInput.value !== "" &&
+        genderInput.value.trim() !== "" &&  // Maintenant fonctionne avec input text
         genotypeInput.value.trim() !== "" &&
         bloodGroupInput.value.trim() !== "" &&
         regionInput.value.trim() !== "" && 
