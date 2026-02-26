@@ -2106,6 +2106,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
+// ============================================
 // INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2259,7 +2260,7 @@ input[readonly] {
     margin-bottom: 20px;
 }
 
-/* Bouton final - MÊME STYLE QUE L'INSCRIPTION MANUELLE */
+/* Bouton final */
 button {
     width: 100%;
     padding: 16px;
@@ -2296,7 +2297,7 @@ button:not(:disabled):hover {
     margin-bottom: 20px;
 }
 
-/* Loader pour la validation - IDEM MANUELLE */
+/* Loader pour la validation */
 .loader {
     display: inline-block;
     width: 20px;
@@ -2313,7 +2314,7 @@ button:not(:disabled):hover {
     to { transform: rotate(360deg); }
 }
 
-/* Message de succès - IDEM MANUELLE */
+/* Message de succès (caché mais sans lien) */
 .success-message {
     background-color: #10b981;
     color: white;
@@ -2322,15 +2323,10 @@ button:not(:disabled):hover {
     text-align: center;
     margin-top: 16px;
     display: none;
-}
-
-.success-message a {
-    color: white;
     font-weight: bold;
-    text-decoration: underline;
 }
 
-/* Sélecteur de langue compact (comme sur les autres pages) */
+/* Sélecteur de langue compact */
 .language-selector-compact {
     position: relative;
     margin: 10px 0 20px;
@@ -2392,7 +2388,7 @@ button:not(:disabled):hover {
 <body>
 <div class="container">
 
-    <!-- Sélecteur de langue (comme sur les autres pages) -->
+    <!-- Sélecteur de langue -->
     <div class="language-selector-compact">
         <button onclick="toggleLanguageDropdown()" class="lang-btn-compact">
             <span>🌐</span>
@@ -2414,7 +2410,7 @@ button:not(:disabled):hover {
         <div id="qr-success">${t('qrSuccess') || 'QR scanné !'}</div>
     </div>
 
-    <!-- Form Fields (deviennent readonly après scan) -->
+    <!-- Form Fields -->
     <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
     <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
     <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
@@ -2423,20 +2419,20 @@ button:not(:disabled):hover {
     <div class="section-title">${t('sectionTitle') || 'Aidez vos partenaires à en savoir un peu plus sur vous'}</div>
     <div class="sub-text">${t('subText') || 'Veuillez remplir les cases ci-dessous :'}</div>
 
-    <!-- Photo box avec aperçu -->
+    <!-- Photo box -->
     <div class="photo-box" id="photoBox">
         <span id="photoPlaceholder">${t('photoPlaceholder') || 'Ajouter photo'}</span>
     </div>
     
     <input type="text" placeholder="${t('region')}" id="region" required>
 
-    <!-- Titre pour la date de naissance -->
-    <div class="date-title">📅 ${t('birthDate') || 'Date de naissance'}</div>
+    <!-- Titre pour la date de naissance - CORRIGÉ avec traduction -->
+    <div class="date-title">📅 ${t('birthDate')}</div>
     
     <div class="date-row">
-        <input type="number" placeholder="${t('day') || 'j'}" min="1" max="31" id="day" required>
-        <input type="number" placeholder="${t('month') || 'm'}" min="1" max="12" id="month" required>
-        <input type="number" placeholder="${t('year') || 'a'}" min="1900" max="2100" id="year" required>
+        <input type="number" placeholder="${t('day')}" min="1" max="31" id="day" required>
+        <input type="number" placeholder="${t('month')}" min="1" max="12" id="month" required>
+        <input type="number" placeholder="${t('year')}" min="1900" max="2100" id="year" required>
     </div>
 
     <div class="checkbox-container">
@@ -2448,10 +2444,9 @@ button:not(:disabled):hover {
         <span id="buttonText">${t('createProfile')}</span>
     </button>
 
-    <!-- Message de succès (caché par défaut) -->
+    <!-- Message de succès SANS lien (redirection automatique seulement) -->
     <div id="successMessage" class="success-message">
-        ✅ ${t('successMessage') || 'Profil validé avec succès !'} 
-        <a href="/profile" id="profileLink">${t('accessProfile')}</a>
+        ✅ ${t('successMessage') || 'Profil validé avec succès !'}
     </div>
 
 </div>
@@ -2491,7 +2486,6 @@ async function startRearCamera() {
             return;
         }
         
-        // Priorité à la caméra arrière
         let rearCamera = devices.find(d => 
             d.label.toLowerCase().includes("back") || 
             d.label.toLowerCase().includes("rear") || 
@@ -2504,22 +2498,17 @@ async function startRearCamera() {
         const qrCodeSuccessCallback = (decodedText, decodedResult) => {
             if (hasScanned) return;
             
-            // Annuler le timeout précédent s'il existe
             if (scanTimeout) {
                 clearTimeout(scanTimeout);
             }
             
             hasScanned = true;
-            
-            // Arrêter le scan après une lecture réussie
             html5QrCode.stop().catch(err => console.log(err));
             
-            // Traiter les données du QR code
             const data = decodedText.trim().split('|');
             console.log("Données scannées:", data);
             
             if(data.length >= 4) {
-                // Remplir les 4 premiers champs avec les données du QR code
                 const fields = ['firstName', 'lastName', 'genotype', 'bloodGroup'];
                 fields.forEach((id, i) => {
                     const el = document.getElementById(id);
@@ -2527,14 +2516,12 @@ async function startRearCamera() {
                         el.value = data[i].trim();
                         el.style.backgroundColor = "#d1fae5";
                         setTimeout(() => { 
-                            el.style.backgroundColor = "#f3f4f6"; // Gris pour readonly
+                            el.style.backgroundColor = "#f3f4f6";
                         }, 1000);
                     }
                 });
                 
-                // Si le QR code contient plus d'informations, remplir automatiquement
                 if (data.length >= 7) {
-                    // Format attendu: Prénom|Nom|Génotype|Groupe|Région|Jour|Mois|Année
                     const regionEl = document.getElementById('region');
                     if (regionEl && data[4]) {
                         regionEl.value = data[4].trim();
@@ -2552,33 +2539,27 @@ async function startRearCamera() {
                 }
             }
 
-            // Animation de succès
             const readerDiv = document.getElementById('reader');
             const successDiv = document.getElementById('qr-success');
             readerDiv.style.border = "3px solid #10b981";
             successDiv.style.display = "block";
             
-            // Réinitialiser après 3 secondes pour permettre un nouveau scan
             scanTimeout = setTimeout(() => { 
                 readerDiv.style.border = "3px solid transparent"; 
                 successDiv.style.display = "none";
                 hasScanned = false;
-                // Redémarrer la caméra
                 startRearCamera();
             }, 3000);
             
-            // Vérifier la validité du formulaire après remplissage
             checkFormValidity();
         };
 
         const qrCodeErrorCallback = (error) => {
-            // Ignorer les erreurs de lecture (s'affiche quand aucun QR n'est détecté)
             if (!error.includes("NotFoundException")) {
                 console.log("Erreur de scan:", error);
             }
         };
 
-        // Configuration du scanner
         const config = {
             fps: 10,
             qrbox: { width: 250, height: 250 },
@@ -2597,10 +2578,8 @@ async function startRearCamera() {
     }
 }
 
-// Démarrer la caméra au chargement de la page
 startRearCamera();
 
-// Button enable logic
 const submitBtn = document.getElementById('submitBtn');
 const regionInput = document.getElementById('region');
 const dayInput = document.getElementById('day');
@@ -2617,7 +2596,6 @@ const successMessage = document.getElementById('successMessage');
 const buttonText = document.getElementById('buttonText');
 
 function checkFormValidity() {
-    // Vérifier que tous les champs sont remplis (comme dans l'inscription manuelle)
     const allFieldsFilled = 
         firstNameInput.value.trim() !== "" &&
         lastNameInput.value.trim() !== "" &&
@@ -2632,16 +2610,13 @@ function checkFormValidity() {
     submitBtn.disabled = !allFieldsFilled;
 }
 
-// Ajouter les écouteurs d'événements pour les champs modifiables uniquement
 [regionInput, dayInput, monthInput, yearInput].forEach(input => {
     input.addEventListener('input', checkFormValidity);
 });
 honorCheckbox.addEventListener('change', checkFormValidity);
 
-// Vérification initiale
 checkFormValidity();
 
-// Photo box avec aperçu
 photoBox.addEventListener('click', ()=>{
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -2652,7 +2627,6 @@ photoBox.addEventListener('click', ()=>{
             const reader = new FileReader();
             
             reader.onload = function(event) {
-                // Afficher l'aperçu de l'image
                 photoBox.style.backgroundImage = "url('" + event.target.result + "')";
                 photoBox.classList.add('has-image');
                 photoPlaceholder.style.display = 'none';
@@ -2664,15 +2638,12 @@ photoBox.addEventListener('click', ()=>{
     fileInput.click();
 });
 
-// Validation du profil - MÊME COMMANDE QUE L'INSCRIPTION MANUELLE
 submitBtn.addEventListener('click', async function() {
-    // Désactiver le bouton pendant la validation
     submitBtn.disabled = true;
     const originalText = buttonText.textContent;
     buttonText.innerHTML = '<span class="loader"></span> Validation...';
     
     try {
-        // Récupérer les valeurs des champs de date
         const day = dayInput.value;
         const month = monthInput.value;
         const year = yearInput.value;
@@ -2686,27 +2657,23 @@ submitBtn.addEventListener('click', async function() {
         
         const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
         
-        // Préparer les données du formulaire (COMME DANS L'INSCRIPTION MANUELLE)
         const userData = {
             firstName: firstNameInput.value,
             lastName: lastNameInput.value,
             genotype: genotypeInput.value,
             bloodGroup: bloodGroupInput.value,
             region: regionInput.value,
-            residence: regionInput.value, // Pour correspondre au modèle
+            residence: regionInput.value,
             dob: dob,
-            gender: '', // Sera peut-être ajouté plus tard
-            desireChild: '', // Sera peut-être ajouté plus tard
+            gender: '',
+            desireChild: '',
             photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : "",
             language: '${req.lang}',
             isPublic: true,
-            qrVerified: true, // Marqué comme vérifié par QR
+            qrVerified: true,
             verificationBadge: 'lab'
         };
         
-        console.log("Données du profil à sauvegarder:", userData);
-        
-        // Appel API (COMME DANS L'INSCRIPTION MANUELLE)
         const res = await fetch('/api/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -2717,19 +2684,14 @@ submitBtn.addEventListener('click', async function() {
         
         setTimeout(() => {
             if (data.success) {
-                // Afficher le message de succès
+                // Afficher le message de succès (sans lien)
                 successMessage.style.display = 'block';
                 
-                // Redirection automatique après 2 secondes
+                // Redirection automatique après 2 secondes (SEULEMENT ça)
                 setTimeout(() => {
                     window.location.href = '/profile';
                 }, 2000);
                 
-                // Redirection au clic sur le lien
-                document.getElementById('profileLink').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.location.href = '/profile';
-                });
             } else {
                 alert("Erreur lors de l'inscription: " + (data.error || "Inconnue"));
                 submitBtn.disabled = false;
@@ -2745,7 +2707,6 @@ submitBtn.addEventListener('click', async function() {
     }
 });
 
-// Fonction utilitaire pour convertir un fichier en base64
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -2755,7 +2716,6 @@ function fileToBase64(file) {
     });
 }
 
-// Nettoyer les ressources quand on quitte la page
 window.addEventListener('beforeunload', () => {
     if (html5QrCode && html5QrCode.isScanning) {
         html5QrCode.stop().catch(err => console.log(err));
