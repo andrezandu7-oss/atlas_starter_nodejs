@@ -2105,12 +2105,15 @@ app.get('/signup-choice', (req, res) => {
 </html>`);
 });
 
-// ============================================ 
-// INSCRIPTION PAR CODE QR 
+// ============================================
+// INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
+// ============================================
 app.get('/signup-qr', (req, res) => {
+    const t = req.t; // Utilisation de ton système de traduction existant
+    
     res.send(`
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${req.lang}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2256,7 +2259,7 @@ input[readonly] {
     margin-bottom: 20px;
 }
 
-/* Bouton final */
+/* Bouton final - MÊME STYLE QUE L'INSCRIPTION MANUELLE */
 button {
     width: 100%;
     padding: 16px;
@@ -2293,7 +2296,7 @@ button:not(:disabled):hover {
     margin-bottom: 20px;
 }
 
-/* Loader pour la validation */
+/* Loader pour la validation - IDEM MANUELLE */
 .loader {
     display: inline-block;
     width: 20px;
@@ -2310,7 +2313,7 @@ button:not(:disabled):hover {
     to { transform: rotate(360deg); }
 }
 
-/* Message de succès */
+/* Message de succès - IDEM MANUELLE */
 .success-message {
     background-color: #10b981;
     color: white;
@@ -2326,59 +2329,155 @@ button:not(:disabled):hover {
     font-weight: bold;
     text-decoration: underline;
 }
+
+/* Sélecteur de langue compact (comme sur les autres pages) */
+.language-selector-compact {
+    position: relative;
+    margin: 10px 0 20px;
+    text-align: center;
+}
+
+.lang-btn-compact {
+    background: white;
+    border: 2px solid #ff416c;
+    color: #1a2a44;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lang-btn-compact:hover {
+    background: #ff416c;
+    color: white;
+}
+
+.language-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    min-width: 180px;
+    margin-top: 5px;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #1a2a44;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background: #f8f9fa;
+}
 </style>
 </head>
 <body>
 <div class="container">
 
+    <!-- Sélecteur de langue (comme sur les autres pages) -->
+    <div class="language-selector-compact">
+        <button onclick="toggleLanguageDropdown()" class="lang-btn-compact">
+            <span>🌐</span>
+            <span id="selected-language">${t('french')}</span>
+            <span style="font-size:0.8rem;">▼</span>
+        </button>
+        <div id="language-dropdown" class="language-dropdown">
+            <a href="/lang/fr" class="dropdown-item">🇫🇷 ${t('french')}</a>
+            <a href="/lang/en" class="dropdown-item">🇬🇧 ${t('english')}</a>
+            <a href="/lang/pt" class="dropdown-item">🇵🇹 ${t('portuguese')}</a>
+            <a href="/lang/es" class="dropdown-item">🇪🇸 ${t('spanish')}</a>
+            <a href="/lang/ar" class="dropdown-item">🇸🇦 ${t('arabic')}</a>
+            <a href="/lang/zh" class="dropdown-item">🇨🇳 ${t('chinese')}</a>
+        </div>
+    </div>
+
     <!-- QR Scanner -->
     <div id="reader" style="position: relative;">
-        <div id="qr-success">QR scanné !</div>
+        <div id="qr-success">${t('qrSuccess') || 'QR scanné !'}</div>
     </div>
 
     <!-- Form Fields (deviennent readonly après scan) -->
-    <input type="text" placeholder="Prénom" id="firstName" readonly>
-    <input type="text" placeholder="Nom" id="lastName" readonly>
-    <input type="text" placeholder="Génotype" id="genotype" readonly>
-    <input type="text" placeholder="Groupe sanguin" id="bloodGroup" readonly>
+    <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
+    <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
+    <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
+    <input type="text" placeholder="${t('bloodGroup')}" id="bloodGroup" readonly>
 
-    <div class="section-title">Aidez vos partenaires à en savoir un peu plus sur vous</div>
-    <div class="sub-text">Veuillez remplir les cases ci-dessous :</div>
+    <div class="section-title">${t('sectionTitle') || 'Aidez vos partenaires à en savoir un peu plus sur vous'}</div>
+    <div class="sub-text">${t('subText') || 'Veuillez remplir les cases ci-dessous :'}</div>
 
     <!-- Photo box avec aperçu -->
     <div class="photo-box" id="photoBox">
-        <span id="photoPlaceholder">Ajouter photo</span>
+        <span id="photoPlaceholder">${t('photoPlaceholder') || 'Ajouter photo'}</span>
     </div>
     
-    <input type="text" placeholder="Région actuelle" id="region" required>
+    <input type="text" placeholder="${t('region')}" id="region" required>
 
     <!-- Titre pour la date de naissance -->
-    <div class="date-title">📅 Date de naissance</div>
+    <div class="date-title">📅 ${t('birthDate') || 'Date de naissance'}</div>
     
     <div class="date-row">
-        <input type="number" placeholder="j" min="1" max="31" id="day" required>
-        <input type="number" placeholder="m" min="1" max="12" id="month" required>
-        <input type="number" placeholder="a" min="1900" max="2100" id="year" required>
+        <input type="number" placeholder="${t('day') || 'j'}" min="1" max="31" id="day" required>
+        <input type="number" placeholder="${t('month') || 'm'}" min="1" max="12" id="month" required>
+        <input type="number" placeholder="${t('year') || 'a'}" min="1900" max="2100" id="year" required>
     </div>
 
     <div class="checkbox-container">
         <input type="checkbox" id="honorCheckbox" required>
-        <label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
+        <label>${t('honorText')}</label>
     </div>
 
     <button id="submitBtn" disabled>
-        <span id="buttonText">Valider le profil</span>
+        <span id="buttonText">${t('createProfile')}</span>
     </button>
 
     <!-- Message de succès (caché par défaut) -->
     <div id="successMessage" class="success-message">
-        ✅ Profil validé avec succès ! 
-        <a href="/profile" id="profileLink">Voir mon profil</a>
+        ✅ ${t('successMessage') || 'Profil validé avec succès !'} 
+        <a href="/profile" id="profileLink">${t('accessProfile')}</a>
     </div>
 
 </div>
 
 <script>
+// Fonction pour le sélecteur de langue
+function toggleLanguageDropdown() {
+    const dropdown = document.getElementById('language-dropdown');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('language-dropdown');
+    const button = event.target.closest('.lang-btn-compact');
+    if (!button && dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+    }
+});
+
+document.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        const langText = this.innerText.replace(/[🇫🇷🇬🇧🇵🇹🇪🇸🇸🇦🇨🇳]/g, '').trim();
+        document.getElementById('selected-language').innerText = langText;
+    });
+});
+
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
 let scanTimeout = null;
@@ -2518,7 +2617,7 @@ const successMessage = document.getElementById('successMessage');
 const buttonText = document.getElementById('buttonText');
 
 function checkFormValidity() {
-    // Vérifier que tous les champs sont remplis (photo optionnelle mais recommandée)
+    // Vérifier que tous les champs sont remplis (comme dans l'inscription manuelle)
     const allFieldsFilled = 
         firstNameInput.value.trim() !== "" &&
         lastNameInput.value.trim() !== "" &&
@@ -2530,11 +2629,7 @@ function checkFormValidity() {
         yearInput.value.trim() !== "" && 
         honorCheckbox.checked;
     
-    if(allFieldsFilled) {
-        submitBtn.disabled = false;
-    } else {
-        submitBtn.disabled = true;
-    }
+    submitBtn.disabled = !allFieldsFilled;
 }
 
 // Ajouter les écouteurs d'événements pour les champs modifiables uniquement
@@ -2558,7 +2653,7 @@ photoBox.addEventListener('click', ()=>{
             
             reader.onload = function(event) {
                 // Afficher l'aperçu de l'image
-                photoBox.style.backgroundImage = \`url('\${event.target.result}')\`;
+                photoBox.style.backgroundImage = "url('" + event.target.result + "')";
                 photoBox.classList.add('has-image');
                 photoPlaceholder.style.display = 'none';
             };
@@ -2569,7 +2664,7 @@ photoBox.addEventListener('click', ()=>{
     fileInput.click();
 });
 
-// Validation du profil
+// Validation du profil - MÊME COMMANDE QUE L'INSCRIPTION MANUELLE
 submitBtn.addEventListener('click', async function() {
     // Désactiver le bouton pendant la validation
     submitBtn.disabled = true;
@@ -2577,45 +2672,74 @@ submitBtn.addEventListener('click', async function() {
     buttonText.innerHTML = '<span class="loader"></span> Validation...';
     
     try {
-        // Préparer les données du formulaire
-        const formData = {
+        // Récupérer les valeurs des champs de date
+        const day = dayInput.value;
+        const month = monthInput.value;
+        const year = yearInput.value;
+        
+        if (!day || !month || !year) {
+            alert("${t('dob')} ${t('required')}");
+            submitBtn.disabled = false;
+            buttonText.textContent = originalText;
+            return;
+        }
+        
+        const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+        
+        // Préparer les données du formulaire (COMME DANS L'INSCRIPTION MANUELLE)
+        const userData = {
             firstName: firstNameInput.value,
             lastName: lastNameInput.value,
             genotype: genotypeInput.value,
             bloodGroup: bloodGroupInput.value,
             region: regionInput.value,
-            birthDate: {
-                day: dayInput.value,
-                month: monthInput.value,
-                year: yearInput.value
-            },
-            honorConfirmed: honorCheckbox.checked,
-            photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : null
+            residence: regionInput.value, // Pour correspondre au modèle
+            dob: dob,
+            gender: '', // Sera peut-être ajouté plus tard
+            desireChild: '', // Sera peut-être ajouté plus tard
+            photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : "",
+            language: '${req.lang}',
+            isPublic: true,
+            qrVerified: true, // Marqué comme vérifié par QR
+            verificationBadge: 'lab'
         };
         
-        // Simuler un appel API (à remplacer par votre vraie API)
-        console.log("Données du profil à sauvegarder:", formData);
+        console.log("Données du profil à sauvegarder:", userData);
         
-        // Simulation d'une requête API
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Afficher le message de succès
-        successMessage.style.display = 'block';
-        
-        // Option 1: Redirection automatique après 2 secondes
-        setTimeout(() => {
-            window.location.href = '/profile';
-        }, 2000);
-        
-        // Option 2: Redirection au clic sur le lien
-        document.getElementById('profileLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = '/profile';
+        // Appel API (COMME DANS L'INSCRIPTION MANUELLE)
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(userData)
         });
+        
+        const data = await res.json();
+        
+        setTimeout(() => {
+            if (data.success) {
+                // Afficher le message de succès
+                successMessage.style.display = 'block';
+                
+                // Redirection automatique après 2 secondes
+                setTimeout(() => {
+                    window.location.href = '/profile';
+                }, 2000);
+                
+                // Redirection au clic sur le lien
+                document.getElementById('profileLink').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = '/profile';
+                });
+            } else {
+                alert("Erreur lors de l'inscription: " + (data.error || "Inconnue"));
+                submitBtn.disabled = false;
+                buttonText.textContent = originalText;
+            }
+        }, 1500);
         
     } catch (error) {
         console.error("Erreur lors de la validation:", error);
-        alert("Une erreur est survenue. Veuillez réessayer.");
+        alert("Erreur de connexion au serveur");
         submitBtn.disabled = false;
         buttonText.textContent = originalText;
     }
