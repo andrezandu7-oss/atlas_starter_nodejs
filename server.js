@@ -2108,6 +2108,7 @@ app.get('/signup-choice', (req, res) => {
 // ============================================
 // ============================================
 // ============================================
+// ============================================
 // INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2253,6 +2254,43 @@ input[readonly] {
     text-align: center;
 }
 
+/* Style pour le projet de vie */
+.life-project-container {
+    margin-bottom: 20px;
+}
+
+.life-project-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.life-project-options {
+    display: flex;
+    gap: 15px;
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+}
+
+.life-project-options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    color: #1a2a44;
+}
+
+.life-project-options input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #db2777;
+    cursor: pointer;
+}
+
 .checkbox-container {
     display: flex;
     align-items: flex-start;
@@ -2289,6 +2327,7 @@ button:not(:disabled):hover {
     font-size: 16px;
     text-align: center;
     margin-bottom: 6px;
+    color: #1a2a44;
 }
 
 .sub-text {
@@ -2411,12 +2450,13 @@ button:not(:disabled):hover {
         <div id="qr-success">${t('qrSuccess') || 'QR scanné !'}</div>
     </div>
 
-    <!-- Form Fields -->
+    <!-- Form Fields (lecture seule) -->
     <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
     <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
     <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
     <input type="text" placeholder="${t('bloodGroup')}" id="bloodGroup" readonly>
 
+    <!-- Phrase encourageante -->
     <div class="section-title">${t('sectionTitle') || 'Aidez vos partenaires à en savoir un peu plus sur vous'}</div>
     <div class="sub-text">${t('subText') || 'Veuillez remplir les cases ci-dessous :'}</div>
 
@@ -2425,9 +2465,10 @@ button:not(:disabled):hover {
         <span id="photoPlaceholder">${t('photoPlaceholder') || 'Ajouter photo'}</span>
     </div>
     
+    <!-- Région -->
     <input type="text" placeholder="${t('region')}" id="region" required>
 
-    <!-- Titre pour la date de naissance - CORRIGÉ avec fallback -->
+    <!-- Date de naissance -->
     <div class="date-title">📅 ${t('birthDate') || 'Date de naissance'}</div>
     
     <div class="date-row">
@@ -2436,16 +2477,31 @@ button:not(:disabled):hover {
         <input type="number" placeholder="${t('year') || 'Année'}" min="1900" max="2100" id="year" required>
     </div>
 
+    <!-- PROJET DE VIE (Désir d'enfant) - NOUVEAU -->
+    <div class="life-project-container">
+        <div class="life-project-title">👶 ${t('desireChild') || 'Désir d\'enfant ?'}</div>
+        <div class="life-project-options">
+            <label>
+                <input type="radio" name="desireChild" value="Oui" required> ${t('yes') || 'Oui'}
+            </label>
+            <label>
+                <input type="radio" name="desireChild" value="Non" required> ${t('no') || 'Non'}
+            </label>
+        </div>
+    </div>
+
+    <!-- Serment -->
     <div class="checkbox-container">
         <input type="checkbox" id="honorCheckbox" required>
         <label>${t('honorText')}</label>
     </div>
 
+    <!-- Bouton de validation -->
     <button id="submitBtn" disabled>
         <span id="buttonText">${t('createProfile')}</span>
     </button>
 
-    <!-- Message de succès SANS lien -->
+    <!-- Message de succès -->
     <div id="successMessage" class="success-message">
         ✅ ${t('successMessage') || 'Profil validé avec succès !'}
     </div>
@@ -2586,6 +2642,7 @@ const regionInput = document.getElementById('region');
 const dayInput = document.getElementById('day');
 const monthInput = document.getElementById('month');
 const yearInput = document.getElementById('year');
+const desireChildRadios = document.getElementsByName('desireChild');
 const honorCheckbox = document.getElementById('honorCheckbox');
 const firstNameInput = document.getElementById('firstName');
 const lastNameInput = document.getElementById('lastName');
@@ -2597,6 +2654,15 @@ const successMessage = document.getElementById('successMessage');
 const buttonText = document.getElementById('buttonText');
 
 function checkFormValidity() {
+    // Vérifier si un radio "désir d'enfant" est sélectionné
+    let desireChildSelected = false;
+    for (let radio of desireChildRadios) {
+        if (radio.checked) {
+            desireChildSelected = true;
+            break;
+        }
+    }
+    
     const allFieldsFilled = 
         firstNameInput.value.trim() !== "" &&
         lastNameInput.value.trim() !== "" &&
@@ -2606,16 +2672,24 @@ function checkFormValidity() {
         dayInput.value.trim() !== "" && 
         monthInput.value.trim() !== "" && 
         yearInput.value.trim() !== "" && 
+        desireChildSelected &&
         honorCheckbox.checked;
     
     submitBtn.disabled = !allFieldsFilled;
 }
 
+// Ajouter les écouteurs d'événements
 [regionInput, dayInput, monthInput, yearInput].forEach(input => {
     input.addEventListener('input', checkFormValidity);
 });
+
+for (let radio of desireChildRadios) {
+    radio.addEventListener('change', checkFormValidity);
+}
+
 honorCheckbox.addEventListener('change', checkFormValidity);
 
+// Vérification initiale
 checkFormValidity();
 
 photoBox.addEventListener('click', ()=>{
@@ -2656,6 +2730,15 @@ submitBtn.addEventListener('click', async function() {
             return;
         }
         
+        // Récupérer la valeur du désir d'enfant
+        let desireChildValue = '';
+        for (let radio of desireChildRadios) {
+            if (radio.checked) {
+                desireChildValue = radio.value;
+                break;
+            }
+        }
+        
         const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
         
         const userData = {
@@ -2666,8 +2749,8 @@ submitBtn.addEventListener('click', async function() {
             region: regionInput.value,
             residence: regionInput.value,
             dob: dob,
-            gender: '',
-            desireChild: '',
+            gender: '', // À remplir si ajouté plus tard
+            desireChild: desireChildValue,
             photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : "",
             language: '${req.lang}',
             isPublic: true,
