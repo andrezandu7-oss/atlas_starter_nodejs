@@ -1574,451 +1574,542 @@ app.get('/signup-choice', (req, res) => {
 // INSCRIPTION PAR CODE QR //
 // ============================================ //
 app.get('/signup-qr', (req, res) => {
-    const t = req.t;
     res.send(`
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-                font-family: sans-serif;
-                background-color: #f9fafb;
-                color: #111827;
-            }
-            .container {
-                max-width: 400px;
-                margin: 0 auto;
-                padding: 20px;
-                box-sizing: border-box;
-            }
-            #reader {
-                width: 70vw;
-                height: 70vw;
-                max-width: 300px;
-                max-height: 300px;
-                margin: 0 auto 20px;
-                border-radius: 15px;
-                overflow: hidden;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                background-color: #ffffff;
-                position: relative;
-                border: 3px solid transparent;
-                transition: border 0.3s ease;
-            }
-            #qr-success {
-                position: absolute;
-                top: 10px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: rgba(16,185,129,0.9);
-                color: white;
-                padding: 6px 12px;
-                border-radius: 12px;
-                font-size: 14px;
-                display: none;
-            }
-            input[type="text"], input[type="number"], select {
-                width: 100%;
-                padding: 12px;
-                margin-bottom: 12px;
-                border-radius: 12px;
-                border: 1px solid #d1d5db;
-                font-size: 14px;
-                box-sizing: border-box;
-                transition: background-color 0.5s ease;
-            }
-            input[readonly] {
-                background-color: #f3f4f6;
-                cursor: not-allowed;
-                opacity: 0.9;
-            }
-            .photo-box {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 180px;
-                width: 120px;
-                background-color: #f3f4f6;
-                border: 2px dashed #d1d5db;
-                color: #9ca3af;
-                font-size: 14px;
-                cursor: pointer;
-                border-radius: 8px;
-                margin: 0 auto 20px;
-                overflow: hidden;
-                position: relative;
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-            }
-            .photo-box.has-image {
-                border: 2px solid #10b981;
-                color: transparent;
-            }
-            .photo-box.has-image::after {
-                content: "📷";
-                position: absolute;
-                bottom: 5px;
-                right: 5px;
-                background-color: rgba(255,255,255,0.8);
-                border-radius: 50%;
-                padding: 5px;
-                font-size: 12px;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-            .photo-box.has-image:hover::after {
-                opacity: 1;
-            }
-            .date-title {
-                font-size: 14px;
-                font-weight: 600;
-                color: #374151;
-                margin-bottom: 6px;
-                margin-top: 10px;
-            }
-            .date-title:first-of-type {
-                margin-top: 0;
-            }
-            .date-row {
-                display: flex;
-                gap: 8px;
-                margin-bottom: 12px;
-            }
-            .date-row input {
-                flex: 1;
-                text-align: center;
-            }
-            .checkbox-container {
-                display: flex;
-                align-items: flex-start;
-                gap: 8px;
-                font-size: 13px;
-                margin-bottom: 20px;
-            }
-            button {
-                width: 100%;
-                padding: 16px;
-                border-radius: 25px;
-                border: none;
-                font-weight: bold;
-                font-size: 16px;
-                color: white;
-                background-color: #db2777;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-            }
-            button:disabled {
-                background-color: #f9a8d4;
-                cursor: not-allowed;
-            }
-            button:not(:disabled):hover {
-                background-color: #be185d;
-            }
-            .section-title {
-                font-weight: bold;
-                font-size: 16px;
-                text-align: center;
-                margin-bottom: 6px;
-            }
-            .sub-text {
-                font-size: 14px;
-                color: #6b7280;
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .loader {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                border: 3px solid #ffffff;
-                border-radius: 50%;
-                border-top-color: transparent;
-                animation: spin 1s linear infinite;
-                margin-right: 8px;
-                vertical-align: middle;
-            }
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-            .success-message {
-                background-color: #10b981;
-                color: white;
-                padding: 12px;
-                border-radius: 8px;
-                text-align: center;
-                margin-top: 16px;
-                display: none;
-            }
-            .success-message a {
-                color: white;
-                font-weight: bold;
-                text-decoration: underline;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div id="reader" style="position: relative;">
-                <div id="qr-success">${t('dataFromCertificate')}</div>
-            </div>
-            <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
-            <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
-            <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
-            <input type="text" placeholder="${t('bloodGroup')}" id="bloodGroup" readonly>
-            <div class="section-title">${t('fillDetails')}</div>
-            <div class="sub-text">${t('fillBelow')}</div>
-            <div class="photo-box" id="photoBox">
-                <span id="photoPlaceholder">${t('addPhoto')}</span>
-            </div>
-            <input type="text" placeholder="${t('region')}" id="region" required>
-            <div class="date-title">${t('dob')}</div>
-            <div class="date-row">
-                <input type="number" placeholder="${t('day')}" min="1" max="31" id="day" required>
-                <input type="number" placeholder="${t('month')}" min="1" max="12" id="month" required>
-                <input type="number" placeholder="${t('year')}" min="1900" max="2100" id="year" required>
-            </div>
-            <div class="checkbox-container">
-                <input type="checkbox" id="honorCheckbox" required>
-                <label>${t('honorConfirm')}</label>
-            </div>
-            <button id="submitBtn" disabled>
-                <span id="buttonText">${t('validateProfile')}</span>
-            </button>
-            <div id="successMessage" class="success-message">
-                ${t('profileValidated')}
-                <a href="#" id="profileLink">${t('viewMyProfile')}</a>
-            </div>
-        </div>
-        <script>
-            const html5QrCode = new Html5Qrcode("reader");
-            let hasScanned = false;
-            let scanTimeout = null;
-            let selectedPhotoFile = null;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: #f9fafb;
+    color: #111827;
+}
 
-            async function startRearCamera() {
-                try {
-                    const devices = await Html5Qrcode.getCameras();
-                    if (!devices || devices.length === 0) {
-                        console.error("Aucune caméra trouvée");
-                        return;
+/* Container scrollable */
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* QR Scanner carré */
+#reader {
+    width: 70vw;
+    height: 70vw; /* carré parfait */
+    max-width: 300px;
+    max-height: 300px;
+    margin: 0 auto 20px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background-color: #ffffff;
+    position: relative;
+    border: 3px solid transparent;
+    transition: border 0.3s ease;
+}
+
+#qr-success {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(16,185,129,0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    display: none;
+}
+
+/* Form Fields */
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: background-color 0.5s ease;
+}
+
+/* Style pour les champs en lecture seule */
+input[readonly] {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+/* Photo box avec aperçu */
+.photo-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    width: 120px;
+    background-color: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    color: #9ca3af;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 0 auto 20px;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.photo-box.has-image {
+    border: 2px solid #10b981;
+    color: transparent;
+}
+
+.photo-box.has-image::after {
+    content: "✏️";
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    padding: 5px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.photo-box.has-image:hover::after {
+    opacity: 1;
+}
+
+/* Style pour le titre de la date */
+.date-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    margin-top: 10px;
+}
+
+.date-title:first-of-type {
+    margin-top: 0;
+}
+
+/* Date row */
+.date-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.date-row input {
+    flex: 1;
+    text-align: center;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+/* Bouton final */
+button {
+    width: 100%;
+    padding: 16px;
+    border-radius: 25px;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+    background-color: #db2777;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:disabled {
+    background-color: #f9a8d4;
+    cursor: not-allowed;
+}
+
+button:not(:disabled):hover {
+    background-color: #be185d;
+}
+
+.section-title {
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.sub-text {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Loader pour la validation */
+.loader {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Message de succès */
+.success-message {
+    background-color: #10b981;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 16px;
+    display: none;
+}
+
+.success-message a {
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+    <!-- QR Scanner -->
+    <div id="reader" style="position: relative;">
+        <div id="qr-success">QR scanné !</div>
+    </div>
+
+    <!-- Form Fields (deviennent readonly après scan) -->
+    <input type="text" placeholder="Prénom" id="firstName" readonly>
+    <input type="text" placeholder="Nom" id="lastName" readonly>
+    <input type="text" placeholder="Génotype" id="genotype" readonly>
+    <input type="text" placeholder="Groupe sanguin" id="bloodGroup" readonly>
+
+    <div class="section-title">Aidez vos partenaires à en savoir un peu plus sur vous</div>
+    <div class="sub-text">Veuillez remplir les cases ci-dessous :</div>
+
+    <!-- Photo box avec aperçu -->
+    <div class="photo-box" id="photoBox">
+        <span id="photoPlaceholder">Ajouter photo</span>
+    </div>
+    
+    <input type="text" placeholder="Région actuelle" id="region" required>
+
+    <!-- Titre pour la date de naissance -->
+    <div class="date-title">📅 Date de naissance</div>
+    
+    <div class="date-row">
+        <input type="number" placeholder="j" min="1" max="31" id="day" required>
+        <input type="number" placeholder="m" min="1" max="12" id="month" required>
+        <input type="number" placeholder="a" min="1900" max="2100" id="year" required>
+    </div>
+
+    <div class="checkbox-container">
+        <input type="checkbox" id="honorCheckbox" required>
+        <label>Je confirme sur mon honneur que mes informations sont sincères et conformes à la réalité</label>
+    </div>
+
+    <button id="submitBtn" disabled>
+        <span id="buttonText">Valider le profil</span>
+    </button>
+
+    <!-- Message de succès (caché par défaut) -->
+    <div id="successMessage" class="success-message">
+        ✅ Profil validé avec succès ! 
+        <a href="/profile" id="profileLink">Voir mon profil</a>
+    </div>
+
+</div>
+
+<script>
+const html5QrCode = new Html5Qrcode("reader");
+let hasScanned = false;
+let scanTimeout = null;
+let selectedPhotoFile = null;
+
+async function startRearCamera() {
+    try {
+        const devices = await Html5Qrcode.getCameras();
+        if (!devices || devices.length === 0) {
+            console.error("Aucune caméra trouvée");
+            return;
+        }
+        
+        // Priorité à la caméra arrière
+        let rearCamera = devices.find(d => 
+            d.label.toLowerCase().includes("back") || 
+            d.label.toLowerCase().includes("rear") || 
+            d.label.toLowerCase().includes("environment") ||
+            d.label.toLowerCase().includes("arrière")
+        );
+        
+        if (!rearCamera) rearCamera = devices[devices.length - 1];
+
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            if (hasScanned) return;
+            
+            // Annuler le timeout précédent s'il existe
+            if (scanTimeout) {
+                clearTimeout(scanTimeout);
+            }
+            
+            hasScanned = true;
+            
+            // Arrêter le scan après une lecture réussie
+            html5QrCode.stop().catch(err => console.log(err));
+            
+            // Traiter les données du QR code
+            const data = decodedText.trim().split('|');
+            console.log("Données scannées:", data);
+            
+            if(data.length >= 4) {
+                // Remplir les 4 premiers champs avec les données du QR code
+                const fields = ['firstName', 'lastName', 'genotype', 'bloodGroup'];
+                fields.forEach((id, i) => {
+                    const el = document.getElementById(id);
+                    if (el && data[i]) {
+                        el.value = data[i].trim();
+                        el.style.backgroundColor = "#d1fae5";
+                        setTimeout(() => { 
+                            el.style.backgroundColor = "#f3f4f6"; // Gris pour readonly
+                        }, 1000);
                     }
-                    let rearCamera = devices.find(d => 
-                        d.label.toLowerCase().includes("back") || 
-                        d.label.toLowerCase().includes("rear") || 
-                        d.label.toLowerCase().includes("environment") ||
-                        d.label.toLowerCase().includes("arrière")
-                    );
-                    if (!rearCamera) rearCamera = devices[devices.length - 1];
-
-                    const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                        if (hasScanned) return;
-                        if (scanTimeout) clearTimeout(scanTimeout);
-
-                        hasScanned = true;
-                        html5QrCode.stop().catch(err => console.log(err));
-
-                        const data = decodedText.trim().split('|');
-                        console.log("Données scannées:", data);
-
-                        if(data.length >= 4) {
-                            const fields = ['firstName', 'lastName', 'genotype', 'bloodGroup'];
-                            fields.forEach((id, i) => {
-                                const el = document.getElementById(id);
-                                if (el && data[i]) {
-                                    el.value = data[i].trim();
-                                    el.style.backgroundColor = "#d1fae5";
-                                    setTimeout(() => {
-                                        el.style.backgroundColor = "#f3f4f6";
-                                    }, 1000);
-                                }
-                            });
-
-                            if (data.length >= 8) {
-                                const regionEl = document.getElementById('region');
-                                if (regionEl && data[4]) regionEl.value = data[4].trim();
-                                if (data[5]) document.getElementById('day').value = data[5].trim();
-                                if (data[6]) document.getElementById('month').value = data[6].trim();
-                                if (data[7]) document.getElementById('year').value = data[7].trim();
-                            }
-
-                            const readerDiv = document.getElementById('reader');
-                            const successDiv = document.getElementById('qr-success');
-                            readerDiv.style.border = "3px solid #10b981";
-                            successDiv.style.display = "block";
-
-                            scanTimeout = setTimeout(() => {
-                                readerDiv.style.border = "3px solid transparent";
-                                successDiv.style.display = "none";
-                                hasScanned = false;
-                                startRearCamera();
-                            }, 3000);
-
-                            checkFormValidity();
-                        }
-                    };
-
-                    const qrCodeErrorCallback = (error) => {
-                        if (!error.includes("NotFoundException")) {
-                            console.log("Erreur de scan:", error);
-                        }
-                    };
-
-                    const config = {
-                        fps: 10,
-                        qrbox: { width: 250, height: 250 },
-                        aspectRatio: 1.0,
-                        videoConstraints: {
-                            width: { min: 640, ideal: 720, max: 1080 },
-                            height: { min: 640, ideal: 720, max: 1080 },
-                            facingMode: "environment"
-                        }
-                    };
-
-                    await html5QrCode.start(rearCamera.id, config, qrCodeSuccessCallback, qrCodeErrorCallback);
-                } catch(e) {
-                    console.error("Erreur lors du démarrage de la caméra:", e);
-                }
-            }
-
-            startRearCamera();
-
-            const submitBtn = document.getElementById('submitBtn');
-            const regionInput = document.getElementById('region');
-            const dayInput = document.getElementById('day');
-            const monthInput = document.getElementById('month');
-            const yearInput = document.getElementById('year');
-            const honorCheckbox = document.getElementById('honorCheckbox');
-            const firstNameInput = document.getElementById('firstName');
-            const lastNameInput = document.getElementById('lastName');
-            const genotypeInput = document.getElementById('genotype');
-            const bloodGroupInput = document.getElementById('bloodGroup');
-            const photoBox = document.getElementById('photoBox');
-            const photoPlaceholder = document.getElementById('photoPlaceholder');
-            const successMessage = document.getElementById('successMessage');
-            const buttonText = document.getElementById('buttonText');
-
-            function checkFormValidity() {
-                const allFieldsFilled = 
-                    firstNameInput.value.trim() !== "" &&
-                    lastNameInput.value.trim() !== "" &&
-                    genotypeInput.value.trim() !== "" &&
-                    bloodGroupInput.value.trim() !== "" &&
-                    regionInput.value.trim() !== "" &&
-                    dayInput.value.trim() !== "" &&
-                    monthInput.value.trim() !== "" &&
-                    yearInput.value.trim() !== "" &&
-                    honorCheckbox.checked;
-
-                submitBtn.disabled = !allFieldsFilled;
-            }
-
-            [regionInput, dayInput, monthInput, yearInput].forEach(input => {
-                input.addEventListener('input', checkFormValidity);
-            });
-            honorCheckbox.addEventListener('change', checkFormValidity);
-            checkFormValidity();
-
-            photoBox.addEventListener('click', () => {
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.accept = 'image/*';
-                fileInput.onchange = e => {
-                    if(e.target.files.length > 0) {
-                        selectedPhotoFile = e.target.files[0];
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            photoBox.style.backgroundImage = 'url(' + event.target.result + ')';
-                            photoBox.classList.add('has-image');
-                            photoPlaceholder.style.display = 'none';
-                        };
-                        reader.readAsDataURL(selectedPhotoFile);
-                    }
-                };
-                fileInput.click();
-            });
-
-            function fileToBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
                 });
+                
+                // Si le QR code contient plus d'informations, remplir automatiquement
+                if (data.length >= 7) {
+                    // Format attendu: Prénom|Nom|Génotype|Groupe|Région|Jour|Mois|Année
+                    const regionEl = document.getElementById('region');
+                    if (regionEl && data[4]) {
+                        regionEl.value = data[4].trim();
+                    }
+                    
+                    if (data.length >= 7) {
+                        const dayEl = document.getElementById('day');
+                        const monthEl = document.getElementById('month');
+                        const yearEl = document.getElementById('year');
+                        
+                        if (dayEl && data[5]) dayEl.value = data[5].trim();
+                        if (monthEl && data[6]) monthEl.value = data[6].trim();
+                        if (yearEl && data[7]) yearEl.value = data[7].trim();
+                    }
+                }
             }
 
-            submitBtn.addEventListener('click', async function() {
-                submitBtn.disabled = true;
-                const originalText = buttonText.textContent;
-                buttonText.innerHTML = '<span class="loader"></span> Validation...';
+            // Animation de succès
+            const readerDiv = document.getElementById('reader');
+            const successDiv = document.getElementById('qr-success');
+            readerDiv.style.border = "3px solid #10b981";
+            successDiv.style.display = "block";
+            
+            // Réinitialiser après 3 secondes pour permettre un nouveau scan
+            scanTimeout = setTimeout(() => { 
+                readerDiv.style.border = "3px solid transparent"; 
+                successDiv.style.display = "none";
+                hasScanned = false;
+                // Redémarrer la caméra
+                startRearCamera();
+            }, 3000);
+            
+            // Vérifier la validité du formulaire après remplissage
+            checkFormValidity();
+        };
 
-                try {
-                    const photoBase64 = selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : null;
+        const qrCodeErrorCallback = (error) => {
+            // Ignorer les erreurs de lecture (s'affiche quand aucun QR n'est détecté)
+            if (!error.includes("NotFoundException")) {
+                console.log("Erreur de scan:", error);
+            }
+        };
 
-                    const userData = {
-                        firstName: firstNameInput.value,
-                        lastName: lastNameInput.value,
-                        gender: '',
-                        dob: yearInput.value + '-' + monthInput.value.padStart(2, '0') + '-' + dayInput.value.padStart(2, '0'),
-                        residence: '',
-                        region: regionInput.value,
-                        genotype: genotypeInput.value,
-                        bloodGroup: bloodGroupInput.value,
-                        desireChild: '',
-                        photo: photoBase64 || "",
-                        language: '${req.lang}',
-                        isPublic: true,
-                        qrVerified: true,
-                        verificationBadge: 'lab',
-                        verifiedBy: 'QR Code',
-                        verifiedAt: new Date()
-                    };
+        // Configuration du scanner
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            videoConstraints: { 
+                width: { min: 640, ideal: 720, max: 1080 },
+                height: { min: 640, ideal: 720, max: 1080 },
+                facingMode: "environment"
+            }
+        };
 
-                    const res = await fetch('/api/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(userData)
-                    });
+        await html5QrCode.start(rearCamera.id, config, qrCodeSuccessCallback, qrCodeErrorCallback);
+        
+    } catch(e) {
+        console.error("Erreur lors du démarrage de la caméra:", e);
+    }
+}
 
-                    const data = await res.json();
+// Démarrer la caméra au chargement de la page
+startRearCamera();
 
-                    if (data.success) {
-                        successMessage.style.display = 'block';
-                        setTimeout(() => {
-                            window.location.href = '/profile';
-                        }, 2000);
-                        document.getElementById('profileLink').addEventListener('click', (e) => {
-                            e.preventDefault();
-                            window.location.href = '/profile';
-                        });
-                    } else {
-                        alert("Erreur lors de l'inscription: " + (data.error || "Inconnue"));
-                        submitBtn.disabled = false;
-                        buttonText.textContent = originalText;
-                    }
-                } catch (error) {
-                    console.error("Erreur lors de la validation:", error);
-                    alert("Une erreur est survenue. Veuillez réessayer.");
-                    submitBtn.disabled = false;
-                    buttonText.textContent = originalText;
-                }
-            });
+// Button enable logic
+const submitBtn = document.getElementById('submitBtn');
+const regionInput = document.getElementById('region');
+const dayInput = document.getElementById('day');
+const monthInput = document.getElementById('month');
+const yearInput = document.getElementById('year');
+const honorCheckbox = document.getElementById('honorCheckbox');
+const firstNameInput = document.getElementById('firstName');
+const lastNameInput = document.getElementById('lastName');
+const genotypeInput = document.getElementById('genotype');
+const bloodGroupInput = document.getElementById('bloodGroup');
+const photoBox = document.getElementById('photoBox');
+const photoPlaceholder = document.getElementById('photoPlaceholder');
+const successMessage = document.getElementById('successMessage');
+const buttonText = document.getElementById('buttonText');
 
-            window.addEventListener('beforeunload', () => {
-                if (html5QrCode && html5QrCode.isScanning) {
-                    html5QrCode.stop().catch(err => console.log(err));
-                }
-                if (scanTimeout) clearTimeout(scanTimeout);
-            });
-        </script>
-    </body>
-    </html>
-    `);
+function checkFormValidity() {
+    // Vérifier que tous les champs sont remplis (photo optionnelle mais recommandée)
+    const allFieldsFilled = 
+        firstNameInput.value.trim() !== "" &&
+        lastNameInput.value.trim() !== "" &&
+        genotypeInput.value.trim() !== "" &&
+        bloodGroupInput.value.trim() !== "" &&
+        regionInput.value.trim() !== "" && 
+        dayInput.value.trim() !== "" && 
+        monthInput.value.trim() !== "" && 
+        yearInput.value.trim() !== "" && 
+        honorCheckbox.checked;
+    
+    if(allFieldsFilled) {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
+    }
+}
+
+// Ajouter les écouteurs d'événements pour les champs modifiables uniquement
+[regionInput, dayInput, monthInput, yearInput].forEach(input => {
+    input.addEventListener('input', checkFormValidity);
+});
+honorCheckbox.addEventListener('change', checkFormValidity);
+
+// Vérification initiale
+checkFormValidity();
+
+// Photo box avec aperçu
+photoBox.addEventListener('click', ()=>{
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = e => {
+        if(e.target.files.length > 0) {
+            selectedPhotoFile = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                // Afficher l'aperçu de l'image - CORRECTION ICI
+                photoBox.style.backgroundImage = "url('" + event.target.result + "')";
+                photoBox.classList.add('has-image');
+                photoPlaceholder.style.display = 'none';
+            };
+            
+            reader.readAsDataURL(selectedPhotoFile);
+        }
+    };
+    fileInput.click();
+});
+
+// Validation du profil
+submitBtn.addEventListener('click', async function() {
+    // Désactiver le bouton pendant la validation
+    submitBtn.disabled = true;
+    const originalText = buttonText.textContent;
+    buttonText.innerHTML = '<span class="loader"></span> Validation...';
+    
+    try {
+        // Préparer les données du formulaire
+        const formData = {
+            firstName: firstNameInput.value,
+            lastName: lastNameInput.value,
+            genotype: genotypeInput.value,
+            bloodGroup: bloodGroupInput.value,
+            region: regionInput.value,
+            birthDate: {
+                day: dayInput.value,
+                month: monthInput.value,
+                year: yearInput.value
+            },
+            honorConfirmed: honorCheckbox.checked,
+            photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : null
+        };
+        
+        // Simuler un appel API (à remplacer par votre vraie API)
+        console.log("Données du profil à sauvegarder:", formData);
+        
+        // Simulation d'une requête API
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Afficher le message de succès
+        successMessage.style.display = 'block';
+        
+        // Option 1: Redirection automatique après 2 secondes
+        setTimeout(() => {
+            window.location.href = '/profile';
+        }, 2000);
+        
+        // Option 2: Redirection au clic sur le lien
+        document.getElementById('profileLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = '/profile';
+        });
+        
+    } catch (error) {
+        console.error("Erreur lors de la validation:", error);
+        alert("Une erreur est survenue. Veuillez réessayer.");
+        submitBtn.disabled = false;
+        buttonText.textContent = originalText;
+    }
+});
+
+// Fonction utilitaire pour convertir un fichier en base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Nettoyer les ressources quand on quitte la page
+window.addEventListener('beforeunload', () => {
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(err => console.log(err));
+    }
+    if (scanTimeout) {
+        clearTimeout(scanTimeout);
+    }
+});
+</script>
+</body>
+</html>
+`);
 });
 
 // ============================================ //
