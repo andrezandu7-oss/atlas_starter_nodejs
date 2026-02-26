@@ -2107,10 +2107,11 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
+// ============================================
 // INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
 // ============================================
 app.get('/signup-qr', (req, res) => {
-    const t = req.t; // Utilisation de ton système de traduction existant
+    const t = req.t;
     
     res.send(`
 <!DOCTYPE html>
@@ -2467,10 +2468,7 @@ button:not(:disabled):hover {
     
     <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
     <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
-    
-    <!-- Genre - CORRIGÉ : input text readonly au lieu de select -->
     <input type="text" placeholder="${t('gender')}" id="gender" readonly>
-    
     <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
     <input type="text" placeholder="${t('bloodGroup')}" id="bloodGroup" readonly>
 
@@ -2590,11 +2588,20 @@ async function startRearCamera() {
             
             // FORMAT: Prénom|Nom|Genre|Génotype|Groupe sanguin
             if(data.length >= 5) {
-                const fields = ['firstName', 'lastName', 'gender', 'genotype', 'bloodGroup'];
-                fields.forEach((id, i) => {
-                    const el = document.getElementById(id);
+                // Pour chaque champ, on ajoute le préfixe avec la valeur
+                const fieldConfigs = [
+                    { id: 'firstName', label: '${t('firstName')}' },
+                    { id: 'lastName', label: '${t('lastName')}' },
+                    { id: 'gender', label: '${t('gender')}' },
+                    { id: 'genotype', label: '${t('genotype')}' },
+                    { id: 'bloodGroup', label: '${t('bloodGroup')}' }
+                ];
+                
+                fieldConfigs.forEach((config, i) => {
+                    const el = document.getElementById(config.id);
                     if (el && data[i]) {
-                        el.value = data[i].trim();
+                        // On met la valeur avec le préfixe : "Prénom : Jean"
+                        el.value = config.label + " : " + data[i].trim();
                         el.style.backgroundColor = "#d1fae5";
                         setTimeout(() => { 
                             el.style.backgroundColor = "#f3f4f6";
@@ -2661,6 +2668,16 @@ const photoPlaceholder = document.getElementById('photoPlaceholder');
 const successMessage = document.getElementById('successMessage');
 const buttonText = document.getElementById('buttonText');
 
+function extractValueFromPrefixed(input) {
+    // Extrait la valeur après le préfixe "Label : "
+    const value = input.value;
+    const colonIndex = value.indexOf(':');
+    if (colonIndex !== -1) {
+        return value.substring(colonIndex + 1).trim();
+    }
+    return value;
+}
+
 function checkFormValidity() {
     // Vérifier si un radio "désir d'enfant" est sélectionné
     let desireChildSelected = false;
@@ -2671,12 +2688,19 @@ function checkFormValidity() {
         }
     }
     
+    // Extraire les valeurs sans les préfixes pour la validation
+    const firstNameValue = extractValueFromPrefixed(firstNameInput);
+    const lastNameValue = extractValueFromPrefixed(lastNameInput);
+    const genderValue = extractValueFromPrefixed(genderInput);
+    const genotypeValue = extractValueFromPrefixed(genotypeInput);
+    const bloodGroupValue = extractValueFromPrefixed(bloodGroupInput);
+    
     const allFieldsFilled = 
-        firstNameInput.value.trim() !== "" &&
-        lastNameInput.value.trim() !== "" &&
-        genderInput.value.trim() !== "" &&  // Maintenant fonctionne avec input text
-        genotypeInput.value.trim() !== "" &&
-        bloodGroupInput.value.trim() !== "" &&
+        firstNameValue !== "" &&
+        lastNameValue !== "" &&
+        genderValue !== "" &&
+        genotypeValue !== "" &&
+        bloodGroupValue !== "" &&
         regionInput.value.trim() !== "" && 
         dayInput.value.trim() !== "" && 
         monthInput.value.trim() !== "" && 
@@ -2750,12 +2774,13 @@ submitBtn.addEventListener('click', async function() {
         
         const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
         
+        // Extraire les valeurs sans les préfixes
         const userData = {
-            firstName: firstNameInput.value,
-            lastName: lastNameInput.value,
-            gender: genderInput.value,
-            genotype: genotypeInput.value,
-            bloodGroup: bloodGroupInput.value,
+            firstName: extractValueFromPrefixed(firstNameInput),
+            lastName: extractValueFromPrefixed(lastNameInput),
+            gender: extractValueFromPrefixed(genderInput),
+            genotype: extractValueFromPrefixed(genotypeInput),
+            bloodGroup: extractValueFromPrefixed(bloodGroupInput),
             region: regionInput.value,
             residence: regionInput.value,
             dob: dob,
