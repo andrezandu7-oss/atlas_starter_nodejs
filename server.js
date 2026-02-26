@@ -1571,7 +1571,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================ //
-// INSCRIPTION PAR CODE QR (AVEC TRADUCTION) //
+// INSCRIPTION PAR CODE QR //
 // ============================================ //
 app.get('/signup-qr', (req, res) => {
     const t = req.t;
@@ -1800,7 +1800,6 @@ app.get('/signup-qr', (req, res) => {
             let hasScanned = false;
             let scanTimeout = null;
             let selectedPhotoFile = null;
-            let qrData = [];
 
             async function startRearCamera() {
                 try {
@@ -1826,7 +1825,6 @@ app.get('/signup-qr', (req, res) => {
 
                         const data = decodedText.trim().split('|');
                         console.log("Données scannées:", data);
-                        qrData = data;
 
                         if(data.length >= 4) {
                             const fields = ['firstName', 'lastName', 'genotype', 'bloodGroup'];
@@ -2204,7 +2202,6 @@ app.get('/profile', requireAuth, async (req, res) => {
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
         
-        // Badge de certification - bleu pour QR (lab), orange pour auto-déclaré (self)
         const verificationBadge = user.qrVerified 
             ? '<span class="verified-badge" style="background-color: #2196F3;">✓ ' + t('certifiedBadge') + '</span>' 
             : '<span class="unverified-badge">⚠️ ' + t('honorTitle') + '</span>';
@@ -2372,7 +2369,6 @@ app.get('/matching', requireAuth, async (req, res) => {
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
         const regionFilter = req.query.region || 'all';
 
-        // Recuperer les IDs exclus
         const messages = await Message.find({
             $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
             isBlocked: false
@@ -3219,7 +3215,6 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/register', async (req, res) => {
     try {
         const userData = req.body;
-        // Si c'est une inscription par QR, on garde qrVerified à true et verificationBadge à 'lab'
         if (userData.qrVerified) {
             userData.verificationBadge = 'lab';
         }
@@ -3407,7 +3402,7 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
 // ============================================ //
 // DÉMARRAGE //
 // ============================================ //
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, () => {
     console.log(`🚀 Genlove démarré sur http://localhost:${port}`);
     console.log(`📱 Routes disponibles:`);
     console.log(`   - Accueil: /`);
