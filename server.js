@@ -3226,7 +3226,7 @@ app.get('/signup-manual', (req, res) => {
 });
 
 // ============================================
-// PROFIL - VERSION CORRIGÉE (avec fonction calculateAge intégrée)
+// PROFIL - VERSION CORRIGÉE (redirection vers inbox)
 // ============================================
 app.get('/profile', requireAuth, async (req, res) => {
     try {
@@ -3237,7 +3237,6 @@ app.get('/profile', requireAuth, async (req, res) => {
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
         
-        // 🔴 Fonction calculateAge définie DANS la route
         function calculateAge(dateNaissance) {
             if (!dateNaissance) return "?";
             const today = new Date();
@@ -3248,7 +3247,6 @@ app.get('/profile', requireAuth, async (req, res) => {
             return age;
         }
         
-        // Badge de vérification avec traduction
         const verificationBadge = user.qrVerified ? 
             '<span class="verified-badge">✓ ' + t('labCertified') + '</span>' : 
             '<span class="unverified-badge">📝 ' + t('selfDeclared') + '</span>';
@@ -3381,11 +3379,13 @@ function showRequestPopup(r) {
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 }
 
+// 🔴 FONCTION ACCEPTREQUEST CORRIGÉE (redirection vers inbox)
 async function acceptRequest() {
     if (!currentRequestId) return;
     const res = await fetch('/api/requests/' + currentRequestId + '/accept', { method: 'POST' });
     if (res.ok) {
         document.getElementById('request-popup').style.display = 'none';
+        // Redirection vers la boîte de réception
         window.location.href = '/inbox';
     }
 }
@@ -3434,7 +3434,6 @@ checkRejections();
 </html>`);
     } catch(error) {
         console.error("ERREUR DANS /profile:", error);
-        // 🔴 Affiche plus de détails sur l'erreur
         res.status(500).send('Erreur profil: ' + error.message);
     }
 });
