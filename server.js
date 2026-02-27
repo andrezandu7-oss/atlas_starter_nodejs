@@ -3226,7 +3226,7 @@ app.get('/signup-manual', (req, res) => {
 });
 
 // ============================================
-// PROFIL - AVEC BADGE DE VÉRIFICATION TRADUIT
+// PROFIL - VERSION CORRIGÉE (avec fonction calculateAge intégrée)
 // ============================================
 app.get('/profile', requireAuth, async (req, res) => {
     try {
@@ -3236,6 +3236,17 @@ app.get('/profile', requireAuth, async (req, res) => {
         const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false, isBlocked: false });
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
+        
+        // 🔴 Fonction calculateAge définie DANS la route
+        function calculateAge(dateNaissance) {
+            if (!dateNaissance) return "?";
+            const today = new Date();
+            const birthDate = new Date(dateNaissance);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+            return age;
+        }
         
         // Badge de vérification avec traduction
         const verificationBadge = user.qrVerified ? 
@@ -3423,10 +3434,10 @@ checkRejections();
 </html>`);
     } catch(error) {
         console.error("ERREUR DANS /profile:", error);
-        res.status(500).send('Erreur profil');
+        // 🔴 Affiche plus de détails sur l'erreur
+        res.status(500).send('Erreur profil: ' + error.message);
     }
 });
-
 // ============================================
 // MATCHING - AVEC BADGE DE CERTIFICATION
 // ============================================
