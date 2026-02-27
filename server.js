@@ -2232,8 +2232,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// ============================================
-// INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
+// INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS) - CORRIGÉ
 // ============================================
 app.get('/signup-qr', (req, res) => {
     const t = req.t;
@@ -2291,6 +2290,7 @@ body {
     display: none;
 }
 
+/* Form Fields */
 input[type="text"], input[type="number"], select {
     width: 100%;
     padding: 12px;
@@ -2302,12 +2302,14 @@ input[type="text"], input[type="number"], select {
     transition: background-color 0.5s ease;
 }
 
+/* Style pour les champs en lecture seule */
 input[readonly] {
     background-color: #f3f4f6;
     cursor: not-allowed;
     opacity: 0.9;
 }
 
+/* Photo box avec aperçu */
 .photo-box {
     display: flex;
     align-items: center;
@@ -2350,6 +2352,7 @@ input[readonly] {
     opacity: 1;
 }
 
+/* Style pour le titre de la date */
 .date-title {
     font-size: 14px;
     font-weight: 600;
@@ -2358,17 +2361,28 @@ input[readonly] {
     margin-top: 10px;
 }
 
-.date-row {
+/* Style pour la date comme inscription manuelle */
+.custom-date-picker {
     display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 5px;
+    margin: 10px 0;
 }
 
-.date-row input {
+.date-part {
     flex: 1;
-    text-align: center;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    background: #f8f9fa;
 }
 
+.date-part:focus {
+    border-color: #ff416c;
+    outline: none;
+}
+
+/* Style pour les erreurs de date */
 .date-error {
     color: #dc2626;
     font-size: 12px;
@@ -2378,6 +2392,7 @@ input[readonly] {
     text-align: center;
 }
 
+/* Style pour le projet de vie */
 .life-project-container {
     margin-bottom: 20px;
 }
@@ -2414,6 +2429,7 @@ input[readonly] {
     cursor: pointer;
 }
 
+/* Checkbox serment */
 .checkbox-container {
     display: flex;
     align-items: flex-start;
@@ -2422,6 +2438,7 @@ input[readonly] {
     margin-bottom: 20px;
 }
 
+/* Bouton final */
 button {
     width: 100%;
     padding: 16px;
@@ -2459,33 +2476,47 @@ button:not(:disabled):hover {
     margin-bottom: 20px;
 }
 
-.loader {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid #ffffff;
+/* Loader comme inscription manuelle */
+#loader {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 20000;
+    text-align: center;
+    min-width: 250px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #ff416c;
     border-radius: 50%;
-    border-top-color: transparent;
     animation: spin 1s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
+    margin: 0 auto 20px;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-.success-message {
-    background-color: #10b981;
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-    margin-top: 16px;
-    display: none;
-    font-weight: bold;
+.loader-text {
+    color: #1a2a44;
+    font-size: 1.1rem;
+    margin-top: 10px;
 }
 
+/* Sélecteur de langue */
 .language-selector-compact {
     position: relative;
     margin: 10px 0 20px;
@@ -2554,6 +2585,12 @@ button:not(:disabled):hover {
 <body>
 <div class="container">
 
+    <!-- Loader comme inscription manuelle -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loading-message">${t('sendingRequest') || 'Création de votre profil...'}</div>
+    </div>
+
     <!-- Sélecteur de langue -->
     <div class="language-selector-compact">
         <button onclick="toggleLanguageDropdown()" class="lang-btn-compact">
@@ -2576,9 +2613,7 @@ button:not(:disabled):hover {
         <div id="qr-success">${t('qrSuccess') || 'QR scanné !'}</div>
     </div>
 
-    <!-- ============================================ -->
     <!-- PREMIÈRE PARTIE : Remplissage automatique QR -->
-    <!-- ============================================ -->
     <div style="margin-bottom: 10px;">
         <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ ${t('automaticData')} (${t('certificate')})</span>
     </div>
@@ -2592,9 +2627,7 @@ button:not(:disabled):hover {
     <!-- Séparateur visuel -->
     <div class="partition-line"></div>
 
-    <!-- ============================================ -->
     <!-- DEUXIÈME PARTIE : Saisie manuelle -->
-    <!-- ============================================ -->
     <div class="section-title">${t('sectionTitle')}</div>
     <div class="sub-text">${t('subText')}</div>
 
@@ -2606,13 +2639,25 @@ button:not(:disabled):hover {
     <!-- Région -->
     <input type="text" placeholder="${t('region')}" id="region" required>
 
-    <!-- DATE DE NAISSANCE (PARTIE MANUELLE) AVEC VALIDATION -->
+    <!-- Date de naissance avec sélecteurs (comme inscription manuelle) -->
     <div class="date-title">📅 ${t('birthDate')}</div>
     
-    <div class="date-row">
-        <input type="number" placeholder="${t('day')}" min="1" max="31" id="day" required oninput="validateDay()">
-        <input type="number" placeholder="${t('month')}" min="1" max="12" id="month" required oninput="validateMonth()">
-        <input type="number" placeholder="${t('year')}" min="1900" max="2100" id="year" required oninput="validateYear()">
+    <div class="custom-date-picker">
+        <select id="day" class="date-part" required>
+            <option value="">${t('day')}</option>
+            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+        </select>
+        <select id="month" class="date-part" required>
+            <option value="">${t('month')}</option>
+            ${Array.from({length: 12}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+        </select>
+        <select id="year" class="date-part" required>
+            <option value="">${t('year')}</option>
+            ${Array.from({length: 101}, (_, i) => {
+                const year = new Date().getFullYear() - 18 - i;
+                return `<option value="${year}">${year}</option>`;
+            }).join('')}
+        </select>
     </div>
     <div id="dateError" class="date-error">Date invalide</div>
 
@@ -2639,11 +2684,6 @@ button:not(:disabled):hover {
     <button id="submitBtn" disabled>
         <span id="buttonText">${t('createProfile')}</span>
     </button>
-
-    <!-- Message de succès -->
-    <div id="successMessage" class="success-message">
-        ✅ ${t('successMessage')}
-    </div>
 
 </div>
 
@@ -2706,7 +2746,6 @@ async function startRearCamera() {
             
             // FORMAT: Prénom|Nom|Genre|Génotype|Groupe sanguin
             if(data.length >= 5) {
-                // Pour chaque champ, on ajoute le préfixe avec la valeur
                 const fieldConfigs = [
                     { id: 'firstName', label: '${t('firstName')}' },
                     { id: 'lastName', label: '${t('lastName')}' },
@@ -2718,7 +2757,6 @@ async function startRearCamera() {
                 fieldConfigs.forEach((config, i) => {
                     const el = document.getElementById(config.id);
                     if (el && data[i]) {
-                        // On met la valeur avec le préfixe : "Prénom : Jean"
                         el.value = config.label + " : " + data[i].trim();
                         el.style.backgroundColor = "#d1fae5";
                         setTimeout(() => { 
@@ -2784,7 +2822,8 @@ const genotypeInput = document.getElementById('genotype');
 const bloodGroupInput = document.getElementById('bloodGroup');
 const photoBox = document.getElementById('photoBox');
 const photoPlaceholder = document.getElementById('photoPlaceholder');
-const successMessage = document.getElementById('successMessage');
+const loader = document.getElementById('loader');
+const loadingMessage = document.getElementById('loading-message');
 const buttonText = document.getElementById('buttonText');
 
 // Fonction pour obtenir le nombre maximum de jours dans un mois
@@ -2802,7 +2841,8 @@ function getMaxDays(month, year) {
     return 31;
 }
 
-function validateDay() {
+// Validation de la date
+function validateDate() {
     const day = dayInput.value;
     const month = monthInput.value;
     const year = yearInput.value;
@@ -2819,66 +2859,9 @@ function validateDay() {
     checkFormValidity();
 }
 
-function validateMonth() {
-    const month = monthInput.value;
-    const day = dayInput.value;
-    const year = yearInput.value;
-    
-    if (month) {
-        const m = parseInt(month);
-        if (m < 1) monthInput.value = 1;
-        if (m > 12) monthInput.value = 12;
-    }
-    
-    if (day && month && year) {
-        const maxDays = getMaxDays(month, year);
-        if (parseInt(day) > maxDays) {
-            dayInput.value = maxDays;
-        }
-    }
-    checkFormValidity();
-}
-
-function validateYear() {
-    const year = yearInput.value;
-    const day = dayInput.value;
-    const month = monthInput.value;
-    
-    if (year) {
-        const y = parseInt(year);
-        if (y < 1900) yearInput.value = 1900;
-        if (y > 2100) yearInput.value = 2100;
-    }
-    
-    if (day && month && year) {
-        const maxDays = getMaxDays(month, year);
-        if (parseInt(day) > maxDays) {
-            dayInput.value = maxDays;
-        }
-    }
-    checkFormValidity();
-}
-
-function isDateValid() {
-    const day = dayInput.value;
-    const month = monthInput.value;
-    const year = yearInput.value;
-    
-    if (!day || !month || !year) return false;
-    
-    const d = parseInt(day);
-    const m = parseInt(month);
-    const y = parseInt(year);
-    
-    if (isNaN(d) || isNaN(m) || isNaN(y)) return false;
-    if (m < 1 || m > 12) return false;
-    if (y < 1900 || y > 2100) return false;
-    
-    const maxDays = getMaxDays(month, year);
-    if (d < 1 || d > maxDays) return false;
-    
-    return true;
-}
+dayInput.addEventListener('change', validateDate);
+monthInput.addEventListener('change', validateDate);
+yearInput.addEventListener('change', validateDate);
 
 function extractValueFromPrefixed(input) {
     const value = input.value;
@@ -2911,7 +2894,9 @@ function checkFormValidity() {
         genotypeValue !== "" &&
         bloodGroupValue !== "" &&
         regionInput.value.trim() !== "" && 
-        isDateValid() &&
+        dayInput.value !== "" && 
+        monthInput.value !== "" && 
+        yearInput.value !== "" && 
         desireChildSelected &&
         honorCheckbox.checked;
     
@@ -2919,7 +2904,6 @@ function checkFormValidity() {
 }
 
 [regionInput, dayInput, monthInput, yearInput].forEach(input => {
-    input.addEventListener('input', checkFormValidity);
     input.addEventListener('change', checkFormValidity);
 });
 
@@ -2952,20 +2936,29 @@ photoBox.addEventListener('click', ()=>{
     fileInput.click();
 });
 
+// Fonction de validation avec loader comme inscription manuelle
 submitBtn.addEventListener('click', async function() {
     submitBtn.disabled = true;
-    const originalText = buttonText.textContent;
-    buttonText.innerHTML = '<span class="loader"></span> Validation...';
+    loader.style.display = 'flex';
+    loadingMessage.innerText = '${t('sendingRequest') || 'Création de votre profil...'}';
     
     try {
         const day = dayInput.value;
         const month = monthInput.value;
         const year = yearInput.value;
         
-        if (!isDateValid()) {
-            alert("Date de naissance invalide. Veuillez vérifier le jour, le mois et l'année.");
+        if (!day || !month || !year) {
+            alert("${t('dob')} ${t('required')}");
+            loader.style.display = 'none';
             submitBtn.disabled = false;
-            buttonText.textContent = originalText;
+            return;
+        }
+        
+        const maxDays = getMaxDays(month, year);
+        if (parseInt(day) > maxDays) {
+            alert("Date invalide : le mois " + month + " n'a que " + maxDays + " jours");
+            loader.style.display = 'none';
+            submitBtn.disabled = false;
             return;
         }
         
@@ -3005,23 +2998,20 @@ submitBtn.addEventListener('click', async function() {
         const data = await res.json();
         
         setTimeout(() => {
+            loader.style.display = 'none';
             if (data.success) {
-                successMessage.style.display = 'block';
-                setTimeout(() => {
-                    window.location.href = '/profile';
-                }, 2000);
+                window.location.href = '/profile';
             } else {
                 alert("Erreur lors de l'inscription: " + (data.error || "Inconnue"));
                 submitBtn.disabled = false;
-                buttonText.textContent = originalText;
             }
         }, 1500);
         
     } catch (error) {
         console.error("Erreur lors de la validation:", error);
+        loader.style.display = 'none';
         alert("Erreur de connexion au serveur");
         submitBtn.disabled = false;
-        buttonText.textContent = originalText;
     }
 });
 
