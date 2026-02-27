@@ -3996,7 +3996,7 @@ app.get('/chat', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// SETTINGS
+// SETTINGS - AVEC TRADUCTIONS COMPLÈTES
 // ============================================
 app.get('/settings', requireAuth, async (req, res) => {
     try {
@@ -4012,135 +4012,182 @@ app.get('/settings', requireAuth, async (req, res) => {
     <title>${t('appName')} - ${t('settingsTitle')}</title>
     ${styles}
     ${notifyScript}
+    <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #ff416c;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .danger-zone {
+            border: 2px solid #dc3545;
+            margin-top: 20px;
+        }
+        #delete-confirm-popup {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-shell">
-        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
-        
-        <div id="delete-confirm-popup">
-            <div class="popup-card" style="max-width:340px;">
-                <div class="popup-icon">⚠️</div>
-                <h3 style="color:#dc3545; margin-bottom:15px;">Supprimer le compte ?</h3>
-                <p style="color:#666; margin-bottom:25px; font-size:1rem;">
-                    Voulez-vous vraiment supprimer votre compte ?<br>
-                    <strong>Cette action effacera définitivement toutes vos données.</strong>
-                </p>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="confirmDelete()" style="flex:1; background:#dc3545; color:white; border:none; padding:15px; border-radius:50px; font-weight:bold; cursor:pointer;">Oui, supprimer</button>
-                    <button onclick="closeDeletePopup()" style="flex:1; background:#eee; color:#333; border:none; padding:15px; border-radius:50px; font-weight:bold; cursor:pointer;">Annuler</button>
-                </div>
+<div class="app-shell">
+    <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+    
+    <div id="delete-confirm-popup">
+        <div class="popup-card" style="max-width:340px;">
+            <div class="popup-icon">⚠️</div>
+            <h3 style="color:#dc3545; margin-bottom:15px;">${t('deleteAccount')}</h3>
+            <p style="color:#666; margin-bottom:25px; font-size:1rem;">
+                ${t('confirmDelete')}<br>
+                <strong>${t('deleteWarning') || 'Cette action effacera définitivement toutes vos données.'}</strong>
+            </p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="confirmDelete()" style="flex:1; background:#dc3545; color:white; border:none; padding:15px; border-radius:50px; font-weight:bold; cursor:pointer;">${t('delete')}</button>
+                <button onclick="closeDeletePopup()" style="flex:1; background:#eee; color:#333; border:none; padding:15px; border-radius:50px; font-weight:bold; cursor:pointer;">${t('cancel') || 'Annuler'}</button>
             </div>
         </div>
-        
-        <div style="padding:25px; background:white; text-align:center;">
-            <div style="font-size:2.5rem; font-weight:bold;">
-                <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
-            </div>
-        </div>
-        
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">CONFIDENTIALITÉ</div>
-        <div class="st-group">
-            <div class="st-item">
-                <span>${t('visibility')}</span>
-                <label class="switch">
-                    <input type="checkbox" id="visibilitySwitch" ${currentUser.isPublic ? 'checked' : ''} onchange="updateVisibility(this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="st-item" style="font-size:0.8rem; color:#666;">
-                Statut actuel : <b id="status" style="color:#ff416c;">${currentUser.isPublic ? 'Public' : 'Privé'}</b>
-            </div>
-        </div>
-        
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">${t('language')}</div>
-        <div class="st-group">
-            <div class="st-item">
-                <span>${t('language')}</span>
-                <select onchange="window.location.href='/lang/'+this.value" style="padding:8px; border-radius:10px; border:1px solid #ddd;">
-                    <option value="fr" ${currentUser.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
-                    <option value="en" ${currentUser.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
-                    <option value="pt" ${currentUser.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
-                    <option value="es" ${currentUser.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
-                    <option value="ar" ${currentUser.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
-                    <option value="zh" ${currentUser.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
-                </select>
-            </div>
-        </div>
-        
-        <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">COMPTE</div>
-        <div class="st-group">
-            <a href="/edit-profile" style="text-decoration:none;" class="st-item">
-                <span>✏️ ${t('editProfile')}</span>
-                <b>Modifier ➔</b>
-            </a>
-            <a href="/blocked-list" style="text-decoration:none;" class="st-item">
-                <span>🚫 ${t('blockedUsers')}</span>
-                <b>${blockedCount} ➔</b>
-            </a>
-        </div>
-        
-        <div class="st-group danger-zone">
-            <div class="st-item" style="color:#dc3545; font-weight:bold; justify-content:center;">
-                ⚠️ ${t('dangerZone')} ⚠️
-            </div>
-            <div style="padding:20px; text-align:center;">
-                <p style="color:#666; margin-bottom:20px; font-size:0.95rem;">
-                    ${t('deleteAccount')}
-                </p>
-                <button id="deleteBtn" class="btn-action btn-block" style="background:#dc3545; color:white; padding:15px; width:100%; font-size:1.1rem;" onclick="showDeleteConfirmation()">
-                    🗑️ ${t('delete')}
-                </button>
-            </div>
-        </div>
-        
-        <a href="/profile" class="btn-pink">${t('backProfile')}</a>
-        <a href="/logout-success" class="btn-dark" style="text-decoration:none;">${t('logout')}</a>
     </div>
     
-    <script>
-        function showDeleteConfirmation() {
-            document.getElementById('delete-confirm-popup').style.display = 'flex';
+    <div style="padding:25px; background:white; text-align:center;">
+        <div style="font-size:2.5rem; font-weight:bold;">
+            <span style="color:#1a2a44;">Gen</span><span style="color:#ff416c;">love</span>
+        </div>
+    </div>
+    
+    <!-- CONFIDENTIALITÉ corrigé -->
+    <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">${t('confidentiality')}</div>
+    <div class="st-group">
+        <div class="st-item">
+            <span>${t('visibility')}</span>
+            <label class="switch">
+                <input type="checkbox" id="visibilitySwitch" ${currentUser.isPublic ? 'checked' : ''} onchange="updateVisibility(this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <!-- Statut actuel corrigé -->
+        <div class="st-item" style="font-size:0.8rem; color:#666;">
+            ${t('currentStatus')} : <b id="status" style="color:#ff416c;">${currentUser.isPublic ? t('public') : t('private')}</b>
+        </div>
+    </div>
+    
+    <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">${t('language')}</div>
+    <div class="st-group">
+        <div class="st-item">
+            <span>${t('language')}</span>
+            <select onchange="window.location.href='/lang/'+this.value" style="padding:8px; border-radius:10px; border:1px solid #ddd;">
+                <option value="fr" ${currentUser.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
+                <option value="en" ${currentUser.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
+                <option value="pt" ${currentUser.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
+                <option value="es" ${currentUser.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
+                <option value="ar" ${currentUser.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
+                <option value="zh" ${currentUser.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
+            </select>
+        </div>
+    </div>
+    
+    <div style="padding:15px 20px 5px 20px; font-size:0.75rem; color:#888; font-weight:bold;">${t('account') || 'COMPTE'}</div>
+    <div class="st-group">
+        <!-- Modifier corrigé -->
+        <a href="/edit-profile" style="text-decoration:none;" class="st-item">
+            <span>✏️ ${t('editProfile')}</span>
+            <b>${t('modify')} ➔</b>
+        </a>
+        <a href="/blocked-list" style="text-decoration:none;" class="st-item">
+            <span>🚫 ${t('blockedUsers')}</span>
+            <b>${blockedCount} ➔</b>
+        </a>
+    </div>
+    
+    <div class="st-group danger-zone">
+        <div class="st-item" style="color:#dc3545; font-weight:bold; justify-content:center;">
+            ⚠️ ${t('dangerZone')} ⚠️
+        </div>
+        <div style="padding:20px; text-align:center;">
+            <p style="color:#666; margin-bottom:20px; font-size:0.95rem;">
+                ${t('deleteAccount')}
+            </p>
+            <button id="deleteBtn" class="btn-action btn-block" style="background:#dc3545; color:white; padding:15px; width:100%; font-size:1.1rem;" onclick="showDeleteConfirmation()">
+                🗑️ ${t('delete')}
+            </button>
+        </div>
+    </div>
+    
+    <a href="/profile" class="btn-pink">← ${t('backProfile')}</a>
+    <a href="/logout-success" class="btn-dark" style="text-decoration:none;">${t('logout')}</a>
+</div>
+
+<script>
+function showDeleteConfirmation() {
+    document.getElementById('delete-confirm-popup').style.display = 'flex';
+}
+
+function closeDeletePopup() {
+    document.getElementById('delete-confirm-popup').style.display = 'none';
+}
+
+async function confirmDelete() {
+    closeDeletePopup();
+    showNotify('${t('deleting') || 'Suppression en cours...'}', 'info');
+    try {
+        const res = await fetch('/api/delete-account', { method: 'DELETE' });
+        if (res.ok) {
+            showNotify('${t('deleteSuccess') || 'Compte supprimé'}', 'success');
+            setTimeout(() => window.location.href = '/', 1500);
+        } else {
+            showNotify('${t('deleteError') || 'Erreur lors de la suppression'}', 'error');
         }
-        
-        function closeDeletePopup() {
-            document.getElementById('delete-confirm-popup').style.display = 'none';
-        }
-        
-        async function confirmDelete() {
-            closeDeletePopup();
-            showNotify('Suppression en cours...', 'info');
-            try {
-                const res = await fetch('/api/delete-account', { method: 'DELETE' });
-                if (res.ok) {
-                    showNotify('Compte supprimé', 'success');
-                    setTimeout(() => window.location.href = '/', 1500);
-                } else {
-                    showNotify('Erreur lors de la suppression', 'error');
-                }
-            } catch(e) {
-                showNotify('Erreur réseau', 'error');
-            }
-        }
-        
-        async function updateVisibility(isPublic) {
-            const status = document.getElementById('status');
-            status.innerText = isPublic ? 'Public' : 'Privé';
-            
-            const res = await fetch('/api/visibility', {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ isPublic })
-            });
-            
-            if (res.ok) {
-                showNotify('Visibilité mise à jour', 'success');
-            } else {
-                showNotify('Erreur lors de la mise à jour', 'error');
-                document.getElementById('visibilitySwitch').checked = !isPublic;
-                status.innerText = !isPublic ? 'Public' : 'Privé';
-            }
-        }
-    </script>
+    } catch(e) {
+        showNotify('${t('networkError') || 'Erreur réseau'}', 'error');
+    }
+}
+
+async function updateVisibility(isPublic) {
+    const status = document.getElementById('status');
+    status.innerText = isPublic ? '${t('public')}' : '${t('private')}';
+    const res = await fetch('/api/visibility', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ isPublic })
+    });
+    if (!res.ok) {
+        showNotify('${t('updateError') || 'Erreur lors de la mise à jour'}', 'error');
+        document.getElementById('visibilitySwitch').checked = !isPublic;
+        status.innerText = !isPublic ? '${t('public')}' : '${t('private')}';
+    }
+}
+</script>
 </body>
 </html>`);
     } catch(error) {
@@ -4148,7 +4195,6 @@ app.get('/settings', requireAuth, async (req, res) => {
         res.status(500).send('Erreur paramètres');
     }
 });
-
 // ============================================
 // ============================================
 // EDIT PROFILE - AVEC TRADUCTIONS COMPLÈTES
