@@ -252,13 +252,26 @@ const translations = {
         yourLocation: 'Votre localisation',
         lifeProject: 'Projet de vie',
         
-        // 🔴 NOUVELLES CLÉS POUR LE PROFIL
+        // 🔴 NOUVELLES CLÉS POUR LE PROFIL (Paramètres, etc.)
         medicalData: 'DONNÉES CERTIFICAT MÉDICAL',
         nonModifiable: 'NON MODIFIABLES',
         protectedSource: 'Protégé (source: certificat)',
         personalData: 'DONNÉES PERSONNELLES',
         modifiable: 'MODIFIABLES',
-        errorOccurred: 'Erreur lors de la modification'
+        errorOccurred: 'Erreur lors de la modification',
+        automaticData: 'DONNÉES AUTOMATIQUES',
+        certificate: 'CERTIFICAT',
+        labCertified: 'Certifié par laboratoire',
+        selfDeclared: 'Auto-déclaré',
+        confidentiality: 'CONFIDENTIALITÉ',
+        currentStatus: 'Statut actuel',
+        public: 'Public',
+        private: 'Privé',
+        modify: 'Modifier',
+        sectionTitle: 'Aidez vos partenaires à en savoir un peu plus sur vous',
+        subText: 'Veuillez remplir les cases ci-dessous :',
+        photoPlaceholder: 'Ajouter photo',
+        birthDate: 'Date de naissance'
     },
     en: {
         appName: 'Genlove',
@@ -410,13 +423,26 @@ const translations = {
         yourLocation: 'Your location',
         lifeProject: 'Life project',
         
-        // 🔴 NOUVELLES CLÉS POUR LE PROFIL
+        // 🔴 NOUVELLES CLÉS POUR LE PROFIL (Paramètres, etc.)
         medicalData: 'MEDICAL CERTIFICATE DATA',
         nonModifiable: 'NON-MODIFIABLE',
         protectedSource: 'Protected (source: certificate)',
         personalData: 'PERSONAL DATA',
         modifiable: 'MODIFIABLE',
-        errorOccurred: 'Error during modification'
+        errorOccurred: 'Error during modification',
+        automaticData: 'AUTOMATIC DATA',
+        certificate: 'CERTIFICATE',
+        labCertified: 'Certified by laboratory',
+        selfDeclared: 'Self-declared',
+        confidentiality: 'CONFIDENTIALITY',
+        currentStatus: 'Current status',
+        public: 'Public',
+        private: 'Private',
+        modify: 'Edit',
+        sectionTitle: 'Help your partners know more about you',
+        subText: 'Please fill in the fields below:',
+        photoPlaceholder: 'Add photo',
+        birthDate: 'Date of birth'
     },
     pt: {
         appName: 'Genlove',
@@ -568,13 +594,26 @@ const translations = {
         yourLocation: 'Sua localização',
         lifeProject: 'Projeto de vida',
         
-        // 🔴 NOUVELLES CLÉS POUR LE PROFIL
+        // 🔴 NOUVELLES CLÉS POUR LE PROFIL (Paramètres, etc.)
         medicalData: 'DADOS DO CERTIFICADO MÉDICO',
         nonModifiable: 'NÃO MODIFICÁVEIS',
         protectedSource: 'Protegido (fonte: certificado)',
         personalData: 'DADOS PESSOAIS',
         modifiable: 'MODIFICÁVEIS',
-        errorOccurred: 'Erro durante a modificação'
+        errorOccurred: 'Erro durante a modificação',
+        automaticData: 'DADOS AUTOMÁTICOS',
+        certificate: 'CERTIFICADO',
+        labCertified: 'Certificado por laboratório',
+        selfDeclared: 'Autodeclarado',
+        confidentiality: 'CONFIDENCIALIDADE',
+        currentStatus: 'Status atual',
+        public: 'Público',
+        private: 'Privado',
+        modify: 'Editar',
+        sectionTitle: 'Ajude seus parceiros a saberem mais sobre você',
+        subText: 'Preencha os campos abaixo:',
+        photoPlaceholder: 'Adicionar foto',
+        birthDate: 'Data de nascimento'
     },
     es: {
         appName: 'Genlove',
@@ -726,13 +765,26 @@ const translations = {
         yourLocation: ' Su ubicación',
         lifeProject: ' Proyecto de vida',
         
-        // 🔴 NOUVELLES CLÉS POUR LE PROFIL
+        // 🔴 NOUVELLES CLÉS POUR LE PROFIL (Paramètres, etc.)
         medicalData: 'DATOS DEL CERTIFICADO MÉDICO',
         nonModifiable: 'NO MODIFICABLES',
         protectedSource: 'Protegido (fuente: certificado)',
         personalData: 'DATOS PERSONALES',
         modifiable: 'MODIFICABLES',
-        errorOccurred: 'Error durante la modificación'
+        errorOccurred: 'Error durante la modificación',
+        automaticData: 'DATOS AUTOMÁTICOS',
+        certificate: 'CERTIFICADO',
+        labCertified: 'Certificado por laboratorio',
+        selfDeclared: 'Autodeclarado',
+        confidentiality: 'CONFIDENCIALIDAD',
+        currentStatus: 'Estado actual',
+        public: 'Público',
+        private: 'Privado',
+        modify: 'Editar',
+        sectionTitle: 'Ayuda a tus compañeros a saber más sobre ti',
+        subText: 'Complete los campos a continuación:',
+        photoPlaceholder: 'Añadir foto',
+        birthDate: 'Fecha de nacimiento'
     },
     ar: {
         appName: 'جينلوف',
@@ -884,13 +936,26 @@ const translations = {
         yourLocation: 'موقعك',
         lifeProject: 'مشروع الحياة',
         
-        // 🔴 NOUVELLES CLÉS POUR LE PROFIL
+        // 🔴 NOUVELLES CLÉS POUR LE PROFIL (Paramètres, etc.)
         medicalData: 'بيانات الشهادة الطبية',
         nonModifiable: 'غير قابلة للتعديل',
         protectedSource: 'محمي (المصدر: شهادة)',
         personalData: 'البيانات الشخصية',
         modifiable: 'قابلة للتعديل',
-        errorOccurred: 'خطأ أثناء التعديل'
+        errorOccurred: 'خطأ أثناء التعديل',
+        automaticData: 'بيانات تلقائية',
+        certificate: 'شهادة',
+        labCertified: 'معتمد من المختبر',
+        selfDeclared: 'معلن ذاتياً',
+        confidentiality: 'السرية',
+        currentStatus: 'الحالة الحالية',
+        public: 'عام',
+        private: 'خاص',
+        modify: 'تعديل',
+        sectionTitle: 'ساعد شركاءك على معرفة المزيد عنك',
+        subText: 'يرجى ملء الحقول أدناه:',
+        photoPlaceholder: 'إضافة صورة',
+        birthDate: 'تاريخ الميلاد'
     },
     zh: {
         appName: '真爱基因',
@@ -1042,13 +1107,26 @@ const translations = {
         yourLocation: '您的位置',
         lifeProject: '人生计划',
         
-        // 🔴 NOUVELLES CLÉS POUR LE PROFIL
+        // 🔴 NOUVELLES CLÉS POUR LE PROFIL (Paramètres, etc.)
         medicalData: '医疗证书数据',
         nonModifiable: '不可修改',
         protectedSource: '受保护（来源：证书）',
         personalData: '个人数据',
         modifiable: '可修改',
-        errorOccurred: '修改时出错'
+        errorOccurred: '修改时出错',
+        automaticData: '自动数据',
+        certificate: '证书',
+        labCertified: '实验室认证',
+        selfDeclared: '自我声明',
+        confidentiality: '保密',
+        currentStatus: '当前状态',
+        public: '公开',
+        private: '私密',
+        modify: '编辑',
+        sectionTitle: '帮助您的伴侣更多了解您',
+        subText: '请填写以下字段：',
+        photoPlaceholder: '添加照片',
+        birthDate: '出生日期'
     }
 };
 
@@ -4239,6 +4317,22 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
             margin-bottom: 20px;
             color: #1a2a44;
         }
+        
+        /* Styles pour les titres de section */
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 6px;
+            color: #1a2a44;
+        }
+        
+        .sub-text {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -4248,10 +4342,10 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
         <h2>${t('editProfile')}</h2>
         
         <!-- ============================================ -->
-        <!-- DONNÉES PROTÉGÉES (NON MODIFIABLES) - TRADUIT -->
+        <!-- DONNÉES PROTÉGÉES (NON MODIFIABLES) -->
         <!-- ============================================ -->
         <div style="margin-bottom: 5px;">
-            <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ ${t('medicalData')} (${t('nonModifiable')})</span>
+            <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ ${t('automaticData')} (${t('certificate')})</span>
         </div>
         
         <!-- SI L'UTILISATEUR VIENT D'UN QR CODE (qrVerified = true), ON BLOQUE LES CHAMPS -->
@@ -4313,13 +4407,27 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
         <div style="height: 2px; background: linear-gradient(90deg, transparent, #ff416c, transparent); margin: 25px 0 15px 0; opacity: 0.3;"></div>
         
         <!-- ============================================ -->
-        <!-- DONNÉES MODIFIABLES (POUR TOUS) - TRADUIT -->
+        <!-- PHRASE D'INTRODUCTION POUR DONNÉES PERSONNELLES -->
+        <!-- ============================================ -->
+        <div class="section-title">${t('sectionTitle')}</div>
+        <div class="sub-text">${t('subText')}</div>
+        
+        <!-- ============================================ -->
+        <!-- DONNÉES MODIFIABLES (POUR TOUS) -->
         <!-- ============================================ -->
         <div style="margin-bottom: 15px;">
             <span style="font-size: 12px; color: #ff416c; font-weight: bold;">✎ ${t('personalData')} (${t('modifiable')})</span>
         </div>
         
         <form id="editForm">
+            <!-- Photo - MODIFIABLE -->
+            <div class="input-label">${t('photoPlaceholder') || 'Photo de profil'}</div>
+            <div class="photo-circle" id="photoCircle" style="background-image: url('${user.photo || ''}');" onclick="document.getElementById('photoInput').click()">
+                <span id="photoText" style="${user.photo ? 'display:none;' : ''}">📸</span>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="previewPhoto(event)">
+            <input type="hidden" name="photo" id="photoBase64" value="${user.photo || ''}">
+            
             <!-- Date de naissance - MODIFIABLE -->
             <div class="input-label">${t('dob')}</div>
             ${datePicker}
@@ -4338,14 +4446,6 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
                 <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
                 <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
             </select>
-            
-            <!-- Photo - MODIFIABLE -->
-            <div class="input-label">${t('photoPlaceholder') || 'Photo de profil'}</div>
-            <div class="photo-circle" id="photoCircle" style="background-image: url('${user.photo || ''}');" onclick="document.getElementById('photoInput').click()">
-                <span id="photoText" style="${user.photo ? 'display:none;' : ''}">📸</span>
-            </div>
-            <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="previewPhoto(event)">
-            <input type="hidden" name="photo" id="photoBase64" value="${user.photo || ''}">
             
             <button type="submit" class="btn-pink">${t('editProfile')}</button>
         </form>
