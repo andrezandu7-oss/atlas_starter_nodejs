@@ -2233,7 +2233,6 @@ app.get('/signup-choice', (req, res) => {
 
 // ============================================
 // ============================================
-// ============================================
 // INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS)
 // ============================================
 app.get('/signup-qr', (req, res) => {
@@ -2266,7 +2265,7 @@ body {
 /* QR Scanner carré */
 #reader {
     width: 70vw;
-    height: 70vw; /* carré parfait */
+    height: 70vw;
     max-width: 300px;
     max-height: 300px;
     margin: 0 auto 20px;
@@ -2292,7 +2291,6 @@ body {
     display: none;
 }
 
-/* Form Fields */
 input[type="text"], input[type="number"], select {
     width: 100%;
     padding: 12px;
@@ -2304,14 +2302,12 @@ input[type="text"], input[type="number"], select {
     transition: background-color 0.5s ease;
 }
 
-/* Style pour les champs en lecture seule (partie automatique) */
 input[readonly] {
     background-color: #f3f4f6;
     cursor: not-allowed;
     opacity: 0.9;
 }
 
-/* Photo box avec aperçu (partie manuelle) */
 .photo-box {
     display: flex;
     align-items: center;
@@ -2354,7 +2350,6 @@ input[readonly] {
     opacity: 1;
 }
 
-/* Style pour le titre de la date (partie manuelle) */
 .date-title {
     font-size: 14px;
     font-weight: 600;
@@ -2363,11 +2358,6 @@ input[readonly] {
     margin-top: 10px;
 }
 
-.date-title:first-of-type {
-    margin-top: 0;
-}
-
-/* Date row (partie manuelle) */
 .date-row {
     display: flex;
     gap: 8px;
@@ -2379,7 +2369,6 @@ input[readonly] {
     text-align: center;
 }
 
-/* Style pour les erreurs de date */
 .date-error {
     color: #dc2626;
     font-size: 12px;
@@ -2389,7 +2378,6 @@ input[readonly] {
     text-align: center;
 }
 
-/* Style pour le projet de vie (partie manuelle) */
 .life-project-container {
     margin-bottom: 20px;
 }
@@ -2426,7 +2414,6 @@ input[readonly] {
     cursor: pointer;
 }
 
-/* Checkbox serment */
 .checkbox-container {
     display: flex;
     align-items: flex-start;
@@ -2435,7 +2422,6 @@ input[readonly] {
     margin-bottom: 20px;
 }
 
-/* Bouton final */
 button {
     width: 100%;
     padding: 16px;
@@ -2458,7 +2444,6 @@ button:not(:disabled):hover {
     background-color: #be185d;
 }
 
-/* Sections */
 .section-title {
     font-weight: bold;
     font-size: 16px;
@@ -2474,7 +2459,6 @@ button:not(:disabled):hover {
     margin-bottom: 20px;
 }
 
-/* Loader */
 .loader {
     display: inline-block;
     width: 20px;
@@ -2491,7 +2475,6 @@ button:not(:disabled):hover {
     to { transform: rotate(360deg); }
 }
 
-/* Message de succès */
 .success-message {
     background-color: #10b981;
     color: white;
@@ -2503,7 +2486,6 @@ button:not(:disabled):hover {
     font-weight: bold;
 }
 
-/* Sélecteur de langue */
 .language-selector-compact {
     position: relative;
     margin: 10px 0 20px;
@@ -2561,7 +2543,6 @@ button:not(:disabled):hover {
     background: #f8f9fa;
 }
 
-/* Séparateur visuel entre les deux parties */
 .partition-line {
     height: 2px;
     background: linear-gradient(90deg, transparent, #ff416c, transparent);
@@ -2599,7 +2580,7 @@ button:not(:disabled):hover {
     <!-- PREMIÈRE PARTIE : Remplissage automatique QR -->
     <!-- ============================================ -->
     <div style="margin-bottom: 10px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ DONNÉES AUTOMATIQUES (CERTIFICAT)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ ${t('automaticData')} (${t('certificate')})</span>
     </div>
     
     <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
@@ -2614,36 +2595,36 @@ button:not(:disabled):hover {
     <!-- ============================================ -->
     <!-- DEUXIÈME PARTIE : Saisie manuelle -->
     <!-- ============================================ -->
-    <div class="section-title">${t('sectionTitle') || 'Aidez vos partenaires à en savoir un peu plus sur vous'}</div>
-    <div class="sub-text">${t('subText') || 'Veuillez remplir les cases ci-dessous :'}</div>
+    <div class="section-title">${t('sectionTitle')}</div>
+    <div class="sub-text">${t('subText')}</div>
 
     <!-- Photo box -->
     <div class="photo-box" id="photoBox">
-        <span id="photoPlaceholder">${t('photoPlaceholder') || 'Ajouter photo'}</span>
+        <span id="photoPlaceholder">${t('photoPlaceholder')}</span>
     </div>
     
     <!-- Région -->
     <input type="text" placeholder="${t('region')}" id="region" required>
 
     <!-- DATE DE NAISSANCE (PARTIE MANUELLE) AVEC VALIDATION -->
-    <div class="date-title">📅 ${t('birthDate') || 'Date de naissance'}</div>
+    <div class="date-title">📅 ${t('birthDate')}</div>
     
     <div class="date-row">
-        <input type="number" placeholder="${t('day') || 'Jour'}" min="1" max="31" id="day" required oninput="validateDay()">
-        <input type="number" placeholder="${t('month') || 'Mois'}" min="1" max="12" id="month" required oninput="validateMonth()">
-        <input type="number" placeholder="${t('year') || 'Année'}" min="1900" max="2100" id="year" required oninput="validateYear()">
+        <input type="number" placeholder="${t('day')}" min="1" max="31" id="day" required oninput="validateDay()">
+        <input type="number" placeholder="${t('month')}" min="1" max="12" id="month" required oninput="validateMonth()">
+        <input type="number" placeholder="${t('year')}" min="1900" max="2100" id="year" required oninput="validateYear()">
     </div>
     <div id="dateError" class="date-error">Date invalide</div>
 
     <!-- Projet de vie (Désir d'enfant) -->
     <div class="life-project-container">
-        <div class="life-project-title">👶 ${t('desireChild') || 'Désir d\'enfant ?'}</div>
+        <div class="life-project-title">👶 ${t('desireChild')}</div>
         <div class="life-project-options">
             <label>
-                <input type="radio" name="desireChild" value="Oui" required> ${t('yes') || 'Oui'}
+                <input type="radio" name="desireChild" value="Oui" required> ${t('yes')}
             </label>
             <label>
-                <input type="radio" name="desireChild" value="Non" required> ${t('no') || 'Non'}
+                <input type="radio" name="desireChild" value="Non" required> ${t('no')}
             </label>
         </div>
     </div>
@@ -2661,7 +2642,7 @@ button:not(:disabled):hover {
 
     <!-- Message de succès -->
     <div id="successMessage" class="success-message">
-        ✅ ${t('successMessage') || 'Profil validé avec succès !'}
+        ✅ ${t('successMessage')}
     </div>
 
 </div>
@@ -2812,20 +2793,15 @@ function getMaxDays(month, year) {
     const m = parseInt(month);
     const y = parseInt(year);
     
-    // Mois de 31 jours
     if ([1, 3, 5, 7, 8, 10, 12].includes(m)) return 31;
-    // Mois de 30 jours
     if ([4, 6, 9, 11].includes(m)) return 30;
-    // Février
     if (m === 2) {
-        // Année bissextile
         if ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) return 29;
         return 28;
     }
     return 31;
 }
 
-// Validation du jour
 function validateDay() {
     const day = dayInput.value;
     const month = monthInput.value;
@@ -2843,7 +2819,6 @@ function validateDay() {
     checkFormValidity();
 }
 
-// Validation du mois
 function validateMonth() {
     const month = monthInput.value;
     const day = dayInput.value;
@@ -2864,7 +2839,6 @@ function validateMonth() {
     checkFormValidity();
 }
 
-// Validation de l'année
 function validateYear() {
     const year = yearInput.value;
     const day = dayInput.value;
@@ -2885,7 +2859,6 @@ function validateYear() {
     checkFormValidity();
 }
 
-// Validation de la date complète
 function isDateValid() {
     const day = dayInput.value;
     const month = monthInput.value;
@@ -2908,7 +2881,6 @@ function isDateValid() {
 }
 
 function extractValueFromPrefixed(input) {
-    // Extrait la valeur après le préfixe "Label : "
     const value = input.value;
     const colonIndex = value.indexOf(':');
     if (colonIndex !== -1) {
@@ -2918,7 +2890,6 @@ function extractValueFromPrefixed(input) {
 }
 
 function checkFormValidity() {
-    // Vérifier si un radio "désir d'enfant" est sélectionné
     let desireChildSelected = false;
     for (let radio of desireChildRadios) {
         if (radio.checked) {
@@ -2927,7 +2898,6 @@ function checkFormValidity() {
         }
     }
     
-    // Extraire les valeurs sans les préfixes pour la validation
     const firstNameValue = extractValueFromPrefixed(firstNameInput);
     const lastNameValue = extractValueFromPrefixed(lastNameInput);
     const genderValue = extractValueFromPrefixed(genderInput);
@@ -2941,14 +2911,13 @@ function checkFormValidity() {
         genotypeValue !== "" &&
         bloodGroupValue !== "" &&
         regionInput.value.trim() !== "" && 
-        isDateValid() && // Validation intelligente de la date
+        isDateValid() &&
         desireChildSelected &&
         honorCheckbox.checked;
     
     submitBtn.disabled = !allFieldsFilled;
 }
 
-// Ajouter les écouteurs d'événements
 [regionInput, dayInput, monthInput, yearInput].forEach(input => {
     input.addEventListener('input', checkFormValidity);
     input.addEventListener('change', checkFormValidity);
@@ -2960,7 +2929,6 @@ for (let radio of desireChildRadios) {
 
 honorCheckbox.addEventListener('change', checkFormValidity);
 
-// Vérification initiale
 checkFormValidity();
 
 photoBox.addEventListener('click', ()=>{
@@ -3001,7 +2969,6 @@ submitBtn.addEventListener('click', async function() {
             return;
         }
         
-        // Récupérer la valeur du désir d'enfant
         let desireChildValue = '';
         for (let radio of desireChildRadios) {
             if (radio.checked) {
@@ -3012,7 +2979,6 @@ submitBtn.addEventListener('click', async function() {
         
         const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
         
-        // Extraire les valeurs sans les préfixes
         const userData = {
             firstName: extractValueFromPrefixed(firstNameInput),
             lastName: extractValueFromPrefixed(lastNameInput),
