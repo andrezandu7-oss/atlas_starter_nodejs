@@ -3236,21 +3236,21 @@ app.get('/signup-manual', (req, res) => {
 });
 
 // ============================================
-// PROFIL
+// PROFIL - AVEC BADGE DE VÉRIFICATION TRADUIT
 // ============================================
 app.get('/profile', requireAuth, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
         if (!user) return res.redirect('/');
-        
         const t = req.t;
         const unreadCount = await Message.countDocuments({ receiverId: user._id, read: false, isBlocked: false });
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
         
+        // 🔴 BADGE DE VÉRIFICATION CORRIGÉ AVEC TRADUCTION
         const verificationBadge = user.qrVerified ? 
-            '<span class="verified-badge">✅ Certifié par laboratoire</span>' : 
-            '<span class="unverified-badge">📝 Auto-déclaré</span>';
+            '<span class="verified-badge">✓ ' + t('labCertified') + '</span>' : 
+            '<span class="unverified-badge">📝 ' + t('selfDeclared') + '</span>';
         
         res.send(`<!DOCTYPE html>
 <html>
@@ -3260,149 +3260,175 @@ app.get('/profile', requireAuth, async (req, res) => {
     <title>${t('appName')} - ${t('myProfile')}</title>
     ${styles}
     ${notifyScript}
+    <style>
+        .profile-unread {
+            background: #ff416c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        .verified-badge {
+            background: #4caf50;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        .unverified-badge {
+            background: #ff9800;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-shell">
-        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
-        
-        <div id="request-popup">
-            <div class="popup-card">
-                <div class="popup-icon">💌</div>
-                <div class="popup-message" id="request-message"></div>
-                <div class="popup-buttons">
-                    <button class="accept-btn" onclick="acceptRequest()">${t('acceptRequest')}</button>
-                    <button class="reject-btn" onclick="rejectRequest()">${t('rejectRequest')}</button>
-                </div>
+<div class="app-shell">
+    <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+    
+    <div id="request-popup">
+        <div class="popup-card">
+            <div class="popup-icon">💌</div>
+            <div class="popup-message" id="request-message"></div>
+            <div class="popup-buttons">
+                <button class="accept-btn" onclick="acceptRequest()">${t('acceptRequest')}</button>
+                <button class="reject-btn" onclick="rejectRequest()">${t('rejectRequest')}</button>
             </div>
-        </div>
-        
-        <div id="rejection-popup">
-            <div class="popup-card">
-                <div class="popup-icon">🌸</div>
-                <div class="popup-message" id="rejection-message"></div>
-                <div class="action-buttons">
-                    <button class="btn-pink" onclick="goToProfile()" style="flex:1;">${t('returnProfile')}</button>
-                    <button class="btn-dark" onclick="goToMatching()" style="flex:1;">${t('newMatch')}</button>
-                </div>
-            </div>
-        </div>
-        
-        <div id="loading-popup">
-            <div class="popup-card">
-                <div class="spinner"></div>
-                <div class="popup-message" id="loading-message">${t('sendingRequest')}</div>
-            </div>
-        </div>
-        
-        <div class="page-white">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <a href="/" class="btn-dark" style="padding: 12px 20px; width: auto;">${t('home')}</a>
-                <a href="/inbox" class="btn-pink" style="padding: 12px 20px; width: auto; display: flex; align-items: center;">
-                    ${t('messages')} ${unreadBadge}
-                </a>
-                <a href="/settings" style="font-size: 2rem; text-decoration: none;">⚙️</a>
-            </div>
-            
-            <div style="display: flex; justify-content: center; margin: 10px 0;">
-                <select onchange="window.location.href='/lang/'+this.value" style="padding: 8px 15px; border-radius: 20px; border: 2px solid #ff416c; background: white; font-size: 1rem;">
-                    <option value="fr" ${user.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
-                    <option value="en" ${user.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
-                    <option value="pt" ${user.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
-                    <option value="es" ${user.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
-                    <option value="ar" ${user.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
-                    <option value="zh" ${user.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
-                </select>
-            </div>
-            
-            <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
-            
-            <h2 style="text-align: center;">${user.firstName} ${user.lastName}</h2>
-            <p style="text-align: center; margin: 5px 0;">${verificationBadge}</p>
-            <p style="text-align: center; font-size:1.2rem;">${user.residence || ''} • ${user.region || ''} • ${genderDisplay}</p>
-            
-            <div class="st-group">
-                <div class="st-item"><span>${t('genotype_label')}</span><b>${user.genotype}</b></div>
-                <div class="st-item"><span>${t('blood_label')}</span><b>${user.bloodGroup}</b></div>
-                <div class="st-item"><span>${t('age_label')}</span><b>${calculerAge(user.dob)} ${t('age_label')}</b></div>
-                <div class="st-item"><span>${t('residence_label')}</span><b>${user.residence || ''}</b></div>
-                <div class="st-item"><span>${t('region_label')}</span><b>${user.region || ''}</b></div>
-                <div class="st-item"><span>${t('project_label')}</span><b>${user.desireChild === 'Oui' ? t('yes') : t('no')}</b></div>
-            </div>
-            
-            <a href="/matching" class="btn-pink">${t('findPartner')}</a>
         </div>
     </div>
     
-    <script>
-        let currentRequestId = null;
+    <div id="rejection-popup">
+        <div class="popup-card">
+            <div class="popup-icon">🌸</div>
+            <div class="popup-message" id="rejection-message"></div>
+            <div class="action-buttons">
+                <button class="btn-pink" onclick="goToProfile()" style="flex:1;">${t('returnProfile')}</button>
+                <button class="btn-dark" onclick="goToMatching()" style="flex:1;">${t('newMatch')}</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading-popup">
+        <div class="popup-card">
+            <div class="spinner"></div>
+            <div class="popup-message" id="loading-message">${t('sendingRequest')}</div>
+        </div>
+    </div>
+    
+    <div class="page-white">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <a href="/" class="btn-dark" style="padding: 12px 20px; width: auto;">${t('home')}</a>
+            <a href="/inbox" class="btn-pink" style="padding: 12px 20px; width: auto; display: flex; align-items: center;">
+                ${t('messages')} ${unreadBadge}
+            </a>
+            <a href="/settings" style="font-size: 2rem; text-decoration: none;">⚙️</a>
+        </div>
         
-        async function checkRequests() {
-            try {
-                const res = await fetch('/api/requests/pending');
-                const reqs = await res.json();
-                if (reqs.length > 0) {
-                    showRequestPopup(reqs[0]);
-                }
-            } catch(e) {}
+        <div style="display: flex; justify-content: center; margin: 10px 0;">
+            <select onchange="window.location.href='/lang/'+this.value" style="padding: 8px 15px; border-radius: 20px; border: 2px solid #ff416c; background: white; font-size: 1rem;">
+                <option value="fr" ${user.language === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
+                <option value="en" ${user.language === 'en' ? 'selected' : ''}>🇬🇧 ${t('english')}</option>
+                <option value="pt" ${user.language === 'pt' ? 'selected' : ''}>🇵🇹 ${t('portuguese')}</option>
+                <option value="es" ${user.language === 'es' ? 'selected' : ''}>🇪🇸 ${t('spanish')}</option>
+                <option value="ar" ${user.language === 'ar' ? 'selected' : ''}>🇸🇦 ${t('arabic')}</option>
+                <option value="zh" ${user.language === 'zh' ? 'selected' : ''}>🇨🇳 ${t('chinese')}</option>
+            </select>
+        </div>
+        
+        <div class="photo-circle" style="background-image:url('${user.photo || ''}');"></div>
+        
+        <h2 style="text-align: center;">${user.firstName} ${user.lastName}</h2>
+        <p style="text-align: center; margin: 5px 0;">${verificationBadge}</p>
+        <p style="text-align: center; font-size:1.2rem;">${user.residence || ''} • ${user.region || ''} • ${genderDisplay}</p>
+        
+        <div class="st-group">
+            <div class="st-item"><span>${t('genotype_label')}</span><b>${user.genotype}</b></div>
+            <div class="st-item"><span>${t('blood_label')}</span><b>${user.bloodGroup}</b></div>
+            <div class="st-item"><span>${t('age_label')}</span><b>${calculateAge(user.dob)}</b></div>
+            <div class="st-item"><span>${t('residence_label')}</span><b>${user.residence || ''}</b></div>
+            <div class="st-item"><span>${t('region_label')}</span><b>${user.region || ''}</b></div>
+            <div class="st-item"><span>${t('project_label')}</span><b>${user.desireChild === 'Oui' ? t('yes') : t('no')}</b></div>
+        </div>
+        
+        <a href="/matching" class="btn-pink">${t('findPartner')}</a>
+    </div>
+</div>
+
+<script>
+let currentRequestId = null;
+
+async function checkRequests() {
+    try {
+        const res = await fetch('/api/requests/pending');
+        const reqs = await res.json();
+        if (reqs.length > 0) {
+            showRequestPopup(reqs[0]);
         }
-        
-        function showRequestPopup(r) {
-            currentRequestId = r._id;
-            const msg = '${t('interestPopup')}'.replace('{name}', r.senderId.firstName);
-            document.getElementById('request-message').innerText = msg;
-            document.getElementById('request-popup').style.display = 'flex';
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    } catch(e) {}
+}
+
+function showRequestPopup(r) {
+    currentRequestId = r._id;
+    const msg = '${t('interestPopup')}'.replace('{name}', r.senderId.firstName);
+    document.getElementById('request-message').innerText = msg;
+    document.getElementById('request-popup').style.display = 'flex';
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+
+async function acceptRequest() {
+    if (!currentRequestId) return;
+    const res = await fetch('/api/requests/' + currentRequestId + '/accept', { method: 'POST' });
+    if (res.ok) {
+        document.getElementById('request-popup').style.display = 'none';
+        window.location.href = '/inbox';
+    }
+}
+
+async function rejectRequest() {
+    if (!currentRequestId) return;
+    const res = await fetch('/api/requests/' + currentRequestId + '/reject', { method: 'POST' });
+    if (res.ok) {
+        document.getElementById('request-popup').style.display = 'none';
+    }
+}
+
+async function checkRejections() {
+    try {
+        const res = await fetch('/api/rejections/unread');
+        const rejs = await res.json();
+        if (rejs.length > 0) {
+            showRejectionPopup(rejs[0]);
         }
-        
-        async function acceptRequest() {
-            if (!currentRequestId) return;
-            const res = await fetch('/api/requests/' + currentRequestId + '/accept', { method: 'POST' });
-            if (res.ok) {
-                document.getElementById('request-popup').style.display = 'none';
-                window.location.href = '/inbox';
-            }
-        }
-        
-        async function rejectRequest() {
-            if (!currentRequestId) return;
-            const res = await fetch('/api/requests/' + currentRequestId + '/reject', { method: 'POST' });
-            if (res.ok) {
-                document.getElementById('request-popup').style.display = 'none';
-            }
-        }
-        
-        async function checkRejections() {
-            try {
-                const res = await fetch('/api/rejections/unread');
-                const rejs = await res.json();
-                if (rejs.length > 0) {
-                    showRejectionPopup(rejs[0]);
-                }
-            } catch(e) {}
-        }
-        
-        function showRejectionPopup(r) {
-            const msg = '${t('rejectionPopup')}'.replace('{name}', r.senderFirstName);
-            document.getElementById('rejection-message').innerText = msg;
-            document.getElementById('rejection-popup').style.display = 'flex';
-            fetch('/api/rejections/' + r.requestId + '/view', { method: 'POST' });
-        }
-        
-        function goToProfile() {
-            document.getElementById('rejection-popup').style.display = 'none';
-            window.location.href = '/profile';
-        }
-        
-        function goToMatching() {
-            document.getElementById('rejection-popup').style.display = 'none';
-            window.location.href = '/matching';
-        }
-        
-        setInterval(checkRequests, 5000);
-        setInterval(checkRejections, 5000);
-        checkRequests();
-        checkRejections();
-    </script>
+    } catch(e) {}
+}
+
+function showRejectionPopup(r) {
+    const msg = '${t('rejectionPopup')}'.replace('{name}', r.senderFirstName);
+    document.getElementById('rejection-message').innerText = msg;
+    document.getElementById('rejection-popup').style.display = 'flex';
+    fetch('/api/rejections/' + r.requestId + '/view', { method: 'POST' });
+}
+
+function goToProfile() {
+    document.getElementById('rejection-popup').style.display = 'none';
+    window.location.href = '/profile';
+}
+
+function goToMatching() {
+    document.getElementById('rejection-popup').style.display = 'none';
+    window.location.href = '/matching';
+}
+
+setInterval(checkRequests, 5000);
+setInterval(checkRejections, 5000);
+checkRequests();
+checkRejections();
+</script>
 </body>
 </html>`);
     } catch(error) {
@@ -3412,18 +3438,16 @@ app.get('/profile', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// MATCHING
+// MATCHING - AVEC BADGE DE CERTIFICATION
 // ============================================
 app.get('/matching', requireAuth, async (req, res) => {
     try {
         const currentUser = await User.findById(req.session.userId);
         if (!currentUser) return res.redirect('/');
-        
         const t = req.t;
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
         const regionFilter = req.query.region || 'all';
         
-        // Récupérer les IDs exclus
         const messages = await Message.find({
             $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
             isBlocked: false
@@ -3444,13 +3468,13 @@ app.get('/matching', requireAuth, async (req, res) => {
         const blockedByArray = currentUser.blockedBy ? currentUser.blockedBy.map(id => id.toString()) : [];
         
         const excludedIds = [...new Set([
-            ...blockedArray, 
+            ...blockedArray,
             ...blockedByArray,
-            ...Array.from(conversationIds), 
+            ...Array.from(conversationIds),
             ...rejectedArray
         ])];
         
-        let query = { 
+        let query = {
             _id: { $ne: currentUser._id },
             gender: currentUser.gender === 'Homme' ? 'Femme' : 'Homme',
             isPublic: true
@@ -3481,25 +3505,26 @@ app.get('/matching', requireAuth, async (req, res) => {
             `;
         } else {
             partners.forEach(p => {
-                const age = calculerAge(p.dob);
-                const verificationBadge = p.qrVerified ? 
-                    '<span class="verified-badge" style="margin-left:5px; font-size:0.7rem;">✅</span>' : '';
+                const age = calculateAge(p.dob);
+                
+                // 🔴 BADGE DE CERTIFICATION BLEU (comme Facebook)
+                const certifiedBadge = p.qrVerified ? 
+                    '<span class="certified-badge" title="' + t('labCertified') + '">✓</span>' : 
+                    '';
                 
                 partnersHTML += `
                     <div class="match-card">
-                        <div class="match-photo-blur" style="background-image:url('${p.photo || ''}'); background-size: cover;"></div>
+                        <div class="match-photo" style="background-image:url('${p.photo || ''}'); background-size: cover; position: relative;">
+                            ${certifiedBadge}
+                        </div>
                         <div class="match-info">
-                            <b style="font-size:1.2rem;">${p.firstName} ${verificationBadge}</b>
+                            <b style="font-size:1.2rem;">${p.firstName} ${certifiedBadge}</b>
                             <br><span style="font-size:0.9rem;">${p.genotype} • ${age} ans</span>
-                            <br><span style="font-size:0.8rem; color:#666;">📍 ${p.residence || ''} (${p.region || ''})</span>
+                            <br><span style="font-size:0.8rem; color:#666;">${p.residence || ''} • ${p.region || ''}</span>
                         </div>
                         <div class="match-actions">
-                            <button class="btn-action btn-contact" onclick="sendInterest('${p._id}')">
-                                💬 ${t('contact')}
-                            </button>
-                            <button class="btn-action btn-details" onclick="showDetails('${p._id}')">
-                                ${t('details')}
-                            </button>
+                            <button class="btn-action btn-contact" onclick="sendInterest('${p._id}')">${t('contact')}</button>
+                            <button class="btn-action btn-details" onclick="showDetails('${p._id}')">${t('details')}</button>
                         </div>
                     </div>
                 `;
@@ -3509,7 +3534,7 @@ app.get('/matching', requireAuth, async (req, res) => {
         const ssasPopup = isSSorAS ? `
             <div id="genlove-popup" style="display:flex;">
                 <div class="popup-card">
-                    <div class="popup-icon">🛡️</div>
+                    <div class="popup-icon">❤️</div>
                     <div class="popup-title">${t('healthCommitment')}</div>
                     <div class="popup-message">
                         ${currentUser.genotype === 'AS' ? t('popupMessageAS') : t('popupMessageSS')}
@@ -3528,156 +3553,244 @@ app.get('/matching', requireAuth, async (req, res) => {
     ${styles}
     ${notifyScript}
     <style>
-        #genlove-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px; }
+        #genlove-popup { display: ${isSSorAS ? 'flex' : 'none'}; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; padding:20px; }
         #loading-popup { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:20000; align-items:center; justify-content:center; padding:20px; }
         #popup-overlay { display: none; }
+        .empty-message { text-align: center; padding: 50px 20px; color: #666; }
+        .empty-message span { font-size: 4rem; display: block; margin-bottom: 20px; }
+        
+        /* 🔴 STYLE POUR LE BADGE DE CERTIFICATION BLEU */
+        .certified-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 22px;
+            height: 22px;
+            background-color: #1e88e5;  /* Bleu Facebook */
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        /* Style pour la photo avec position relative */
+        .match-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
+            background-color: #eee;
+        }
+        
+        .match-card {
+            background: white;
+            border-radius: 25px;
+            margin: 10px 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .match-info {
+            flex: 1;
+        }
+        
+        .match-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-action {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-contact {
+            background: #ff416c;
+            color: white;
+        }
+        
+        .btn-details {
+            background: #1a2a44;
+            color: white;
+        }
+        
+        .filter-container {
+            padding: 15px;
+            background: white;
+            margin: 10px 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: #f8f9fa;
+        }
     </style>
 </head>
 <body>
-    <div class="app-shell">
-        <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
-        
-        ${ssasPopup}
-        
-        <div id="loading-popup">
-            <div class="popup-card">
-                <div class="spinner"></div>
-                <div class="popup-message" id="loading-message">${t('sendingRequest')}</div>
-            </div>
+<div class="app-shell">
+    <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+    ${ssasPopup}
+    
+    <div id="loading-popup">
+        <div class="popup-card">
+            <div class="spinner"></div>
+            <div class="popup-message" id="loading-message">${t('sendingRequest')}</div>
         </div>
-        
-        <div id="popup-overlay" onclick="closePopup()">
-            <div class="popup-content" onclick="event.stopPropagation()">
-                <span class="close-popup" onclick="closePopup()">&times;</span>
-                <h3 id="pop-name" style="color:#ff416c; margin-top:0;">${t('details')}</h3>
-                <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
-                <div id="pop-msg" class="popup-msg"></div>
-                <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="sendInterestFromPopup()"> ${t('contact')}</button>
-            </div>
-        </div>
-        
-        <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;">
-            <h3 style="margin:0; color:#1a2a44;">${t('compatiblePartners')}</h3>
-        </div>
-        
-        <div class="filter-container">
-            <select id="regionFilter" class="input-box" style="margin:0;" onchange="applyRegionFilter()">
-                <option value="all" ${regionFilter === 'all' ? 'selected' : ''}>${t('allRegions')}</option>
-                <option value="mine" ${regionFilter === 'mine' ? 'selected' : ''}>${t('myRegion')} (${currentUser.region || ''})</option>
-            </select>
-        </div>
-        
-        <div id="match-container">
-            ${partnersHTML}
-        </div>
-        
-        <a href="/profile" class="btn-pink">${t('backProfile')}</a>
     </div>
     
-    <script>
-        let partners = ${JSON.stringify(partners)};
-        let currentPartnerId = null;
-        
-        function applyRegionFilter() {
-            const filter = document.getElementById('regionFilter').value;
-            window.location.href = '/matching?region=' + filter;
-        }
-        
-        function sendInterest(receiverId) {
-            currentPartnerId = receiverId;
-            document.getElementById('loading-popup').style.display = 'flex';
-            document.getElementById('loading-message').innerText = '${t('sendingRequest')}';
-            
-            fetch('/api/requests', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ receiverId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('loading-message').innerText = '${t('requestSent')}';
-                setTimeout(() => {
-                    document.getElementById('loading-popup').style.display = 'none';
-                    if (data.success) {
-                        const partner = partners.find(p => p._id === receiverId);
-                        showNotify('Intérêt envoyé à ' + (partner ? partner.firstName : ''), 'success');
-                    } else {
-                        showNotify('Erreur: ' + (data.error || 'Inconnue'), 'error');
-                    }
-                }, 1000);
-            })
-            .catch(() => {
-                document.getElementById('loading-popup').style.display = 'none';
-                showNotify('Erreur réseau', 'error');
-            });
-        }
-        
-        function sendInterestFromPopup() {
-            if (currentPartnerId) {
-                sendInterest(currentPartnerId);
-                closePopup();
+    <div id="popup-overlay" onclick="closePopup()">
+        <div class="popup-content" onclick="event.stopPropagation()">
+            <span class="close-popup" onclick="closePopup()">&times;</span>
+            <h3 id="pop-name" style="color:#ff416c; margin-top:0;">${t('details')}</h3>
+            <div id="pop-details" style="font-size:0.95rem; color:#333; line-height:1.6;"></div>
+            <div id="pop-msg" class="popup-msg"></div>
+            <button class="btn-pink" style="margin:20px 0 0 0; width:100%" onclick="sendInterestFromPopup()">${t('contact')}</button>
+        </div>
+    </div>
+    
+    <div style="padding:20px; background:white; text-align:center; border-bottom:1px solid #eee;">
+        <h3 style="margin:0; color:#1a2a44;">${t('compatiblePartners')}</h3>
+    </div>
+    
+    <div class="filter-container">
+        <select id="regionFilter" class="input-box" style="margin:0;" onchange="applyRegionFilter()">
+            <option value="all" ${regionFilter === 'all' ? 'selected' : ''}>${t('allRegions')}</option>
+            <option value="mine" ${regionFilter === 'mine' ? 'selected' : ''}>${t('myRegion')} (${currentUser.region || ''})</option>
+        </select>
+    </div>
+    
+    <div id="match-container">
+        ${partnersHTML}
+    </div>
+    
+    <a href="/profile" class="btn-pink">← ${t('backProfile')}</a>
+</div>
+
+<script>
+let partners = ${JSON.stringify(partners)};
+let currentPartnerId = null;
+
+function applyRegionFilter() {
+    const filter = document.getElementById("regionFilter").value;
+    window.location.href = '/matching?region=' + filter;
+}
+
+function sendInterest(receiverId) {
+    currentPartnerId = receiverId;
+    document.getElementById("loading-popup").style.display = 'flex';
+    document.getElementById("loading-message").innerText = '${t('sendingRequest')}';
+    
+    fetch('/api/requests', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ receiverId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('loading-message').innerText = '${t('requestSent')}';
+        setTimeout(() => {
+            document.getElementById('loading-popup').style.display = 'none';
+            if (data.success) {
+                const partner = partners.find(p => p._id === receiverId);
+                showNotify('${t('requestSent')} ' + (partner ? partner.firstName : ''), 'success');
+            } else {
+                showNotify('Erreur: ' + (data.error || 'Inconnue'), 'error');
             }
-        }
-        
-        function showDetails(partnerId) {
-            const partner = partners.find(p => p._id === partnerId);
-            if (!partner) return;
-            
-            currentPartnerId = partner._id;
-            
-            const myGt = '${currentUser.genotype}';
-            
-            function calculateAge(dob) {
-                if (!dob) return "?";
-                const birthDate = new Date(dob);
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-                return age;
-            }
-            
-            const age = calculateAge(partner.dob);
-            
-            document.getElementById('pop-name').innerText = partner.firstName || "Profil";
-            document.getElementById('pop-details').innerHTML = 
-                '<b>${t('genotype_label')} :</b> ' + partner.genotype + '<br>' +
-                '<b>${t('blood_label')} :</b> ' + partner.bloodGroup + '<br>' +
-                '<b>${t('residence_label')} :</b> ' + (partner.residence || '') + '<br>' +
-                '<b>${t('region_label')} :</b> ' + (partner.region || '') + '<br>' +
-                '<b>${t('age_label')} :</b> ' + age + ' ans<br><br>' +
-                '<b>${t('project_label')} :</b><br>' +
-                '<i>' + (partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}') + '</i>' +
-                (partner.qrVerified ? '<br><br><span style="color:#4caf50;">✅ Certifié par laboratoire</span>' : '');
-            
-            let msg = "";
-            if(myGt === "AA" && partner.genotype === "AA") {
-                msg = "<b>💞 L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale.";
-            }
-            else if(myGt === "AA" && partner.genotype === "AS") {
-                msg = "<b>🛡️ L'Union Protectrice :</b> Excellent choix. En tant que AA, vous jouez un rôle protecteur.";
-            }
-            else if(myGt === "AA" && partner.genotype === "SS") {
-                msg = "<b>💪 L'Union Solidaire :</b> Une union magnifique et sans crainte.";
-            }
-            else if(myGt === "AS" && partner.genotype === "AA") {
-                msg = "<b>✨ L'Union Équilibrée :</b> Votre choix est responsable !";
-            }
-            else if(myGt === "SS" && partner.genotype === "AA") {
-                msg = "<b>🌈 L'Union Espoir :</b> Vous avez fait le choix le plus sûr.";
-            }
-            else {
-                msg = "<b>💬 Compatibilité standard :</b> Vous pouvez échanger avec ce profil.";
-            }
-            
-            document.getElementById('pop-msg').innerHTML = msg;
-            document.getElementById('popup-overlay').style.display = 'flex';
-        }
-        
-        function closePopup() {
-            document.getElementById('popup-overlay').style.display = 'none';
-        }
-    </script>
+        }, 1000);
+    })
+    .catch(() => {
+        document.getElementById('loading-popup').style.display = 'none';
+        showNotify('Erreur réseau', 'error');
+    });
+}
+
+function sendInterestFromPopup() {
+    if (currentPartnerId) {
+        sendInterest(currentPartnerId);
+        closePopup();
+    }
+}
+
+function showDetails(partnerId) {
+    const partner = partners.find(p => p._id === partnerId);
+    if (!partner) return;
+    
+    currentPartnerId = partner._id;
+    
+    const myGt = '${currentUser.genotype}';
+    
+    function calculateAge(dob) {
+        if (!dob) return "?";
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+        return age;
+    }
+    
+    const age = calculateAge(partner.dob);
+    
+    document.getElementById('pop-name').innerText = partner.firstName || "Profil";
+    document.getElementById('pop-details').innerHTML = 
+        '<b>${t('genotype_label')}: </b> ' + partner.genotype + '<br>' +
+        '<b>${t('blood_label')}: </b> ' + partner.bloodGroup + '<br>' +
+        '<b>${t('residence_label')}: </b> ' + (partner.residence || '') + '<br>' +
+        '<b>${t('region_label')}: </b> ' + (partner.region || '') + '<br>' +
+        '<b>${t('age_label')}: </b> ' + age + ' ans<br><br>' +
+        '<b>${t('project_label')}: </b><br>' +
+        '<i>' + (partner.desireChild === 'Oui' ? '${t('yes')}' : '${t('no')}') + '</i>' +
+        (partner.qrVerified ? '<br><br><span style="color:#1e88e5;">✓ ' + '${t('labCertified')}' + '</span>' : '');
+    
+    let msg = "";
+    if(myGt === "AA" && partner.genotype === "AA") {
+        msg = "<b>✨ L'Union Sérénité :</b> Félicitations ! Votre compatibilité génétique est idéale.";
+    }
+    else if(myGt === "AA" && partner.genotype === "AS") {
+        msg = "<b>🛡️ L'Union Protectrice :</b> Excellent choix. En tant que AA, vous jouez un rôle protecteur.";
+    }
+    else if(myGt === "AA" && partner.genotype === "SS") {
+        msg = "<b>💝 L'Union Solidaire :</b> Une union magnifique et sans crainte.";
+    }
+    else if(myGt === "AS" && partner.genotype === "AA") {
+        msg = "<b>⚖️ L'Union Équilibrée :</b> Votre choix est responsable !";
+    }
+    else if(myGt === "SS" && partner.genotype === "AA") {
+        msg = "<b>🌈 L'Union Espoir :</b> Vous avez fait le choix le plus sûr.";
+    }
+    else {
+        msg = "<b>💬 Compatibilité standard :</b> Vous pouvez échanger avec ce profil.";
+    }
+    
+    document.getElementById('pop-msg').innerHTML = msg;
+    document.getElementById('popup-overlay').style.display = 'flex';
+}
+
+function closePopup() {
+    document.getElementById('popup-overlay').style.display = 'none';
+}
+</script>
 </body>
 </html>`);
     } catch(error) {
