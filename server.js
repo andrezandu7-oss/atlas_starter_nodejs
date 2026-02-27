@@ -4073,7 +4073,7 @@ app.get('/settings', requireAuth, async (req, res) => {
 
 // ============================================
 // ============================================
-// EDIT PROFILE
+// EDIT PROFILE - AVEC TRADUCTIONS COMPLÈTES
 // ============================================
 app.get('/edit-profile', requireAuth, async (req, res) => {
     try {
@@ -4248,10 +4248,10 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
         <h2>${t('editProfile')}</h2>
         
         <!-- ============================================ -->
-        <!-- DONNÉES PROTÉGÉES (NON MODIFIABLES) -->
+        <!-- DONNÉES PROTÉGÉES (NON MODIFIABLES) - TRADUIT -->
         <!-- ============================================ -->
         <div style="margin-bottom: 5px;">
-            <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ DONNÉES CERTIFICAT MÉDICAL (NON MODIFIABLES)</span>
+            <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ ${t('medicalData')} (${t('nonModifiable')})</span>
         </div>
         
         <!-- SI L'UTILISATEUR VIENT D'UN QR CODE (qrVerified = true), ON BLOQUE LES CHAMPS -->
@@ -4259,27 +4259,27 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
             <!-- Prénom - VERROUILLÉ -->
             <div class="input-label">${t('firstName')}</div>
             <input type="text" class="input-box" value="${user.firstName}" readonly>
-            <div class="protected-badge">Protégé (source: certificat)</div>
+            <div class="protected-badge">${t('protectedSource')}</div>
             
             <!-- Nom - VERROUILLÉ -->
             <div class="input-label">${t('lastName')}</div>
             <input type="text" class="input-box" value="${user.lastName}" readonly>
-            <div class="protected-badge">Protégé (source: certificat)</div>
+            <div class="protected-badge">${t('protectedSource')}</div>
             
             <!-- Genre - VERROUILLÉ -->
             <div class="input-label">${t('gender')}</div>
             <input type="text" class="input-box" value="${user.gender || ''}" readonly>
-            <div class="protected-badge">Protégé (source: certificat)</div>
+            <div class="protected-badge">${t('protectedSource')}</div>
             
             <!-- Génotype - VERROUILLÉ -->
             <div class="input-label">${t('genotype')}</div>
             <input type="text" class="input-box" value="${user.genotype || ''}" readonly>
-            <div class="protected-badge">Protégé (source: certificat)</div>
+            <div class="protected-badge">${t('protectedSource')}</div>
             
             <!-- Groupe sanguin - VERROUILLÉ -->
             <div class="input-label">${t('bloodGroup')}</div>
             <input type="text" class="input-box" value="${user.bloodGroup || ''}" readonly>
-            <div class="protected-badge">Protégé (source: certificat)</div>
+            <div class="protected-badge">${t('protectedSource')}</div>
         ` : `
             <!-- POUR INSCRIPTION MANUELLE : CHAMPS MODIFIABLES NORMALEMENT -->
             <div class="input-label">${t('firstName')}</div>
@@ -4313,10 +4313,10 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
         <div style="height: 2px; background: linear-gradient(90deg, transparent, #ff416c, transparent); margin: 25px 0 15px 0; opacity: 0.3;"></div>
         
         <!-- ============================================ -->
-        <!-- DONNÉES MODIFIABLES (POUR TOUS) -->
+        <!-- DONNÉES MODIFIABLES (POUR TOUS) - TRADUIT -->
         <!-- ============================================ -->
         <div style="margin-bottom: 15px;">
-            <span style="font-size: 12px; color: #ff416c; font-weight: bold;">✎ DONNÉES PERSONNELLES (MODIFIABLES)</span>
+            <span style="font-size: 12px; color: #ff416c; font-weight: bold;">✎ ${t('personalData')} (${t('modifiable')})</span>
         </div>
         
         <form id="editForm">
@@ -4340,7 +4340,7 @@ app.get('/edit-profile', requireAuth, async (req, res) => {
             </select>
             
             <!-- Photo - MODIFIABLE -->
-            <div class="input-label">Photo de profil</div>
+            <div class="input-label">${t('photoPlaceholder') || 'Photo de profil'}</div>
             <div class="photo-circle" id="photoCircle" style="background-image: url('${user.photo || ''}');" onclick="document.getElementById('photoInput').click()">
                 <span id="photoText" style="${user.photo ? 'display:none;' : ''}">📸</span>
             </div>
@@ -4410,10 +4410,10 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
     });
     
     if (res.ok) {
-        showNotify('Profil mis à jour', 'success');
+        showNotify('${t('editProfile')} ' + '${t('successMessage')}', 'success');
         setTimeout(() => window.location.href = '/profile', 1000);
     } else {
-        alert('Erreur lors de la modification');
+        alert('${t('errorOccurred') || 'Erreur lors de la modification'}');
     }
 });
 </script>
@@ -4424,7 +4424,6 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
         res.status(500).send('Erreur édition');
     }
 });
-
 // ============================================
 // BLOCKED LIST
 // ============================================
