@@ -402,13 +402,6 @@ const translations = {
         yourLocation: '📍 Your location',
         lifeProject: '👶 Life project'
     },
-// Dans la section 'en'
-protectedSource: 'Protected (source: certificate)',
-dataFromCertificate: '✔ MEDICAL CERTIFICATE DATA (NON-EDITABLE)',
-freeEntry: '✎ PERSONAL DATA (EDITABLE)',
-successMessage: 'Profile updated successfully',
-errorMessage: 'Error during update',
-};
     pt: {
         appName: 'Genlove',
         slogan: 'Una coração e saúde para construir casais saudáveis 💑',
@@ -558,15 +551,8 @@ errorMessage: 'Error during update',
         locationHelp: 'Ajude as pessoas mais próximas de você a contatá-lo facilmente',
         yourLocation: '📍 Sua localização',
         lifeProject: '👶 Projeto de vida'
-    },// Dans la section 'pt'
-protectedSource: 'Protegido (fonte: certificado)',
-dataFromCertificate: '✔ DADOS DO CERTIFICADO MÉDICO (NÃO EDITÁVEIS)',
-freeEntry: '✎ DADOS PESSOAIS (EDITÁVEIS)',
-successMessage: 'Perfil atualizado com sucesso',
-errorMessage: 'Erro ao atualizar',
-};
+    },
     es: {
-
         appName: 'Genlove',
         slogan: 'Une corazón y salud para construir parejas saludables 💑',
         security: '🛡️ Sus datos de salud están encriptados',
@@ -717,13 +703,6 @@ errorMessage: 'Erro ao atualizar',
         lifeProject: '👶 Proyecto de vida'
     },
     ar: {
-// Dans la section 'es'
-protectedSource: 'Protegido (fuente: certificado)',
-dataFromCertificate: '✔ DATOS DEL CERTIFICADO MÉDICO (NO EDITABLES)',
-freeEntry: '✎ DATOS PERSONALES (EDITABLES)',
-successMessage: 'Perfil actualizado con éxito',
-errorMessage: 'Error al actualizar',
-};
         appName: 'جينلوف',
         slogan: '💑 وحد القلب والصحة لبناء أزواج أصحاء',
         security: '🛡️ بياناتك الصحية مشفرة',
@@ -874,13 +853,6 @@ errorMessage: 'Error al actualizar',
         lifeProject: '👶 مشروع الحياة'
     },
     zh: {
-// Dans la section 'ar' (arabe)
-protectedSource: 'محمي (المصدر: شهادة طبية)',
-dataFromCertificate: '✔ بيانات الشهادة الطبية (غير قابلة للتعديل)',
-freeEntry: '✎ البيانات الشخصية (قابلة للتعديل)',
-successMessage: 'تم تحديث الملف الشخصي بنجاح',
-errorMessage: 'حدث خطأ أثناء التحديث',};
-
         appName: '真爱基因',
         slogan: '💑 结合心灵与健康，建立健康的伴侣关系',
         security: '🛡️ 您的健康数据已加密',
@@ -1030,13 +1002,6 @@ errorMessage: 'حدث خطأ أثناء التحديث',};
         yourLocation: '📍 您的位置',
         lifeProject: '👶 人生计划'
     }
-// Dans la section 'zh' (chinois)
-protectedSource: '受保护（来源：医疗证书）',
-dataFromCertificate: '✔ 医疗证书数据（不可修改）',
-freeEntry: '✎ 个人数据（可修改）',
-successMessage: '个人资料更新成功',
-errorMessage: '更新时出错',
-
 };
 
 // Middleware de traduction
@@ -4059,306 +4024,357 @@ app.get('/settings', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// ===============================
+// ============================================
 // EDIT PROFILE
-// ===============================
+// ============================================
 app.get('/edit-profile', requireAuth, async (req, res) => {
-  try {
-    const user = await User.findById(req.session.userId);
-    const t = req.t;
-    const datePicker = generateDateOptions(req, user.dob);
-    const bloodOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => 
-      `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g}</option>`
-    ).join('');
-    
-    res.send(`<!DOCTYPE html>
+    try {
+        const user = await User.findById(req.session.userId);
+        const t = req.t;
+        const datePicker = generateDateOptions(req, user.dob);
+        
+        const bloodOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => 
+            `<option value="${g}" ${user.bloodGroup === g ? 'selected' : ''}>${g}</option>`
+        ).join('');
+        
+        res.send(`<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>${t('appName')} - ${t('editProfile')}</title>
-  ${styles}
-  ${notifyScript}
-  <style>
-    input[readonly], select[readonly] {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-      opacity: 0.9;
-      border-color: #10b981;
-    }
-    .protected-badge {
-      font-size: 11px;
-      color: #10b981;
-      margin-top: -8px;
-      margin-bottom: 10px;
-      padding-left: 5px;
-    }
-    .protected-badge::before {
-      content: "✔";
-      margin-right: 3px;
-      font-weight: bold;
-    }
-    .photo-circle {
-      width: 110px;
-      height: 110px;
-      border: 4px solid #ff416c;
-      border-radius: 50%;
-      margin: 15px auto;
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 10px 25px rgba(255,65,108,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .input-label {
-      text-align: left;
-      font-size: 0.9rem;
-      color: #1a2a44;
-      margin-top: 10px;
-      font-weight: 600;
-    }
-    .input-box {
-      width: 100%;
-      padding: 14px;
-      border: 2px solid #e2e8f0;
-      border-radius: 15px;
-      margin: 8px 0;
-      font-size: 1rem;
-      background: #f8f9fa;
-      transition: all 0.3s;
-      box-sizing: border-box;
-    }
-    .input-box:focus {
-      border-color: #ff416c;
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(255,65,108,0.2);
-    }
-    .custom-date-picker {
-      display: flex;
-      gap: 5px;
-      margin: 10px 0;
-    }
-    .date-part {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid #e2e8f0;
-      border-radius: 15px;
-      font-size: 0.9rem;
-      background: #f8f9fa;
-    }
-    .date-part:focus {
-      border-color: #ff416c;
-      outline: none;
-    }
-    .btn-pink {
-      background: #ff416c;
-      color: white;
-      padding: 15px 25px;
-      border-radius: 60px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      width: 90%;
-      margin: 10px auto;
-      display: block;
-      text-align: center;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 10px 20px rgba(255,65,108,0.3);
-    }
-    .btn-pink:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 30px rgba(255,65,108,0.4);
-    }
-    .back-link {
-      display: inline-block;
-      margin: 15px 0;
-      color: #666;
-      text-decoration: none;
-      font-size: 1rem;
-    }
-    .page-white {
-      background: white;
-      padding: 20px;
-      flex: 1;
-    }
-    .app-shell {
-      width: 100%;
-      max-width: 420px;
-      min-height: 100vh;
-      background: #f4e9da;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 30px rgba(0,0,0,0.1);
-      margin: 0 auto;
-    }
-    h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      color: #1a2a44;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>${t('appName')} - ${t('editProfile')}</title>
+    ${styles}
+    ${notifyScript}
+    <style>
+        /* Style pour les champs verrouillés (données QR) */
+        input[readonly], select[readonly] {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+            opacity: 0.9;
+            border-color: #10b981;
+        }
+        
+        /* Indicateur visuel pour les données protégées */
+        .protected-badge {
+            font-size: 11px;
+            color: #10b981;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        
+        .protected-badge::before {
+            content: "✓";
+            margin-right: 3px;
+            font-weight: bold;
+        }
+        
+        /* Photo circle */
+        .photo-circle {
+            width: 110px;
+            height: 110px;
+            border: 4px solid #ff416c;
+            border-radius: 50%;
+            margin: 15px auto;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 10px 25px rgba(255,65,108,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        /* Input label */
+        .input-label {
+            text-align: left;
+            font-size: 0.9rem;
+            color: #1a2a44;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input box */
+        .input-box {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            margin: 8px 0;
+            font-size: 1rem;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .input-box:focus {
+            border-color: #ff416c;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255,65,108,0.2);
+        }
+        
+        /* Date picker */
+        .custom-date-picker {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .date-part {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+        }
+        
+        .date-part:focus {
+            border-color: #ff416c;
+            outline: none;
+        }
+        
+        /* Bouton */
+        .btn-pink {
+            background: #ff416c;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            width: 90%;
+            margin: 10px auto;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(255,65,108,0.3);
+        }
+        
+        .btn-pink:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255,65,108,0.4);
+        }
+        
+        /* Back link */
+        .back-link {
+            display: inline-block;
+            margin: 15px 0;
+            color: #666;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        
+        /* Page white */
+        .page-white {
+            background: white;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        /* App shell */
+        .app-shell {
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            background: #f4e9da;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            margin: 0 auto;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #1a2a44;
+        }
+    </style>
 </head>
 <body>
-  <div class="app-shell">
+<div class="app-shell">
     <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
     <div class="page-white">
-      
-      <div style="margin-bottom: 5px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">✔ ${t('dataFromCertificate')}</span>
-      </div>
-      
-      ${user.qrVerified ? `
-        <div class="input-label">${t('firstName')}</div>
-        <input type="text" class="input-box" value="${user.firstName}" readonly>
-        <div class="protected-badge">${t('protectedSource')}</div>
+        <h2>${t('editProfile')}</h2>
         
-        <div class="input-label">${t('lastName')}</div>
-        <input type="text" class="input-box" value="${user.lastName}" readonly>
-        <div class="protected-badge">${t('protectedSource')}</div>
-        
-        <div class="input-label">${t('gender')}</div>
-        <input type="text" class="input-box" value="${user.gender || ''}" readonly>
-        <div class="protected-badge">${t('protectedSource')}</div>
-        
-        <div class="input-label">${t('genotype')}</div>
-        <input type="text" class="input-box" value="${user.genotype || ''}" readonly>
-        <div class="protected-badge">${t('protectedSource')}</div>
-        
-        <div class="input-label">${t('bloodGroup')}</div>
-        <input type="text" class="input-box" value="${user.bloodGroup || ''}" readonly>
-        <div class="protected-badge">${t('protectedSource')}</div>
-      ` : `
-        <div class="input-label">${t('firstName')}</div>
-        <input type="text" name="firstName" class="input-box" value="${user.firstName}" required>
-        
-        <div class="input-label">${t('lastName')}</div>
-        <input type="text" name="lastName" class="input-box" value="${user.lastName}" required>
-        
-        <div class="input-label">${t('gender')}</div>
-        <select name="gender" class="input-box" required>
-          <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
-          <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
-        </select>
-        
-        <div class="input-label">${t('genotype')}</div>
-        <select name="genotype" class="input-box" required>
-          <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
-          <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
-          <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
-        </select>
-        
-        <div class="input-label">${t('bloodGroup')}</div>
-        <select name="bloodGroup" class="input-box" required>
-          ${bloodOptions}
-        </select>
-      `}
-      
-      <div style="height: 2px; background: linear-gradient(90deg, transparent, #ff416c, transparent); margin: 25px 0 15px 0; opacity: 0.3;"></div>
-      
-      <div style="margin-bottom: 15px;">
-        <span style="font-size: 12px; color: #ff416c; font-weight: bold;">✎ ${t('freeEntry')}</span>
-      </div>
-      
-      <form id="editForm">
-        <div class="input-label">${t('dob')}</div>
-        ${datePicker}
-        
-        <div class="input-label">${t('city')}</div>
-        <input type="text" name="residence" class="input-box" value="${user.residence || ''}" required>
-        
-        <div class="input-label">${t('region')}</div>
-        <input type="text" name="region" class="input-box" value="${user.region || ''}" required>
-        
-        <div class="input-label">${t('desireChild')}</div>
-        <select name="desireChild" class="input-box" required>
-          <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
-          <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
-        </select>
-        
-        <div class="input-label">${t('photoPlaceholder') || 'Photo'}</div>
-        <div class="photo-circle" id="photoCircle" style="background-image: url('${user.photo || ''}');" onclick="document.getElementById('photoInput').click()">
-          <span id="photoText" style="${user.photo ? 'display: none;' : ''}">📷</span>
+        <!-- ============================================ -->
+        <!-- DONNÉES PROTÉGÉES (NON MODIFIABLES) -->
+        <!-- ============================================ -->
+        <div style="margin-bottom: 5px;">
+            <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ DONNÉES CERTIFICAT MÉDICAL (NON MODIFIABLES)</span>
         </div>
-        <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="previewPhoto(event)">
-        <input type="hidden" name="photo" id="photoBase64" value="${user.photo || ''}">
         
-        <button type="submit" class="btn-pink">${t('editProfile')}</button>
-      </form>
-      
-      <a href="/profile" class="back-link">← ${t('backProfile')}</a>
+        <!-- SI L'UTILISATEUR VIENT D'UN QR CODE (qrVerified = true), ON BLOQUE LES CHAMPS -->
+        ${user.qrVerified ? `
+            <!-- Prénom - VERROUILLÉ -->
+            <div class="input-label">${t('firstName')}</div>
+            <input type="text" class="input-box" value="${user.firstName}" readonly>
+            <div class="protected-badge">Protégé (source: certificat)</div>
+            
+            <!-- Nom - VERROUILLÉ -->
+            <div class="input-label">${t('lastName')}</div>
+            <input type="text" class="input-box" value="${user.lastName}" readonly>
+            <div class="protected-badge">Protégé (source: certificat)</div>
+            
+            <!-- Genre - VERROUILLÉ -->
+            <div class="input-label">${t('gender')}</div>
+            <input type="text" class="input-box" value="${user.gender || ''}" readonly>
+            <div class="protected-badge">Protégé (source: certificat)</div>
+            
+            <!-- Génotype - VERROUILLÉ -->
+            <div class="input-label">${t('genotype')}</div>
+            <input type="text" class="input-box" value="${user.genotype || ''}" readonly>
+            <div class="protected-badge">Protégé (source: certificat)</div>
+            
+            <!-- Groupe sanguin - VERROUILLÉ -->
+            <div class="input-label">${t('bloodGroup')}</div>
+            <input type="text" class="input-box" value="${user.bloodGroup || ''}" readonly>
+            <div class="protected-badge">Protégé (source: certificat)</div>
+        ` : `
+            <!-- POUR INSCRIPTION MANUELLE : CHAMPS MODIFIABLES NORMALEMENT -->
+            <div class="input-label">${t('firstName')}</div>
+            <input type="text" name="firstName" class="input-box" value="${user.firstName}" required>
+            
+            <div class="input-label">${t('lastName')}</div>
+            <input type="text" name="lastName" class="input-box" value="${user.lastName}" required>
+            
+            <div class="input-label">${t('gender')}</div>
+            <select name="gender" class="input-box" required>
+                <option value="Homme" ${user.gender === 'Homme' ? 'selected' : ''}>${t('male')}</option>
+                <option value="Femme" ${user.gender === 'Femme' ? 'selected' : ''}>${t('female')}</option>
+            </select>
+            
+            <div class="input-label">${t('genotype')}</div>
+            <select name="genotype" class="input-box" required>
+                <option value="AA" ${user.genotype === 'AA' ? 'selected' : ''}>AA</option>
+                <option value="AS" ${user.genotype === 'AS' ? 'selected' : ''}>AS</option>
+                <option value="SS" ${user.genotype === 'SS' ? 'selected' : ''}>SS</option>
+            </select>
+            
+            <div class="input-label">${t('bloodGroup')}</div>
+            <select name="bloodGroup" class="input-box" required>
+                ${bloodOptions}
+            </select>
+        `}
+        
+        <!-- ============================================ -->
+        <!-- SÉPARATEUR VISUEL -->
+        <!-- ============================================ -->
+        <div style="height: 2px; background: linear-gradient(90deg, transparent, #ff416c, transparent); margin: 25px 0 15px 0; opacity: 0.3;"></div>
+        
+        <!-- ============================================ -->
+        <!-- DONNÉES MODIFIABLES (POUR TOUS) -->
+        <!-- ============================================ -->
+        <div style="margin-bottom: 15px;">
+            <span style="font-size: 12px; color: #ff416c; font-weight: bold;">✎ DONNÉES PERSONNELLES (MODIFIABLES)</span>
+        </div>
+        
+        <form id="editForm">
+            <!-- Date de naissance - MODIFIABLE -->
+            <div class="input-label">${t('dob')}</div>
+            ${datePicker}
+            
+            <!-- Ville - MODIFIABLE -->
+            <div class="input-label">${t('city')}</div>
+            <input type="text" name="residence" class="input-box" value="${user.residence || ''}" required>
+            
+            <!-- Région - MODIFIABLE -->
+            <div class="input-label">${t('region')}</div>
+            <input type="text" name="region" class="input-box" value="${user.region || ''}" required>
+            
+            <!-- Désir d'enfant - MODIFIABLE -->
+            <div class="input-label">${t('desireChild')}</div>
+            <select name="desireChild" class="input-box" required>
+                <option value="Oui" ${user.desireChild === 'Oui' ? 'selected' : ''}>${t('yes')}</option>
+                <option value="Non" ${user.desireChild === 'Non' ? 'selected' : ''}>${t('no')}</option>
+            </select>
+            
+            <!-- Photo - MODIFIABLE -->
+            <div class="input-label">Photo de profil</div>
+            <div class="photo-circle" id="photoCircle" style="background-image: url('${user.photo || ''}');" onclick="document.getElementById('photoInput').click()">
+                <span id="photoText" style="${user.photo ? 'display:none;' : ''}">📸</span>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="previewPhoto(event)">
+            <input type="hidden" name="photo" id="photoBase64" value="${user.photo || ''}">
+            
+            <button type="submit" class="btn-pink">${t('editProfile')}</button>
+        </form>
+        
+        <a href="/profile" class="back-link">← ${t('backProfile')}</a>
     </div>
-  </div>
-  
-  <script>
-    let photoBase64 = "${user.photo || ''}";
-    
-    function previewPhoto(e) {
-      const reader = new FileReader();
-      reader.onload = function() {
+</div>
+
+<script>
+let photoBase64 = "${user.photo || ''}";
+
+function previewPhoto(e) {
+    const reader = new FileReader();
+    reader.onload = function() {
         photoBase64 = reader.result;
         document.getElementById('photoCircle').style.backgroundImage = 'url(' + photoBase64 + ')';
         document.getElementById('photoCircle').style.backgroundSize = 'cover';
         document.getElementById('photoText').style.display = 'none';
         document.getElementById('photoBase64').value = photoBase64;
-      };
-      reader.readAsDataURL(e.target.files[0]);
-    }
+    };
+    reader.readAsDataURL(e.target.files[0]);
+}
+
+document.getElementById('editForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-    document.getElementById('editForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const day = document.querySelector('select[name="day"]').value;
-      const month = document.querySelector('select[name="month"]').value;
-      const year = document.querySelector('select[name="year"]').value;
-      
-      if (!day || !month || !year) {
+    const day = document.querySelector('select[name="day"]').value;
+    const month = document.querySelector('select[name="month"]').value;
+    const year = document.querySelector('select[name="year"]').value;
+    
+    if (!day || !month || !year) {
         alert("${t('dob')} ${t('required')}");
         return;
-      }
-      
-      const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
-      const formData = new FormData(e.target);
-      
-      const data = {
+    }
+    
+    const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+    
+    const formData = new FormData(e.target);
+    
+    // CONSTRUCTION DYNAMIQUE DES DONNÉES SELON LE TYPE D'UTILISATEUR
+    const data = {
         residence: formData.get('residence'),
         region: formData.get('region'),
         desireChild: formData.get('desireChild'),
         dob: dob,
         photo: photoBase64
-      };
-      
-      if (!${user.qrVerified}) {
+    };
+    
+    // SI INSCRIPTION MANUELLE (qrVerified = false), ON INCLUT AUSSI LES CHAMPS MODIFIABLES
+    if (${!user.qrVerified}) {
         data.firstName = document.querySelector('input[name="firstName"]').value;
         data.lastName = document.querySelector('input[name="lastName"]').value;
         data.gender = document.querySelector('select[name="gender"]').value;
         data.genotype = document.querySelector('select[name="genotype"]').value;
         data.bloodGroup = document.querySelector('select[name="bloodGroup"]').value;
-      }
-      
-      const res = await fetch('/api/users/profile', {
+    }
+    
+    const res = await fetch('/api/users/profile', {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
-      });
-      
-      if (res.ok) {
-        showNotify('${t('successMessage')}', 'success');
-        setTimeout(() => window.location.href = '/profile', 1000);
-      } else {
-        alert('${t('errorMessage')}');
-      }
     });
-  </script>
+    
+    if (res.ok) {
+        showNotify('Profil mis à jour', 'success');
+        setTimeout(() => window.location.href = '/profile', 1000);
+    } else {
+        alert('Erreur lors de la modification');
+    }
+});
+</script>
 </body>
 </html>`);
-  } catch(error) {
-    console.error(error);
-    res.status(500).send('Erreur édition');
-  }
+    } catch(error) {
+        console.error(error);
+        res.status(500).send('Erreur édition');
+    }
 });
 
 // ============================================
@@ -4698,6 +4714,5 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
-
 
 
