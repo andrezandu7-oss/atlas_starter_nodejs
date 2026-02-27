@@ -3439,7 +3439,8 @@ checkRejections();
     }
 });
 // ============================================
-// MATCHING - AVEC BADGE DE CERTIFICATION
+// ============================================
+// MATCHING - VERSION CORRIGÉE (avec calculateAge intégré)
 // ============================================
 app.get('/matching', requireAuth, async (req, res) => {
     try {
@@ -3448,6 +3449,17 @@ app.get('/matching', requireAuth, async (req, res) => {
         const t = req.t;
         const isSSorAS = (currentUser.genotype === 'SS' || currentUser.genotype === 'AS');
         const regionFilter = req.query.region || 'all';
+        
+        // 🔴 Fonction calculateAge définie DANS la route
+        function calculateAge(dateNaissance) {
+            if (!dateNaissance) return "?";
+            const today = new Date();
+            const birthDate = new Date(dateNaissance);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+            return age;
+        }
         
         const messages = await Message.find({
             $or: [{ senderId: currentUser._id }, { receiverId: currentUser._id }],
@@ -3508,7 +3520,7 @@ app.get('/matching', requireAuth, async (req, res) => {
             partners.forEach(p => {
                 const age = calculateAge(p.dob);
                 
-                // 🔴 BADGE DE CERTIFICATION BLEU (comme Facebook)
+                // Badge de certification bleu
                 const certifiedBadge = p.qrVerified ? 
                     '<span class="certified-badge" title="' + t('labCertified') + '">✓</span>' : 
                     '';
@@ -3519,7 +3531,8 @@ app.get('/matching', requireAuth, async (req, res) => {
                             ${certifiedBadge}
                         </div>
                         <div class="match-info">
-                            <b style="font-size:1.2rem;">${p.firstName} ${certifiedBadge}</b>
+                            <b style="font-size:1.2rem;">${p.firstName}</b>
+                            ${certifiedBadge ? '<span class="certified-badge-small" title="' + t('labCertified') + '">✓</span>' : ''}
                             <br><span style="font-size:0.9rem;">${p.genotype} • ${age} ans</span>
                             <br><span style="font-size:0.8rem; color:#666;">${p.residence || ''} • ${p.region || ''}</span>
                         </div>
@@ -3560,14 +3573,14 @@ app.get('/matching', requireAuth, async (req, res) => {
         .empty-message { text-align: center; padding: 50px 20px; color: #666; }
         .empty-message span { font-size: 4rem; display: block; margin-bottom: 20px; }
         
-        /* 🔴 STYLE POUR LE BADGE DE CERTIFICATION BLEU */
+        /* Style pour le badge de certification bleu */
         .certified-badge {
             position: absolute;
             bottom: 0;
             right: 0;
             width: 22px;
             height: 22px;
-            background-color: #1e88e5;  /* Bleu Facebook */
+            background-color: #1e88e5;
             border: 2px solid white;
             border-radius: 50%;
             display: flex;
@@ -3580,7 +3593,20 @@ app.get('/matching', requireAuth, async (req, res) => {
             z-index: 10;
         }
         
-        /* Style pour la photo avec position relative */
+        .certified-badge-small {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background-color: #1e88e5;
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 18px;
+            margin-left: 5px;
+        }
+        
         .match-photo {
             width: 60px;
             height: 60px;
@@ -3741,6 +3767,7 @@ function showDetails(partnerId) {
     
     const myGt = '${currentUser.genotype}';
     
+    // Fonction calculateAge redéfinie dans le script aussi
     function calculateAge(dob) {
         if (!dob) return "?";
         const birthDate = new Date(dob);
@@ -3795,8 +3822,8 @@ function closePopup() {
 </body>
 </html>`);
     } catch(error) {
-        console.error("Erreur matching:", error);
-        res.status(500).send('Erreur matching');
+        console.error("ERREUR DANS /matching:", error);
+        res.status(500).send('Erreur matching: ' + error.message);
     }
 });
 
