@@ -3237,7 +3237,7 @@ app.get('/profile', requireAuth, async (req, res) => {
         const genderDisplay = user.gender === 'Homme' ? t('male') : t('female');
         const unreadBadge = unreadCount > 0 ? `<span class="profile-unread">${unreadCount}</span>` : '';
         
-        // 🔴 BADGE DE VÉRIFICATION CORRIGÉ AVEC TRADUCTION
+        // Badge de vérification avec traduction
         const verificationBadge = user.qrVerified ? 
             '<span class="verified-badge">✓ ' + t('labCertified') + '</span>' : 
             '<span class="unverified-badge">📝 ' + t('selfDeclared') + '</span>';
@@ -3422,7 +3422,7 @@ checkRejections();
 </body>
 </html>`);
     } catch(error) {
-        console.error(error);
+        console.error("ERREUR DANS /profile:", error);
         res.status(500).send('Erreur profil');
     }
 });
