@@ -35,9 +35,8 @@ const sessionConfig = {
 
 app.use(session(sessionConfig));
 
-// ========================
 // ============================================
-// MODÈLES DE DONNÉES - CORRIGÉ
+// MODÈLES DE DONNÉES - VERSION FINALE
 // ============================================
 
 const userSchema = new mongoose.Schema({
@@ -58,14 +57,11 @@ const userSchema = new mongoose.Schema({
     blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now },
-    // QR Code fields
     qrVerified: { type: Boolean, default: false },
     verifiedBy: String,
     verifiedAt: Date,
     verificationBadge: { type: String, enum: ['none', 'self', 'lab'], default: 'none' }
 });
-
-const User = mongoose.model('User', userSchema);
 
 const messageSchema = new mongoose.Schema({
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -76,8 +72,6 @@ const messageSchema = new mongoose.Schema({
     isBlocked: { type: Boolean, default: false }
 });
 
-const Message = mongoose.model('Message', messageSchema);
-
 const requestSchema = new mongoose.Schema({
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -86,10 +80,12 @@ const requestSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+const User = mongoose.model('User', userSchema);
+const Message = mongoose.model('Message', messageSchema);
 const Request = mongoose.model('Request', requestSchema);
 
 // ============================================
-// MIDDLEWARE (commence ici)
+// MIDDLEWARE
 // ============================================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
