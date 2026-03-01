@@ -36,15 +36,17 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 
 // ========================
-// MODÈLES DE DONNÉES
-// ========================
+// ============================================
+// MODÈLES DE DONNÉES - CORRIGÉ
+// ============================================
+
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     gender: String,
     dob: String,
     residence: String,
-    region: { type: String, default: '' },
+    region: { type: String, default: "" },
     genotype: { type: String, enum: ['AA', 'AS', 'SS'] },
     bloodGroup: String,
     desireChild: String,
@@ -56,7 +58,6 @@ const userSchema = new mongoose.Schema({
     blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now },
-    
     // QR Code fields
     qrVerified: { type: Boolean, default: false },
     verifiedBy: String,
@@ -87,9 +88,9 @@ const requestSchema = new mongoose.Schema({
 
 const Request = mongoose.model('Request', requestSchema);
 
-// ===============================
-// MIDDLEWARE
-// ===============================
+// ============================================
+// MIDDLEWARE (commence ici)
+// ============================================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
