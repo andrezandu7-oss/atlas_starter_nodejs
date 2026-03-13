@@ -2229,810 +2229,300 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION PAR CODE QR (AVEC TRADUCTIONS) - CORRIGÉ
+// INSCRIPTION PAR CODE QR (VERSION CORRIGÉE AVEC DESIGN ET QR)
 // ============================================
 app.get('/signup-qr', (req, res) => {
-    const t = req.t;
-    
-    res.send(`
+  const t = req.t;
+  
+  res.send(`
 <!DOCTYPE html>
 <html lang="${req.lang}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
 <style>
-body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-    background-color: #f9fafb;
-    color: #111827;
-}
-
-/* Container scrollable */
-.container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-/* QR Scanner carré */
-#reader {
-    width: 70vw;
-    height: 70vw;
-    max-width: 300px;
-    max-height: 300px;
-    margin: 0 auto 20px;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    background-color: #ffffff;
-    position: relative;
-    border: 3px solid transparent;
-    transition: border 0.3s ease;
-}
-
-#qr-success {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(16,185,129,0.9);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 14px;
-    display: none;
-}
-
-/* Form Fields */
-input[type="text"], input[type="number"], select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-    box-sizing: border-box;
-    transition: background-color 0.5s ease;
-}
-
-/* Style pour les champs en lecture seule */
-input[readonly] {
-    background-color: #f3f4f6;
-    cursor: not-allowed;
-    opacity: 0.9;
-}
-
-/* Photo box avec aperçu */
-.photo-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 180px;
-    width: 120px;
-    background-color: #f3f4f6;
-    border: 2px dashed #d1d5db;
-    color: #9ca3af;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 8px;
-    margin: 0 auto 20px;
-    overflow: hidden;
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.photo-box.has-image {
-    border: 2px solid #10b981;
-    color: transparent;
-}
-
-.photo-box.has-image::after {
-    content: "✏️";
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background-color: rgba(255,255,255,0.8);
-    border-radius: 50%;
-    padding: 5px;
-    font-size: 12px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.photo-box.has-image:hover::after {
-    opacity: 1;
-}
-
-/* Style pour le titre de la date */
-.date-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 6px;
-    margin-top: 10px;
-}
-
-/* Style pour la date comme inscription manuelle */
-.custom-date-picker {
-    display: flex;
-    gap: 5px;
-    margin: 10px 0;
-}
-
-.date-part {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid #e2e8f0;
-    border-radius: 15px;
-    font-size: 0.9rem;
-    background: #f8f9fa;
-}
-
-.date-part:focus {
-    border-color: #ff416c;
-    outline: none;
-}
-
-/* Style pour les erreurs de date */
-.date-error {
-    color: #dc2626;
-    font-size: 12px;
-    margin-top: -8px;
-    margin-bottom: 12px;
-    display: none;
-    text-align: center;
-}
-
-/* Style pour le projet de vie */
-.life-project-container {
-    margin-bottom: 20px;
-}
-
-.life-project-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px;
-}
-
-.life-project-options {
-    display: flex;
-    gap: 15px;
-    background-color: #f8f9fa;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid #d1d5db;
-}
-
-.life-project-options label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 15px;
-    cursor: pointer;
-    color: #1a2a44;
-}
-
-.life-project-options input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #db2777;
-    cursor: pointer;
-}
-
-/* Checkbox serment */
-.checkbox-container {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
-    margin-bottom: 20px;
-}
-
-/* Bouton final */
-button {
-    width: 100%;
-    padding: 16px;
-    border-radius: 25px;
-    border: none;
-    font-weight: bold;
-    font-size: 16px;
-    color: white;
-    background-color: #db2777;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:disabled {
-    background-color: #f9a8d4;
-    cursor: not-allowed;
-}
-
-button:not(:disabled):hover {
-    background-color: #be185d;
-}
-
-.section-title {
-    font-weight: bold;
-    font-size: 16px;
-    text-align: center;
-    margin-bottom: 6px;
-    color: #1a2a44;
-}
-
-.sub-text {
-    font-size: 14px;
-    color: #6b7280;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Loader comme inscription manuelle */
-#loader {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    z-index: 20000;
-    text-align: center;
-    min-width: 250px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #ff416c;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loader-text {
-    color: #1a2a44;
-    font-size: 1.1rem;
-    margin-top: 10px;
-}
-
-/* Sélecteur de langue */
-.language-selector-compact {
-    position: relative;
-    margin: 10px 0 20px;
-    text-align: center;
-}
-
-.lang-btn-compact {
-    background: white;
-    border: 2px solid #ff416c;
-    color: #1a2a44;
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.lang-btn-compact:hover {
-    background: #ff416c;
-    color: white;
-}
-
-.language-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    z-index: 1000;
-    min-width: 180px;
-    margin-top: 5px;
-}
-
-.dropdown-item {
-    display: block;
-    padding: 12px 20px;
-    text-decoration: none;
-    color: #1a2a44;
-    border-bottom: 1px solid #eee;
-    transition: background 0.2s;
-}
-
-.dropdown-item:last-child {
-    border-bottom: none;
-}
-
-.dropdown-item:hover {
-    background: #f8f9fa;
-}
-
-.partition-line {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #ff416c, transparent);
-    margin: 25px 0 15px 0;
-    opacity: 0.3;
-}
+  /* Styles complets (repris de l'original) */
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+  body { background:#f9fafb; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:20px; }
+  .container { max-width:400px; width:100%; background:white; border-radius:30px; padding:25px; box-shadow:0 10px 30px rgba(0,0,0,0.1); }
+  h2 { color:#1a2a44; font-size:1.8rem; margin-bottom:20px; text-align:center; }
+  .language-selector { text-align:center; margin-bottom:20px; }
+  .language-selector select { padding:10px 20px; border-radius:30px; border:2px solid #ff416c; background:white; font-size:1rem; color:#1a2a44; font-weight:600; cursor:pointer; }
+  #reader { width:100%; max-width:300px; height:auto; margin:0 auto 20px; border-radius:15px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.2); background:#f0f0f0; position:relative; }
+  #qr-success { position:absolute; top:10px; left:50%; transform:translateX(-50%); background:#10b981; color:white; padding:6px 12px; border-radius:12px; font-size:14px; display:none; z-index:10; }
+  .section-badge { font-size:12px; color:#10b981; font-weight:bold; margin:10px 0 5px; text-transform:uppercase; }
+  .partition { height:2px; background:linear-gradient(90deg,transparent,#ff416c,transparent); margin:25px 0 20px; opacity:0.3; }
+  input, select { width:100%; padding:14px; margin:8px 0; border:2px solid #e2e8f0; border-radius:15px; font-size:1rem; background:#f8f9fa; transition:0.3s; }
+  input:focus, select:focus { border-color:#ff416c; outline:none; box-shadow:0 0 0 4px rgba(255,65,108,0.2); }
+  input[readonly] { background:#f3f4f6; border-color:#10b981; }
+  .photo-box { width:120px; height:120px; margin:15px auto; border:2px dashed #ff416c; border-radius:15px; background:#f8f9fa; display:flex; align-items:center; justify-content:center; color:#999; cursor:pointer; background-size:cover; background-position:center; }
+  .photo-box.has-image { border:2px solid #10b981; color:transparent; }
+  .date-picker { display:flex; gap:5px; margin:10px 0; }
+  .date-picker select { flex:1; padding:12px; }
+  .date-error { color:#dc2626; font-size:12px; display:none; margin-top:-5px; }
+  .life-project { background:#f8f9fa; padding:15px; border-radius:15px; margin:15px 0; border:1px solid #e2e8f0; }
+  .life-project-title { font-weight:600; color:#1a2a44; margin-bottom:10px; }
+  .life-project-options { display:flex; gap:20px; }
+  .life-project-options label { display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .checkbox-container { display:flex; align-items:flex-start; gap:10px; margin:20px 0; font-size:14px; color:#4b5563; }
+  button { width:100%; padding:16px; background:#ff416c; color:white; border:none; border-radius:30px; font-size:1.2rem; font-weight:bold; cursor:pointer; transition:0.3s; margin-top:10px; }
+  button:hover { background:#e63956; transform:translateY(-2px); box-shadow:0 10px 20px rgba(255,65,108,0.3); }
+  button:disabled { background:#f9a8d4; cursor:not-allowed; }
+  .back-link { display:block; text-align:center; margin-top:15px; color:#666; text-decoration:none; }
 </style>
 </head>
 <body>
 <div class="container">
+  <!-- Sélecteur de langue -->
+  <div class="language-selector">
+    <select onchange="window.location.href='/signup-qr?lang='+this.value">
+      <option value="fr" ${req.lang === 'fr' ? 'selected' : ''}>🇫🇷 Français</option>
+      <option value="en" ${req.lang === 'en' ? 'selected' : ''}>🇬🇧 English</option>
+      <option value="pt" ${req.lang === 'pt' ? 'selected' : ''}>🇵🇹 Português</option>
+      <option value="es" ${req.lang === 'es' ? 'selected' : ''}>🇪🇸 Español</option>
+      <option value="ar" ${req.lang === 'ar' ? 'selected' : ''}>🇸🇦 العربية</option>
+      <option value="zh" ${req.lang === 'zh' ? 'selected' : ''}>🇨🇳 中文</option>
+    </select>
+  </div>
 
-    <!-- Loader comme inscription manuelle -->
-    <div id="loader">
-        <div class="spinner"></div>
-        <div class="loader-text" id="loading-message">${t('sendingRequest') || 'Création de votre profil...'}</div>
+  <!-- Scanner QR -->
+  <div id="reader" style="position:relative;">
+    <div id="qr-success">✓ QR scanné !</div>
+  </div>
+
+  <!-- Dados automáticos -->
+  <div class="section-badge">✓ DADOS AUTOMÁTICOS (CERTIFICADO)</div>
+  <input type="text" id="fullName" placeholder="Nome completo" readonly>
+  <input type="text" id="gender" placeholder="Gênero" readonly>
+  <input type="text" id="genotype" placeholder="Genótipo" readonly>
+  <input type="text" id="bloodGroup" placeholder="Grupo sanguíneo" readonly>
+
+  <div class="partition"></div>
+
+  <!-- Dados manuais -->
+  <h2>Ajude seus parceiros a saberem mais sobre você</h2>
+  <p style="color:#6b7280; margin-bottom:20px;">Preencha os campos abaixo:</p>
+  
+  <div class="photo-box" id="photoBox" onclick="document.getElementById('photoInput').click()">
+    <span id="photoPlaceholder">Adicionar foto</span>
+  </div>
+  <input type="file" id="photoInput" accept="image/*" style="display:none">
+
+  <input type="text" id="region" placeholder="Região" required>
+
+  <div class="date-picker">
+    <select id="day" required><option value="">Dia</option>${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
+    <select id="month" required><option value="">Mês</option>${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
+    <select id="year" required><option value="">Ano</option>${Array.from({length:101},(_,i)=>{let y=new Date().getFullYear()-18-i; return `<option value="${y}">${y}</option>`}).join('')}</select>
+  </div>
+  <div id="dateError" class="date-error">Data inválida</div>
+
+  <div class="life-project">
+    <div class="life-project-title">Desejo de ter filhos?</div>
+    <div class="life-project-options">
+      <label><input type="radio" name="desireChild" value="Oui" required> Sim</label>
+      <label><input type="radio" name="desireChild" value="Non" required> Não</label>
     </div>
+  </div>
 
-    <!-- Sélecteur de langue -->
-    <div class="language-selector-compact">
-        <button onclick="toggleLanguageDropdown()" class="lang-btn-compact">
-            <span>🌐</span>
-            <span id="selected-language">${t('french')}</span>
-            <span style="font-size:0.8rem;">▼</span>
-        </button>
-        <div id="language-dropdown" class="language-dropdown">
-            <a href="/lang/fr" class="dropdown-item">🇫🇷 ${t('french')}</a>
-            <a href="/lang/en" class="dropdown-item">🇬🇧 ${t('english')}</a>
-            <a href="/lang/pt" class="dropdown-item">🇵🇹 ${t('portuguese')}</a>
-            <a href="/lang/es" class="dropdown-item">🇪🇸 ${t('spanish')}</a>
-            <a href="/lang/ar" class="dropdown-item">🇸🇦 ${t('arabic')}</a>
-            <a href="/lang/zh" class="dropdown-item">🇨🇳 ${t('chinese')}</a>
-        </div>
-    </div>
+  <div class="checkbox-container">
+    <input type="checkbox" id="honorCheckbox" required>
+    <label>Confirmo por minha honra que minhas informações são sinceras e conformes à realidade.</label>
+  </div>
 
-    <!-- QR Scanner -->
-    <div id="reader" style="position: relative;">
-        <div id="qr-success">${t('qrSuccess') || 'QR scanné !'}</div>
-    </div>
-
-    <!-- PREMIÈRE PARTIE : Remplissage automatique QR -->
-    <div style="margin-bottom: 10px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">✓ ${t('automaticData')} (${t('certificate')})</span>
-    </div>
-    
-    <input type="text" placeholder="${t('firstName')}" id="firstName" readonly>
-    <input type="text" placeholder="${t('lastName')}" id="lastName" readonly>
-    <input type="text" placeholder="${t('gender')}" id="gender" readonly>
-    <input type="text" placeholder="${t('genotype')}" id="genotype" readonly>
-    <input type="text" placeholder="${t('bloodGroup')}" id="bloodGroup" readonly>
-
-    <!-- Séparateur visuel -->
-    <div class="partition-line"></div>
-
-    <!-- DEUXIÈME PARTIE : Saisie manuelle -->
-    <div class="section-title">${t('sectionTitle')}</div>
-    <div class="sub-text">${t('subText')}</div>
-
-    <!-- Photo box -->
-    <div class="photo-box" id="photoBox">
-        <span id="photoPlaceholder">${t('photoPlaceholder')}</span>
-    </div>
-    
-    <!-- Région -->
-    <input type="text" placeholder="${t('region')}" id="region" required>
-
-    <!-- Date de naissance avec sélecteurs (comme inscription manuelle) -->
-    <div class="date-title">📅 ${t('birthDate')}</div>
-    
-    <div class="custom-date-picker">
-        <select id="day" class="date-part" required>
-            <option value="">${t('day')}</option>
-            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
-        </select>
-        <select id="month" class="date-part" required>
-            <option value="">${t('month')}</option>
-            ${Array.from({length: 12}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
-        </select>
-        <select id="year" class="date-part" required>
-            <option value="">${t('year')}</option>
-            ${Array.from({length: 101}, (_, i) => {
-                const year = new Date().getFullYear() - 18 - i;
-                return `<option value="${year}">${year}</option>`;
-            }).join('')}
-        </select>
-    </div>
-    <div id="dateError" class="date-error">Date invalide</div>
-
-    <!-- Projet de vie (Désir d'enfant) -->
-    <div class="life-project-container">
-        <div class="life-project-title">👶 ${t('desireChild')}</div>
-        <div class="life-project-options">
-            <label>
-                <input type="radio" name="desireChild" value="Oui" required> ${t('yes')}
-            </label>
-            <label>
-                <input type="radio" name="desireChild" value="Non" required> ${t('no')}
-            </label>
-        </div>
-    </div>
-
-    <!-- Serment -->
-    <div class="checkbox-container">
-        <input type="checkbox" id="honorCheckbox" required>
-        <label>${t('honorText')}</label>
-    </div>
-
-    <!-- Bouton de validation -->
-    <button id="submitBtn" disabled>
-        <span id="buttonText">${t('createProfile')}</span>
-    </button>
-
+  <button id="submitBtn" disabled>Criar meu perfil</button>
+  <a href="/signup-choice" class="back-link">← Voltar</a>
 </div>
 
 <script>
-// Fonction pour le sélecteur de langue
-function toggleLanguageDropdown() {
-    const dropdown = document.getElementById('language-dropdown');
-    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-}
-
-document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('language-dropdown');
-    const button = event.target.closest('.lang-btn-compact');
-    if (!button && dropdown.style.display === 'block') {
-        dropdown.style.display = 'none';
-    }
-});
-
-document.querySelectorAll('.dropdown-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-        const langText = this.innerText.replace(/[🇫🇷🇬🇧🇵🇹🇪🇸🇸🇦🇨🇳]/g, '').trim();
-        document.getElementById('selected-language').innerText = langText;
-    });
-});
-
+// Funções do QR scanner e formulário (completas)
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
 let scanTimeout = null;
 let selectedPhotoFile = null;
 
 async function startRearCamera() {
-    try {
-        const devices = await Html5Qrcode.getCameras();
-        if (!devices || devices.length === 0) {
-            console.error("Aucune caméra trouvée");
-            return;
-        }
-        
-        let rearCamera = devices.find(d => 
-            d.label.toLowerCase().includes("back") || 
-            d.label.toLowerCase().includes("rear") || 
-            d.label.toLowerCase().includes("environment") ||
-            d.label.toLowerCase().includes("arrière")
-        );
-        
-        if (!rearCamera) rearCamera = devices[devices.length - 1];
-
-        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-            if (hasScanned) return;
-            
-            if (scanTimeout) {
-                clearTimeout(scanTimeout);
-            }
-            
-            hasScanned = true;
-            html5QrCode.stop().catch(err => console.log(err));
-            
-            const data = decodedText.trim().split('|');
-            console.log("Données scannées:", data);
-            
-            // FORMAT: Prénom|Nom|Genre|Génotype|Groupe sanguin
-            if(data.length >= 5) {
-                const fieldConfigs = [
-                    { id: 'firstName', label: '${t('firstName')}' },
-                    { id: 'lastName', label: '${t('lastName')}' },
-                    { id: 'gender', label: '${t('gender')}' },
-                    { id: 'genotype', label: '${t('genotype')}' },
-                    { id: 'bloodGroup', label: '${t('bloodGroup')}' }
-                ];
-                
-                fieldConfigs.forEach((config, i) => {
-                    const el = document.getElementById(config.id);
-                    if (el && data[i]) {
-                        el.value = config.label + " : " + data[i].trim();
-                        el.style.backgroundColor = "#d1fae5";
-                        setTimeout(() => { 
-                            el.style.backgroundColor = "#f3f4f6";
-                        }, 1000);
-                    }
-                });
-            }
-
-            const readerDiv = document.getElementById('reader');
-            const successDiv = document.getElementById('qr-success');
-            readerDiv.style.border = "3px solid #10b981";
-            successDiv.style.display = "block";
-            
-            scanTimeout = setTimeout(() => { 
-                readerDiv.style.border = "3px solid transparent"; 
-                successDiv.style.display = "none";
-                hasScanned = false;
-                startRearCamera();
-            }, 3000);
-            
-            checkFormValidity();
-        };
-
-        const qrCodeErrorCallback = (error) => {
-            if (!error.includes("NotFoundException")) {
-                console.log("Erreur de scan:", error);
-            }
-        };
-
-        const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-            videoConstraints: { 
-                width: { min: 640, ideal: 720, max: 1080 },
-                height: { min: 640, ideal: 720, max: 1080 },
-                facingMode: "environment"
-            }
-        };
-
-        await html5QrCode.start(rearCamera.id, config, qrCodeSuccessCallback, qrCodeErrorCallback);
-        
-    } catch(e) {
-        console.error("Erreur lors du démarrage de la caméra:", e);
-    }
+  try {
+    const devices = await Html5Qrcode.getCameras();
+    if (!devices || devices.length === 0) return;
+    let rearCamera = devices.find(d => 
+      d.label.toLowerCase().includes("back") || 
+      d.label.toLowerCase().includes("rear") ||
+      d.label.toLowerCase().includes("environment") ||
+      d.label.toLowerCase().includes("arrière")
+    ) || devices[0];
+    
+    const config = { fps: 10, qrbox: 250, aspectRatio: 1.0 };
+    await html5QrCode.start(rearCamera.id, config, onScanSuccess, onScanError);
+  } catch(e) { console.error(e); }
 }
 
-startRearCamera();
-
-const submitBtn = document.getElementById('submitBtn');
-const regionInput = document.getElementById('region');
-const dayInput = document.getElementById('day');
-const monthInput = document.getElementById('month');
-const yearInput = document.getElementById('year');
-const dateError = document.getElementById('dateError');
-const desireChildRadios = document.getElementsByName('desireChild');
-const honorCheckbox = document.getElementById('honorCheckbox');
-const firstNameInput = document.getElementById('firstName');
-const lastNameInput = document.getElementById('lastName');
-const genderInput = document.getElementById('gender');
-const genotypeInput = document.getElementById('genotype');
-const bloodGroupInput = document.getElementById('bloodGroup');
-const photoBox = document.getElementById('photoBox');
-const photoPlaceholder = document.getElementById('photoPlaceholder');
-const loader = document.getElementById('loader');
-const loadingMessage = document.getElementById('loading-message');
-const buttonText = document.getElementById('buttonText');
-
-// Fonction pour obtenir le nombre maximum de jours dans un mois
-function getMaxDays(month, year) {
-    if (!month || !year) return 31;
-    const m = parseInt(month);
-    const y = parseInt(year);
-    
-    if ([1, 3, 5, 7, 8, 10, 12].includes(m)) return 31;
-    if ([4, 6, 9, 11].includes(m)) return 30;
-    if (m === 2) {
-        if ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) return 29;
-        return 28;
-    }
-    return 31;
-}
-
-// Validation de la date
-function validateDate() {
-    const day = dayInput.value;
-    const month = monthInput.value;
-    const year = yearInput.value;
-    
-    if (day && month && year) {
-        const maxDays = getMaxDays(month, year);
-        if (parseInt(day) > maxDays) {
-            dayInput.value = maxDays;
-            dateError.style.display = 'block';
-            dateError.textContent = 'Le mois ' + month + ' ne peut pas avoir plus de ' + maxDays + ' jours';
-            setTimeout(() => dateError.style.display = 'none', 3000);
-        }
-    }
+function onScanSuccess(decodedText) {
+  if (hasScanned) return;
+  clearTimeout(scanTimeout);
+  hasScanned = true;
+  html5QrCode.stop().catch(console.log);
+  
+  const data = decodedText.split("|");
+  if (data.length >= 5) {
+    document.getElementById('fullName').value = data[0] + ' ' + data[1];
+    let genero = data[2] === 'M' ? 'Homme' : (data[2] === 'F' ? 'Femme' : data[2]);
+    document.getElementById('gender').value = genero;
+    document.getElementById('genotype').value = data[3];
+    document.getElementById('bloodGroup').value = data[4];
+    // feedback visuel
+    document.getElementById('qr-success').style.display = 'block';
+    document.getElementById('reader').style.border = '3px solid #10b981';
+    scanTimeout = setTimeout(() => {
+      document.getElementById('qr-success').style.display = 'none';
+      document.getElementById('reader').style.border = 'none';
+      hasScanned = false;
+      startRearCamera();
+    }, 3000);
     checkFormValidity();
+  } else {
+    alert("QR code inválido");
+    hasScanned = false;
+    startRearCamera();
+  }
 }
+function onScanError(err) { if (!err.includes("NotFoundException")) console.log(err); }
 
-dayInput.addEventListener('change', validateDate);
-monthInput.addEventListener('change', validateDate);
-yearInput.addEventListener('change', validateDate);
-
-function extractValueFromPrefixed(input) {
-    const value = input.value;
-    const colonIndex = value.indexOf(':');
-    if (colonIndex !== -1) {
-        return value.substring(colonIndex + 1).trim();
-    }
-    return value;
-}
-
+// Validação do formulário
 function checkFormValidity() {
-    let desireChildSelected = false;
-    for (let radio of desireChildRadios) {
-        if (radio.checked) {
-            desireChildSelected = true;
-            break;
-        }
-    }
-    
-    const firstNameValue = extractValueFromPrefixed(firstNameInput);
-    const lastNameValue = extractValueFromPrefixed(lastNameInput);
-    const genderValue = extractValueFromPrefixed(genderInput);
-    const genotypeValue = extractValueFromPrefixed(genotypeInput);
-    const bloodGroupValue = extractValueFromPrefixed(bloodGroupInput);
-    
-    const allFieldsFilled = 
-        firstNameValue !== "" &&
-        lastNameValue !== "" &&
-        genderValue !== "" &&
-        genotypeValue !== "" &&
-        bloodGroupValue !== "" &&
-        regionInput.value.trim() !== "" && 
-        dayInput.value !== "" && 
-        monthInput.value !== "" && 
-        yearInput.value !== "" && 
-        desireChildSelected &&
-        honorCheckbox.checked;
-    
-    submitBtn.disabled = !allFieldsFilled;
+  const fields = [
+    'fullName', 'gender', 'genotype', 'bloodGroup', 'region', 
+    'day', 'month', 'year'
+  ];
+  let allFilled = fields.every(id => document.getElementById(id).value.trim() !== '');
+  let desireChecked = document.querySelector('input[name="desireChild"]:checked') !== null;
+  let honorChecked = document.getElementById('honorCheckbox').checked;
+  document.getElementById('submitBtn').disabled = !(allFilled && desireChecked && honorChecked);
 }
+['fullName','gender','genotype','bloodGroup','region','day','month','year'].forEach(id => {
+  document.getElementById(id).addEventListener('change', checkFormValidity);
+});
+document.querySelectorAll('input[name="desireChild"]').forEach(r => r.addEventListener('change', checkFormValidity));
+document.getElementById('honorCheckbox').addEventListener('change', checkFormValidity);
 
-[regionInput, dayInput, monthInput, yearInput].forEach(input => {
-    input.addEventListener('change', checkFormValidity);
+// Validação de data (máximo de dias)
+function getMaxDays(month, year) {
+  if (!month || !year) return 31;
+  let m = parseInt(month), y = parseInt(year);
+  if ([4,6,9,11].includes(m)) return 30;
+  if (m === 2) return ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 29 : 28;
+  return 31;
+}
+function validateDate() {
+  let day = document.getElementById('day').value;
+  let month = document.getElementById('month').value;
+  let year = document.getElementById('year').value;
+  if (day && month && year) {
+    let max = getMaxDays(month, year);
+    if (parseInt(day) > max) {
+      document.getElementById('day').value = max;
+      document.getElementById('dateError').style.display = 'block';
+      setTimeout(() => document.getElementById('dateError').style.display = 'none', 3000);
+    }
+  }
+}
+document.getElementById('day').addEventListener('change', validateDate);
+document.getElementById('month').addEventListener('change', validateDate);
+document.getElementById('year').addEventListener('change', validateDate);
+
+// Photo
+document.getElementById('photoBox').addEventListener('click', () => {
+  let input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = e => {
+    if (e.target.files[0]) {
+      selectedPhotoFile = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.getElementById('photoBox').style.backgroundImage = 'url(' + ev.target.result + ')';
+        document.getElementById('photoBox').classList.add('has-image');
+        document.getElementById('photoPlaceholder').style.display = 'none';
+      };
+      reader.readAsDataURL(selectedPhotoFile);
+    }
+  };
+  input.click();
 });
 
-for (let radio of desireChildRadios) {
-    radio.addEventListener('change', checkFormValidity);
-}
-
-honorCheckbox.addEventListener('change', checkFormValidity);
-
-checkFormValidity();
-
-photoBox.addEventListener('click', ()=>{
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = e => {
-        if(e.target.files.length > 0) {
-            selectedPhotoFile = e.target.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function(event) {
-                photoBox.style.backgroundImage = "url('" + event.target.result + "')";
-                photoBox.classList.add('has-image');
-                photoPlaceholder.style.display = 'none';
-            };
-            
-            reader.readAsDataURL(selectedPhotoFile);
-        }
+// Soumission
+document.getElementById('submitBtn').addEventListener('click', async function() {
+  this.disabled = true;
+  // loader simple
+  const btn = this;
+  btn.textContent = '⏳ Criando...';
+  
+  try {
+    const fullName = document.getElementById('fullName').value.trim();
+    const parts = fullName.split(' ');
+    const firstName = parts[0];
+    const lastName = parts.slice(1).join(' ') || '';
+    
+    const day = document.getElementById('day').value;
+    const month = document.getElementById('month').value;
+    const year = document.getElementById('year').value;
+    const dob = year + '-' + month.padStart(2,'0') + '-' + day.padStart(2,'0');
+    
+    const userData = {
+      firstName,
+      lastName,
+      gender: document.getElementById('gender').value,
+      genotype: document.getElementById('genotype').value,
+      bloodGroup: document.getElementById('bloodGroup').value,
+      region: document.getElementById('region').value,
+      residence: document.getElementById('region').value,
+      dob,
+      desireChild: document.querySelector('input[name="desireChild"]:checked').value,
+      photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : '',
+      language: '${req.lang}',
+      isPublic: true,
+      qrVerified: true,
+      verificationBadge: 'lab'
     };
-    fileInput.click();
-});
-
-// Fonction de validation avec loader comme inscription manuelle
-submitBtn.addEventListener('click', async function() {
-    submitBtn.disabled = true;
-    loader.style.display = 'flex';
-    loadingMessage.innerText = '${t('sendingRequest') || 'Création de votre profil...'}';
     
-    try {
-        const day = dayInput.value;
-        const month = monthInput.value;
-        const year = yearInput.value;
-        
-        if (!day || !month || !year) {
-            alert("${t('dob')} ${t('required')}");
-            loader.style.display = 'none';
-            submitBtn.disabled = false;
-            return;
-        }
-        
-        const maxDays = getMaxDays(month, year);
-        if (parseInt(day) > maxDays) {
-            alert("Date invalide : le mois " + month + " n'a que " + maxDays + " jours");
-            loader.style.display = 'none';
-            submitBtn.disabled = false;
-            return;
-        }
-        
-        let desireChildValue = '';
-        for (let radio of desireChildRadios) {
-            if (radio.checked) {
-                desireChildValue = radio.value;
-                break;
-            }
-        }
-        
-        const dob = year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
-        
-        const userData = {
-            firstName: extractValueFromPrefixed(firstNameInput),
-            lastName: extractValueFromPrefixed(lastNameInput),
-            gender: extractValueFromPrefixed(genderInput),
-            genotype: extractValueFromPrefixed(genotypeInput),
-            bloodGroup: extractValueFromPrefixed(bloodGroupInput),
-            region: regionInput.value,
-            residence: regionInput.value,
-            dob: dob,
-            desireChild: desireChildValue,
-            photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : "",
-            language: '${req.lang}',
-            isPublic: true,
-            qrVerified: true,
-            verificationBadge: 'lab'
-        };
-        
-        const res = await fetch('/api/register', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(userData)
-        });
-        
-        const data = await res.json();
-        
-        setTimeout(() => {
-            loader.style.display = 'none';
-            if (data.success) {
-                window.location.href = '/profile';
-            } else {
-                alert("Erreur lors de l'inscription: " + (data.error || "Inconnue"));
-                submitBtn.disabled = false;
-            }
-        }, 1500);
-        
-    } catch (error) {
-        console.error("Erreur lors de la validation:", error);
-        loader.style.display = 'none';
-        alert("Erreur de connexion au serveur");
-        submitBtn.disabled = false;
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(userData)
+    });
+    const data = await res.json();
+    if (data.success) {
+      window.location.href = '/profile';
+    } else {
+      alert('Erreur: ' + (data.error || 'Inconnue'));
+      btn.textContent = 'Criar meu perfil';
+      btn.disabled = false;
     }
+  } catch(e) {
+    alert('Erreur de connexion');
+    btn.textContent = 'Criar meu perfil';
+    btn.disabled = false;
+  }
 });
 
 function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
 }
 
+startRearCamera();
 window.addEventListener('beforeunload', () => {
-    if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().catch(err => console.log(err));
-    }
-    if (scanTimeout) {
-        clearTimeout(scanTimeout);
-    }
+  if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(()=>{});
+  if (scanTimeout) clearTimeout(scanTimeout);
 });
 </script>
-</body>
-</html>
-`);
+</body></html>
+  `);
 });
 // ============================================
 // INSCRIPTION MANUELLE
