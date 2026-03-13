@@ -2229,7 +2229,7 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION PAR CODE QR (VERSION FINALE AVEC CORRECTION lastName)
+// INSCRIPTION PAR CODE QR (VERSION FINALE)
 // ============================================
 app.get('/signup-qr', (req, res) => {
   // Gestion du changement de langue via paramètre
@@ -2248,7 +2248,7 @@ app.get('/signup-qr', (req, res) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
 <style>
-  /* Styles complets (identiques à la version précédente) */
+  /* Styles complets (inchangés) */
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
   body { background:#f9fafb; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:20px; }
   .container { max-width:400px; width:100%; background:white; border-radius:30px; padding:25px; box-shadow:0 10px 30px rgba(0,0,0,0.1); }
@@ -2280,7 +2280,7 @@ app.get('/signup-qr', (req, res) => {
 </head>
 <body>
 <div class="container">
-  <!-- Sélecteur de langue simplifié -->
+  <!-- Sélecteur de langue -->
   <div class="language-selector">
     <select onchange="window.location.href='/signup-qr?lang='+this.value">
       <option value="fr" ${req.lang === 'fr' ? 'selected' : ''}>🇫🇷 ${t('french')}</option>
@@ -2299,8 +2299,9 @@ app.get('/signup-qr', (req, res) => {
 
   <!-- Dados automáticos -->
   <div class="section-badge">✓ ${t('automaticData')} (${t('certificate')})</div>
-  <!-- UN SEUL CHAMP : PRÉNOM (le nom est ignoré) -->
+  <!-- Champ Prénom (readonly) -->
   <input type="text" id="firstName" placeholder="${t('firstName')}" readonly>
+  <!-- Les autres champs automatiques -->
   <input type="text" id="gender" placeholder="${t('gender')}" readonly>
   <input type="text" id="genotype" placeholder="${t('genotype')}" readonly>
   <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly>
@@ -2343,7 +2344,6 @@ app.get('/signup-qr', (req, res) => {
 </div>
 
 <script>
-// Fonctions du QR scanner et du formulaire
 const html5QrCode = new Html5Qrcode("reader");
 let hasScanned = false;
 let scanTimeout = null;
@@ -2371,15 +2371,28 @@ function onScanSuccess(decodedText) {
   hasScanned = true;
   html5QrCode.stop().catch(console.log);
   
-  const data = decodedText.split("|");
-  if (data.length >= 5) {
-    // On prend le premier élément pour le prénom, on ignore le nom
-    document.getElementById('firstName').value = data[0].trim();
-    let genero = data[2] === 'M' ? 'Homme' : (data[2] === 'F' ? 'Femme' : data[2]);
+  const parts = decodedText.split("|").map(s => s.trim());
+  console.log("QR scanné:", parts);
+
+  // Format attendu : Prénom | Nom | Genre | Génotype | Groupe sanguin
+  if (parts.length >= 5) {
+    // Prénom = premier champ (on prend le premier mot si besoin ? Non, on prend la chaîne entière)
+    document.getElementById('firstName').value = parts[0];
+    // On ignore le nom (parts[1])
+    
+    // Genre
+    let genero = parts[2];
+    if (genero === 'M') genero = 'Homme';
+    else if (genero === 'F') genero = 'Femme';
     document.getElementById('gender').value = genero;
-    document.getElementById('genotype').value = data[3].trim();
-    document.getElementById('bloodGroup').value = data[4].trim();
-    // feedback visuel
+    
+    // Génotype
+    document.getElementById('genotype').value = parts[3];
+    
+    // Groupe sanguin
+    document.getElementById('bloodGroup').value = parts[4];
+    
+    // Feedback visuel
     document.getElementById('qr-success').style.display = 'block';
     document.getElementById('reader').style.border = '3px solid #10b981';
     scanTimeout = setTimeout(() => {
@@ -2390,7 +2403,7 @@ function onScanSuccess(decodedText) {
     }, 3000);
     checkFormValidity();
   } else {
-    alert("QR code inválido");
+    alert("QR code invalide. Format attendu: Prénom|Nom|Genre|Génotype|Groupe sanguin");
     hasScanned = false;
     startRearCamera();
   }
@@ -2467,7 +2480,7 @@ document.getElementById('submitBtn').addEventListener('click', async function() 
   
   try {
     const firstName = document.getElementById('firstName').value.trim();
-    // CORRECTION : mettre un point '.' au lieu d'une chaîne vide pour éviter l'erreur de validation
+    // On met un point pour le nom (obligatoire)
     const lastName = '.';
     
     const day = document.getElementById('day').value;
