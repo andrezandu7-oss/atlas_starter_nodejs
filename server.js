@@ -2229,13 +2229,12 @@ app.get('/signup-choice', (req, res) => {
 });
 
 // ============================================
-// INSCRIPTION PAR CODE QR (VERSION AVEC GESTION MULTILANGUE CORRIGÉE)
+// INSCRIPTION PAR CODE QR (VERSION SIMPLIFIÉE : UN SEUL CHAMP PRÉNOM)
 // ============================================
 app.get('/signup-qr', (req, res) => {
   // Gestion du changement de langue via paramètre
   if (req.query.lang && ['fr','en','pt','es','ar','zh'].includes(req.query.lang)) {
     req.session.lang = req.query.lang;
-    // Rediriger sans le paramètre pour nettoyer l'URL (optionnel)
     return res.redirect('/signup-qr');
   }
 
@@ -2300,7 +2299,8 @@ app.get('/signup-qr', (req, res) => {
 
   <!-- Dados automáticos -->
   <div class="section-badge">✓ ${t('automaticData')} (${t('certificate')})</div>
-  <input type="text" id="fullName" placeholder="${t('fullName') || 'Nome completo'}" readonly>
+  <!-- UN SEUL CHAMP : PRÉNOM (le nom est ignoré) -->
+  <input type="text" id="firstName" placeholder="${t('firstName')}" readonly>
   <input type="text" id="gender" placeholder="${t('gender')}" readonly>
   <input type="text" id="genotype" placeholder="${t('genotype')}" readonly>
   <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly>
@@ -2343,7 +2343,189 @@ app.get('/signup-qr', (req, res) => {
 </div>
 
 <script>
-// ... (le reste du script JavaScript est inchangé, voir version précédente)
+// Fonctions du QR scanner et du formulaire
+const html5QrCode = new Html5Qrcode("reader");
+let hasScanned = false;
+let scanTimeout = null;
+let selectedPhotoFile = null;
+
+async function startRearCamera() {
+  try {
+    const devices = await Html5Qrcode.getCameras();
+    if (!devices || devices.length === 0) return;
+    let rearCamera = devices.find(d => 
+      d.label.toLowerCase().includes("back") || 
+      d.label.toLowerCase().includes("rear") ||
+      d.label.toLowerCase().includes("environment") ||
+      d.label.toLowerCase().includes("arrière")
+    ) || devices[0];
+    
+    const config = { fps: 10, qrbox: 250, aspectRatio: 1.0 };
+    await html5QrCode.start(rearCamera.id, config, onScanSuccess, onScanError);
+  } catch(e) { console.error(e); }
+}
+
+function onScanSuccess(decodedText) {
+  if (hasScanned) return;
+  clearTimeout(scanTimeout);
+  hasScanned = true;
+  html5QrCode.stop().catch(console.log);
+  
+  const data = decodedText.split("|");
+  if (data.length >= 5) {
+    // On prend le premier élément pour le prénom, on ignore le nom
+    document.getElementById('firstName').value = data[0].trim();
+    let genero = data[2] === 'M' ? 'Homme' : (data[2] === 'F' ? 'Femme' : data[2]);
+    document.getElementById('gender').value = genero;
+    document.getElementById('genotype').value = data[3].trim();
+    document.getElementById('bloodGroup').value = data[4].trim();
+    // feedback visuel
+    document.getElementById('qr-success').style.display = 'block';
+    document.getElementById('reader').style.border = '3px solid #10b981';
+    scanTimeout = setTimeout(() => {
+      document.getElementById('qr-success').style.display = 'none';
+      document.getElementById('reader').style.border = 'none';
+      hasScanned = false;
+      startRearCamera();
+    }, 3000);
+    checkFormValidity();
+  } else {
+    alert("QR code inválido");
+    hasScanned = false;
+    startRearCamera();
+  }
+}
+function onScanError(err) { if (!err.includes("NotFoundException")) console.log(err); }
+
+// Validação do formulário
+function checkFormValidity() {
+  const fields = [
+    'firstName', 'gender', 'genotype', 'bloodGroup', 'region', 
+    'day', 'month', 'year'
+  ];
+  let allFilled = fields.every(id => document.getElementById(id).value.trim() !== '');
+  let desireChecked = document.querySelector('input[name="desireChild"]:checked') !== null;
+  let honorChecked = document.getElementById('honorCheckbox').checked;
+  document.getElementById('submitBtn').disabled = !(allFilled && desireChecked && honorChecked);
+}
+['firstName','gender','genotype','bloodGroup','region','day','month','year'].forEach(id => {
+  document.getElementById(id).addEventListener('change', checkFormValidity);
+});
+document.querySelectorAll('input[name="desireChild"]').forEach(r => r.addEventListener('change', checkFormValidity));
+document.getElementById('honorCheckbox').addEventListener('change', checkFormValidity);
+
+// Validação de data (máximo de dias)
+function getMaxDays(month, year) {
+  if (!month || !year) return 31;
+  let m = parseInt(month), y = parseInt(year);
+  if ([4,6,9,11].includes(m)) return 30;
+  if (m === 2) return ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 29 : 28;
+  return 31;
+}
+function validateDate() {
+  let day = document.getElementById('day').value;
+  let month = document.getElementById('month').value;
+  let year = document.getElementById('year').value;
+  if (day && month && year) {
+    let max = getMaxDays(month, year);
+    if (parseInt(day) > max) {
+      document.getElementById('day').value = max;
+      document.getElementById('dateError').style.display = 'block';
+      setTimeout(() => document.getElementById('dateError').style.display = 'none', 3000);
+    }
+  }
+}
+document.getElementById('day').addEventListener('change', validateDate);
+document.getElementById('month').addEventListener('change', validateDate);
+document.getElementById('year').addEventListener('change', validateDate);
+
+// Photo
+document.getElementById('photoBox').addEventListener('click', () => {
+  let input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = e => {
+    if (e.target.files[0]) {
+      selectedPhotoFile = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.getElementById('photoBox').style.backgroundImage = 'url(' + ev.target.result + ')';
+        document.getElementById('photoBox').classList.add('has-image');
+        document.getElementById('photoPlaceholder').style.display = 'none';
+      };
+      reader.readAsDataURL(selectedPhotoFile);
+    }
+  };
+  input.click();
+});
+
+// Soumission
+document.getElementById('submitBtn').addEventListener('click', async function() {
+  this.disabled = true;
+  const btn = this;
+  btn.textContent = '⏳ Criando...';
+  
+  try {
+    const firstName = document.getElementById('firstName').value.trim();
+    // On laisse lastName vide
+    const lastName = '';
+    
+    const day = document.getElementById('day').value;
+    const month = document.getElementById('month').value;
+    const year = document.getElementById('year').value;
+    const dob = year + '-' + month.padStart(2,'0') + '-' + day.padStart(2,'0');
+    
+    const userData = {
+      firstName,
+      lastName,
+      gender: document.getElementById('gender').value,
+      genotype: document.getElementById('genotype').value,
+      bloodGroup: document.getElementById('bloodGroup').value,
+      region: document.getElementById('region').value,
+      residence: document.getElementById('region').value,
+      dob,
+      desireChild: document.querySelector('input[name="desireChild"]:checked').value,
+      photo: selectedPhotoFile ? await fileToBase64(selectedPhotoFile) : '',
+      language: '${req.lang}',
+      isPublic: true,
+      qrVerified: true,
+      verificationBadge: 'lab'
+    };
+    
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(userData)
+    });
+    const data = await res.json();
+    if (data.success) {
+      window.location.href = '/profile';
+    } else {
+      alert('Erreur: ' + (data.error || 'Inconnue'));
+      btn.textContent = 'Criar meu perfil';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    alert('Erreur de connexion');
+    btn.textContent = 'Criar meu perfil';
+    btn.disabled = false;
+  }
+});
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+}
+
+startRearCamera();
+window.addEventListener('beforeunload', () => {
+  if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(()=>{});
+  if (scanTimeout) clearTimeout(scanTimeout);
+});
 </script>
 </body></html>
   `);
