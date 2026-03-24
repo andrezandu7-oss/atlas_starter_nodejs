@@ -2294,21 +2294,22 @@ app.get('/signup-qr', (req, res) => {
   </div>
 
   <!-- Scanner QR -->
-  <div id="reader" style="position:relative;">
-    <div id="qr-success">✓ ${t('qrSuccess') || 'QR scanné !'}</div>
-  </div>
+<div id="reader" style="position:relative;">
+  <div id="qr-success">✅ QR lido!</div>
+</div>
 
-  <!-- Dados automáticos -->
-  <div class="section-badge">✓ ${t('automaticData')} (${t('certificate')})</div>
-  <!-- Champ Prénom (readonly) -->
-  <input type="text" id="firstName" placeholder="${t('firstName')}" readonly>
-  <!-- Les autres champs automatiques -->
-  <input type="text" id="gender" placeholder="${t('gender')}" readonly>
-  <input type="text" id="genotype" placeholder="${t('genotype')}" readonly>
-  <input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly>
+<!-- Dados automáticos -->
+<div class="section-badge">✓ ${t('automaticData')} (${t('certificate')})</div>
+<input type="text" id="firstName" placeholder="${t('firstName')}" readonly>
+<input type="text" id="gender" placeholder="${t('gender')}" readonly>
+<input type="text" id="genotype" placeholder="${t('genotype')}" readonly>
+<input type="text" id="bloodGroup" placeholder="${t('bloodGroup')}" readonly>
 
-  <div class="partition"></div>
+<!-- Campos ocultos -->
+<input type="hidden" id="qrVerified" value="false">
+<input type="hidden" id="verificationBadge" value="self">
 
+<div class="partition"></div>
   <!-- Dados manuais -->
   <h2>${t('sectionTitle')}</h2>
   <p style="color:#6b7280; margin-bottom:20px;">${t('subText')}</p>
