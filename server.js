@@ -2376,42 +2376,54 @@ function onScanSuccess(decodedText) {
   hasScanned = true;
   html5QrCode.stop().catch(console.log);
   
-  const parts = decodedText.split("|").map(s => s.trim());
-  console.log("QR scanné:", parts);
-
-  // Format attendu : Prénom | Nom | Genre | Génotype | Groupe sanguin
-  if (parts.length >= 5) {
-    // Prénom = premier champ (on prend le premier mot si besoin ? Non, on prend la chaîne entière)
-    document.getElementById('firstName').value = parts[0];
-    // On ignore le nom (parts[1])
-    
-    // Genre
-    let genero = parts[2];
-    if (genero === 'M') genero = 'Homme';
-    else if (genero === 'F') genero = 'Femme';
-    document.getElementById('gender').value = genero;
-    
-    // Génotype
-    document.getElementById('genotype').value = parts[3];
-    
-    // Groupe sanguin
-    document.getElementById('bloodGroup').value = parts[4];
-    
-    // Feedback visuel
-    document.getElementById('qr-success').style.display = 'block';
-    document.getElementById('reader').style.border = '3px solid #10b981';
-    scanTimeout = setTimeout(() => {
-      document.getElementById('qr-success').style.display = 'none';
-      document.getElementById('reader').style.border = 'none';
+  // Envoyer le QR au serveur pour validation
+  fetch('/api/validate-genotype-qr', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ qrData: decodedText })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // ✅ Signature valide - QR authentique
+      document.getElementById('firstName').value = data.userData.firstName;
+      document.getElementById('gender').value = data.userData.gender;
+      document.getElementById('genotype').value = data.userData.genotype;
+      document.getElementById('bloodGroup').value = data.userData.bloodGroup;
+      
+      document.getElementById('qrVerified').value = 'true';
+      document.getElementById('verificationBadge').value = 'lab';
+      
+      document.getElementById('firstName').readOnly = true;
+      document.getElementById('gender').disabled = true;
+      document.getElementById('genotype').disabled = true;
+      document.getElementById('bloodGroup').disabled = true;
+      
+      // Feedback visuel
+      const successDiv = document.getElementById('qr-success');
+      successDiv.style.display = 'block';
+      successDiv.innerHTML = '✅ Certificado válido! Dados preenchidos.';
+      successDiv.style.backgroundColor = '#10b981';
+      
+      scanTimeout = setTimeout(() => {
+        successDiv.style.display = 'none';
+        hasScanned = false;
+        startRearCamera();
+      }, 3000);
+      
+    } else {
+      // ❌ Signature invalide - QR non authentique
+      alert('❌ Certificado não reconhecido pelo Ministério da Saúde. Assinatura inválida.');
       hasScanned = false;
       startRearCamera();
-    }, 3000);
-    checkFormValidity();
-  } else {
-    alert("QR code invalide. Format attendu: Prénom|Nom|Genre|Génotype|Groupe sanguin");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Erro ao validar certificado');
     hasScanned = false;
     startRearCamera();
-  }
+  });
 }
 function onScanError(err) { if (!err.includes("NotFoundException")) console.log(err); }
 
@@ -4561,6 +4573,7 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
+
 
 
 
