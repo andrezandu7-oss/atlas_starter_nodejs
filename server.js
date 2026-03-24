@@ -4534,7 +4534,6 @@ app.post('/api/validate-genotype-qr', async (req, res) => {
 // ============================================
 // DÉMARRAGE
 // ============================================
-const port = process.env.PORT || 3000;
 app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Genlove démarré sur http://localhost:${port}`);
     console.log(`📱 Routes disponibles:`);
