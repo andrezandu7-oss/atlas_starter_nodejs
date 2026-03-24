@@ -4491,6 +4491,43 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+// ====================== VALIDAÇÃO DO QR DO CERTIFICADO GENÓTIPO ======================
+app.post('/api/validate-genotype-qr', async (req, res) => {
+  try {
+    const { qrData } = req.body;
+    if (!qrData) {
+      return res.status(400).json({ error: 'Dados do QR não fornecidos' });
+    }
+    
+    const parts = qrData.split('|').map(s => s.trim());
+    
+    // Verificar formato: 6 campos (5 dados + assinatura)
+    if (parts.length !== 6) {
+      return res.status(400).json({ error: 'Formato de QR inválido' });
+    }
+    
+    const signature = parts[5];
+    if (signature !== SECRET_SIGNATURE) {
+      return res.status(401).json({ error: 'Assinatura inválida - Certificado não autenticado' });
+    }
+    
+    // Extrair os dados
+    const userData = {
+      firstName: parts[0],
+      lastName: parts[1],
+      gender: parts[2] === 'M' ? 'Homem' : 'Mulher',
+      genotype: parts[3],
+      bloodGroup: parts[4],
+      qrVerified: true,
+      verificationBadge: 'lab'
+    };
+    
+    res.json({ success: true, userData });
+  } catch (error) {
+    console.error('Erro na validação do QR:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
 
 // ============================================
 // DÉMARRAGE
