@@ -2384,6 +2384,7 @@ function onScanSuccess(decodedText){
   .then(response => response.json())
   .then(data => {
     if (data.success) {
+      // ✅ Certificat agréé - remplissage et caméra s'éteint
       document.getElementById('firstName').value = data.userData.firstName;
       document.getElementById('gender').value = data.userData.gender;
       document.getElementById('genotype').value = data.userData.genotype;
@@ -2401,23 +2402,17 @@ function onScanSuccess(decodedText){
       successDiv.innerHTML = '✅ Certificado válido! Dados preenchidos.';
       successDiv.style.backgroundColor = '#10b981';
 
-      scanTimeout = setTimeout(() => {
-        successDiv.style.display = 'none';
-        hasScanned = false;
-        startRearCamera();
-      }, 3000);
-
+      // Caméra reste éteinte, pas de redémarrage
+      
     } else {
-      alert('❌ Certificado não reconhecido.');
+      // ❌ Certificat non agréé - réactiver la caméra pour un nouveau scan
       hasScanned = false;
       startRearCamera();
     }
   })
   .catch(err => {
+    // En cas d'erreur réseau, on ne fait rien (caméra reste éteinte)
     console.error(err);
-    alert('Erro ao validar certificado');
-    hasScanned = false;
-    startRearCamera();
   });
 }
 function onScanError(err) { if (!err.includes("NotFoundException")) console.log(err); }
@@ -4568,6 +4563,7 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
+
 
 
 
