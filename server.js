@@ -2546,7 +2546,7 @@ window.addEventListener('beforeunload', () => {
   if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(()=>{});
   if (scanTimeout) clearTimeout(scanTimeout);
 });
-</script>
+
 <!-- Popup para certificado não reconhecido -->
 <div id="errorPopup" class="popup-overlay">
   <div class="popup-card">
@@ -2560,6 +2560,7 @@ window.addEventListener('beforeunload', () => {
     <button class="popup-btn" onclick="closeErrorPopup()">OK</button>
   </div>
 </div>
+</script>
 </body></html>
   `);
 });
