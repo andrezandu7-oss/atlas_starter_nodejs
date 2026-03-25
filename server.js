@@ -2546,20 +2546,6 @@ window.addEventListener('beforeunload', () => {
   if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(()=>{});
   if (scanTimeout) clearTimeout(scanTimeout);
 });
-
-<!-- Popup para certificado não reconhecido -->
-<div id="errorPopup" class="popup-overlay">
-  <div class="popup-card">
-    <div class="popup-icon">⚠️</div>
-    <div class="popup-title">Certificado não reconhecido</div>
-    <div class="popup-message">
-      Este certificado <strong>não é reconhecido</strong> pelo<br>
-      Ministério da Saúde de Angola.<br><br>
-      Assinatura inválida ou ausente.
-    </div>
-    <button class="popup-btn" onclick="closeErrorPopup()">OK</button>
-  </div>
-</div>
 </script>
 </body></html>
   `);
@@ -4577,7 +4563,6 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
-
 
 
 
