@@ -2405,7 +2405,8 @@ function onScanSuccess(decodedText){
       // Caméra reste éteinte, pas de redémarrage
       
     } else {
-      // ❌ Certificat non agréé - réactiver la caméra pour un nouveau scan
+      // ❌ Certificat non agréé - popup et réactivation caméra
+      alert('❌ Certificado não reconhecido pelo Ministério da Saúde. Assinatura inválida.');
       hasScanned = false;
       startRearCamera();
     }
@@ -4563,6 +4564,7 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
+
 
 
 
