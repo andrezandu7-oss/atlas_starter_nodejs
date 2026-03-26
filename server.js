@@ -4498,7 +4498,7 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
-// ====================== VALIDAÇÃO DO QR DO CERTIFICADO GENÓTIPO ======================
+// ================ VALIDAÇÃO DO QR DO CERTIFICADO GENÓTIPO ================
 app.post('/api/validate-genotype-qr', async (req, res) => {
   try {
     const { qrData } = req.body;
@@ -4506,30 +4506,32 @@ app.post('/api/validate-genotype-qr', async (req, res) => {
       return res.status(400).json({ error: 'Dados do QR não fornecidos' });
     }
     
+    // ✅ Correction : split('|') au lieu de split('!')
     const parts = qrData.split('|').map(s => s.trim());
     
-    // Verificar formato: 6 campos (5 dados + assinatura)
-    if (parts.length !== 6) {
+    // ✅ NOUVEAU FORMAT : 7 campos (numero + 5 dados + assinatura)
+    if (parts.length !== 7) {
       return res.status(400).json({ error: 'Formato de QR inválido' });
     }
     
-    const signature = parts[5];
+    const signature = parts[6];
     if (signature !== SECRET_SIGNATURE) {
       return res.status(401).json({ error: 'Assinatura inválida - Certificado não autenticado' });
     }
     
-    // Extrair os dados
+    // Extrair os dados (ignorar parts[0] que é o número do certificado)
     const userData = {
-      firstName: parts[0],
-      lastName: parts[1],
-      gender: parts[2] === 'M' ? 'Homem' : 'Mulher',
-      genotype: parts[3],
-      bloodGroup: parts[4],
+      firstName: parts[1],
+      lastName: parts[2],
+      gender: parts[3] === 'M' ? 'Homem' : 'Mulher',
+      genotype: parts[4],
+      bloodGroup: parts[5],
       qrVerified: true,
       verificationBadge: 'lab'
     };
     
     res.json({ success: true, userData });
+    
   } catch (error) {
     console.error('Erro na validação do QR:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -4564,6 +4566,8 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
+
+
 
 
 
