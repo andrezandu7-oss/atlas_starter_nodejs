@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const app = express();
+const crypto = require('crypto');
 
 console.log("🚀 Serveur en cours de démarrage...");
 const port = process.env.PORT || 3000;
