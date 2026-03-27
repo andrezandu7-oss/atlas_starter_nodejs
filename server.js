@@ -5,8 +5,7 @@ const MongoDBStore = require('connect-mongo');
 const app = express();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');  // ← AJOUTEZ CETTE LIGNE ICI
-
+const crypto = require('crypto');  
 console.log("Serveur en cours de démarrage...");
 const port = process.env.PORT || 3000;
 
