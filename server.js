@@ -1,10 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const MongoDBStore = require('connect-mongo');
 const app = express();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');  // ← AJOUTEZ CETTE LIGNE ICI
 
-console.log("🚀 Serveur en cours de démarrage...");
+console.log("Serveur en cours de démarrage...");
 const port = process.env.PORT || 3000;
 
 // ====================== CONEXÃO MONGODB ======================
