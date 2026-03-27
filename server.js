@@ -44,29 +44,31 @@ app.use(session(sessionConfig));
 // ============================================
 
 const userSchema = new mongoose.Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    gender: String,
-    dob: String,
-    residence: String,
-    region: { type: String, default: "" },
-    genotype: { type: String, enum: ['AA', 'AS', 'SS'] },
-    bloodGroup: String,
-    desireChild: String,
-    photo: String,
-    language: { type: String, default: 'fr' },
-    isVerified: { type: Boolean, default: false },
-    isPublic: { type: Boolean, default: true },
-    blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    createdAt: { type: Date, default: Date.now },
-    qrVerified: { type: Boolean, default: false },
-    verifiedBy: String,
-    verifiedAt: Date,
-    verificationBadge: { type: String, enum: ['none', 'self', 'lab'], default: 'none' }
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  gender: String,
+  dob: String,
+  residence: String,
+  region: { type: String, default: "" },
+  genotype: { type: String, enum: ['AA', 'AS', 'SS'] },
+  bloodGroup: String,
+  desireChild: String,
+  photo: String,
+  language: { type: String, default: 'fr' },
+  isVerified: { type: Boolean, default: false },
+  isPublic: { type: Boolean, default: true },
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  blockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  rejectedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  createdAt: { type: Date, default: Date.now },
+  qrVerified: { type: Boolean, default: false },
+  verifiedBy: String,
+  verifiedAt: Date,
+  verificationBadge: { type: String, enum: ['none', 'self', 'lab'], default: 'none' },
+  // NOUVEAUX CHAMPS POUR EMAIL ET MOT DE PASSE
+  email: { type: String, unique: true, sparse: true },
+  passwordHash: { type: String }
 });
-
 const messageSchema = new mongoose.Schema({
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -2028,8 +2030,7 @@ app.get('/', (req, res) => {
             
             <div style="font-size:1.1rem; color:#1a2a44; margin:20px 0 10px;">${t('haveAccount')}</div>
             <a href="/login" class="btn-dark">${t('login')}</a>
-            <a href="/charte-engagement" class="btn-pink">${t('createAccount')}</a>
-            <div style="margin-top:30px; font-size:0.9rem; color:#666;">${t('security')}</div>
+            <a href="/signup-email" class="btn-pink">${t('createAccount')}</a>            <div style="margin-top:30px; font-size:0.9rem; color:#666;">${t('security')}</div>
         </div>
     </div>
     
@@ -2108,6 +2109,145 @@ app.get('/login', (req, res) => {
 </html>`);
 });
 
+// ============================================
+// PAGE D'INSCRIPTION - EMAIL ET MOT DE PASSE
+// ============================================
+app.get('/signup-email', (req, res) => {
+  const t = req.t;
+  
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>${t('appName')} - Créer mon compte</title>
+  ${styles}
+  ${notifyScript}
+  <style>
+    .info-message {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 15px;
+      margin: 20px 0;
+      border-left: 5px solid #2196f3;
+    }
+    .info-message p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="page-white">
+      <h2 style="color:#ff416c;">Créer mon compte</h2>
+      <p style="margin-bottom: 20px;">Veuillez entrer votre email et mot de passe pour créer votre compte Genlove.</p>
+      
+      <div class="info-message">
+        <p>📧 Un email de vérification vous sera envoyé après validation de la charte d'honneur.</p>
+      </div>
+      
+      <form id="signupForm">
+        <div class="input-label">Email</div>
+        <input type="email" id="email" class="input-box" placeholder="votre@email.com" required>
+        
+        <div class="input-label">Mot de passe</div>
+        <input type="password" id="password" class="input-box" placeholder="•••••• (minimum 6 caractères)" required>
+        
+        <div class="input-label">Confirmer le mot de passe</div>
+        <input type="password" id="confirmPassword" class="input-box" placeholder="••••••" required>
+        
+        <button type="submit" class="btn-pink">Continuer vers la charte →</button>
+      </form>
+      
+      <a href="/" class="back-link">← Retour à l'accueil</a>
+    </div>
+  </div>
+  
+  <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+  
+  <script>
+    function showNotify(msg, type) {
+      const notify = document.getElementById('genlove-notify');
+      const msgSpan = document.getElementById('notify-msg');
+      msgSpan.innerText = msg;
+      notify.style.backgroundColor = type === 'success' ? '#4CAF50' : '#dc3545';
+      notify.classList.add('show');
+      setTimeout(() => notify.classList.remove('show'), 3000);
+    }
+    
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!email || !password) {
+        showNotify("Veuillez remplir tous les champs", "error");
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showNotify("Les mots de passe ne correspondent pas", "error");
+        return;
+      }
+      
+      if (password.length < 6) {
+        showNotify("Le mot de passe doit contenir au moins 6 caractères", "error");
+        return;
+      }
+      
+      // Vérification format email
+      const emailRegex = /^[^\\s@]+@([^\\s@]+\\.)+[^\\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showNotify("Format d'email invalide", "error");
+        return;
+      }
+      
+      showNotify("Vérification en cours...", "info");
+      
+      try {
+        // Vérifier si l'email existe déjà
+        const checkRes = await fetch('/api/check-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const checkData = await checkRes.json();
+        
+        if (checkData.exists) {
+          showNotify("Cet email est déjà utilisé", "error");
+          return;
+        }
+        
+        // Stocker les données en session temporaire
+        const tempRes = await fetch('/api/temp-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const tempData = await tempRes.json();
+        
+        if (tempData.success) {
+          showNotify("Email validé, continuons !", "success");
+          setTimeout(() => {
+            window.location.href = '/charte-engagement?tempId=' + tempData.tempId;
+          }, 1000);
+        } else {
+          showNotify(tempData.error || "Erreur", "error");
+        }
+      } catch(e) {
+        showNotify("Erreur réseau", "error");
+        console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>`);
+});
 // ============================================
 // CHARTE D'ENGAGEMENT
 // ============================================
@@ -4307,85 +4447,18 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-  try {
-    const { 
-      email, 
-      password,
-      confirmPassword,
-      firstName, 
-      lastName, 
-      gender, 
-      dob, 
-      residence, 
-      region, 
-      genotype, 
-      bloodGroup, 
-      desireChild, 
-      photo, 
-      language,
-      qrVerified,
-      verificationBadge,
-      isPublic
-    } = req.body;
-    
-    // Vérification que les mots de passe correspondent
-    if (password && password !== confirmPassword) {
-      return res.status(400).json({ error: "Les mots de passe ne correspondent pas" });
+    try {
+        const user = new User(req.body);
+        await user.save();
+        
+        req.session.userId = user._id;
+        req.session.isVerified = false;
+        await new Promise(resolve => req.session.save(resolve));
+        
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
     }
-    
-    // Si email est fourni, on vérifie
-    if (email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ error: "Cet email est déjà utilisé" });
-      }
-      
-      const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: "Format d'email invalide" });
-      }
-    }
-    
-    // Hachage du mot de passe si fourni
-    let passwordHash = null;
-    if (password) {
-      if (password.length < 6) {
-        return res.status(400).json({ error: "Le mot de passe doit contenir au moins 6 caractères" });
-      }
-      passwordHash = await bcrypt.hash(password, 10);
-    }
-    
-    const user = new User({
-      firstName,
-      lastName,
-      gender: gender || '',
-      dob: dob || '',
-      residence: residence || '',
-      region: region || '',
-      genotype: genotype || '',
-      bloodGroup: bloodGroup || '',
-      desireChild: desireChild || '',
-      photo: photo || '',
-      language: language || 'fr',
-      isPublic: isPublic !== undefined ? isPublic : true,
-      qrVerified: qrVerified || false,
-      verificationBadge: verificationBadge || 'self',
-      email: email || null,
-      passwordHash: passwordHash,
-      emailVerified: !email
-    });
-    
-    await user.save();
-    
-    req.session.userId = user._id;
-    await new Promise(resolve => req.session.save(resolve));
-    
-    res.json({ success: true, userId: user._id });
-    
-  } catch(error) {
-    console.error("Erreur inscription:", error);
-    res.status(500).json({ error: "Erreur lors de l'inscription: " + error.message });
-  }
 });
 
 app.post('/api/requests', requireAuth, async (req, res) => {
@@ -4605,6 +4678,44 @@ app.post('/api/validate-genotype-qr', async (req, res) => {
   }
 });
 
+// ============================================
+// API - VÉRIFICATION EMAIL
+// ============================================
+app.post('/api/check-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const existingUser = await User.findOne({ email });
+    res.json({ exists: !!existingUser });
+  } catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Stockage temporaire des données email/password
+const tempSignups = new Map();
+
+app.post('/api/temp-signup', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "Cet email est déjà utilisé" });
+    }
+    
+    const tempId = crypto.randomBytes(16).toString('hex');
+    
+    tempSignups.set(tempId, {
+      email,
+      passwordHash: await bcrypt.hash(password, 10),
+      expires: Date.now() + 30 * 60 * 1000
+    });
+    
+    res.json({ success: true, tempId });
+  } catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // ============================================
 // DÉMARRAGE
 // ============================================
