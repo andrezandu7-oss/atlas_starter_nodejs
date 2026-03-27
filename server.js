@@ -2063,51 +2063,89 @@ app.get('/', (req, res) => {
 });
 
 // ============================================
-// LOGIN
+// PAGE DE CONNEXION - EMAIL ET MOT DE PASSE
 // ============================================
 app.get('/login', (req, res) => {
-    const t = req.t;
-    res.send(`<!DOCTYPE html>
+  const t = req.t;
+  
+  res.send(`<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>${t('appName')} - ${t('loginTitle')}</title>
-    ${styles}
-    ${notifyScript}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>${t('appName')} - ${t('loginTitle')}</title>
+  ${styles}
+  ${notifyScript}
 </head>
 <body>
-    <div class="app-shell">
-        <div class="page-white">
-            <h2>${t('loginTitle')}</h2>
-            <p style="font-size: 1.2rem; margin: 20px 0;">${t('enterName')}</p>
-            <form id="loginForm">
-                <input type="text" id="firstName" class="input-box" placeholder="${t('yourName')}" required>
-                <button type="submit" class="btn-pink">${t('login')}</button>
-            </form>
-            <a href="/" class="back-link">← ${t('backHome')}</a>
-        </div>
+  <div class="app-shell">
+    <div class="page-white">
+      <h2 style="text-align: center;">${t('loginTitle')}</h2>
+      <p style="text-align: center; margin-bottom: 20px;">Connectez-vous avec votre email et mot de passe</p>
+      
+      <form id="loginForm">
+        <div class="input-label">Email</div>
+        <input type="email" id="email" class="input-box" placeholder="votre@email.com" required>
+        
+        <div class="input-label">Mot de passe</div>
+        <input type="password" id="password" class="input-box" placeholder="••••••" required>
+        
+        <button type="submit" class="btn-pink">${t('login')}</button>
+      </form>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="/signup-email" class="back-link">Pas encore de compte ? Créer un compte</a>
+      </div>
+      
+      <a href="/" class="back-link">← ${t('backHome')}</a>
     </div>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const firstName = document.getElementById('firstName').value;
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({firstName})
-            });
-            if (res.ok) window.location.href = '/profile';
-            else alert('${t('nameNotFound')}');
+  </div>
+  
+  <div id="genlove-notify"><span>🔔</span> <span id="notify-msg"></span></div>
+  
+  <script>
+    function showNotify(msg, type) {
+      const notify = document.getElementById('genlove-notify');
+      const msgSpan = document.getElementById('notify-msg');
+      msgSpan.innerText = msg;
+      notify.style.backgroundColor = type === 'success' ? '#4CAF50' : '#dc3545';
+      notify.classList.add('show');
+      setTimeout(() => notify.classList.remove('show'), 3000);
+    }
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (!email || !password) {
+        showNotify("Veuillez remplir tous les champs", "error");
+        return;
+      }
+      
+      showNotify("Connexion en cours...", "info");
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
         });
         
-        document.getElementById('firstName').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('loginForm').requestSubmit();
-            }
-        });
-    </script>
+        const data = await response.json();
+        
+        if (data.success) {
+          showNotify("✅ Connexion réussie !", "success");
+          setTimeout(() => window.location.href = '/profile', 1000);
+        } else {
+          showNotify(data.error || "❌ Échec de connexion", "error");
+        }
+      } catch(e) {
+        showNotify("❌ Erreur réseau", "error");
+      }
+    });
+  </script>
 </body>
 </html>`);
 });
