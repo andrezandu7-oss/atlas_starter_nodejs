@@ -2148,6 +2148,14 @@ app.get('/login', (req, res) => {
         showNotify("❌ Erreur réseau", "error");
       }
     });
+function togglePassword(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (field.type === "password") {
+    field.type = "text";
+  } else {
+    field.type = "password";
+  }
+}
   </script>
 </body>
 </html>`);
@@ -4873,6 +4881,7 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
+
 
 
 
