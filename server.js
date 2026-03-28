@@ -2194,11 +2194,16 @@ app.get('/signup-email', (req, res) => {
         <input type="email" id="email" class="input-box" placeholder="votre@email.com" required>
         
         <div class="input-label">Mot de passe</div>
-        <input type="password" id="password" class="input-box" placeholder="•••••• (minimum 6 caractères)" required>
-        
-        <div class="input-label">Confirmer le mot de passe</div>
-        <input type="password" id="confirmPassword" class="input-box" placeholder="••••••" required>
-        
+<div style="position: relative;">
+  <input type="password" id="password" class="input-box" placeholder="•••••• (minimum 6 caractères)" required style="padding-right: 45px;">
+  <span onclick="togglePassword('password')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem;">👁️</span>
+</div>
+
+<div class="input-label">Confirmer le mot de passe</div>
+<div style="position: relative;">
+  <input type="password" id="confirmPassword" class="input-box" placeholder="••••••" required style="padding-right: 45px;">
+  <span onclick="togglePassword('confirmPassword')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem;">👁️</span>
+</div>        
         <button type="submit" class="btn-pink">Continuer vers la charte →</button>
       </form>
       
@@ -2285,6 +2290,15 @@ app.get('/signup-email', (req, res) => {
         console.error(e);
       }
     });
+
+function togglePassword(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (field.type === "password") {
+    field.type = "text";
+  } else {
+    field.type = "password";
+  }
+}
   </script>
 </body>
 </html>`);
@@ -4856,6 +4870,7 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
+
 
 
 
